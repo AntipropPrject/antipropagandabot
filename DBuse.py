@@ -2,6 +2,9 @@ from psycopg2 import sql
 
 from bata import all_data
 
+
+
+
 def data_getter(query):
     conn = all_data().get_postg()
     with conn:

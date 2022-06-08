@@ -6,10 +6,13 @@ from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message, FSInputFile
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
+
+import bata
 from DBuse import data_getter
 
 from handlers.admin_hand import admin_home
 from states.donbass_states import donbass_state
+from keyboards.admin_keys import main_admin_keyboard
 
 
 router = Router()
@@ -23,12 +26,11 @@ async def cmd_start(message: Message):
                          reply_markup=nmarkup.as_markup(resize_keyboard=True,
                          input_field_placeholder="Кстати, я разместил тут разные фразы поддержки и советы, как вам?"))
 
-@router.message(F.from_user.id == 319736241, commands=["admin"])
+
+@router.message(F.from_user.id.in_(bata.all_data().admins), commands=["admin"])
 async def admin_hi(message: Message, state: FSMContext) -> None:
     await state.set_state(admin_home.admin)
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Довольно"))
-    await message.answer("Добро пожаловать в режим администрации. Присланные ассеты будут записаны под именем из описания.", reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer("Добро пожаловать в режим администрации. Что вам угодно сегодня?", reply_markup=main_admin_keyboard())
 
 
 @router.message(text_contains=('бомбила', '8', 'лет'), content_types=types.ContentType.TEXT, text_ignore_case=True)
