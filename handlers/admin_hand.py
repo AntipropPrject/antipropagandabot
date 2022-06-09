@@ -50,7 +50,7 @@ async def text_hello(message: types.Message, state: FSMContext):
 
 @router.message(content_types=types.ContentType.TEXT, state=admin_home.add_text)
 async def get_text(message: Message, state: FSMContext):
-    await state.set_state(admin_home.testing)
+    await state.set_state(admin_home.testing_text)
     new_name = message.text.split("|\n")[0]
     new_text = message.text.split("|\n")[1]
     await state.update_data(text = new_text, name = new_name)
@@ -88,16 +88,19 @@ async def text_edit_tag(message: types.Message, state: FSMContext):
 
 @router.message(content_types=types.ContentType.TEXT, state=admin_home.text_edit_tag)
 async def text_edit_text_tag(message: Message, state: FSMContext):
-    data = {'name':message.text}
-    sql_query = sql.SQL("SELECT text from public.texts WHERE {} = {};").format(
-        sql.SQL(', ').join(map(sql.Identifier, data)),
-        sql.SQL(", ").join(map(sql.Placeholder, data))
-    )
-    text = safe_data_getter(sql_query, data)[0][0]
-    await message.answer(f'Выбранный вами пост после линии:\n----------------\n{text}', parse_mode="HTML")
-    await message.answer('Если это нужный блок, то отправьте мне его новый вариант.', reply_markup=middle_admin_keyboard())
-    await state.set_state(admin_home.text_edit)
-    await state.update_data(name = message.text)
+    try:
+        data = {'name': message.text}
+        sql_query = sql.SQL("SELECT text from public.texts WHERE {} = {};").format(
+            sql.SQL(', ').join(map(sql.Identifier, data)),
+            sql.SQL(", ").join(map(sql.Placeholder, data))
+        )
+        text = safe_data_getter(sql_query, data)[0][0]
+        await message.answer(f'Выбранный вами пост после линии:\n----------------\n{text}', parse_mode="HTML")
+        await message.answer('Если это нужный блок, то отправьте мне его новый вариант.', reply_markup=middle_admin_keyboard())
+        await state.set_state(admin_home.text_edit)
+        await state.update_data(name = message.text)
+    except:
+        await message.answer(f'Вы ввели некорректный тэг, попробуйте еще раз', parse_mode="HTML")
 
 @router.message(content_types=types.ContentType.TEXT, state=admin_home.text_edit)
 async def text_edit_text_test(message: Message, state: FSMContext):
@@ -114,25 +117,27 @@ async def media_edit_tag(message: types.Message, state: FSMContext):
 
 @router.message(content_types=types.ContentType.TEXT, state=admin_home.media_edit_tag)
 async def edit_media(message: Message, state: FSMContext):
-    data = {'name':message.text}
-    sql_query = sql.SQL("SELECT t_id from public.assets WHERE {} = {};").format(
-        sql.SQL(', ').join(map(sql.Identifier, data)),
-        sql.SQL(", ").join(map(sql.Placeholder, data))
-    )
-    media_id = safe_data_getter(sql_query, data)[0][0]
-    print(media_id)
     try:
-        await message.answer_photo(media_id, caption='Это выбранная вами картинка. Если все верно, отправьте ту, '
-                                                     'на которую вы хотите ее заменить', reply_markup=middle_admin_keyboard())
+        data = {'name':message.text}
+        sql_query = sql.SQL("SELECT t_id from public.assets WHERE {} = {};").format(
+            sql.SQL(', ').join(map(sql.Identifier, data)),
+            sql.SQL(", ").join(map(sql.Placeholder, data))
+        )
+        media_id = safe_data_getter(sql_query, data)[0][0]
+        try:
+            await message.answer_photo(media_id, caption='Это выбранная вами картинка. Если все верно, отправьте ту, '
+                                                         'на которую вы хотите ее заменить', reply_markup=middle_admin_keyboard())
+        except:
+            pass
+        try:
+            await message.answer_video(media_id, caption='Это выбранное вами видео. Если все верно, отправьте то, на которое его надо заменить'
+                                       , reply_markup=middle_admin_keyboard())
+        except:
+            pass
+        await state.set_state(admin_home.media_edit)
+        await state.update_data(name = message.text)
     except:
-        pass
-    try:
-        await message.answer_video(media_id, caption='Это выбранное вами видео. Если все верно, отправьте то, на которое его надо заменить'
-                                   , reply_markup=middle_admin_keyboard())
-    except:
-        pass
-    await state.set_state(admin_home.media_edit)
-    await state.update_data(name = message.text)
+        await message.answer('К сожалению, медиа под этим тжгом нет в базе.\nПопробуйте еще раз.', reply_markup=middle_admin_keyboard())
 
 
 @router.message(content_types='video', state=admin_home.media_edit)
@@ -197,18 +202,23 @@ async def approve_text(message: Message, state: FSMContext):
     await message.answer('Текст добавлен. Еще разок?', reply_markup=main_admin_keyboard())
 
 
-@router.message((F.text == 'Отменить'), state = (admin_home.testing_text))
+@router.message((F.text == 'Отменить'), state = (admin_home.testing_text, admin_home.testing_media, admin_home.text_edit_test, admin_home.media_edit_test))
 async def reset_text(message: Message, state: FSMContext):
-    await state.set_state(admin_home.add_text)
-    await message.answer('Хорошо, отправьте мне сообщение с правками', reply_markup=middle_admin_keyboard())
-
-@router.message((F.text == 'Отменить'), state = (admin_home.testing_media))
-async def reset_media(message: Message, state: FSMContext):
-    await state.set_state(admin_home.add_media)
-    await message.answer('Хорошо, отправьте мне сообщение с правками', reply_markup=middle_admin_keyboard())
-
-@router.message((F.text == 'Отменить'), state = (admin_home.text_edit_test))
-async def reset_media(message: Message, state: FSMContext):
-    await state.set_state(admin_home.add_media)
-    await message.answer('Хорошо, отправьте мне сообщение с правками', reply_markup=middle_admin_keyboard())
+    stt = await state.get_state()
+    if stt == 'admin_home:testing_text':
+        await state.set_state(admin_home.add_text)
+        await message.answer('Хорошо, отправьте мне текст с правками', reply_markup=middle_admin_keyboard())
+    elif stt == 'admin_home:testing_media':
+        await state.set_state(admin_home.add_media)
+        await message.answer('Хорошо, отправьте мне другое медиа', reply_markup=middle_admin_keyboard())
+    elif stt == 'admin_home:media_edit_test':
+        await state.set_state(admin_home.media_edit)
+        await message.answer('Хорошо, отправьте мне медиа, на которое вы хотите заменить старое', reply_markup=middle_admin_keyboard())
+    elif stt == 'admin_home:text_edit_test':
+        await state.set_state(admin_home.text_edit)
+        await message.answer('Хорошо, отправьте мне текст, который заменит старый', reply_markup=middle_admin_keyboard())
+    else:
+        await state.set_state(admin_home.admin)
+        await message.answer('Хорошо, вернемся в меню',
+                             reply_markup=main_admin_keyboard())
 
