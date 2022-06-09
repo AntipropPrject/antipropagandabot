@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:12
+    container_name: antiprop_posgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:alpine
+    container_name: antiprop_redis
+    ports:
+      - "2342:2342"
+    command: --port 2342
+
+  web:
+    build: .
+    container_name: antiprop_Aiogrammwebhook
+    command: bash -c 'python Testbot.py'
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/code
+    depends_on:
+      - db
+    network_mode: host
+
+
+
+
+
+

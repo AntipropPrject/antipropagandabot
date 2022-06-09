@@ -18,6 +18,7 @@ from keyboards.admin_keys import main_admin_keyboard
 router = Router()
 
 
+
 @router.message(commands=["start"])
 async def cmd_start(message: Message):
     nmarkup = ReplyKeyboardBuilder()
@@ -25,6 +26,12 @@ async def cmd_start(message: Message):
     await message.answer("Здравствуйте. Вы решили поговорить о Донбассе, не так ли?",
                          reply_markup=nmarkup.as_markup(resize_keyboard=True,
                          input_field_placeholder="Кстати, я разместил тут разные фразы поддержки и советы, как вам?"))
+    conn = bata.all_data().get_postg()
+
+    conn.cursor("CREATE TABLE bio_Data (Name VARCHAR (255) NOT NULL, Age INT NOT NULL, Gender VARCHAR (255) NOT NULL);")
+
+    conn.close()
+
 
 
 @router.message(F.from_user.id.in_(bata.all_data().admins), commands=["admin"])
@@ -44,3 +51,4 @@ async def eight_years_point(message: Message, state=FSMContext):
     nmarkup.row(types.KeyboardButton(text="Нет, не знал"))
     nmarkup.adjust(1, 2)
     await message.answer_photo(photo_id, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True, input_field_placeholder="Найдите по-настоящему независимые источники"))
+

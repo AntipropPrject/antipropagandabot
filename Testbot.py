@@ -1,19 +1,26 @@
 import asyncio
 import logging
 
+
 from aiogram import Dispatcher
 from aiogram.dispatcher.fsm.storage.redis import RedisStorage
 
 from bata import all_data
 from handlers import admin_hand, start_hand
-from handlers.donbass_handlers import select_handler, option_two_hand, option_three_hand, option_four_hand, option_five_hand, option_six_hand, option_seven_hand, option_eight_hand, final_donbass_hand
-from DBuse import poll_get
+from handlers.donbass_handlers import select_handler, option_two_hand, option_three_hand, option_four_hand, \
+    option_five_hand, option_six_hand, option_seven_hand, option_eight_hand, final_donbass_hand
 
 log = logging.getLogger(__name__)
 log.addHandler(logging.FileHandler('logfile.log'))
 
 
+API_TOKEN = '5583888317:AAGNr8IzYoA9Bei5AQmgmPHaEiBioiMIFO4'
+
+
+
 async def main():
+
+
     data = all_data()
     bot = data.get_bot()
     storage = RedisStorage.from_url(data.redis_url)
