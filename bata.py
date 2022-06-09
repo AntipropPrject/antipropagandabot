@@ -20,4 +20,4 @@ class all_data():
         return from_url(hi.redis_url, decode_responses=True)
 
     def get_data_red(hi):
-        return from_url('redis://username:password@127.0.0.1:6379/1', decode_responses=True)
+        return from_url('redis://localhost:2342/1', decode_responses=True)
