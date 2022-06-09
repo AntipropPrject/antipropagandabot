@@ -26,11 +26,7 @@ async def cmd_start(message: Message):
     await message.answer("Здравствуйте. Вы решили поговорить о Донбассе, не так ли?",
                          reply_markup=nmarkup.as_markup(resize_keyboard=True,
                          input_field_placeholder="Кстати, я разместил тут разные фразы поддержки и советы, как вам?"))
-    conn = bata.all_data().get_postg()
 
-    conn.cursor("CREATE TABLE bio_Data (Name VARCHAR (255) NOT NULL, Age INT NOT NULL, Gender VARCHAR (255) NOT NULL);")
-
-    conn.close()
 
 
 
