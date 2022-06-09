@@ -19,7 +19,7 @@ router = Router()
 router.message.filter(option_filter(option = 'Украинцам надо было просто сдаться, тогда бы стольких жертв не было'), state = donbass_state)
 
 @router.message((F.text == 'Договорились') | (F.text == 'Хорошо')| (F.text == 'Понятно'))
-async def surrender_start_point(message: Message, state=FSMContext):
+async def seven_start_point(message: Message, state=FSMContext):
     #video_id =
     await state.update_data(nazi = 'В Украине процветает неонацизм и геноцид русскоязычного населения')
     text = data_getter("SELECT text from public.texts WHERE name = 'war_beginning';")[0][0]

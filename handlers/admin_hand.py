@@ -45,7 +45,7 @@ async def menu(message: types.Message, state: FSMContext):
 async def text_hello(message: types.Message, state: FSMContext):
     await state.set_state(admin_home.add_text)
     text = data_getter("SELECT text from public.texts WHERE name = 'any_unique_readible_tag';")[0][0]
-    await message.answer(f"Пришлите сообщение в подобном формате:{text}", reply_markup=middle_admin_keyboard())
+    await message.answer(f"Пришлите сообщение в подобном формате:\n\n\n{text}", reply_markup=middle_admin_keyboard())
 
 
 @router.message(content_types=types.ContentType.TEXT, state=admin_home.add_text)
@@ -157,26 +157,32 @@ async def updated_video_test(message: Message, state: FSMContext):
 @router.message((F.text == 'Подтвердить'), state=admin_home.media_edit_test)
 async def approve_media_edit(message: Message, state: FSMContext):
     data = await state.get_data()
-    string = "UPDATE public.assets SET t_id={t_id} WHERE name = {name} Returning id;"
+    string = "UPDATE public.assets SET t_id={t_id} WHERE name = {name} Returning name;"
     query = sql.SQL(string).format(
         t_id=sql.Placeholder('t_id'),
         name=sql.Placeholder('name'),
     )
-    safe_data_getter(query, data)
-    await message.answer('Все готово', reply_markup=main_admin_keyboard())
-    await state.set_state(admin_home.admin)
+    try:
+        safe_data_getter(query, data)
+        await message.answer('Все готово', reply_markup=main_admin_keyboard())
+        await state.set_state(admin_home.admin)
+    except:
+        await message.answer('Что-то пошло не так. Вы указали тэг?')
 
 @router.message((F.text == 'Подтвердить'), state=admin_home.text_edit_test)
 async def approve_edit_text(message: Message, state: FSMContext):
     data = await state.get_data()
-    string = "UPDATE public.texts SET text={text} WHERE name = {name} Returning id;"
+    string = "UPDATE public.texts SET text={text} WHERE name = {name} Returning name;"
     query = sql.SQL(string).format(
         text=sql.Placeholder('text'),
         name=sql.Placeholder('name'),
     )
-    safe_data_getter(query, data)
-    await message.answer('Все готово', reply_markup=main_admin_keyboard())
-    await state.set_state(admin_home.admin)
+    try:
+        safe_data_getter(query, data)
+        await message.answer('Все готово', reply_markup=main_admin_keyboard())
+        await state.set_state(admin_home.admin)
+    except:
+        await message.answer('Что-то пошло не так. Вы не ошиблись в разметке?')
 
 @router.message((F.text == 'Подтвердить'), state = admin_home.testing_media)
 async def approve_media(message: Message, state: FSMContext):
@@ -186,24 +192,30 @@ async def approve_media(message: Message, state: FSMContext):
         sql.SQL(', ').join(map(sql.Identifier, data)),
         sql.SQL(", ").join(map(sql.Placeholder, data))
     )
-    safe_data_getter(sql_query, data)
-    await state.set_state(admin_home.admin)
-    await message.answer('Медиа добавлено. Еще разок?', reply_markup=main_admin_keyboard())
+    try:
+        safe_data_getter(sql_query, data)
+        await state.set_state(admin_home.admin)
+        await message.answer('Медиа добавлено. Еще разок?', reply_markup=main_admin_keyboard())
+    except:
+        await message.answer('Что-то пошло не так. Вероятно, вы забыли указать тэг, или использовали имеющийся.')
 
 @router.message((F.text == 'Подтвердить'), state = admin_home.testing_text)
 async def approve_text(message: Message, state: FSMContext):
     data = await state.get_data()
-    sql_query = sql.SQL("INSERT INTO public.texts ({}) VALUES ({}) RETURNING id;").format(
+    sql_query = sql.SQL("INSERT INTO public.texts ({}) VALUES ({}) RETURNING name;").format(
         sql.SQL(', ').join(map(sql.Identifier, data)),
         sql.SQL(", ").join(map(sql.Placeholder, data))
     )
-    safe_data_getter(sql_query, data)
-    await state.set_state(admin_home.admin)
-    await message.answer('Текст добавлен. Еще разок?', reply_markup=main_admin_keyboard())
+    try:
+        safe_data_getter(sql_query, data)
+        await state.set_state(admin_home.admin)
+        await message.answer('Текст добавлен. Еще разок?', reply_markup=main_admin_keyboard())
+    except:
+        await message.answer('Что-то пошло не так. Вероятно, вы забыли указать тэг, или использовали имеющийся.')
 
 
 @router.message((F.text == 'Отменить'), state = (admin_home.testing_text, admin_home.testing_media, admin_home.text_edit_test, admin_home.media_edit_test))
-async def reset_text(message: Message, state: FSMContext):
+async def reset(message: Message, state: FSMContext):
     stt = await state.get_state()
     if stt == 'admin_home:testing_text':
         await state.set_state(admin_home.add_text)

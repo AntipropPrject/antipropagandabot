@@ -18,7 +18,7 @@ from keyboards.main_keys import filler_kb
 router = Router()
 router.message.filter(option_filter(option = 'Это ужасно, но помимо защиты жителей Донбасса есть более весомые причины для начала войны'), state = donbass_state)
 
-@router.message((F.text == 'Договорились') | (F.text == 'Хорошо')| (F.text == 'Понятно'))
+@router.message((F.text == 'Договорились') | (F.text == 'Хорошо') | (F.text == 'Понятно'))
 async def eight_years_add_point(message: Message, state=FSMContext):
     #video_id =
     text = data_getter("SELECT text from public.texts WHERE name = 'reasons_here';")[0][0]
