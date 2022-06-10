@@ -2,7 +2,6 @@ import asyncio
 import logging
 import pandas as pd
 from sqlalchemy import create_engine
-from data_base import db
 from time import sleep
 
 import psycopg2
@@ -19,6 +18,23 @@ from handlers.started_message import welcome_messages
 log = logging.getLogger(__name__)
 log.addHandler(logging.FileHandler('logfile.log'))
 
+try:
+    con = psycopg2.connect(database="postgres", user="postgres", password="postgres", host="localhost")
+    con.autocommit = True
+    cursor = con.cursor()
+    cursor.execute("DROP TABLE if exists texts")
+    cursor.execute("DROP TABLE if exists assets")
+    cursor.close()
+    con.close()
+    df1 = pd.read_csv('resources/texts.csv')
+    df2 = pd.read_csv('resources/assets.csv')
+    engine = create_engine('postgresql://postgres:postgres@localhost:5432/postgres')
+    df1.to_sql("texts", engine)
+    df2.to_sql("assets", engine)
+except (Exception, Error) as error:
+    print("SQL EXEPTION ", error)
+else:
+    print("Database base created!")
 
 
 async def main():

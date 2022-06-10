@@ -32,12 +32,13 @@ async def sql_safe_select(column, table_name, condition_dict):
         sql.SQL(", ").join(map(sql.Placeholder, condition_dict)),
     )
     conn = all_data().get_postg()
+    print(safe_query.as_string(conn))
     with conn:
         with conn.cursor() as cur:
             cur.execute(safe_query, condition_dict)
             data = cur.fetchall()
     conn.close()
-    return data
+    return data[0][0]
 
 
 async def sql_safe_insert(table_name, data_dict):

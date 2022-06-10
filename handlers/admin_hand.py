@@ -5,7 +5,6 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.dispatcher.fsm.state import State, StatesGroup
 from aiogram.types import Message
 
-import data_base
 from DBuse import safe_data_getter, data_getter, sql_safe_select, sql_safe_update, sql_safe_insert
 from keyboards.admin_keys import main_admin_keyboard, middle_admin_keyboard, app_admin_keyboard
 
@@ -33,6 +32,7 @@ async def cmd_cancel(message: types.Message, state: FSMContext):
 
 @router.message(content_types=types.ContentType.TEXT, text_ignore_case=True, text_contains='меню', state=admin_home)
 async def menu(message: types.Message, state: FSMContext):
+    await state.clear()
     await state.set_state(admin_home.admin)
     await message.answer("Чего изволите теперь?", reply_markup=main_admin_keyboard())
 
@@ -40,7 +40,8 @@ async def menu(message: types.Message, state: FSMContext):
 @router.message((F.text == 'Добавить блок текста'), state = admin_home.admin)
 async def text_hello(message: types.Message, state: FSMContext):
     await state.set_state(admin_home.add_text)
-    text = await sql_safe_select('text', 'public.texts', {'name':'any_unique_readible_tag'})[0][0]
+    text = await sql_safe_select('text', 'texts', {'name':'any_unique_readible_tag'})
+    text = text
     await message.answer(f"Пришлите сообщение в подобном формате:\n\n\n{text}", reply_markup=middle_admin_keyboard())
 
 
@@ -56,7 +57,7 @@ async def get_text(message: Message, state: FSMContext):
 @router.message((F.text == 'Добавить медиа'), state = admin_home.admin)
 async def text_hello(message: types.Message, state: FSMContext):
     await state.set_state(admin_home.add_media)
-    photo = data_getter("SELECT t_id from public.assets WHERE name = 'test_photo_tag';")[0][0]
+    photo = await sql_safe_select('t_id', 'assets', {'name':'test_photo_tag'})
     await message.answer_photo(photo, caption = 'Пришлите фото или видео, подписав его удобным тегом подобного формата: some_unique_tag', reply_markup=middle_admin_keyboard())
 
 @router.message(content_types='photo', state=admin_home.add_media)
@@ -85,12 +86,7 @@ async def text_edit_tag(message: types.Message, state: FSMContext):
 @router.message(content_types=types.ContentType.TEXT, state=admin_home.text_edit_tag)
 async def text_edit_text_tag(message: Message, state: FSMContext):
     try:
-        data = {'name': message.text}
-        sql_query = sql.SQL("SELECT text from public.texts WHERE {} = {};").format(
-            sql.SQL(', ').join(map(sql.Identifier, data)),
-            sql.SQL(", ").join(map(sql.Placeholder, data))
-        )
-        text = safe_data_getter(sql_query, data)[0][0]
+        text = await sql_safe_select('text', 'texts', {'name':message.text})
         await message.answer(f'Выбранный вами пост после линии:\n----------------\n{text}', parse_mode="HTML")
         await message.answer('Если это нужный блок, то отправьте мне его новый вариант.', reply_markup=middle_admin_keyboard())
         await state.set_state(admin_home.text_edit)
@@ -114,12 +110,7 @@ async def media_edit_tag(message: types.Message, state: FSMContext):
 @router.message(content_types=types.ContentType.TEXT, state=admin_home.media_edit_tag)
 async def edit_media(message: Message, state: FSMContext):
     try:
-        data = {'name':message.text}
-        sql_query = sql.SQL("SELECT t_id from public.assets WHERE {} = {};").format(
-            sql.SQL(', ').join(map(sql.Identifier, data)),
-            sql.SQL(", ").join(map(sql.Placeholder, data))
-        )
-        media_id = safe_data_getter(sql_query, data)[0][0]
+        media_id = await sql_safe_select('t_id', 'assets', {'name': message.text})
         try:
             await message.answer_photo(media_id, caption='Это выбранная вами картинка. Если все верно, отправьте ту, '
                                                          'на которую вы хотите ее заменить', reply_markup=middle_admin_keyboard())
@@ -153,15 +144,10 @@ async def updated_video_test(message: Message, state: FSMContext):
 @router.message((F.text == 'Подтвердить'), state=admin_home.media_edit_test)
 async def approve_media_edit(message: Message, state: FSMContext):
     data = await state.get_data()
-    string = "UPDATE public.assets SET t_id={t_id} WHERE name = {name} Returning name;"
-    query = sql.SQL(string).format(
-        t_id=sql.Placeholder('t_id'),
-        name=sql.Placeholder('name'),
-    )
     try:
-        await sql_safe_update('assets')
-        safe_data_getter(query, data)
+        await sql_safe_update('assets', {"t_id": data["t_id"]}, {'name': data['name']})
         await message.answer('Все готово', reply_markup=main_admin_keyboard())
+        await state.clear()
         await state.set_state(admin_home.admin)
     except:
         await message.answer('Что-то пошло не так. Вы указали тэг?')
@@ -169,14 +155,10 @@ async def approve_media_edit(message: Message, state: FSMContext):
 @router.message((F.text == 'Подтвердить'), state=admin_home.text_edit_test)
 async def approve_edit_text(message: Message, state: FSMContext):
     data = await state.get_data()
-    string = "UPDATE public.texts SET text={text} WHERE name = {name} Returning name;"
-    query = sql.SQL(string).format(
-        text=sql.Placeholder('text'),
-        name=sql.Placeholder('name'),
-    )
     try:
-        safe_data_getter(query, data)
+        await sql_safe_update('texts', {"text": data["text"]}, {'name': data['name']})
         await message.answer('Все готово', reply_markup=main_admin_keyboard())
+        await state.clear()
         await state.set_state(admin_home.admin)
     except:
         await message.answer('Что-то пошло не так. Вы не ошиблись в разметке?')
@@ -184,28 +166,25 @@ async def approve_edit_text(message: Message, state: FSMContext):
 @router.message((F.text == 'Подтвердить'), state = admin_home.testing_media)
 async def approve_media(message: Message, state: FSMContext):
     data = await state.get_data()
-    print (data)
-    sql_query = sql.SQL("INSERT INTO public.assets ({}) VALUES ({}) Returning name;").format(
-        sql.SQL(', ').join(map(sql.Identifier, data)),
-        sql.SQL(", ").join(map(sql.Placeholder, data))
-    )
-    safe_data_getter(sql_query, data)
-    await state.set_state(admin_home.admin)
-    await message.answer('Медиа добавлено. Еще разок?', reply_markup=main_admin_keyboard())
+    print(data)
+    try:
+        await sql_safe_insert('assets', data)
+        await state.clear()
+        await state.set_state(admin_home.admin)
+        await message.answer('Медиа добавлено. Еще разок?', reply_markup=main_admin_keyboard())
+    except:
+        await message.answer('Не получилось. Может быть, вы указали существующий таг?')
+
 
 @router.message((F.text == 'Подтвердить'), state = admin_home.testing_text)
 async def approve_text(message: Message, state: FSMContext):
     data = await state.get_data()
-    sql_query = sql.SQL("INSERT INTO public.texts ({}) VALUES ({}) RETURNING name;").format(
-        sql.SQL(', ').join(map(sql.Identifier, data)),
-        sql.SQL(", ").join(map(sql.Placeholder, data))
-    )
     try:
-        safe_data_getter(sql_query, data)
+        await sql_safe_insert('texts', data)
         await state.set_state(admin_home.admin)
         await message.answer('Текст добавлен. Еще разок?', reply_markup=main_admin_keyboard())
     except:
-        await message.answer('Что-то пошло не так. Вероятно, вы забыли указать тэг, или использовали имеющийся.')
+        await message.answer('Увы, ошибка. Скорее всего, этот таг сущесвует.')
 
 
 @router.message((F.text == 'Отменить'), state = (admin_home.testing_text, admin_home.testing_media, admin_home.text_edit_test, admin_home.media_edit_test))
