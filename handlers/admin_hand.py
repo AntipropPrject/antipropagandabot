@@ -5,7 +5,8 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.dispatcher.fsm.state import State, StatesGroup
 from aiogram.types import Message
 
-from DBuse import safe_data_getter, data_getter
+import data_base
+from DBuse import safe_data_getter, data_getter, sql_safe_select, sql_safe_update, sql_safe_insert
 from keyboards.admin_keys import main_admin_keyboard, middle_admin_keyboard, app_admin_keyboard
 
 class admin_home(StatesGroup):
@@ -39,7 +40,7 @@ async def menu(message: types.Message, state: FSMContext):
 @router.message((F.text == 'Добавить блок текста'), state = admin_home.admin)
 async def text_hello(message: types.Message, state: FSMContext):
     await state.set_state(admin_home.add_text)
-    text = data_getter("SELECT text from public.texts WHERE name = 'any_unique_readible_tag';")[0][0]
+    text = await sql_safe_select('text', 'public.texts', {'name':'any_unique_readible_tag'})[0][0]
     await message.answer(f"Пришлите сообщение в подобном формате:\n\n\n{text}", reply_markup=middle_admin_keyboard())
 
 
@@ -158,6 +159,7 @@ async def approve_media_edit(message: Message, state: FSMContext):
         name=sql.Placeholder('name'),
     )
     try:
+        await sql_safe_update('assets')
         safe_data_getter(query, data)
         await message.answer('Все готово', reply_markup=main_admin_keyboard())
         await state.set_state(admin_home.admin)

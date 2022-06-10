@@ -49,3 +49,6 @@ coverage.xml
 # Sphinx documentation
 docs/_build/
 .idea/.name
+*.pyc
+*.pyc
+logfile.log
