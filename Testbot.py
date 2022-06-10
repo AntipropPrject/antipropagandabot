@@ -1,8 +1,15 @@
 import asyncio
 import logging
+import pandas as pd
+from sqlalchemy import create_engine
+from time import sleep
+
+import psycopg2
 from aiogram import Dispatcher
 from aiogram.dispatcher.fsm.storage.redis import RedisStorage
 from psycopg2 import Error
+
+import bata
 from bata import all_data
 from handlers import admin_hand, start_hand
 from handlers.donbass_handlers import select_handler, option_two_hand, option_three_hand, option_four_hand, \
@@ -12,44 +19,22 @@ log = logging.getLogger(__name__)
 log.addHandler(logging.FileHandler('logfile.log'))
 
 try:
-    # Подключение к существующей базе данных
-    con = all_data().get_postg()
-
-    # Курсор для выполнения операций с базой данных
-    cur = con.cursor()
+    con = psycopg2.connect(database="postgres", user="postgres", password="postgres", host="localhost")
     con.autocommit = True
-    # Выполнение SQL-запроса
-    cur.execute("SELECT version();")
-    # Получить результат
-    record = cur.fetchone()
-    print("Вы подключены к - ", record, "\n")
-    # Удаление таблицы
-    cur.execute("DROP TABLE IF EXISTS texts")
-    cur.execute("DROP TABLE IF EXISTS assets")
-    # Создание таблиц
-    cur.execute('''CREATE TABLE IF NOT EXISTS texts(
-                name TEXT NOT NULL PRIMARY KEY,
-                text TEXT NOT NULL
-                )''')
-
-    cur.execute('''CREATE TABLE IF NOT EXISTS assets(
-            t_id TEXT NOT NULL,
-            name TEXT NOT NULL PRIMARY KEY
-            )''')
-
-    csv_file_name = 'resources/assets.csv'
-    sql = "COPY assets FROM STDIN DELIMITER ',' CSV HEADER"
-    cur.copy_expert(sql, open(csv_file_name, "r"))
-
-    csv_file_name = 'resources/texts.csv'
-    sql = "COPY texts FROM STDIN DELIMITER ',' CSV HEADER"
-    cur.copy_expert(sql, open(csv_file_name, "r"))
+    cursor = con.cursor()
+    cursor.execute("DROP TABLE if exists texts")
+    cursor.execute("DROP TABLE if exists assets")
+    cursor.close()
     con.close()
-    cur.close()
-
-
+    df1 = pd.read_csv('resources/texts.csv')
+    df2 = pd.read_csv('resources/assets.csv')
+    engine = create_engine('postgresql://postgres:postgres@localhost:5432/postgres')
+    df1.to_sql("texts", engine)
+    df2.to_sql("assets", engine)
 except (Exception, Error) as error:
-    print("Ошибка при работе с PostgreSQL", error)
+    print("SQL EXEPTION ", error)
+else:
+    print("Database base created!")
 
 
 async def main():
