@@ -1,5 +1,6 @@
 import psycopg2
 from psycopg2 import Error
+from psycopg2 import sql
 
 try:
     # Подключение базе данных
