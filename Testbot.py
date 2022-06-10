@@ -33,7 +33,7 @@ async def main():
     )
     log.error("Starting bot")
 
-    dp.include_router(welcome_messages)
+    dp.include_router(welcome_messages.router)
     dp.include_router(start_hand.router)
     dp.include_router(admin_hand.router)
     dp.include_router(select_handler.router)
