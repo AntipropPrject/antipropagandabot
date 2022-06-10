@@ -1,10 +1,10 @@
 import psycopg2
 from psycopg2 import Error
 from psycopg2 import sql
-
+from bata import all_data
 try:
     # Подключение базе данных
-    con = psycopg2.connect(database="postgres", user="postgres", password="postgres", host="127.0.0.1")
+    con = all_data.get_postg()
 
     cur = con.cursor()
     con.autocommit=True
@@ -13,17 +13,29 @@ try:
 
     record = cur.fetchone()
     print("Вы подключены к - ", record, "\n")
+    cur.execute("""DROP TABLE IF EXISTS assets""")
+    cur.execute("""DROP TABLE IF EXISTS texts""")
 
-    cur.execute('''CREATE TABLE IF NOT EXISTS texts(
-                text_tag = BIGINT,
-                text = BIGINT
-                )''')
 
-    cur.execute('''CREATE TABLE IF NOT EXISTS assets(
-            asset_tag = BIGINT,
-            asset_id = BIGINT
-            )''')
+    cur.execute('''CREATE TABLE public.texts (
+  "name" varchar NOT NULL,
+  "text" text NULL,
+  CONSTRAINT texts_pk PRIMARY KEY (name)
+);''')
 
+    cur.execute('''CREATE TABLE IF NOT EXISTS  public.assets (
+  t_id varchar NULL,
+  "name" varchar NOT NULL,
+  CONSTRAINT assets_pk PRIMARY KEY (name)
+);''')
+
+    csv_out = '/resources/assets.csv'
+    sql = "copy assets from STDIN delimiter ',' csv encoding 'UTF8'"
+    cur.copy_expert(sql, open(csv_out, "r", encoding='utf-8'))
+
+    csv_out = '/resources/text.csv'
+    sql = "copy assets from STDIN delimiter ',' csv encoding 'UTF8'"
+    cur.copy_expert(sql, open(csv_out, "r", encoding='utf-8'))
 
     async def sql_add_text(text_tag, text):
         cur = con.cursor()
