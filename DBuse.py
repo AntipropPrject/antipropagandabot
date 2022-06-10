@@ -84,4 +84,4 @@ async def redis_pop(key):
 
 async def poll_write(user_id, poll_name, tag):
     redis = all_data().get_data_red()
-    redis.rpush(f'Poll_answers: {poll_name}: {user_id}', tag)
+    redis.rpush(f'{poll_name}: Poll_answers: {user_id}', tag)
