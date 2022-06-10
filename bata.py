@@ -11,7 +11,7 @@ class all_data():
         hi.admins = (5306348087, 5177494340, 5581082758)
 
     def get_bot(hi):
-        return Bot(hi.bot_token)
+        return Bot(hi.bot_token, parse_mode="HTML")
 
     def get_postg(hi):
         return psycopg2.connect(database="postgres", user="postgres", password="postgres", host="localhost")

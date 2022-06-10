@@ -1,16 +1,8 @@
 import asyncio
 import logging
-import pandas as pd
-from sqlalchemy import create_engine
-from data_base import db
-from time import sleep
-
-import psycopg2
 from aiogram import Dispatcher
 from aiogram.dispatcher.fsm.storage.redis import RedisStorage
 from psycopg2 import Error
-
-import bata
 from bata import all_data
 from handlers import admin_hand, start_hand
 from handlers.donbass_handlers import select_handler, option_two_hand, option_three_hand, option_four_hand, \
@@ -19,6 +11,45 @@ from handlers.started_message import welcome_messages
 log = logging.getLogger(__name__)
 log.addHandler(logging.FileHandler('logfile.log'))
 
+try:
+    # Подключение к существующей базе данных
+    con = all_data().get_postg()
+
+    # Курсор для выполнения операций с базой данных
+    cur = con.cursor()
+    con.autocommit = True
+    # Выполнение SQL-запроса
+    cur.execute("SELECT version();")
+    # Получить результат
+    record = cur.fetchone()
+    print("Вы подключены к - ", record, "\n")
+    # Удаление таблицы
+    cur.execute("DROP TABLE IF EXISTS texts")
+    cur.execute("DROP TABLE IF EXISTS assets")
+    # Создание таблиц
+    cur.execute('''CREATE TABLE IF NOT EXISTS texts(
+                name TEXT NOT NULL PRIMARY KEY,
+                text TEXT NOT NULL
+                )''')
+
+    cur.execute('''CREATE TABLE IF NOT EXISTS assets(
+            t_id TEXT NOT NULL,
+            name TEXT NOT NULL PRIMARY KEY
+            )''')
+
+    csv_file_name = 'resources/assets.csv'
+    sql = "COPY assets FROM STDIN DELIMITER ',' CSV HEADER"
+    cur.copy_expert(sql, open(csv_file_name, "r"))
+
+    csv_file_name = 'resources/texts.csv'
+    sql = "COPY texts FROM STDIN DELIMITER ',' CSV HEADER"
+    cur.copy_expert(sql, open(csv_file_name, "r"))
+    con.close()
+    cur.close()
+
+
+except (Exception, Error) as error:
+    print("Ошибка при работе с PostgreSQL", error)
 
 
 async def main():

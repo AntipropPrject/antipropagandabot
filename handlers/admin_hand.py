@@ -4,8 +4,6 @@ from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.dispatcher.fsm.state import State, StatesGroup
 from aiogram.types import Message
-
-import data_base
 from DBuse import safe_data_getter, data_getter, sql_safe_select, sql_safe_update, sql_safe_insert
 from keyboards.admin_keys import main_admin_keyboard, middle_admin_keyboard, app_admin_keyboard
 
@@ -67,6 +65,7 @@ async def get_photo(message: Message, state: FSMContext):
     await state.update_data(t_id = ph_id, name = capt)
     await message.answer_photo(ph_id, caption=capt)
     await message.answer('Все верно?', reply_markup=app_admin_keyboard())
+
 
 @router.message(content_types='video', state=admin_home.add_media)
 async def get_video(message: Message, state: FSMContext):
