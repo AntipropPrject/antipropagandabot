@@ -1,5 +1,6 @@
 import psycopg2
 from psycopg2 import Error
+from psycopg2 import sql
 
 try:
     # Подключение базе данных
@@ -43,6 +44,20 @@ try:
         cur.execute("SELECT * FROM assets WHERE asset_tag = %(tag)s", {'tag': asset_tag})
         return cur.fetchone()
 
+
+    async def sql_safe_update(table_name, data_dict, condition_dict):
+        where = list(condition_dict.keys())[0]
+        equals = condition_dict[where]
+        sql_query = sql.SQL("UPDATE {} SET {} = {} WHERE {} = '{}';").format(
+            sql.Identifier(table_name),
+            sql.SQL(', ').join(map(sql.Identifier, data_dict)),
+            sql.SQL(", ").join(map(sql.Placeholder, data_dict)),
+            sql.Identifier(where),
+            sql.Identifier(equals),
+        )
+        cur = con.cursor()
+        cur.execute(sql_query, data_dict)
+        return "Comlete"
 
 except (Exception, Error) as error:
     print("[ERROR]", error)

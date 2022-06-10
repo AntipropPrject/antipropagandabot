@@ -12,6 +12,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from filters.donbas_filters import option_filter
 from states.donbass_states import donbass_state
+from states.antiprop_states import propaganda_victim
 from DBuse import data_getter, redis_pop
 from keyboards.main_keys import filler_kb
 

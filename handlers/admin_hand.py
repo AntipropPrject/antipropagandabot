@@ -1,14 +1,9 @@
-import asyncio
-import pathlib
-
 from psycopg2 import sql
 from aiogram import Router, F
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.dispatcher.fsm.state import State, StatesGroup
-from aiogram.types import Message, ReplyKeyboardRemove
-from bata import all_data
-from aiogram.utils.keyboard import ReplyKeyboardBuilder
+from aiogram.types import Message
 
 from DBuse import safe_data_getter, data_getter
 from keyboards.admin_keys import main_admin_keyboard, middle_admin_keyboard, app_admin_keyboard
