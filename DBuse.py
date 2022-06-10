@@ -34,7 +34,7 @@ async def sql_safe_select(column, table_name, condition_dict):
     conn = all_data().get_postg()
     with conn:
         with conn.cursor() as cur:
-            cur.execute(safe_query, data_dict)
+            cur.execute(safe_query, condition_dict)
             data = cur.fetchall()
     conn.close()
     return data
