@@ -186,18 +186,15 @@ async def approve_edit_text(message: Message, state: FSMContext):
 
 @router.message((F.text == 'Подтвердить'), state = admin_home.testing_media)
 async def approve_media(message: Message, state: FSMContext):
-    conn = all_data().get_postg()
     data = await state.get_data()
-    sql_query = sql.SQL("INSERT INTO public.assets ({}) VALUES ({});").format(
+    print (data)
+    sql_query = sql.SQL("INSERT INTO public.assets ({}) VALUES ({}) Returning name;").format(
         sql.SQL(', ').join(map(sql.Identifier, data)),
         sql.SQL(", ").join(map(sql.Placeholder, data))
     )
-    try:
-        safe_data_getter(sql_query, data)
-        await state.set_state(admin_home.admin)
-        await message.answer('Медиа добавлено. Еще разок?', reply_markup=main_admin_keyboard())
-    except:
-        await message.answer('Что-то пошло не так. Вероятно, вы забыли указать тэг, или использовали имеющийся.')
+    safe_data_getter(sql_query, data)
+    await state.set_state(admin_home.admin)
+    await message.answer('Медиа добавлено. Еще разок?', reply_markup=main_admin_keyboard())
 
 @router.message((F.text == 'Подтвердить'), state = admin_home.testing_text)
 async def approve_text(message: Message, state: FSMContext):

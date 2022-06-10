@@ -13,6 +13,7 @@ from DBuse import data_getter
 from handlers.admin_hand import admin_home
 from states.donbass_states import donbass_state
 from keyboards.admin_keys import main_admin_keyboard
+from keyboards.test_keys import strange_kb
 
 
 router = Router()
@@ -29,8 +30,13 @@ async def cmd_start(message: Message):
 
 @router.message(F.from_user.id.in_(bata.all_data().admins), commands=["admin"])
 async def admin_hi(message: Message, state: FSMContext) -> None:
+    await state.clear()
     await state.set_state(admin_home.admin)
     await message.answer("Добро пожаловать в режим администрации. Что вам угодно сегодня?", reply_markup=main_admin_keyboard())
+
+@router.message(commands=["test"])
+async def admin_hi(message: Message, state: FSMContext) -> None:
+    await message.answer("Сообщение с текстом", reply_markup=strange_kb())
 
 
 @router.message(text_contains=('бомбила', '8', 'лет'), content_types=types.ContentType.TEXT, text_ignore_case=True)
