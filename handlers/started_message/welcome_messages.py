@@ -6,11 +6,13 @@ from DBuse import poll_get, poll_write
 from bata import all_data
 from states import welcome_states
 from DBuse import sql_safe_select
+from states.antiprop_states import propaganda_victim
+
 router = Router()
 
 
 @router.message(commands=['message', 'help'], state="*")
-async def commands_start(message: types.Message, state: FSMContext):  # Первое сообщение
+async def commands_start(message: types.Message, state: FSMContext): # Первое сообщение
     await state.clear()
     markup = ReplyKeyboardBuilder()
     markup.add(types.KeyboardButton(text="Начнем!"))
@@ -89,7 +91,8 @@ async def message_5(message: types.Message, state: FSMContext):
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
     await state.set_state(welcome_states.start_dialog.dialogue_5)
 
-
+#((F.text @ ('Открой мне глаза 👀', "Ну удиви меня 🤔"))
+#@router.message(((F.text == 'Договорились') | (F.text == 'Хорошо')))
 @router.message(welcome_states.start_dialog.dialogue_5, text_contains=('Хорошо', 'свои', 'вопросы'), content_types=types.ContentType.TEXT, text_ignore_case=True)
 @router.message(welcome_states.start_dialog.dialogue_5, text_contains=('Задавай'), content_types=types.ContentType.TEXT, text_ignore_case=True)  # Задаю первый вопрос и ставлю состояние
 async def message_6(message: types.Message, state: FSMContext):
@@ -101,10 +104,12 @@ async def message_6(message: types.Message, state: FSMContext):
     await state.set_state(welcome_states.start_dialog.dialogue_6)
 
 
-@router.message(welcome_states.start_dialog.dialogue_6)  # Сохраняю 1 вопрос и задаю второй
+@router.message(welcome_states.start_dialog.dialogue_6)  # Сохраняю 1 вопрос
 async def message_7(message: types.Message, state: FSMContext):
-    # Сохранить 1 вопрос в базу
     print(1)
+    # Сохранить 1 вопрос в базу
+
+    await poll_write(f'Start_answers: interest_in_politics: {message.from_user.id}', message.text)
     options = ["Защитить русских в Донбассе",  # Вопросы опроса
                "Предотвратить вторжение на территорию"
                " России или ЛНР/ДНР", "Денацификация / Уничтожить нацистов", "Демилитаризация / Снижение военной мощи",
@@ -112,14 +117,27 @@ async def message_7(message: types.Message, state: FSMContext):
                "Повысить рейтинг доверия Владимира Путина", "Захватить территории Донбасса и юга Украины",
                "Предотвратить размещение военных баз НАТО в Украине", "Я не знаю..."
                ]
+    # Сохранение 1 вопроса в дату
+    await state.update_data(option_1=options)
+
+    await state.update_data(answer_1=message.text)
     text = await sql_safe_select("text", "texts", {"name": "start_russia_goal"})
-    await message.answer_poll(text, options, is_anonymous=False, allows_multiple_answers=True)  # Отправка первого опроса
+    await message.answer_poll(text, options, is_anonymous=False, allows_multiple_answers=True)
     await state.set_state(welcome_states.start_dialog.dialogue_7)
 
 
-@router.poll_answer(state=welcome_states.start_dialog.dialogue_7)  # Ловлю ответы первого опроса
+@router.poll_answer(state=welcome_states.start_dialog.dialogue_7)  # Сохраняю 2 вопрос
 async def poll_answer_handler(poll_answer: types.PollAnswer, state=FSMContext):
-    print(poll_answer.option_ids)  # тут нужно записать ответы опроса в базу
+    print(2)
+    #сохранение 2 вопроса
+    options = await state.get_data()
+    lst_options = options["option_1"]
+    lst_answers = poll_answer.option_ids
+    lst = []
+    for index in lst_answers:
+        lst.append(lst_options[index])
+        await poll_write(f'Start_answers: Invasion: {poll_answer.user.id}', lst_options[index])
+    await state.update_data(answer_2=lst)
     markup = ReplyKeyboardBuilder()
     markup.add(types.KeyboardButton(text="Да, полностью доверяю"))
     markup.add(types.KeyboardButton(text="Скорее да"), types.KeyboardButton(text="Скорее нет"))
@@ -129,35 +147,77 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, state=FSMContext):
     await state.set_state(welcome_states.start_dialog.dialogue_8)
 
 
-@router.message(state=welcome_states.start_dialog.dialogue_8)  # Сохранение 3 вопроса и отправка 4
+@router.message(state=welcome_states.start_dialog.dialogue_8)  # Сохраняю 3 вопрос
 async def message_8(message: types.Message, state: FSMContext):
-    #сохранение 3 вопроса
-    options = ["РИА Новости", "Russia Today",
+    print(3)
+    option = ["РИА Новости", "Russia Today",
                "Meduza / BBC / Радио Свобода / Медиазона / Настоящее время / Популярная Политика",
                "Телеграм-каналы: Военный осведомитель / WarGonzo / Kotsnews",
                "Телеграм-канал: Война с фейками", "РБК",
                "ТАСС / Комсомольская правда / АиФ / Ведомости / Лента / Интерфакс",
                "Яндекс.Новости", "Википедия", "Никому из них...",
                ]
-    text = await sql_safe_select("text", "texts", {"name": "start_internet_belive"})
-    await message.answer_poll(text, options, is_anonymous=False, allows_multiple_answers=True)
+    # сохранение 3 вопроса
+
+    await poll_write(f'Start_answers: tv: {message.from_user.id}', message.text)
+    await state.update_data(option_3=option)
+    await state.update_data(answer_3=message.text)
+    text=await sql_safe_select("text", "texts", {"name": "start_internet_belive"})
+    await message.answer_poll(text, option, is_anonymous=False, allows_multiple_answers=True)
     await state.set_state(welcome_states.start_dialog.dialogue_9)
 
 
-@router.poll_answer(state = welcome_states.start_dialog.dialogue_9)  # Ловлю ответы второго опроса и отправляю третий
+@router.poll_answer(state = welcome_states.start_dialog.dialogue_9)  # Сохраняю 4 вопрос
 async def poll_answer_handler_tho(poll_answer: types.PollAnswer, state=FSMContext):
-    print(poll_answer.option_ids)  # тут нужно записать ответы опроса в базу
+    print(4)
     options = ["Владимир Путин", "Дмитрий Песков", "Рамзан Кадыров",
                "Сергей Лавров", "Юрий Подоляка", "Владимир Соловьев",
                "Ольга Скабеева", "Никому из них..."
                ]
+    # сохранение 4 вопроса
+    option = await state.get_data()
+    lst_options = option["option_3"]
+    lst_answers = poll_answer.option_ids
+    lst = []
+    for index in lst_answers:
+        lst.append(lst_options[index])
+        await poll_write(f'Start_answers: ethernet: {poll_answer.user.id}', lst_options[index])
+    await state.update_data(answer_4=poll_answer.option_ids)
+    await state.update_data(option_4=options)
     text = await sql_safe_select("text", "texts", {"name": "start_people_belive"})
     await Bot(all_data().bot_token).send_poll(poll_answer.user.id, text, options, is_anonymous=False, allows_multiple_answers=True)
     await state.set_state(welcome_states.start_dialog.dialogue_10)
 
 
-@router.poll_answer(state = welcome_states.start_dialog.dialogue_10)  # Ловлю ответы третьего опроса и перехожу к антипропаганде
+@router.poll_answer(state=welcome_states.start_dialog.dialogue_10)  # Сохраняю 5 вопрос
 async def poll_answer_handler_three(poll_answer: types.PollAnswer, state=FSMContext):
+    markup = ReplyKeyboardBuilder()
+    markup.add(types.KeyboardButton(text="Поехали!"))
+    options = await state.get_data()
+    lst_options = options["option_4"]
+    lst_answers = poll_answer.option_ids
+    lst = []
+    for index in lst_answers:
+        lst.append(lst_options[index])
+        await poll_write(f'Start_answers: who_to_trust: {poll_answer.user.id}', lst_options[index])
+    await state.update_data(answer_5=poll_answer.option_ids)
     text = await sql_safe_select("text", "texts", {"name": "start_thank_you"})
-    # Сохранить все значения и присвоить статус собеседнику для дальнейшего сценария
-    await Bot(all_data().bot_token).send_message(poll_answer.user.id, text)
+    await Bot(all_data().bot_token).send_message(poll_answer.user.id, text, reply_markup=markup.as_markup(resize_keyboard=True))
+    data = await state.get_data()
+
+    a = {0, 1, 3, 4, 5, 6, 7}
+    b = {1, 2, 3, 4, 5, 6}
+    a_1 = set(data["answer_4"])
+    b_1 = set(data["answer_5"])
+    if data["answer_3"] != "Нет, не верю ни слову":
+        await state.set_state(propaganda_victim.start)
+    if a.isdisjoint(a_1)==False:
+        await state.set_state(propaganda_victim.start)
+    else:
+        pass
+    if b.isdisjoint(b_1)==False:
+        await state.set_state(propaganda_victim.start)
+
+
+    await state.clear()
+
