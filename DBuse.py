@@ -110,8 +110,8 @@ async def redis_pop(key):
         logg.get_error(f"{error}", __file__)
 
 
-async def poll_write(user_id, poll_name, tag):
+async def poll_write(key, value):
     try:
-        all_data().get_data_red().rpush(f'{poll_name}: Poll_answers: {user_id}', tag)
+        all_data().get_data_red().rpush(key, value)
     except Exception as error:
         logg.get_error(f"{error}", __file__)
