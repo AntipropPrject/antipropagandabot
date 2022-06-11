@@ -1,6 +1,5 @@
 import asyncio
 import logging
-from sqlalchemy import create_engine
 from data_base import db
 from time import sleep
 
