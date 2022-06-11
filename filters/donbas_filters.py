@@ -10,7 +10,7 @@ class option_filter(BaseFilter):
 
     async def __call__(self, message: Message) -> bool:
         print ('filtering')
-        user_lies = await poll_get(f'Poll_answers: Donbas: {message.from_user.id}')
+        user_lies = await poll_get(f'Donbas: Poll_answers: {message.from_user.id}')
         print (user_lies)
         for lie in user_lies:
             print (lie)

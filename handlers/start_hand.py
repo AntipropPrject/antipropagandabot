@@ -5,7 +5,7 @@ from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 import bata
-from DBuse import data_getter
+from DBuse import data_getter, pandas_csv_add
 from handlers.admin_hand import admin_home
 from keyboards.admin_keys import main_admin_keyboard
 from states.antiprop_states import propaganda_victim
@@ -23,20 +23,13 @@ async def cmd_start(message: Message):
                                                         input_field_placeholder="Кстати, я разместил тут разные фразы поддержки и советы, как вам?"))
 
 
+
 @router.message(F.from_user.id.in_(bata.all_data().admins), commands=["admin"])
 async def admin_hi(message: Message, state: FSMContext) -> None:
     await state.clear()
     await state.set_state(admin_home.admin)
     await message.answer("Добро пожаловать в режим администрации. Что вам угодно сегодня?",
                          reply_markup=main_admin_keyboard())
-
-
-@router.message(commands=["test"])
-async def admin_hi(message: Message, state: FSMContext) -> None:
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Поехали"))
-    await state.set_state(propaganda_victim.start)
-    await message.answer("Сообщение с текстом")
 
 
 @router.message(text_contains=('бомбила', '8', 'лет'), content_types=types.ContentType.TEXT, text_ignore_case=True)
