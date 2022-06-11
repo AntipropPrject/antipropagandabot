@@ -5,7 +5,7 @@ from colorama import Back
 from colorama import Style
 
 def get_info(text):
-    print(f"{Fore.GREEN}[INFO] | " + Fore.WHITE + text)
+    print(f"{Fore.GREEN}[INFO] | " + Fore.LIGHTYELLOW_EX + text)
     logging.basicConfig(
         level=logging.INFO,
         filename="logs.log",
