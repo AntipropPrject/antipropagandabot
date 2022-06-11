@@ -22,23 +22,24 @@ class option_filter(BaseFilter):
         return False
 
 
-class PropagandaFilter(BaseFilter):
+class TVPropagandaFilter(BaseFilter):
     option: Union[str, list]
 
     async def __call__(self, message: Message) -> bool:
-        print('filtering')
-        user_thoughts = await poll_get(f'Start_answers: interest_in_politics: {message.from_user.id}')
+        print('filtering propaganda')
+        user_thoughts = await poll_get(f'Start_answers: tv: {message.from_user.id}')
+        print(user_thoughts)
         for answ in user_thoughts:
             if self.option == answ:
                 return True
         return False
 
 class WebPropagandaFilter(BaseFilter):
-    option: Union[str, list]
 
     async def __call__(self, message: Message) -> Union[bool, dict]:
-        print('filtering')
+        print('filtering web propaganda')
         web_lies_list = await poll_get(f'Start_answers: ethernet: {message.from_user.id}')
+        print(web_lies_list)
         bad_lies = ("РИА Новости", "Russia Today",
                "Телеграм-каналы: Военный осведомитель / WarGonzo / Kotsnews",
                "Телеграм-канал: Война с фейками", "РБК",
@@ -51,11 +52,11 @@ class WebPropagandaFilter(BaseFilter):
 
 
 class PplPropagandaFilter(BaseFilter):
-    option: Union[str, list]
 
     async def __call__(self, message: Message) -> Union[bool, dict]:
-        print('filtering')
+        print('filtering ppl')
         ppl_lies_list = await poll_get(f'Start_answers: who_to_trust: {message.from_user.id}')
+        print(ppl_lies_list)
         bad_ppl_lies = ("Дмитрий Песков", "Рамзан Кадыров",
                "Сергей Лавров", "Юрий Подоляка", "Владимир Соловьев",
                "Ольга Скабеева")

@@ -18,7 +18,7 @@ async def commands_start(message: types.Message, state: FSMContext): # Перв�
     markup.add(types.KeyboardButton(text="Начнем!"))
     markup.add(types.KeyboardButton(text="А с чего мне тебе верить?"))
     text = await sql_safe_select("text", "texts", {"name": "start_hello"})
-
+    all_data().get_data_red().flushdb()
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
     await state.set_state(welcome_states.start_dialog.dialogue_1)
 
@@ -217,9 +217,6 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, state=FSMCont
         pass
     if b.isdisjoint(b_1)==False:
         await state.set_state(propaganda_victim.start)
-
-
-    await state.clear()
 
 
 

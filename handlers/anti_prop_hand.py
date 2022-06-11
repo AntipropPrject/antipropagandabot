@@ -8,7 +8,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from DBuse import sql_safe_select
 from bata import all_data
-from filters.All_filters import WebPropagandaFilter, PropagandaFilter, PplPropagandaFilter
+from filters.All_filters import WebPropagandaFilter, TVPropagandaFilter, PplPropagandaFilter
 from keyboards.map_keys import antip_why_kb
 from states.antiprop_states import propaganda_victim
 
@@ -19,7 +19,7 @@ router.message.filter(state = propaganda_victim)
 
 
 
-@router.message(PropagandaFilter(option = "Скорее да"), (F.text == 'Поехали!'))
+@router.message(TVPropagandaFilter(option ="Скорее да"), (F.text == 'Поехали!'))
 async def antiprop_rather_yes_start(message: Message, state=FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_rather_yes_TV'})
     nmarkup = ReplyKeyboardBuilder()
@@ -28,15 +28,16 @@ async def antiprop_rather_yes_start(message: Message, state=FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(PropagandaFilter(option = "Да, полностью доверяю"), (F.text == 'Поехали!'))
+@router.message(TVPropagandaFilter(option ="Да, полностью доверяю"), (F.text == 'Поехали!'))
 async def antiprop_all_yes_start(message: Message, state=FSMContext):
+    print('IN LIE HE TRUST')
     text = await sql_safe_select('text', 'texts', {'name': 'antip_all_yes_TV'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжай"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(PropagandaFilter(option = "Да, полностью доверяю"), (F.text == 'Продолжай!'))
+@router.message(TVPropagandaFilter(option ="Да, полностью доверяю"), (F.text == 'Продолжай'))
 async def antiprop_all_yes_second(message: Message, state=FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_all_yes_TV_2'})
     nmarkup = ReplyKeyboardBuilder()
@@ -45,7 +46,7 @@ async def antiprop_all_yes_second(message: Message, state=FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup())
 
 
-@router.message(PropagandaFilter(option = "Скорее нет"), (F.text == 'Поехали!'))
+@router.message(TVPropagandaFilter(option ="Скорее нет"), (F.text == 'Поехали!'))
 async def antiprop_rather_yes_start(message: Message, state=FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'rather_no_TV'})
     nmarkup = ReplyKeyboardBuilder()
@@ -53,7 +54,7 @@ async def antiprop_rather_yes_start(message: Message, state=FSMContext):
     nmarkup.row(types.KeyboardButton(text="Ну удиви меня 🤔"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
-@router.message(PropagandaFilter(option = "Нет, не верю ни слову"), (F.text == 'Поехали!'))
+@router.message(TVPropagandaFilter(option ="Нет, не верю ни слову"), (F.text == 'Поехали!'))
 async def antiprop_rather_yes_start(message: Message, state=FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'all_no_TV'})
     nmarkup = ReplyKeyboardBuilder()
@@ -63,7 +64,7 @@ async def antiprop_rather_yes_start(message: Message, state=FSMContext):
 
 
 
-@router.message((F.text @ ({'Открой мне глаза 👀', "Ну удиви меня 🤔", "Покажи ложь на ТВ -- мне интересно посмотреть!"})))
+@router.message((F.text.in_({'Открой мне глаза 👀', "Ну удиви меня 🤔", "Покажи ложь на ТВ -- мне интересно посмотреть!"})))
 async def antiprop_tv_selecter(message: Message, state=FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_pile_of_lies'})
     utv_list = ['1️⃣','2️⃣4️⃣','🇷🇺1️⃣','❇️▶️', '⭐️🅾️', '🟠🍺']
@@ -77,7 +78,7 @@ async def antiprop_tv_selecter(message: Message, state=FSMContext):
 
 
 #Тут ифами, но можно и по роутерам
-@router.message((F.text @ ({'1️⃣','2️⃣4️⃣','🇷🇺1️⃣','❇️▶️', '⭐️🅾️', '🟠🍺'})))
+@router.message((F.text.in_({'1️⃣','2️⃣4️⃣','🇷🇺1️⃣','❇️▶️', '⭐️🅾️', '🟠🍺'})))
 async def antiprop_tv_selecter(message: Message, state=FSMContext):
     if message.text == '1️⃣':
         await message.answer("Тут будет сюжет с первого канала")
@@ -102,7 +103,7 @@ async def russia_in_nutshell(message: Message, state=FSMContext):
 
 @router.message((F.text.contains('заговора')))
 async def antip_conspirasy(message: Message, state=FSMContext):
-    text = await sql_safe_select('text', 'texts', {'name': 'antip_conspirasy'})
+    text = await sql_safe_select('text', 'texts', {'name': 'antip_conspiracy'})
     await message.answer(text)
 
 
@@ -155,14 +156,14 @@ async def antip_anecdote(message: Message, state=FSMContext):
 
 
 
-@router.message((F.text @ ({'😁', "🙂", "😕"})))
+@router.message((F.text.in_({'😁', "🙂", "😕"})))
 async def antip_emoji(message: Message, state=FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Конечно! 🙂"))
     nmarkup.row(types.KeyboardButton(text="Ну давай 🤮"))
     await message.answer("Можно вопрос?", reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
-@router.message((F.text @ ({"Конечно! 🙂", "Ну давай 🤮"})))
+@router.message((F.text.in_({"Конечно! 🙂", "Ну давай 🤮"})))
 async def antip_do_you_agree(message: Message, state=FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_do_you_agree'})
     nmarkup = ReplyKeyboardBuilder()
