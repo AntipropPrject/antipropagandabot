@@ -1,7 +1,6 @@
 from aiogram.dispatcher.filters import BaseFilter
 from aiogram.types import Message
-from typing import Union
-
+from typing import Union, Dict, Any
 from DBuse import poll_get
 
 
@@ -36,7 +35,7 @@ class TVPropagandaFilter(BaseFilter):
 
 class WebPropagandaFilter(BaseFilter):
 
-    async def __call__(self, message: Message) -> Union[bool, dict]:
+    async def __call__(self, message: Message) -> Union[bool, Dict[str, Any]]:
         print('filtering web propaganda')
         web_lies_list = await poll_get(f'Start_answers: ethernet: {message.from_user.id}')
         print(web_lies_list)
@@ -47,13 +46,14 @@ class WebPropagandaFilter(BaseFilter):
                "Яндекс.Новости", "Никому из них...")
         for bad_lie in bad_lies:
             if bad_lie in web_lies_list:
+                print("ОН ВЕРНУЛСЯ")
                 return {'web_lies_list': web_lies_list}
         return False
 
 
 class PplPropagandaFilter(BaseFilter):
 
-    async def __call__(self, message: Message) -> Union[bool, dict]:
+    async def __call__(self, message: Message) -> Union[bool, Dict[str, Any]]:
         print('filtering ppl')
         ppl_lies_list = await poll_get(f'Start_answers: who_to_trust: {message.from_user.id}')
         print(ppl_lies_list)
