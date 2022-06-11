@@ -1,6 +1,5 @@
 import asyncio
 import logging
-import pandas as pd
 from sqlalchemy import create_engine
 from data_base import db
 from time import sleep
