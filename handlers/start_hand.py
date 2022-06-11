@@ -1,6 +1,9 @@
+import csv
+
 from aiogram import Router, F
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
+from aiogram.dispatcher.fsm.state import StatesGroup, State
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
@@ -44,3 +47,29 @@ async def eight_years_point(message: Message, state=FSMContext):
     nmarkup.adjust(1, 2)
     await message.answer_photo(photo_id, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True,
                                                                                       input_field_placeholder="Найдите по-настоящему независимые источники"))
+
+class add_id(StatesGroup):
+    one = State()
+
+
+@router.message(commands=["load"])
+async def csv_dump(message: Message, state: FSMContext):
+    await message.answer("Отправьте фото с тегом")
+    await state.set_state(add_id.one)
+
+
+@router.message(state=add_id.one)
+async def csv_dump(message: Message, state: FSMContext):
+    ph_id = message.photo[0].file_id
+    capt = message.caption
+
+    data = [['t_id', 'name'],
+            [ph_id, capt]]
+
+    with open('resources/assets.csv', 'w') as f:
+        writer = csv.writer(f)
+        for row in data:
+            writer.writerow(row)
+
+    await message.answer_photo(ph_id, caption=capt)
+    await state.clear()

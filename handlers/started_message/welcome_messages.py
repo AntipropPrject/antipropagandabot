@@ -8,8 +8,8 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from DBuse import poll_get, poll_write
 from bata import all_data
 from states import welcome_states
-
-
+from DBuse import sql_safe_select
+from data_base import db
 router = Router()
 
 
@@ -19,15 +19,10 @@ async def commands_start(message: types.Message, state: FSMContext):  # Перв
     markup = ReplyKeyboardBuilder()
     markup.add(types.KeyboardButton(text="Начнем!"))
     markup.add(types.KeyboardButton(text="А с чего мне тебе верить?"))
-    await message.answer("Вокруг России и Украины сейчас очень "
-                         "много мнений. Так говорят. Но я убеждён, "
-                         "что правда - она одна. Кто-то пытается ее "
-                         "донести, кто-то - исказить, а кто-то переврать.\n\n"
-                         "Как отличить правду ото лжи? Поговорите "
-                         "со мной - и убедитесь, что это не трудно. Я "
-                         "создан, чтобы показывать правду.\n\n"
-                         "Общаться со мной очень легко, надо лишь "
-                         "нажимать на кнопки внизу экрана. Начнем?", reply_markup=markup.as_markup(resize_keyboard=True))
+
+    text = await sql_safe_select("text", "texts", {"name": "start_hello"})
+    print(text)
+    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
     await state.set_state(welcome_states.start_dialog.dialogue_1)
 
 
