@@ -24,6 +24,7 @@ class admin_home(StatesGroup):
 router = Router()
 router.message.filter(state = admin_home)
 
+
 @router.message(content_types=types.ContentType.TEXT, text_ignore_case=True, text_contains='Выйти', state=admin_home)
 async def cmd_cancel(message: types.Message, state: FSMContext):
     await state.clear()
@@ -62,21 +63,28 @@ async def text_hello(message: types.Message, state: FSMContext):
 
 @router.message(content_types='photo', state=admin_home.add_media)
 async def get_photo(message: Message, state: FSMContext):
-    await state.set_state(admin_home.testing_media)
     ph_id = message.photo[0].file_id
-    capt = message.caption.replace(" ","_")
-    await state.update_data(t_id = ph_id, name = capt)
-    await message.answer_photo(ph_id, caption=capt)
-    await message.answer('Все верно?', reply_markup=app_admin_keyboard())
+    try:
+        capt = message.caption.replace(" ","_")
+        await state.update_data(t_id = ph_id, name = capt)
+        await message.answer_photo(ph_id, caption=capt)
+        await state.set_state(admin_home.testing_media)
+        await message.answer('Все верно?', reply_markup=app_admin_keyboard())
+    except:
+        await message.answer('Пожалуйста, укажите тэг')
+
 
 @router.message(content_types='video', state=admin_home.add_media)
 async def get_video(message: Message, state: FSMContext):
-    await state.set_state(admin_home.testing_media)
     vid_id = message.video.file_id
-    capt = message.caption.replace(" ","_")
-    await state.update_data(t_id = vid_id, name = capt)
-    await message.answer_video(vid_id, caption=capt)
-    await message.answer('Все верно?', reply_markup=app_admin_keyboard())
+    try:
+        capt = message.caption.replace(" ","_")
+        await state.update_data(t_id = vid_id, name = capt)
+        await message.answer_video(vid_id, caption=capt)
+        await state.set_state(admin_home.testing_media)
+        await message.answer('Все верно?', reply_markup=app_admin_keyboard())
+    except:
+        await message.answer('Пожалуйста, укажите тэг')
 
 @router.message((F.text == 'Отредактировать блок текста'), state = admin_home.admin)
 async def text_edit_tag(message: types.Message, state: FSMContext):

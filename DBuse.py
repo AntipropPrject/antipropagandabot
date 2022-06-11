@@ -1,6 +1,8 @@
 from psycopg2 import sql
-
 from bata import all_data
+import os
+from pandas import DataFrame
+
 
 
 def data_getter(query):
@@ -50,6 +52,7 @@ async def sql_safe_insert(table_name, data_dict):
         with conn.cursor() as cur:
             cur.execute(safe_query, data_dict)
     conn.close()
+    pandas_csv_add(table_name, data_dict)
     return "Complete"
 
 
@@ -68,9 +71,17 @@ async def sql_safe_update(table_name, data_dict, condition_dict):
         with conn.cursor() as cur:
             cur.execute(safe_query, data_dict)
     conn.close()
+    pandas_csv_add(table_name, data_dict)
     return "Complete"
 
 
+def pandas_csv_add(table_name, new_values_dict):
+    dtframe = DataFrame([new_values_dict.values()], columns=new_values_dict.keys())
+    print (dtframe)
+    if not os.path.isfile(f'resources/{table_name}.csv'):
+        dtframe.to_csv(f'resources/{table_name}.csv', header=True, index=False)
+    else:
+        dtframe.to_csv(f'resources/{table_name}.csv', mode='a', header=False, index=False)
 
 
 async def poll_get(key):
@@ -78,9 +89,11 @@ async def poll_get(key):
     R = redis.lrange(key, 0, -1)
     return R
 
+
 async def redis_pop(key):
     redis = all_data().get_data_red()
     R = redis.lpop(key)
+
 
 async def poll_write(user_id, poll_name, tag):
     redis = all_data().get_data_red()

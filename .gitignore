@@ -52,3 +52,4 @@ docs/_build/
 *.pyc
 *.pyc
 logfile.log
+*.pyc
