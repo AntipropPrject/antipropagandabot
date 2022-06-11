@@ -1,6 +1,3 @@
-import asyncio
-import pathlib
-from psycopg2 import sql
 from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
@@ -9,7 +6,6 @@ from DBuse import poll_get, poll_write
 from bata import all_data
 from states import welcome_states
 from DBuse import sql_safe_select
-from data_base import db
 router = Router()
 
 
@@ -19,9 +15,8 @@ async def commands_start(message: types.Message, state: FSMContext):  # Перв
     markup = ReplyKeyboardBuilder()
     markup.add(types.KeyboardButton(text="Начнем!"))
     markup.add(types.KeyboardButton(text="А с чего мне тебе верить?"))
-
     text = await sql_safe_select("text", "texts", {"name": "start_hello"})
-    print(text)
+
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
     await state.set_state(welcome_states.start_dialog.dialogue_1)
 
@@ -30,10 +25,9 @@ async def commands_start(message: types.Message, state: FSMContext):  # Перв
 async def message_1(message: types.Message, state: FSMContext):
     markup = ReplyKeyboardBuilder()
     markup.add(types.KeyboardButton(text="Хорошо"))
-    await message.answer("Мне и не нужно верить. Ко всем своим "
-                         "словам я буду оставлять доказательства, "
-                         "но главно не в этом.\n\nПравду - ее чувствуешь."
-                         " Пообщавшись со мной немного, вы поймёте, что я имею в виду.", reply_markup=markup.as_markup(resize_keyboard=True))
+    text = await sql_safe_select("text", "texts", {"name": "start_why_belive"})
+
+    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
     await state.set_state(welcome_states.start_dialog.dialogue_2)
 
 
@@ -57,11 +51,9 @@ async def message_2(message: types.Message, state: FSMContext):
                                  "выражать незаконно. Вдруг вы из ФСБ?"))
     markup.row(types.KeyboardButton(text="Специальная военная операция (СВО)"))
     markup.row(types.KeyboardButton(text="Война / Вторжение в Украину"))
-    await message.answer("Договорились!\n\n"
-                         "Мнения о том, что сейчас "
-                         "происходит на территории "
-                         "Украины разделились. "
-                         "А как считаете вы?", reply_markup=markup.as_markup())
+    text = await sql_safe_select("text", "texts", {"name": "start_what_about_you"})
+
+    await message.answer(text, reply_markup=markup.as_markup())
     # if на ты
 
     await state.set_state(welcome_states.start_dialog.dialogue_4)
@@ -73,33 +65,28 @@ async def message_3(message: types.Message, state: FSMContext):  # Начало 
     markup = ReplyKeyboardBuilder()
     markup.add(types.KeyboardButton(text="Задавай"))
     markup.add(types.KeyboardButton(text="А долго будешь допрашивать?"))
-    await message.answer("Начнем наше общение. Сперва мне надо "
-                         "задать вам несколько вопросов, чтобы "
-                         "узнать ваши взгляды.", reply_markup=markup.as_markup(resize_keyboard=True))
+    text = await sql_safe_select("text", "texts", {"name": "start_lets_start"})
+    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
+    # if на ты
     await state.set_state(welcome_states.start_dialog.dialogue_5)
 
 
 @router.message(welcome_states.start_dialog.dialogue_4, text_contains=('выражать', 'незаконно'), content_types=types.ContentType.TEXT, text_ignore_case=True)
 async def message_4(message: types.Message, state: FSMContext):
-
     markup = ReplyKeyboardBuilder()
     markup.add(types.KeyboardButton(text="Специальная военная операция (СВО)"))
     markup.add(types.KeyboardButton(text="Война / Вторжение в Украину"))
-    await message.answer("Прекрасно вас понимаю. Тем не менее за "
-                         "общение с ботом в России пока никого не "
-                         "посадили. Так что расслабьтесь и нажимайте кнопки"
-                         " - это не является чемто незаконным.\n\n"
-                         "Так как вы считаете, что сейчас "
-                         "происходит на территории Украины?", reply_markup=markup.as_markup(resize_keyboard=True))
+    text = await sql_safe_select("text", "texts", {"name": "start_afraid"})
+    # if на ты
+    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
 
 
 @router.message(welcome_states.start_dialog.dialogue_5, text_contains=('долго', 'допрашивать'), content_types=types.ContentType.TEXT, text_ignore_case=True)
 async def message_5(message: types.Message, state: FSMContext):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Хорошо, задавай свои вопросы"))
-    await message.answer("Всего 5 вопросов, обещаю! Я хочу узнать "
-                         "ваши взгляды, чтобы знать, о чем нам "
-                         "будет интересно общаться.", reply_markup=markup.as_markup(resize_keyboard=True))
+    text = await sql_safe_select("text", "texts", {"name": "start_only_five"})
+    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
     await state.set_state(welcome_states.start_dialog.dialogue_5)
 
 
@@ -109,8 +96,8 @@ async def message_6(message: types.Message, state: FSMContext):
     markup = ReplyKeyboardBuilder()
     markup.add(types.KeyboardButton(text="Начал(а) интересоваться после 24 февраля"))
     markup.row(types.KeyboardButton(text="Скорее да"), types.KeyboardButton(text="Скорее нет"))
-    await message.answer("(1/5) Можно сказать, "
-                         "что вы интересуетесь политикой?", reply_markup=markup.as_markup())
+    text = await sql_safe_select("text", "texts", {"name": "start_do_you_love_politics"})
+    await message.answer(text, reply_markup=markup.as_markup())
     await state.set_state(welcome_states.start_dialog.dialogue_6)
 
 
@@ -125,14 +112,7 @@ async def message_7(message: types.Message, state: FSMContext):
                "Повысить рейтинг доверия Владимира Путина", "Захватить территории Донбасса и юга Украины",
                "Предотвратить размещение военных баз НАТО в Украине", "Я не знаю..."
                ]
-
-    text = ("Иногда я буду задавать вопросы с "
-            "несколькими вариантами ответов. Можно "
-            "выбрать столько, сколько хотите. После "
-            "этого нажмите на кнопку «Проголосовать». Давайте попробуем.\n\n"
-            "(2/5) Как вы считаете, какие из этих целей "
-            "ставились Россией при решении о вторжении в Украину 24 февраля?"
-            )
+    text = await sql_safe_select("text", "texts", {"name": "start_russia_goal"})
     await message.answer_poll(text, options, is_anonymous=False, allows_multiple_answers=True)  # Отправка первого опроса
     await state.set_state(welcome_states.start_dialog.dialogue_7)
 
@@ -144,17 +124,14 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, state=FSMContext):
     markup.add(types.KeyboardButton(text="Да, полностью доверяю"))
     markup.add(types.KeyboardButton(text="Скорее да"), types.KeyboardButton(text="Скорее нет"))
     markup.add(types.KeyboardButton(text="Нет, не верю ни слову"))
-    await Bot(all_data().bot_token).send_message(chat_id=poll_answer.user.id, text ="(3/5) Доверяете ли вы новостям"
-                                               " и политическим программам из телевизора?", reply_markup=markup.as_markup())
-
+    text = await sql_safe_select("text", "texts", {"name": "start_belive_TV"})
+    await Bot(all_data().bot_token).send_message(chat_id=poll_answer.user.id, text=text, reply_markup=markup.as_markup())
     await state.set_state(welcome_states.start_dialog.dialogue_8)
 
 
 @router.message(state=welcome_states.start_dialog.dialogue_8)  # Сохранение 3 вопроса и отправка 4
 async def message_8(message: types.Message, state: FSMContext):
     #сохранение 3 вопроса
-    text = ("(4/5) Помимо ТВ, еще больше информации "
-                         "есть в интернете. Каким из этих источников вы доверяете?")
     options = ["РИА Новости", "Russia Today",
                "Meduza / BBC / Радио Свобода / Медиазона / Настоящее время / Популярная Политика",
                "Телеграм-каналы: Военный осведомитель / WarGonzo / Kotsnews",
@@ -162,6 +139,7 @@ async def message_8(message: types.Message, state: FSMContext):
                "ТАСС / Комсомольская правда / АиФ / Ведомости / Лента / Интерфакс",
                "Яндекс.Новости", "Википедия", "Никому из них...",
                ]
+    text = await sql_safe_select("text", "texts", {"name": "start_internet_belive"})
     await message.answer_poll(text, options, is_anonymous=False, allows_multiple_answers=True)
     await state.set_state(welcome_states.start_dialog.dialogue_9)
 
@@ -169,16 +147,17 @@ async def message_8(message: types.Message, state: FSMContext):
 @router.poll_answer(state = welcome_states.start_dialog.dialogue_9)  # Ловлю ответы второго опроса и отправляю третий
 async def poll_answer_handler_tho(poll_answer: types.PollAnswer, state=FSMContext):
     print(poll_answer.option_ids)  # тут нужно записать ответы опроса в базу
-    text = ("5/5) Кому из этих людей вы доверяете?")
     options = ["Владимир Путин", "Дмитрий Песков", "Рамзан Кадыров",
                "Сергей Лавров", "Юрий Подоляка", "Владимир Соловьев",
                "Ольга Скабеева", "Никому из них..."
                ]
+    text = await sql_safe_select("text", "texts", {"name": "start_people_belive"})
     await Bot(all_data().bot_token).send_poll(poll_answer.user.id, text, options, is_anonymous=False, allows_multiple_answers=True)
     await state.set_state(welcome_states.start_dialog.dialogue_10)
 
 
 @router.poll_answer(state = welcome_states.start_dialog.dialogue_10)  # Ловлю ответы третьего опроса и перехожу к антипропаганде
 async def poll_answer_handler_three(poll_answer: types.PollAnswer, state=FSMContext):
+    text = await sql_safe_select("text", "texts", {"name": "start_thank_you"})
     # Сохранить все значения и присвоить статус собеседнику для дальнейшего сценария
-    await Bot(all_data().bot_token).send_message(poll_answer.user.id, "Спасибо за ответы! Начинаем наше общение")
+    await Bot(all_data().bot_token).send_message(poll_answer.user.id, text)

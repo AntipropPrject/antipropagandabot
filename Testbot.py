@@ -1,40 +1,71 @@
 import asyncio
-import logging
-import pandas as pd
-from sqlalchemy import create_engine
-from time import sleep
+import sys
 
-import psycopg2
 from aiogram import Dispatcher
 from aiogram.dispatcher.fsm.storage.redis import RedisStorage
 from psycopg2 import Error
-
-import bata
 from bata import all_data
 from handlers import admin_hand, start_hand
 from handlers.donbass_handlers import select_handler, option_two_hand, option_three_hand, option_four_hand, \
     option_five_hand, option_six_hand, option_seven_hand, option_eight_hand, final_donbass_hand
 from handlers.started_message import welcome_messages
-log = logging.getLogger(__name__)
-log.addHandler(logging.FileHandler('logfile.log'))
+from log import logg
 
 try:
-    con = psycopg2.connect(database="postgres", user="postgres", password="postgres", host="localhost")
+    # Подключение к существующей базе данных
+    con = all_data().get_postg()
+    # Курсор для выполнения операций с базой данных
+    cur = con.cursor()
     con.autocommit = True
-    cursor = con.cursor()
-    cursor.execute("DROP TABLE if exists texts")
-    cursor.execute("DROP TABLE if exists assets")
-    cursor.close()
+
+    # Выполнение SQL-запроса
+
+    cur.execute("SELECT version();")
+    record = cur.fetchone()
+    logg.get_info(f"You connect to - {record}, \n")
+
+    # Удаление таблицы
+
+    cur.execute("DROP TABLE IF EXISTS texts")
+    logg.get_info("Table is texts has been deleted")
+    cur.execute("DROP TABLE IF EXISTS assets")
+
+    logg.get_info("Table is assets has been deleted")
+
+    # Создание таблиц
+
+    cur.execute('''CREATE TABLE IF NOT EXISTS texts(
+                name TEXT NOT NULL PRIMARY KEY,
+                text TEXT NOT NULL
+                )''')
+    logg.get_info("Texts table created")
+
+    cur.execute('''CREATE TABLE IF NOT EXISTS assets(
+            t_id TEXT NOT NULL,
+            name TEXT NOT NULL PRIMARY KEY
+            )''')
+    logg.get_info("Assets table created")
+
+    try:
+        csv_file_name = 'resources/assets.csv'
+        sql = "COPY assets FROM STDIN DELIMITER ',' CSV HEADER"
+        cur.copy_expert(sql, open(csv_file_name, "r"))
+    except Exception as error:
+        logg.get_error(f"{error}", __file__)
+    try:
+        csv_file_name = 'resources/texts.csv'
+        sql = "COPY texts FROM STDIN DELIMITER ',' CSV HEADER"
+        cur.copy_expert(sql, open(csv_file_name, "r"))
+    except Exception as error:
+        logg.get_error(f"{error}", __file__)
+
     con.close()
-    df1 = pd.read_csv('resources/texts.csv')
-    df2 = pd.read_csv('resources/assets.csv')
-    engine = create_engine('postgresql://postgres:postgres@localhost:5432/postgres')
-    df1.to_sql("texts", engine)
-    df2.to_sql("assets", engine)
+    cur.close()
+
+
 except (Exception, Error) as error:
-    print("SQL EXEPTION ", error)
-else:
-    print("Database base created!")
+    logg.get_error(f"PostgreSQL, {error}", __file__)
+
 
 
 async def main():
@@ -42,12 +73,7 @@ async def main():
     bot = data.get_bot()
     storage = RedisStorage.from_url(data.redis_url)
     dp = Dispatcher(storage)
-
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
-    )
-    log.error("Starting bot")
+    logg.get_info("BOT_STARTED")
 
     dp.include_router(welcome_messages.router)
     dp.include_router(start_hand.router)
