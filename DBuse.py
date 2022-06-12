@@ -1,7 +1,7 @@
 from psycopg2 import sql
 from bata import all_data
 import os
-from pandas import DataFrame
+from pandas import DataFrame, read_csv
 from log import logg
 
 
@@ -17,6 +17,7 @@ def data_getter(query):
         return data
     except Exception as error:
         logg.get_error(f"{error}", __file__)
+        return error
 
 
 def safe_data_getter(safe_query, values_dict):
@@ -30,6 +31,7 @@ def safe_data_getter(safe_query, values_dict):
         return data
     except Exception as error:
         logg.get_error(f"{error}", __file__)
+        return False
 
 
 async def sql_safe_select(column, table_name, condition_dict):
@@ -46,11 +48,12 @@ async def sql_safe_select(column, table_name, condition_dict):
         return data[0][0]
     except Exception as error:
         logg.get_error(f"{error}", __file__)
+        return False
 
 
 async def sql_safe_insert(table_name, data_dict):
     try:
-        safe_query = sql.SQL("INSERT INTO {} ({}) VALUES ({}) Returning name;").format(sql.Identifier(table_name),
+        safe_query = sql.SQL("INSERT INTO {} ({}) VALUES ({});").format(sql.Identifier(table_name),
                 sql.SQL(', ').join(map(sql.Identifier, data_dict)),
                 sql.SQL(", ").join(map(sql.Placeholder, data_dict)), )
         conn = all_data().get_postg()
@@ -59,9 +62,10 @@ async def sql_safe_insert(table_name, data_dict):
                 cur.execute(safe_query, data_dict)
         conn.close()
         pandas_csv_add(table_name, data_dict)
-        return "Complete"
+        return True
     except Exception as error:
         logg.get_error(f"{error}", __file__)
+        return False
 
 
 async def sql_safe_update(table_name, data_dict, condition_dict):
@@ -76,7 +80,7 @@ async def sql_safe_update(table_name, data_dict, condition_dict):
             with conn.cursor() as cur:
                 cur.execute(safe_query, data_dict)
         conn.close()
-        pandas_csv_add(table_name, data_dict)
+        pandas_csv_update(table_name, data_dict, condition_dict)
         return "Complete"
     except Exception as error:
         logg.get_error(f"{error}", __file__)
@@ -86,7 +90,6 @@ async def sql_safe_update(table_name, data_dict, condition_dict):
 def pandas_csv_add(table_name, new_values_dict):
     try:
         dtframe = DataFrame([new_values_dict.values()], columns=new_values_dict.keys())
-        print(dtframe)
         if not os.path.isfile(f'resources/{table_name}.csv'):
             dtframe.to_csv(f'resources/{table_name}.csv', header=True, index=False)
         else:
@@ -94,6 +97,15 @@ def pandas_csv_add(table_name, new_values_dict):
     except Exception as error:
         logg.get_error(f"{error}", __file__)
 
+#update_csv
+def pandas_csv_update(table_name, new_values_dict, condition_dict):
+    data = read_csv(f'resources/{table_name}.csv', header=0)
+    df = DataFrame(data)
+    for value in new_values_dict:
+        for condition in condition_dict:
+            print(value, new_values_dict[value])
+            df.loc[df[condition] == condition_dict[condition], value] = new_values_dict[value]
+    df.to_csv(f'resources/{table_name}.csv', header=True, index=False)
 
 # redis
 async def poll_get(key):
