@@ -1,17 +1,15 @@
 # - *- coding: utf- 8 - *-
 import logging
-from colorama import init, Fore
-from colorama import Back
-from colorama import Style
+from colorama import Fore
+
 
 def get_info(text):
-    print(f"{Fore.GREEN}[INFO] | " + Fore.LIGHTYELLOW_EX + text)
-    logging.basicConfig(
-        level=logging.INFO,
-        filename="logs.log",
-        format=u'[%(levelname)s] [%(asctime)s] | %(message)s',
-        datefmt="%d-%b-%y %H:%M:%S"
-    )
+    file_log = logging.FileHandler('logs.log')
+    console_out = logging.StreamHandler()
+
+    logging.basicConfig(handlers=(file_log, console_out), format='[%(asctime)s | %(levelname)s]: %(message)s',
+                        datefmt='%m.%d.%Y %H:%M:%S', level=logging.INFO)
+
     logging.info(text)
 
 

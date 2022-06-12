@@ -12,7 +12,7 @@ from states.antiprop_states import propaganda_victim
 router = Router()
 
 
-@router.message(commands=['message', 'help'], state="*")
+@router.message(commands=['start', 'help'], state="*")
 async def commands_start(message: types.Message, state: FSMContext): # Первое сообщение
     await state.clear()
     markup = ReplyKeyboardBuilder()
@@ -109,22 +109,25 @@ async def message_6(message: types.Message, state: FSMContext):
 async def message_7(message: types.Message, state: FSMContext):
     print(1)
     # Сохранить 1 вопрос в базу
+    text = message.text
+    if text == 'Начал(а) интересоваться после 24 февраля' or text == "Скорее да" or text == "Скорее нет":
+        await poll_write(f'Start_answers: interest_in_politics: {message.from_user.id}', message.text)
+        options = ["Защитить русских в Донбассе",  # Вопросы опроса
+                   "Предотвратить вторжение на территорию"
+                   " России или ЛНР/ДНР", "Денацификация / Уничтожить нацистов", "Демилитаризация / Снижение военной мощи",
+                   "Сменить власть в Украине", "Уничтожить биолаборатории / Предотвратить создание ядерного оружия",
+                   "Повысить рейтинг доверия Владимира Путина", "Захватить территории Донбасса и юга Украины",
+                   "Предотвратить размещение военных баз НАТО в Украине", "Я не знаю..."
+                   ]
+        # Сохранение 1 вопроса в дату
+        await state.update_data(option_1=options)
 
-    await poll_write(f'Start_answers: interest_in_politics: {message.from_user.id}', message.text)
-    options = ["Защитить русских в Донбассе",  # Вопросы опроса
-               "Предотвратить вторжение на территорию"
-               " России или ЛНР/ДНР", "Денацификация / Уничтожить нацистов", "Демилитаризация / Снижение военной мощи",
-               "Сменить власть в Украине", "Уничтожить биолаборатории / Предотвратить создание ядерного оружия",
-               "Повысить рейтинг доверия Владимира Путина", "Захватить территории Донбасса и юга Украины",
-               "Предотвратить размещение военных баз НАТО в Украине", "Я не знаю..."
-               ]
-    # Сохранение 1 вопроса в дату
-    await state.update_data(option_1=options)
-
-    await state.update_data(answer_1=message.text)
-    text = await sql_safe_select("text", "texts", {"name": "start_russia_goal"})
-    await message.answer_poll(text, options, is_anonymous=False, allows_multiple_answers=True, reply_markup=ReplyKeyboardRemove())
-    await state.set_state(welcome_states.start_dialog.dialogue_7)
+        await state.update_data(answer_1=text)
+        text = await sql_safe_select("text", "texts", {"name": "start_russia_goal"})
+        await message.answer_poll(text, options, is_anonymous=False, allows_multiple_answers=True, reply_markup=ReplyKeyboardRemove())
+        await state.set_state(welcome_states.start_dialog.dialogue_7)
+    else:
+        await message.answer("Неправильный ответ, вы можете выбрать вариант ответа на клавиатуре")
 
 
 @router.poll_answer(state=welcome_states.start_dialog.dialogue_7)  # Сохраняю 2 вопрос
@@ -150,22 +153,25 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, state=FSMContext):
 
 @router.message(state=welcome_states.start_dialog.dialogue_8)  # Сохраняю 3 вопрос
 async def message_8(message: types.Message, state: FSMContext):
-    print(3)
-    option = ["РИА Новости", "Russia Today",
-               "Meduza / BBC / Радио Свобода / Медиазона / Настоящее время / Популярная Политика",
-               "Телеграм-каналы: Военный осведомитель / WarGonzo / Kotsnews",
-               "Телеграм-канал: Война с фейками", "РБК",
-               "ТАСС / Комсомольская правда / АиФ / Ведомости / Лента / Интерфакс",
-               "Яндекс.Новости", "Википедия", "Никому из них...",
-               ]
-    # сохранение 3 вопроса
+    text = message.text
+    if text == "Да, полностью доверяю" or text == "Скорее да" or text =="Скорее нет" or text == "Нет, не верю ни слову":
+        option = ["РИА Новости", "Russia Today",
+                   "Meduza / BBC / Радио Свобода / Медиазона / Настоящее время / Популярная Политика",
+                   "Телеграм-каналы: Военный осведомитель / WarGonzo / Kotsnews",
+                   "Телеграм-канал: Война с фейками", "РБК",
+                   "ТАСС / Комсомольская правда / АиФ / Ведомости / Лента / Интерфакс",
+                   "Яндекс.Новости", "Википедия", "Никому из них...",
+                   ]
+        # сохранение 3 вопроса
 
-    await poll_write(f'Start_answers: tv: {message.from_user.id}', message.text)
-    await state.update_data(option_3=option)
-    await state.update_data(answer_3=message.text)
-    text=await sql_safe_select("text", "texts", {"name": "start_internet_belive"})
-    await message.answer_poll(text, option, is_anonymous=False, allows_multiple_answers=True, reply_markup=ReplyKeyboardRemove())
-    await state.set_state(welcome_states.start_dialog.dialogue_9)
+        await poll_write(f'Start_answers: tv: {message.from_user.id}', message.text)
+        await state.update_data(option_3=option)
+        await state.update_data(answer_3=message.text)
+        text=await sql_safe_select("text", "texts", {"name": "start_internet_belive"})
+        await message.answer_poll(text, option, is_anonymous=False, allows_multiple_answers=True, reply_markup=ReplyKeyboardRemove())
+        await state.set_state(welcome_states.start_dialog.dialogue_9)
+    else:
+        await message.answer("Неправильный ответ, вы можете выбрать вариант ответа на клавиатуре")
 
 
 @router.poll_answer(state = welcome_states.start_dialog.dialogue_9)  # Сохраняю 4 вопрос
@@ -205,19 +211,14 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, state=FSMCont
     text = await sql_safe_select("text", "texts", {"name": "start_thank_you"})
     await Bot(all_data().bot_token).send_message(poll_answer.user.id, text, reply_markup=markup.as_markup(resize_keyboard=True))
     data = await state.get_data()
-
-    a = {0, 1, 3, 4, 5, 6, 7}
-    b = {1, 2, 3, 4, 5, 6}
-    a_1 = set(data["answer_4"])
-    b_1 = set(data["answer_5"])
-    if data["answer_3"] != "Нет, не верю ни слову":
+    if data["answer_3"] != "Нет, не верю ни слову"\
+            or {0, 1, 3, 4, 5, 6, 7}.isdisjoint(set(data["answer_4"]))==False\
+            or {1, 2, 3, 4, 5, 6}.isdisjoint(set(data["answer_5"]))==False:  # Жертва пропаганды?
+        print("Жертва пропаганды")
         await state.set_state(propaganda_victim.start)
-    if a.isdisjoint(a_1)==False:
-        await state.set_state(propaganda_victim.start)
-    else:
-        pass
-    if b.isdisjoint(b_1)==False:
-        await state.set_state(propaganda_victim.start)
-
-
+    elif {2, 8}.isdisjoint(set(data["answer_4"]))==False or {7}.isdisjoint(set(data["answer_5"]))==False:  # Король информации?
+        if len(data["answer_2"]) <= 2 and {0, 1, 2, 3, 5, 7, 8} not in set(data["answer_2"]):
+            print("Король информации")
+        else:
+            print("Фома неверующий")
 
