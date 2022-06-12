@@ -19,4 +19,6 @@ jobs:
             sudo service docker start
             cd antipropagandabot\
             git pull
-            docker compose up --build
+            sleep 5
+            docker compose build
+            docker compose up
