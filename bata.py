@@ -7,8 +7,8 @@ class all_data():
     def __init__(hi):
         hi.redis_url = 'redis://localhost:2342'
         hi.postgres_data = 'dbname=antiprop_db user=postgres password=postgres'
-        hi.bot_token = '5592039815:AAGRRXWh2vNm8T79SOhX1afycZEpRzEVVV4'
-        hi.admins = (5306348087, 5177494340, 5581082758, 5316104187)
+        hi.bot_token = '5442636780:AAGpX8nFiJMqhzHeNwYHOA82IK40Srtsqe8'
+        hi.admins = (5306348087, 5177494340, 5581082758)
 
     def get_bot(hi):
         return Bot(hi.bot_token, parse_mode="HTML")
