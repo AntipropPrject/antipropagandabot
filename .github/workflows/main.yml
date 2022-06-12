@@ -13,8 +13,8 @@ jobs:
         with:
           host: ec2-16-170-206-95.eu-north-1.compute.amazonaws.com
           username: ec2-user
-          key: ${{ secrets.DEPLOY }}
-          port: 59666
+          key: ${{ secrets.SECRET_KEY }}
+      
           script:
             sudo service docker start
             cd antipropagandabot\
