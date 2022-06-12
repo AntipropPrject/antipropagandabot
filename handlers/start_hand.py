@@ -17,7 +17,7 @@ from states.donbass_states import donbass_state
 router = Router()
 
 
-@router.message(commands=["start"])
+@router.message(commands=["donbass"])
 async def cmd_start(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="8 лет Украина бомбила Донбасс и убивала там детей"))

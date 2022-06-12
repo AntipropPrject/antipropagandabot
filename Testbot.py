@@ -9,6 +9,7 @@ from handlers import admin_hand, start_hand, anti_prop_hand
 from handlers.donbass_handlers import select_handler, option_two_hand, option_three_hand, option_four_hand, \
     option_five_hand, option_six_hand, option_seven_hand, option_eight_hand, final_donbass_hand
 from handlers.started_message import welcome_messages
+from handlers.other import other_file
 from log import logg
 
 try:
@@ -27,10 +28,9 @@ try:
     # Удаление таблицы
 
     cur.execute("DROP TABLE IF EXISTS texts")
-    logg.get_info("Table is texts has been deleted")
+    logg.get_info("Table is texts has been deleted".upper())
     cur.execute("DROP TABLE IF EXISTS assets")
-
-    logg.get_info("Table is assets has been deleted")
+    logg.get_info("Table is assets has been deleted".upper())
 
     # Создание таблиц
 
@@ -38,13 +38,13 @@ try:
                 name TEXT NOT NULL PRIMARY KEY,
                 text TEXT NOT NULL
                 )''')
-    logg.get_info("Texts table created")
+    logg.get_info("Texts table created".upper())
 
     cur.execute('''CREATE TABLE IF NOT EXISTS assets(
             t_id TEXT NOT NULL,
             name TEXT NOT NULL PRIMARY KEY
             )''')
-    logg.get_info("Assets table created")
+    logg.get_info("Assets table created".upper())
 
     try:
         csv_file_name = 'resources/assets.csv'
@@ -67,15 +67,11 @@ except (Exception, Error) as error:
     logg.get_error(f"PostgreSQL, {error}", __file__)
 
 
-
 async def main():
     data = all_data()
     bot = data.get_bot()
     storage = RedisStorage.from_url(data.redis_url)
     dp = Dispatcher(storage)
-    forbot = await bot.get_me()
-    logg.get_info(f"BOT_STARTED | ID: {forbot.username} | NAME: {forbot.full_name}")
-
     dp.include_router(welcome_messages.router)
     dp.include_router(anti_prop_hand.router)
     dp.include_router(start_hand.router)
@@ -89,7 +85,7 @@ async def main():
     dp.include_router(option_seven_hand.router)
     dp.include_router(option_eight_hand.router)
     dp.include_router(final_donbass_hand.router)
-
+    dp.include_router(other_file.router)
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
 
