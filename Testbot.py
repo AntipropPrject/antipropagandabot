@@ -35,14 +35,14 @@ try:
     # Создание таблиц
 
     cur.execute('''CREATE TABLE IF NOT EXISTS texts(
-                name TEXT NOT NULL PRIMARY KEY,
-                text TEXT NOT NULL
+                "text" TEXT NOT NULL,
+                "name" TEXT NOT NULL PRIMARY KEY
                 )''')
     logg.get_info("Texts table created")
 
     cur.execute('''CREATE TABLE IF NOT EXISTS assets(
-            t_id TEXT NOT NULL,
-            name TEXT NOT NULL PRIMARY KEY
+            "t_id" TEXT NOT NULL,
+            "name" TEXT NOT NULL PRIMARY KEY
             )''')
     logg.get_info("Assets table created")
 
