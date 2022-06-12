@@ -73,7 +73,8 @@ async def main():
     bot = data.get_bot()
     storage = RedisStorage.from_url(data.redis_url)
     dp = Dispatcher(storage)
-    logg.get_info("BOT_STARTED")
+    forbot = await bot.get_me()
+    logg.get_info(f"BOT_STARTED | ID: {forbot.username} | NAME: {forbot.full_name}")
 
     dp.include_router(welcome_messages.router)
     dp.include_router(anti_prop_hand.router)

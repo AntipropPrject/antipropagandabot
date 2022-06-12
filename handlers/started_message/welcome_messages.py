@@ -2,6 +2,7 @@ from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
+from aiogram.types import ReplyKeyboardRemove
 from DBuse import poll_get, poll_write
 from bata import all_data
 from states import welcome_states
@@ -55,7 +56,7 @@ async def message_2(message: types.Message, state: FSMContext):
     markup.row(types.KeyboardButton(text="Война / Вторжение в Украину"))
     text = await sql_safe_select("text", "texts", {"name": "start_what_about_you"})
 
-    await message.answer(text, reply_markup=markup.as_markup())
+    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
     # if на ты
 
     await state.set_state(welcome_states.start_dialog.dialogue_4)
@@ -76,8 +77,8 @@ async def message_3(message: types.Message, state: FSMContext):  # Начало 
 @router.message(welcome_states.start_dialog.dialogue_4, text_contains=('выражать', 'незаконно'), content_types=types.ContentType.TEXT, text_ignore_case=True)
 async def message_4(message: types.Message, state: FSMContext):
     markup = ReplyKeyboardBuilder()
-    markup.add(types.KeyboardButton(text="Специальная военная операция (СВО)"))
-    markup.add(types.KeyboardButton(text="Война / Вторжение в Украину"))
+    markup.row(types.KeyboardButton(text="Специальная военная операция (СВО)"))
+    markup.row(types.KeyboardButton(text="Война / Вторжение в Украину"))
     text = await sql_safe_select("text", "texts", {"name": "start_afraid"})
     # if на ты
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
@@ -100,7 +101,7 @@ async def message_6(message: types.Message, state: FSMContext):
     markup.add(types.KeyboardButton(text="Начал(а) интересоваться после 24 февраля"))
     markup.row(types.KeyboardButton(text="Скорее да"), types.KeyboardButton(text="Скорее нет"))
     text = await sql_safe_select("text", "texts", {"name": "start_do_you_love_politics"})
-    await message.answer(text, reply_markup=markup.as_markup())
+    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
     await state.set_state(welcome_states.start_dialog.dialogue_6)
 
 
@@ -122,7 +123,7 @@ async def message_7(message: types.Message, state: FSMContext):
 
     await state.update_data(answer_1=message.text)
     text = await sql_safe_select("text", "texts", {"name": "start_russia_goal"})
-    await message.answer_poll(text, options, is_anonymous=False, allows_multiple_answers=True)
+    await message.answer_poll(text, options, is_anonymous=False, allows_multiple_answers=True, reply_markup=ReplyKeyboardRemove())
     await state.set_state(welcome_states.start_dialog.dialogue_7)
 
 
@@ -139,11 +140,11 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, state=FSMContext):
         await poll_write(f'Start_answers: Invasion: {poll_answer.user.id}', lst_options[index])
     await state.update_data(answer_2=lst)
     markup = ReplyKeyboardBuilder()
-    markup.add(types.KeyboardButton(text="Да, полностью доверяю"))
-    markup.add(types.KeyboardButton(text="Скорее да"), types.KeyboardButton(text="Скорее нет"))
-    markup.add(types.KeyboardButton(text="Нет, не верю ни слову"))
+    markup.row(types.KeyboardButton(text="Да, полностью доверяю"))
+    markup.row(types.KeyboardButton(text="Скорее да"), types.KeyboardButton(text="Скорее нет"))
+    markup.row(types.KeyboardButton(text="Нет, не верю ни слову"))
     text = await sql_safe_select("text", "texts", {"name": "start_belive_TV"})
-    await Bot(all_data().bot_token).send_message(chat_id=poll_answer.user.id, text=text, reply_markup=markup.as_markup())
+    await Bot(all_data().bot_token).send_message(chat_id=poll_answer.user.id, text=text, reply_markup=markup.as_markup(resize_keyboard=True))
     await state.set_state(welcome_states.start_dialog.dialogue_8)
 
 
@@ -163,7 +164,7 @@ async def message_8(message: types.Message, state: FSMContext):
     await state.update_data(option_3=option)
     await state.update_data(answer_3=message.text)
     text=await sql_safe_select("text", "texts", {"name": "start_internet_belive"})
-    await message.answer_poll(text, option, is_anonymous=False, allows_multiple_answers=True)
+    await message.answer_poll(text, option, is_anonymous=False, allows_multiple_answers=True, reply_markup=ReplyKeyboardRemove())
     await state.set_state(welcome_states.start_dialog.dialogue_9)
 
 
