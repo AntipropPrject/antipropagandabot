@@ -4,6 +4,7 @@ from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.dispatcher.fsm.state import State, StatesGroup
 from aiogram.types import Message
+from pandas import DataFrame
 
 from DBuse import safe_data_getter, data_getter, sql_safe_select, sql_safe_update, sql_safe_insert
 from keyboards.admin_keys import main_admin_keyboard, middle_admin_keyboard, app_admin_keyboard
@@ -43,16 +44,20 @@ async def text_hello(message: types.Message, state: FSMContext):
     await state.set_state(admin_home.add_text)
     text = await sql_safe_select('text', 'texts', {'name':'any_unique_readible_tag'})
     text = text
-    await message.answer(f"Пришлите сообщение в подобном формате:\n\n\n{text}", reply_markup=middle_admin_keyboard())
+    await message.answer(f'Пришлите сообщение, отделив тег от текста вертикальной чертой и переносом строки. После черты приведен пример:\n-------------------------'
+                         f'\n\n{text}', reply_markup=middle_admin_keyboard())
 
 
 @router.message(content_types=types.ContentType.TEXT, state=admin_home.add_text)
 async def get_text(message: Message, state: FSMContext):
-    await state.set_state(admin_home.testing_text)
-    new_name = message.text.split("|\n")[0]
-    new_text = message.text.split("|\n")[1]
-    await state.update_data(text = new_text, name = new_name)
-    await message.answer(f'<b>Тэг текста:</b>{new_name}\n<b>Текст:\n</b>{new_text}', parse_mode="HTML", reply_markup=app_admin_keyboard())
+    try:
+        new_name = message.text.split("|\n")[0]
+        new_text = message.text.split("|\n")[1]
+        await state.update_data(text = new_text, name = new_name)
+        await state.set_state(admin_home.testing_text)
+        await message.answer(f'<b>Тэг текста:</b>{new_name}\n<b>Текст:\n</b>{new_text}', parse_mode="HTML", reply_markup=app_admin_keyboard())
+    except:
+        await message.answer('Ошибка. Похоже, вы использовали неверный формат текста.\nПожалуйста, прочтите инструкцию.', reply_markup=middle_admin_keyboard())
 
 
 @router.message((F.text == 'Добавить медиа'), state = admin_home.admin)
@@ -93,13 +98,13 @@ async def text_edit_tag(message: types.Message, state: FSMContext):
 
 @router.message(content_types=types.ContentType.TEXT, state=admin_home.text_edit_tag)
 async def text_edit_text_tag(message: Message, state: FSMContext):
-    try:
-        text = await sql_safe_select('text', 'texts', {'name':message.text})
+    text = await sql_safe_select('text', 'texts', {'name':message.text})
+    if text != False:
         await message.answer(f'Выбранный вами пост после линии:\n----------------\n{text}', parse_mode="HTML")
         await message.answer('Если это нужный блок, то отправьте мне его новый вариант.', reply_markup=middle_admin_keyboard())
         await state.set_state(admin_home.text_edit)
         await state.update_data(name = message.text)
-    except:
+    else:
         await message.answer(f'Вы ввели некорректный тэг, попробуйте еще раз', parse_mode="HTML")
 
 @router.message(content_types=types.ContentType.TEXT, state=admin_home.text_edit)
@@ -110,15 +115,21 @@ async def text_edit_text_test(message: Message, state: FSMContext):
     await state.update_data({"text":message.text})
     await state.set_state(admin_home.text_edit_test)
 
+    test = await state.get_data()
+    dtframe = DataFrame([test.values()], columns=test.keys())
+    print(dtframe)
+
+
 @router.message((F.text == 'Изменить медиа'), state = admin_home.admin)
 async def media_edit_tag(message: types.Message, state: FSMContext):
     await state.set_state(admin_home.media_edit_tag)
     await message.answer('Пришлите тэг медиа, которое вы хотите изменить.', reply_markup=middle_admin_keyboard())
 
+
 @router.message(content_types=types.ContentType.TEXT, state=admin_home.media_edit_tag)
 async def edit_media(message: Message, state: FSMContext):
-    try:
-        media_id = await sql_safe_select('t_id', 'assets', {'name': message.text})
+    media_id = await sql_safe_select('t_id', 'assets', {'name': message.text})
+    if media_id != False:
         try:
             await message.answer_photo(media_id, caption='Это выбранная вами картинка. Если все верно, отправьте ту, '
                                                          'на которую вы хотите ее заменить', reply_markup=middle_admin_keyboard())
@@ -131,7 +142,7 @@ async def edit_media(message: Message, state: FSMContext):
             pass
         await state.set_state(admin_home.media_edit)
         await state.update_data(name = message.text)
-    except:
+    else:
         await message.answer('К сожалению, медиа под этим тжгом нет в базе.\nПопробуйте еще раз.', reply_markup=middle_admin_keyboard())
 
 
@@ -152,46 +163,47 @@ async def updated_video_test(message: Message, state: FSMContext):
 @router.message((F.text == 'Подтвердить'), state=admin_home.media_edit_test)
 async def approve_media_edit(message: Message, state: FSMContext):
     data = await state.get_data()
-    try:
-        await sql_safe_update('assets', {"t_id": data["t_id"]}, {'name': data['name']})
+    r = await sql_safe_update('assets', {"t_id": data["t_id"]}, {'name': data['name']})
+    if r != False:
         await message.answer('Все готово', reply_markup=main_admin_keyboard())
         await state.clear()
         await state.set_state(admin_home.admin)
-    except:
+    else:
         await message.answer('Что-то пошло не так. Вы указали тэг?')
+
 
 @router.message((F.text == 'Подтвердить'), state=admin_home.text_edit_test)
 async def approve_edit_text(message: Message, state: FSMContext):
     data = await state.get_data()
-    try:
-        await sql_safe_update('texts', {"text": data["text"]}, {'name': data['name']})
+    r = await sql_safe_update('texts', {"text": data["text"]}, {'name': data['name']})
+    if r != False:
         await message.answer('Все готово', reply_markup=main_admin_keyboard())
         await state.clear()
         await state.set_state(admin_home.admin)
-    except:
+    else:
         await message.answer('Что-то пошло не так. Вы не ошиблись в разметке?')
 
 @router.message((F.text == 'Подтвердить'), state = admin_home.testing_media)
 async def approve_media(message: Message, state: FSMContext):
     data = await state.get_data()
     print(data)
-    try:
-        await sql_safe_insert('assets', data)
+    r = await sql_safe_insert('assets', data)
+    if r != False:
         await state.clear()
         await state.set_state(admin_home.admin)
         await message.answer('Медиа добавлено. Еще разок?', reply_markup=main_admin_keyboard())
-    except:
+    else:
         await message.answer('Не получилось. Может быть, вы указали существующий таг?')
 
 
 @router.message((F.text == 'Подтвердить'), state = admin_home.testing_text)
 async def approve_text(message: Message, state: FSMContext):
     data = await state.get_data()
-    try:
-        await sql_safe_insert('texts', data)
+    r = await sql_safe_insert('texts', data)
+    if r != False:
         await state.set_state(admin_home.admin)
         await message.answer('Текст добавлен. Еще разок?', reply_markup=main_admin_keyboard())
-    except:
+    else:
         await message.answer('Увы, ошибка. Скорее всего, этот таг сущесвует.')
 
 
