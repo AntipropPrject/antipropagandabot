@@ -17,7 +17,7 @@ jobs:
       
           script: |
             sudo service docker start
-            cd antipropagandabot\
+            cd antipropagandabot/
             git pull
             sleep 5
             docker compose build
