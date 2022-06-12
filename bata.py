@@ -9,7 +9,7 @@ class all_data():
         hi.postgres_data = 'dbname=antiprop_db user=postgres password=postgres'
         hi.bot_token = '5442636780:AAGpX8nFiJMqhzHeNwYHOA82IK40Srtsqe8'
         hi.admins = (5306348087, 5177494340, 5581082758)
-
+# фывфывфдв
     def get_bot(hi):
         return Bot(hi.bot_token, parse_mode="HTML")
 
