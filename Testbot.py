@@ -28,10 +28,13 @@ try:
 
     # Удаление таблицы
 
+    cur.execute("DROP TABLE IF EXISTS truthgame")
+    logg.get_info("Table truthgame has been deleted".upper())
     cur.execute("DROP TABLE IF EXISTS texts")
-    logg.get_info("Table is texts has been deleted".upper())
+    logg.get_info("Table texts has been deleted".upper())
     cur.execute("DROP TABLE IF EXISTS assets")
-    logg.get_info("Table is assets has been deleted".upper())
+    logg.get_info("Table assets has been deleted".upper())
+
 
     # Создание таблиц
 
@@ -47,6 +50,21 @@ try:
             )''')
     logg.get_info("Assets table created".upper())
 
+
+    cur.execute('''CREATE TABLE public.truthgame (
+	id int4 NOT NULL,
+	truth bool NOT NULL,
+	asset_name varchar NULL,
+	text_name varchar NULL,
+	belivers int4 NOT NULL,
+	nonbelivers int4 NOT NULL,
+	CONSTRAINT truthgame_pk PRIMARY KEY (id));''')
+
+    cur.execute('ALTER TABLE public.truthgame ADD CONSTRAINT truthgame_fk FOREIGN KEY (asset_name) REFERENCES public.assets("name");')
+    cur.execute('ALTER TABLE public.truthgame ADD CONSTRAINT truthgame_fk_1 FOREIGN KEY (text_name) REFERENCES public.texts("name");')
+
+    logg.get_info("Truthgame table is created".upper())
+
     try:
         csv_file_name = 'resources/assets.csv'
         sql = "COPY assets FROM STDIN DELIMITER ',' CSV HEADER"
@@ -56,6 +74,12 @@ try:
     try:
         csv_file_name = 'resources/texts.csv'
         sql = "COPY texts FROM STDIN DELIMITER ',' CSV HEADER"
+        cur.copy_expert(sql, open(csv_file_name, "r"))
+    except Exception as error:
+        logg.get_error(f"{error}", __file__)
+    try:
+        csv_file_name = 'resources/truthgame.csv'
+        sql = "COPY truthgame FROM STDIN DELIMITER ',' CSV HEADER"
         cur.copy_expert(sql, open(csv_file_name, "r"))
     except Exception as error:
         logg.get_error(f"{error}", __file__)

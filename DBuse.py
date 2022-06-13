@@ -36,16 +36,28 @@ def safe_data_getter(safe_query, values_dict):
 
 async def sql_safe_select(column, table_name, condition_dict):
     try:
-        safe_query = sql.SQL("SELECT {} from {} WHERE {} = {};").format(sql.Identifier(column),
+        ident_list = list()
+        if isinstance(column, list):
+            for i in column:
+                ident_list.append(sql.Identifier(i))
+        elif isinstance(column, str):
+            ident_list.append(sql.Identifier(column))
+        safe_query = sql.SQL("SELECT {col_names} from {} WHERE {} = {};").format(
                 sql.Identifier(table_name), sql.SQL(', ').join(map(sql.Identifier, condition_dict)),
-                sql.SQL(", ").join(map(sql.Placeholder, condition_dict)), )
+                sql.SQL(", ").join(map(sql.Placeholder, condition_dict)),
+                col_names=sql.SQL(',').join(ident_list)
+                )
         conn = all_data().get_postg()
+        print(safe_query.as_string(conn))
         with conn:
             with conn.cursor() as cur:
                 cur.execute(safe_query, condition_dict)
                 data = cur.fetchall()
         conn.close()
-        return data[0][0]
+        if isinstance(column, list):
+            return data[0]
+        else:
+            return data[0][0]
     except Exception as error:
         logg.get_error(f"{error}", __file__)
         return False
@@ -72,10 +84,11 @@ async def sql_safe_update(table_name, data_dict, condition_dict):
     try:
         where = list(condition_dict.keys())[0]
         equals = condition_dict[where]
-        safe_query = sql.SQL("UPDATE {} SET {} = {} WHERE {} = '{}';").format(sql.Identifier(table_name),
+        safe_query = sql.SQL("UPDATE {} SET {} = {} WHERE {} = {};").format(sql.Identifier(table_name),
                 sql.SQL(', ').join(map(sql.Identifier, data_dict)), sql.SQL(", ").join(map(sql.Placeholder, data_dict)),
-                sql.Identifier(where), sql.Identifier(equals), )
+                sql.Identifier(where), sql.Literal(equals))
         conn = all_data().get_postg()
+        print(safe_query.as_string(conn))
         with conn:
             with conn.cursor() as cur:
                 cur.execute(safe_query, data_dict)
