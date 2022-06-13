@@ -7,7 +7,8 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
-from DBuse import sql_safe_select
+
+from DBuse import sql_safe_select, data_getter
 from bata import all_data
 from filters.All_filters import WebPropagandaFilter, TVPropagandaFilter, PplPropagandaFilter
 from keyboards.map_keys import antip_why_kb, antip_killme_kb
@@ -85,9 +86,11 @@ async def antiprop_tv_first(message: Message, state=FSMContext):
         count = (await state.get_data())['first_tv_count']
     except:
         count = 0
+    if count == 5:
+        count = 0
     count += 1
     await state.update_data(first_tv_count=count)
-    vid_id = await sql_safe_select('t_id', 'assets', {'name':'TV_shit_filler'})
+    vid_id = await sql_safe_select('t_id', 'assets', {'name':f'tv_first_lie_{count}'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Видео посмотрел, что с ним не так?"))
     await message.answer_video(vid_id, reply_markup=nmarkup.as_markup(resize_keyboard=True), caption=f'{count} сюжет с Первого')
@@ -100,12 +103,15 @@ async def antiprop_tv_24(message: Message, state=FSMContext):
         count = (await state.get_data())['rus24_tv_count']
     except:
         count = 0
+    if count == 5:
+        count = 0
     count += 1
     await state.update_data(rus24_tv_count=count)
-    vid_id = await sql_safe_select('t_id', 'assets', {'name':'TV_shit_filler'})
+    vid_id = await sql_safe_select('t_id', 'assets', {'name':f'tv_24_lie_{count}'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Видео посмотрел, что с ним не так?"))
     await message.answer_video(vid_id, reply_markup=nmarkup.as_markup(resize_keyboard=True), caption=f'{count} сюжет с России24')
+
 
 @router.message((F.text.contains('🇷🇺1️⃣')))
 async def antiprop_tv_russia1(message: Message, state=FSMContext):
@@ -114,9 +120,11 @@ async def antiprop_tv_russia1(message: Message, state=FSMContext):
         count = (await state.get_data())['rus1_tv_count']
     except:
         count = 0
+    if count == 5:
+        count = 0
     count += 1
     await state.update_data(rus1_tv_count=count)
-    vid_id = await sql_safe_select('t_id', 'assets', {'name':'TV_shit_filler'})
+    vid_id = await sql_safe_select('t_id', 'assets', {'name':f'tv_r1_lie_{count}'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Видео посмотрел, что с ним не так?"))
     await message.answer_video(vid_id, reply_markup=nmarkup.as_markup(resize_keyboard=True), caption=f'{count} сюжет с России1')
@@ -128,9 +136,11 @@ async def antiprop_tv_HTB(message: Message, state=FSMContext):
         count = (await state.get_data())['HTB_tv_count']
     except:
         count = 0
+    if count == 5:
+        count = 0
     count += 1
     await state.update_data(HTB_tv_count=count)
-    vid_id = await sql_safe_select('t_id', 'assets', {'name':'TV_shit_filler'})
+    vid_id = await sql_safe_select('t_id', 'assets', {'name':f'tv_HTB_lie_{count}'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Видео посмотрел, что с ним не так?"))
     await message.answer_video(vid_id, reply_markup=nmarkup.as_markup(resize_keyboard=True), caption=f'{count} сюжет с НТВ')
@@ -142,9 +152,11 @@ async def antiprop_tv_star(message: Message, state=FSMContext):
         count = (await state.get_data())['Star_tv_count']
     except:
         count = 0
+    if count == 5:
+        count = 0
     count += 1
     await state.update_data(Star_tv_count=count)
-    vid_id = await sql_safe_select('t_id', 'assets', {'name':'TV_shit_filler'})
+    vid_id = await sql_safe_select('t_id', 'assets', {'name':f'tv_star_lie_{count}'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Видео посмотрел, что с ним не так?"))
     await message.answer_video(vid_id, reply_markup=nmarkup.as_markup(resize_keyboard=True), caption=f'{count} сюжет со Звезды')
@@ -156,9 +168,11 @@ async def antiprop_tv_ren(message: Message, state=FSMContext):
         count = (await state.get_data())['ren_tv_count']
     except:
         count = 0
+    if count == 5:
+        count = 0
     count += 1
     await state.update_data(ren_tv_count=count)
-    vid_id = await sql_safe_select('t_id', 'assets', {'name':'TV_shit_filler'})
+    vid_id = await sql_safe_select('t_id', 'assets', {'name':f'tv_ren_lie_{count}'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Видео посмотрел, что с ним не так?"))
     await message.answer_video(vid_id, reply_markup=nmarkup.as_markup(resize_keyboard=True), caption=f'{count} сюжет с Рентв')
@@ -168,11 +182,12 @@ async def antiprop_tv_ren(message: Message, state=FSMContext):
 async def russia_tv_first_reb(message: Message, state=FSMContext):
     count = (await state.get_data())['first_tv_count']
     text = f'{count} Разоблачение первого канала'
-    vid_id = await sql_safe_select('t_id', 'assets', {'name': 'TV_rebuttal_filler'})
+    vid_id = await sql_safe_select('t_id', 'assets', {'name': f'tv_first_reb_{count}'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Достаточно, мне все понятно"))
-    nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет с 1️⃣ Первого канала"))
     nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал"))
+    if count < 5:
+        nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет с 1️⃣ Первого канала"))
     await message.answer_video(vid_id, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -180,11 +195,12 @@ async def russia_tv_first_reb(message: Message, state=FSMContext):
 async def tv_russia24_reb(message: Message, state=FSMContext):
     count = (await state.get_data())['rus24_tv_count']
     text = f'{count} Разоблачение россии24'
-    vid_id = await sql_safe_select('t_id', 'assets', {'name': 'TV_rebuttal_filler'})
+    vid_id = await sql_safe_select('t_id', 'assets', {'name': f'tv_24_reb_{count}'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Достаточно, мне все понятно"))
-    nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет 2️⃣4️⃣ России24"))
     nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал"))
+    if count < 5:
+        nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет 2️⃣4️⃣ России24"))
     await message.answer_video(vid_id, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -192,11 +208,12 @@ async def tv_russia24_reb(message: Message, state=FSMContext):
 async def tv_russia1_reb(message: Message, state=FSMContext):
     count = (await state.get_data())['rus1_tv_count']
     text = f'{count} Разоблачение россии1'
-    vid_id = await sql_safe_select('t_id', 'assets', {'name': 'TV_rebuttal_filler'})
+    vid_id = await sql_safe_select('t_id', 'assets', {'name': f'tv_r1_reb_{count}'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Достаточно, мне все понятно"))
-    nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет 🇷🇺1️⃣ России1"))
     nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал"))
+    if count < 5:
+        nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет 🇷🇺1️⃣ России1"))
     await message.answer_video(vid_id, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -204,11 +221,12 @@ async def tv_russia1_reb(message: Message, state=FSMContext):
 async def tv_HTB_reb(message: Message, state=FSMContext):
     count = (await state.get_data())['HTB_tv_count']
     text = f'{count} Разоблачение НТВ'
-    vid_id = await sql_safe_select('t_id', 'assets', {'name': 'TV_rebuttal_filler'})
+    vid_id = await sql_safe_select('t_id', 'assets', {'name': f'tv_HTB_reb_{count}'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Достаточно, мне все понятно"))
-    nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет ❇️▶️ НТВ"))
     nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал"))
+    if count < 5:
+        nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет ❇️▶️ НТВ"))
     await message.answer_video(vid_id, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -216,11 +234,12 @@ async def tv_HTB_reb(message: Message, state=FSMContext):
 async def tv_star_reb(message: Message, state=FSMContext):
     count = (await state.get_data())['Star_tv_count']
     text = f'{count} Разоблачение совканала'
-    vid_id = await sql_safe_select('t_id', 'assets', {'name': 'TV_rebuttal_filler'})
+    vid_id = await sql_safe_select('t_id', 'assets', {'name': f'tv_star_reb_{count}'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Достаточно, мне все понятно"))
-    nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет ⭐️🅾️ Звезды"))
     nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал"))
+    if count < 5:
+        nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет ⭐️🅾️ Звезды"))
     await message.answer_video(vid_id, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -228,11 +247,12 @@ async def tv_star_reb(message: Message, state=FSMContext):
 async def russia_in_nutshell(message: Message, state=FSMContext):
     count = (await state.get_data())['ren_tv_count']
     text = f'{count} Разоблачение рентв'
-    vid_id = await sql_safe_select('t_id', 'assets', {'name': 'TV_rebuttal_filler'})
+    vid_id = await sql_safe_select('t_id', 'assets', {'name': f'tv_ren_reb_{count}'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Достаточно, мне все понятно"))
-    nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет 🟠🍺 Рентв"))
     nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал"))
+    if count < 5:
+        nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет 🟠🍺 Рентв"))
     await message.answer_video(vid_id, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -241,9 +261,7 @@ async def antip_crossed_boy_1(message: Message, state=FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_crossed_boy_1'})
     vid_id = await sql_safe_select('t_id', 'assets', {'name': 'TV_rebuttal_filler'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Достаточно, мне все понятно"))
-    nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет 2️⃣4️⃣ России24"))
-    nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал"))
+    nmarkup.row(types.KeyboardButton(text="Посмотрел"))
     await message.answer_video(vid_id, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -259,17 +277,48 @@ async def antip_crossed_boy_3(message: Message, state=FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_crossed_boy_3'})
     text2 = await sql_safe_select('text', 'texts', {'name': 'antip_be_honest'})
     await message.answer(text)
-    await asyncio.sleep(4)
+    await asyncio.sleep(3)
+    #await state.clear()
+    #await state.set_state(propaganda_victim.start)
     await message.answer(text2, reply_markup=antip_killme_kb())
 
 
-@router.message((F.text.contains('другой телеканал'))| (F.text.contains('посмотреть еще')))
+@router.message((F.text.contains('другой телеканал')) | (F.text.contains('посмотреть еще')))
 async def russia_in_nutshell(message: Message, state=FSMContext):
-    utv_list = ['1️⃣','2️⃣4️⃣','🇷🇺1️⃣','❇️▶️', '⭐️🅾️', '🟠🍺']
+    bigdata = await state.get_data()
     nmarkup = ReplyKeyboardBuilder()
-    for channel in utv_list:
-        nmarkup.row(types.KeyboardButton(text=channel))
-    nmarkup.adjust(2,2,2)
+    nmarkup.row(types.KeyboardButton(text="Достаточно, мне все понятно"))
+    try:
+        if bigdata['first_tv_count'] < 5:
+            raise Exception
+    except:
+        nmarkup.row(types.KeyboardButton(text='1️⃣'))
+    try:
+        if bigdata['rus24_tv_count'] < 5:
+            raise Exception
+    except:
+        nmarkup.row(types.KeyboardButton(text='2️⃣4️⃣'))
+    try:
+        if bigdata['rus1_tv_count'] < 5:
+            raise Exception
+    except:
+        nmarkup.row(types.KeyboardButton(text='🇷🇺1️⃣'))
+    try:
+        if bigdata['HTB_tv_count'] < 5:
+            raise Exception
+    except:
+        nmarkup.row(types.KeyboardButton(text='❇️▶️'))
+    try:
+        if bigdata['Star_tv_count'] < 5:
+            raise Exception
+    except:
+        nmarkup.row(types.KeyboardButton(text='⭐️🅾️'))
+    try:
+        if bigdata['ren_tv_count'] < 5:
+            raise Exception
+    except:
+        nmarkup.row(types.KeyboardButton(text='🟠🍺'))
+    nmarkup.adjust(1,3,3)
     await message.answer('Я собрал для вас большую базу лжи на фееральных каналах. Выбирайте любой -- и убедитесь сами!',
                          reply_markup=nmarkup.as_markup())
 
@@ -311,22 +360,57 @@ async def antip_bad_people_lies(message: Message, ppl_lies_list,state=FSMContext
 async def antip_truth_game_start(message: Message, state=FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_truth_game_start'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Начнем!"))
+    nmarkup.row(types.KeyboardButton(text="Давай начнем"))
     nmarkup.row(types.KeyboardButton(text="Не сейчас"))
-    await message.answer(text, reply_markup=nmarkup.as_markup())
+    nmarkup.adjust(2)
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == 'Не сейчас'))
+@router.message((F.text == "Давай начнем") | (F.text == "Продолжаем, давай еще!"))
+async def antip_truth_game_start(message: Message, state=FSMContext):
+    try:
+        count = (await state.get_data())['truth_game_count']
+    except:
+        count = 0
+    if count == 8:
+        count = 0
+    count += 1
+    truth_data = data_getter("SELECT truth, t_id, text, belivers, nonbelivers FROM public.truthgame"
+                             " inner join assets on asset_name = assets.name "
+                             "inner join texts ON text_name = texts.name "
+                             f"where id = {count};")[0]
+    print('aaaaaa', truth_data)
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Это правда!"))
+    nmarkup.row(types.KeyboardButton(text="Это ложь."))
+    await message.answer('Тут будет сюжет. Если вы видите это сообщение, то система должна работать.', reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
+
+
+@router.message((F.text == "Это правда!") | (F.text == "Это ложь."))
+async def antip_truth_game_answer(message: Message, state=FSMContext):
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Продолжаем, давай еще!"))
+    nmarkup.row(types.KeyboardButton(text="Достаточно, двигаемся дальше."))
+    await message.answer('Конечно же это правда, потому что сюжета еще нет.\n\nРезультаты других участников:\nПравда: %%\nЛожь: %%',
+                             reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer('А этим сообщением будет опровержение, если ложь.')
+
+
+
+@router.message((F.text == 'Не сейчас') | (F.text.contains("двигаемся дальше")))
 async def antip_ok(message: Message, state=FSMContext):
     msg = await message.answer("Хорошо")
     await asyncio.sleep(2)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Давай"))
-    all_data().get_bot().edit_message_text("У меня есть анекдот", reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await all_data().get_bot().edit_message_text("У меня есть анекдот", message.from_user.id, msg.message_id)
+    await asyncio.sleep(2)
+    await message.answer("Хотите послушать?", reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 
-@router.message((F.text == 'Не сейчас'))
+@router.message((F.text == 'Давай'))
 async def antip_anecdote(message: Message, state=FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_anecdote'})
     nmarkup = ReplyKeyboardBuilder()

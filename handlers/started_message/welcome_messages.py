@@ -45,7 +45,7 @@ async def message_1(message: types.Message, state: FSMContext):
 
 
 @router.message(welcome_states.start_dialog.dialogue_2, text_contains=('Хорошо'), content_types=types.ContentType.TEXT, text_ignore_case=True)
-@router.message(welcome_states.start_dialog.dialogue_1, text_contains=('Начнем'), content_types=types.ContentType.TEXT, text_ignore_case=True)
+@router.message(welcome_states.start_dialog.dialogue_1, (F.text == 'Начнем!'), content_types=types.ContentType.TEXT)
 #@router.message(welcome_states.start_dialog.dialogue_3)  # запомнить на ты или на вы в базу
 async def message_2(message: types.Message, state: FSMContext):
     # запись значения в базу
