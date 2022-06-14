@@ -1,16 +1,18 @@
 import asyncio
 from typing import List
-
 from aiogram import Router, F
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-
+from DBuse import poll_get, redis_pop
 from DBuse import sql_safe_select, data_getter, sql_safe_update
 from filters.All_filters import WebPropagandaFilter, TVPropagandaFilter, PplPropagandaFilter
 from keyboards.map_keys import antip_why_kb, antip_killme_kb
 from states.antiprop_states import propaganda_victim
+from resources.all_polls import web_prop
+from resources.other_lists import channels
+
 
 router = Router()
 router.message.filter(state=propaganda_victim)
@@ -192,7 +194,7 @@ async def russia_tv_first_reb(message: Message, state=FSMContext):
     text = f'{count} Разоблачение первого канала'
     vid_id = await sql_safe_select('t_id', 'assets', {'name': f'tv_first_reb_{count}'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Достаточно, мне все понятно"))
+    nmarkup.row(types.KeyboardButton(text="Хватит, мне все понятно"))
     nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал"))
     if count < 5:
         nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет с 1️⃣ Первого канала"))
@@ -205,7 +207,7 @@ async def tv_russia24_reb(message: Message, state=FSMContext):
     text = f'{count} Разоблачение россии24'
     vid_id = await sql_safe_select('t_id', 'assets', {'name': f'tv_24_reb_{count}'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Достаточно, мне все понятно"))
+    nmarkup.row(types.KeyboardButton(text="Хватит, мне все понятно"))
     nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал"))
     if count < 5:
         nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет 2️⃣4️⃣ России24"))
@@ -218,7 +220,7 @@ async def tv_russia1_reb(message: Message, state=FSMContext):
     text = f'{count} Разоблачение россии1'
     vid_id = await sql_safe_select('t_id', 'assets', {'name': f'tv_r1_reb_{count}'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Достаточно, мне все понятно"))
+    nmarkup.row(types.KeyboardButton(text="Хватит, мне все понятно"))
     nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал"))
     if count < 5:
         nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет 🇷🇺1️⃣ России1"))
@@ -231,7 +233,7 @@ async def tv_HTB_reb(message: Message, state=FSMContext):
     text = f'{count} Разоблачение НТВ'
     vid_id = await sql_safe_select('t_id', 'assets', {'name': f'tv_HTB_reb_{count}'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Достаточно, мне все понятно"))
+    nmarkup.row(types.KeyboardButton(text="Хватит, мне все понятно"))
     nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал"))
     if count < 5:
         nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет ❇️▶️ НТВ"))
@@ -244,7 +246,7 @@ async def tv_star_reb(message: Message, state=FSMContext):
     text = f'{count} Разоблачение совканала'
     vid_id = await sql_safe_select('t_id', 'assets', {'name': f'tv_star_reb_{count}'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Достаточно, мне все понятно"))
+    nmarkup.row(types.KeyboardButton(text="Хватит, мне все понятно"))
     nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал"))
     if count < 5:
         nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет ⭐️🅾️ Звезды"))
@@ -257,14 +259,14 @@ async def russia_in_nutshell(message: Message, state=FSMContext):
     text = f'{count} Разоблачение рентв'
     vid_id = await sql_safe_select('t_id', 'assets', {'name': f'tv_ren_reb_{count}'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Достаточно, мне все понятно"))
+    nmarkup.row(types.KeyboardButton(text="Хватит, мне все понятно"))
     nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал"))
     if count < 5:
         nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет 🟠🍺 Рентв"))
     await message.answer_video(vid_id, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.contains('Достаточно') & (F.text.contains('понятно'))))
+@router.message((F.text.contains('Хватит') & (F.text.contains('понятно'))))
 async def antip_crossed_boy_1(message: Message, state=FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_crossed_boy_1'})
     vid_id = await sql_safe_select('t_id', 'assets', {'name': 'TV_rebuttal_filler'})
@@ -296,7 +298,7 @@ async def antip_crossed_boy_3(message: Message, state=FSMContext):
 async def antip_another_tv(message: Message, state=FSMContext):
     bigdata = await state.get_data()
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Достаточно, мне все понятно"))
+    nmarkup.row(types.KeyboardButton(text="Хватит, мне все понятно"))
     try:
         if bigdata['first_tv_count'] < 5:
             raise Exception
@@ -345,15 +347,219 @@ async def antip_conspirasy(message: Message, state=FSMContext):
     await message.answer(text)
 
 
-@router.message(WebPropagandaFilter(), (
-        (F.text.contains('шаг')) | (F.text.contains('удивлен')) | (F.text.contains('шоке')) | (
-F.text.contains('знал'))))
+@router.message(WebPropagandaFilter(), ((F.text.contains('шаг')) | (F.text.contains('удивлен')) | (F.text.contains('шоке')) | (F.text.contains('знал'))))
+@router.message(WebPropagandaFilter(), commands=["test"])
 async def antip_not_only_TV(message: Message, web_lies_list: List[str], state=FSMContext):
     print("HERE LIES LIES LIST", web_lies_list)
+    answer_id_str = await poll_get(f'Start_answers: ethernet_id: {message.from_user.id}')
+    markup = ReplyKeyboardBuilder()
+    markup.row(types.KeyboardButton(text="Показывай"))
     lies_list = web_lies_list
-    text = await sql_safe_select('text', 'texts', {'name': 'antip_not_only_TV'})
-    await message.answer(text)
-    await message.answer('Начало блока с выбором новостей в интернете. В данный момент тупик')
+    answer_id_int = []
+    all_answers = web_prop
+    for i in answer_id_str:
+        answer_id_int.append(int(i))  # числа ответов пользователя
+    try:
+        answer_id_int.remove(2)
+        lies_list.remove('Meduza / BBC / Радио Свобода / Медиазона / Настоящее время / Популярная Политика')
+        all_answers.remove('Meduza / BBC / Радио Свобода / Медиазона / Настоящее время / Популярная Политика')
+    except:
+        pass
+    try:
+        answer_id_int.remove(8)
+        lies_list.remove('Википедия')
+        all_answers.remove("Википедия")
+    except:
+        pass
+    try:
+        answer_id_int.remove(9)
+        lies_list.remove('Никому из них...')
+        all_answers.remove("Никому из них...")
+    except:
+        pass
+
+    await state.update_data(all_answers=all_answers)  # Все ответы опроса
+    await state.update_data(answers_int=answer_id_int)  # Все ответы пользователя индексы
+    await state.update_data(answers_str=lies_list)  # Все ответы пользователя строки
+    channel = lies_list[0]
+    text = 'Но пропаганда в России не заканчивается ' \
+           'на ТВ. Молодое поколение получает ' \
+           'новости из интернета: новостных ' \
+           'порталов, соцсетей и телеграм-каналов.  ' \
+           'Больше 10 лет пропаганда постепенно ' \
+           'захватывала интернет-ресурсы, которые ' \
+           'до этого были независимыми: РИА ' \
+           'Новости, Известия, Коммерсант, РБК и ' \
+           'даже Яндекс.Новости. Этот список ' \
+           'включает в себя сотни интернет-порталов,  ' \
+           'а также блогеров и телеграм-каналы.\n\n' \
+           'Я заметил, что среди источников, которым ' \
+           f'вы доверяете - есть {channel}.' \
+           f' К сожалению, {channel} ставит целью не ' \
+           'донести правдивые новости, а составить у ' \
+           'людей нужную [властям] картину мира. ' \
+           'Давайте я покажу несколько сюжетов,  ' \
+           'которые это докажут'
+    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
+
+
+async def keyboard_for_next_chanel(text):
+    markup = ReplyKeyboardBuilder()
+    if text:
+        markup.row(types.KeyboardButton(text=text))
+    markup.row(types.KeyboardButton(text="Достаточно, мне все понятно"))
+    return markup
+
+async def keyboard_for_all_chanel(lst_kb):
+    markup = ReplyKeyboardBuilder()
+    for button in lst_kb:
+        markup.row(types.KeyboardButton(text=button))
+    markup.row(types.KeyboardButton(text='Хватит, пропустим остальные источники'))
+    return markup
+
+@router.message(((F.text.contains('Показывай')) | (F.text.contains('РИА Новости')) | (
+F.text.contains('Russia Today')) | (
+                 F.text.contains('Телеграм-каналы: Военный осведомитель / WarGonzo / Kotsnews')) | (
+                 F.text.contains('Телеграм-канал: Война с фейками')) | (F.text.contains('РБК')) | (
+                 F.text.contains('ТАСС / Комсомольская правда / АиФ / Ведомости / Лента / Интерфакс')) | (
+                 F.text.contains('Яндекс.Новости')) | (F.text.contains('Хорошо, давай вернемся и посмотрим'))) & ~(
+F.text.contains('еще')))  # вход в цикл
+async def show_the_news(message: types.Message, state=FSMContext):
+    data = await state.get_data()
+    if message.text == 'Показывай':
+        markup = ReplyKeyboardBuilder()
+        markup.row(types.KeyboardButton(text="Новость посмотрел(а). Что с ней не так?"))
+        # получить самый первый источник из списка выбранных каналов
+        user_answer_str = data['answers_str']
+        one_channel = channels[
+            channels.index(user_answer_str[0]) + 1]  # получаю первый канал из ответа пользователя
+        one_media = await sql_safe_select('t_id', 'assets',
+                                          {'name': list(one_channel[0].keys())[0][0]})  # Получаю id видео
+        one_caption = await sql_safe_select('text', 'texts',
+                                            {'name': list(one_channel[0].keys())[0][1]})  # Получаю описание
+        await state.update_data(viewed_channel=user_answer_str[0])  # передаю канал для разоблачения
+        await state.update_data(count_news=0)  # Ставлю счетчик на 0 для первой новости
+        await state.update_data(all_viwed=[user_answer_str[0]])  # записываю просмотренный источник
+        await message.answer_video(one_media, caption=one_caption,
+                                   reply_markup=markup.as_markup(resize_keyboard=True))
+
+    elif message.text != 'Хорошо, давай вернемся и посмотрим':
+        markup = ReplyKeyboardBuilder()
+        markup.row(types.KeyboardButton(text="Новость посмотрел(а). Что с ней не так?"))
+        await state.update_data(count_news=0)
+        await state.update_data(viewed_channel=message.text)
+        new_data = 0
+        other_channel = message.text
+        if other_channel != 'Хватит, пропустим остальные источники':
+            viewed = data["all_viwed"]
+            viewed.append(other_channel)
+            await state.update_data(all_viwed=list(set(viewed)))  # Список просмотренных источников
+        channel_exposure = channels[channels.index(other_channel) + 1]
+        media = await sql_safe_select('t_id', 'assets',
+                                      {'name': list(channel_exposure[new_data].keys())[0][0]})  # Получаю id видео
+        caption = await sql_safe_select('text', 'texts',
+                                        {'name': list(channel_exposure[new_data].keys())[0][1]})  # Получаю описание
+        await message.answer_video(media, caption=caption, reply_markup=markup.as_markup(resize_keyboard=True))
+
+    elif message.text == 'Хорошо, давай вернемся и посмотрим':
+        markup = ReplyKeyboardBuilder()
+        markup.row(types.KeyboardButton(text="Новость посмотрел(а). Что с ней не так?"))
+        await state.update_data(count_news=0)
+        new_data = 0
+        other_channel = data['not_viewed_chanel']
+        await state.update_data(viewed_channel=other_channel)
+        if other_channel != 'Хватит, пропустим остальные источники':
+            viewed = data["all_viwed"]
+            viewed.append(other_channel)
+            await state.update_data(all_viwed=list(set(viewed)))  # Список просмотренных источников
+        channel_exposure = channels[channels.index(other_channel) + 1]
+        media = await sql_safe_select('t_id', 'assets',
+                                      {'name': list(channel_exposure[new_data].keys())[0][0]})  # Получаю id видео
+        caption = await sql_safe_select('text', 'texts',
+                                        {'name': list(channel_exposure[new_data].keys())[0][1]})  # Получаю описание
+        await message.answer_video(media, caption=caption, reply_markup=markup.as_markup(resize_keyboard=True))
+    else:
+        await message.answer('Неправильная команда')
+        await poll_get(f'Start_answers: ethernet: {message.from_user.id}')
+
+@router.message((F.text.contains('Новость посмотрел(а). Что с ней не так?')))
+async def revealing_the_news(message: types.Message, state=FSMContext):
+    data = await state.get_data()
+    viewed_channel = data['viewed_channel']  # Просматриваемый канал  менять эту дату для следующих каналов
+    count_news = data['count_news']  # Получаю номер новости
+    print(viewed_channel)
+    if count_news <= 3:  # Проверка если новости закончились
+        markup = await keyboard_for_next_chanel(f"Покажи еще новость с {viewed_channel}")
+        channel_exposure = channels[channels.index(viewed_channel) + 1]
+
+        media_exposure = await sql_safe_select('t_id', 'assets', {
+            'name': list(channel_exposure[count_news].values())[0][0]})  # Получаю id видео
+        caption_exposure = await sql_safe_select('text', 'texts', {
+            'name': list(channel_exposure[count_news].values())[0][1]})  # Получаю описание
+
+        await message.answer_video(media_exposure, caption=caption_exposure,
+                                   reply_markup=markup.as_markup(resize_keyboard=True))
+    else:
+        markup = ReplyKeyboardBuilder()
+        markup.row(types.KeyboardButton(text="Достаточно, мне все понятно"))
+        channel_exposure = channels[channels.index(viewed_channel) + 1]
+
+        media_exposure = await sql_safe_select('t_id', 'assets', {
+            'name': list(channel_exposure[count_news].values())[0][0]})  # Получаю id видео
+        caption_exposure = await sql_safe_select('text', 'texts', {
+            'name': list(channel_exposure[count_news].values())[0][1]})  # Получаю описание
+        await message.answer_video(media_exposure, caption=caption_exposure,
+                                   reply_markup=markup.as_markup(resize_keyboard=True))
+
+@router.message(text_contains=('Покажи', 'еще', 'новость'), content_types=types.ContentType.TEXT,
+                text_ignore_case=True)
+async def show_more(message: types.Message, state=FSMContext):
+    data = await state.get_data()
+    new_data = data['count_news'] + 1
+    await state.update_data(count_news=new_data)  # обновление счетчика
+    viewed_channel = data['viewed_channel']  # Просматриваемый канал
+    channel_exposure = channels[channels.index(viewed_channel) + 1]
+    media = await sql_safe_select('t_id', 'assets',
+                                  {'name': list(channel_exposure[new_data].keys())[0][0]})  # Получаю id видео
+    caption = await sql_safe_select('text', 'texts',
+                                    {'name': list(channel_exposure[new_data].keys())[0][1]})  # Получаю описание
+    markup = ReplyKeyboardBuilder()
+    markup.row(types.KeyboardButton(text="Новость посмотрел(а). Что с ней не так?"))
+    await message.answer_video(media, caption=caption, reply_markup=markup.as_markup(resize_keyboard=True))
+
+@router.message((F.text.contains('Достаточно, мне все понятно')))
+async def revealing_the_news(message: Message, state=FSMContext):
+    data = await state.get_data()
+    if len(data['answers_str']) - len(data['all_viwed']) != 0:
+        # Посмотрел ли юзер все источники
+        data = await state.get_data()
+        markup = await keyboard_for_all_chanel(data['answers_str'])
+        text = await sql_safe_select('text', 'texts', {'name': 'antip_another_web_lie'})
+        await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
+    else:
+        await redis_pop(f'Start_answers: ethernet: {message.from_user.id}')
+
+@router.message((F.text.contains('Хватит, пропустим остальные источники')))
+async def skip_web(message: Message, state=FSMContext):
+    data = await state.get_data()
+    answer_channel = data['answers_str']  # Все выбранные источники
+    all_viwed = data['all_viwed']  # Все просмотренные источники
+    not_viewed = list(set(answer_channel) - set(all_viwed))
+    markup = ReplyKeyboardBuilder()
+    markup.row(types.KeyboardButton(text='Хорошо, давай вернемся и посмотрим'))
+    markup.row(types.KeyboardButton(text='Не надо, я и так знаю, что они врут'))
+    markup.row(types.KeyboardButton(text='Не надо, я все равно буду доверять им'))
+    lst_web_answers = str(', '.join(not_viewed))
+    next_channel = str(not_viewed[0])
+    await state.update_data(not_viewed_chanel=not_viewed[0])
+
+    await message.answer("Я хотел показать вам еще, как врут "
+                         f"{lst_web_answers}, ведь вы "
+                         "отметили, что доверяете им. Для нашей "
+                         "дальнейшей беседы важно, чтобы мы "
+                         "разобрались, кому можно верить, а кому нет.\n\n"
+                         "Можно я все-таки покажу хотя бы один "
+                         f"сюжет от {next_channel}?", reply_markup=markup.as_markup(resize_keyboard=True))
 
 
 @router.message(PplPropagandaFilter(),
@@ -367,8 +573,7 @@ async def antip_bad_people_lies(message: Message, ppl_lies_list, state=FSMContex
     await message.answer('Начало блока с пропагандистами. В данный момент тупик.')
 
 
-@router.message(
-    (F.text.contains('шаг')) | (F.text.contains('удивлен')) | (F.text.contains('шоке')) | (F.text.contains('знал')))
+@router.message((F.text.contains('шаг')) | (F.text.contains('удивлен')) | (F.text.contains('шоке')) | (F.text.contains('знал')))
 async def antip_truth_game_start(message: Message, state=FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_truth_game_start'})
     nmarkup = ReplyKeyboardBuilder()

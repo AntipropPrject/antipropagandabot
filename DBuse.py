@@ -96,6 +96,7 @@ async def sql_safe_insert(table_name, data_dict):
                                                                         sql.SQL(", ").join(
                                                                             map(sql.Placeholder, data_dict)), )
         conn = all_data().get_postg()
+        print(safe_query.as_string(conn))
         with conn:
             with conn.cursor() as cur:
                 cur.execute(safe_query, data_dict)
