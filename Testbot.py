@@ -5,7 +5,7 @@ from aiogram import Dispatcher
 from aiogram.dispatcher.fsm.storage.redis import RedisStorage
 from psycopg2 import Error
 from bata import all_data
-from handlers import admin_hand, start_hand, anti_prop_hand
+from handlers import admin_hand, start_hand, anti_prop_hand, smi_hand
 from handlers.donbass_handlers import select_handler, option_two_hand, option_three_hand, option_four_hand, \
     option_five_hand, option_six_hand, option_seven_hand, option_eight_hand, final_donbass_hand
 from handlers.started_message import welcome_messages
@@ -100,6 +100,7 @@ async def main():
     dp.include_router(welcome_messages.router)
     dp.include_router(anti_prop_hand.router)
     dp.include_router(start_hand.router)
+    dp.include_router(smi_hand.router)
     dp.include_router(admin_hand.router)
     dp.include_router(select_handler.router)
     dp.include_router(option_two_hand.router)
