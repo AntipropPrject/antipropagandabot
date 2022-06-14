@@ -12,6 +12,7 @@ from handlers.started_message import welcome_messages
 from handlers.other import other_file
 from log import logg
 
+
 try:
     # Подключение к существующей базе данных
     con = all_data().get_postg()
@@ -86,6 +87,7 @@ async def main():
     dp.include_router(option_eight_hand.router)
     dp.include_router(final_donbass_hand.router)
     dp.include_router(other_file.router)
+
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
 

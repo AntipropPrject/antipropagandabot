@@ -8,6 +8,7 @@ from bata import all_data
 from states import welcome_states
 from DBuse import sql_safe_select
 from states.antiprop_states import propaganda_victim
+from resources.all_polls import web_prop
 
 router = Router()
 
@@ -155,20 +156,14 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, state=FSMContext):
 async def message_8(message: types.Message, state: FSMContext):
     text = message.text
     if text == "Да, полностью доверяю" or text == "Скорее да" or text =="Скорее нет" or text == "Нет, не верю ни слову":
-        option = ["РИА Новости", "Russia Today",
-                   "Meduza / BBC / Радио Свобода / Медиазона / Настоящее время / Популярная Политика",
-                   "Телеграм-каналы: Военный осведомитель / WarGonzo / Kotsnews",
-                   "Телеграм-канал: Война с фейками", "РБК",
-                   "ТАСС / Комсомольская правда / АиФ / Ведомости / Лента / Интерфакс",
-                   "Яндекс.Новости", "Википедия", "Никому из них...",
-                   ]
+
         # сохранение 3 вопроса
 
         await poll_write(f'Start_answers: tv: {message.from_user.id}', message.text)
-        await state.update_data(option_3=option)
+        await state.update_data(option_3=web_prop)
         await state.update_data(answer_3=message.text)
         text=await sql_safe_select("text", "texts", {"name": "start_internet_belive"})
-        await message.answer_poll(text, option, is_anonymous=False, allows_multiple_answers=True, reply_markup=ReplyKeyboardRemove())
+        await message.answer_poll(text, web_prop, is_anonymous=False, allows_multiple_answers=True, reply_markup=ReplyKeyboardRemove())
         await state.set_state(welcome_states.start_dialog.dialogue_9)
     else:
         await message.answer("Неправильный ответ, вы можете выбрать вариант ответа на клавиатуре")
@@ -187,10 +182,13 @@ async def poll_answer_handler_tho(poll_answer: types.PollAnswer, state=FSMContex
     lst_answers = poll_answer.option_ids
     lst = []
     for index in lst_answers:
+
         lst.append(lst_options[index])
+        await poll_write(f'Start_answers: ethernet_id: {poll_answer.user.id}', int(index))
         await poll_write(f'Start_answers: ethernet: {poll_answer.user.id}', lst_options[index])
     await state.update_data(answer_4=poll_answer.option_ids)
     await state.update_data(option_4=options)
+    answer_id_str = await poll_get(f'Start_answers: ethernet_id: {poll_answer.user.id}')
     text = await sql_safe_select("text", "texts", {"name": "start_people_belive"})
     await Bot(all_data().bot_token).send_poll(poll_answer.user.id, text, options, is_anonymous=False, allows_multiple_answers=True)
     await state.set_state(welcome_states.start_dialog.dialogue_10)
