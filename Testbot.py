@@ -52,13 +52,14 @@ try:
 
 
     cur.execute('''CREATE TABLE public.truthgame (
-	id int4 NOT NULL,
-	truth bool NOT NULL,
-	asset_name varchar NULL,
-	text_name varchar NULL,
-	belivers int4 NOT NULL,
-	nonbelivers int4 NOT NULL,
-	CONSTRAINT truthgame_pk PRIMARY KEY (id));''')
+	            "id" int4 NOT NULL,
+	            truth bool NOT NULL,
+	            asset_name varchar NULL,
+	            text_name varchar NULL,
+	            belivers int4 NOT NULL,
+	            nonbelivers int4 NOT NULL,
+	            rebuttal varchar NULL,
+	            CONSTRAINT truthgame_pk PRIMARY KEY (id));''')
 
     cur.execute('ALTER TABLE public.truthgame ADD CONSTRAINT truthgame_fk FOREIGN KEY (asset_name) REFERENCES public.assets("name");')
     cur.execute('ALTER TABLE public.truthgame ADD CONSTRAINT truthgame_fk_1 FOREIGN KEY (text_name) REFERENCES public.texts("name");')
