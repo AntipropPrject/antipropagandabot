@@ -66,8 +66,7 @@ async def antip_all_no_TV(message: Message, state=FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(
-    (F.text.in_({'Открой мне глаза 👀', "Ну удиви меня 🤔", "Покажи ложь на ТВ -- мне интересно посмотреть!"})))
+@router.message((F.text.in_({'Открой мне глаза 👀', "Ну удиви меня 🤔", "Покажи ложь на ТВ -- мне интересно посмотреть!"})))
 async def antiprop_tv_selecter(message: Message, state=FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_pile_of_lies'})
     utv_list = ['1️⃣', '2️⃣4️⃣', '🇷🇺1️⃣', '❇️▶️', '⭐️🅾️', '🟠🍺']
@@ -417,13 +416,13 @@ async def keyboard_for_all_chanel(lst_kb):
     markup.row(types.KeyboardButton(text='Хватит, пропустим остальные источники'))
     return markup
 
+
 @router.message(((F.text.contains('Показывай')) | (F.text.contains('РИА Новости')) | (
 F.text.contains('Russia Today')) | (
                  F.text.contains('Телеграм-каналы: Военный осведомитель / WarGonzo / Kotsnews')) | (
                  F.text.contains('Телеграм-канал: Война с фейками')) | (F.text.contains('РБК')) | (
                  F.text.contains('ТАСС / Комсомольская правда / АиФ / Ведомости / Лента / Интерфакс')) | (
-                 F.text.contains('Яндекс.Новости')) | (F.text.contains('Хорошо, давай вернемся и посмотрим'))) & ~(
-F.text.contains('еще')))  # вход в цикл
+                 F.text.contains('Яндекс.Новости')) | (F.text.contains('Хорошо, давай вернемся и посмотрим'))) & ~(F.text.contains('еще')))  # вход в цикл
 async def show_the_news(message: types.Message, state=FSMContext):
     data = await state.get_data()
     if message.text == 'Показывай':
@@ -530,6 +529,8 @@ async def show_more(message: types.Message, state=FSMContext):
 @router.message((F.text.contains('Достаточно, мне все понятно')))
 async def revealing_the_news(message: Message, state=FSMContext):
     data = await state.get_data()
+    print(data['answers_str'])
+    print(data['all_viwed'])
     if len(data['answers_str']) - len(data['all_viwed']) != 0:
         # Посмотрел ли юзер все источники
         data = await state.get_data()
@@ -538,6 +539,8 @@ async def revealing_the_news(message: Message, state=FSMContext):
         await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
     else:
         await redis_pop(f'Start_answers: ethernet: {message.from_user.id}')
+        await message.answer("На этом моменте вы просмотрели все новости, переход к следующей ветке (она пока не поключена)")
+
 
 @router.message((F.text.contains('Хватит, пропустим остальные источники')))
 async def skip_web(message: Message, state=FSMContext):
@@ -552,7 +555,6 @@ async def skip_web(message: Message, state=FSMContext):
     lst_web_answers = str(', '.join(not_viewed))
     next_channel = str(not_viewed[0])
     await state.update_data(not_viewed_chanel=not_viewed[0])
-
     await message.answer("Я хотел показать вам еще, как врут "
                          f"{lst_web_answers}, ведь вы "
                          "отметили, что доверяете им. Для нашей "
@@ -589,7 +591,6 @@ async def antip_truth_game_start(message: Message, state=FSMContext):
         count = (await state.get_data())['gamecount']
     except:
         count = 0
-
     how_many_rounds = data_getter("SELECT COUNT (*) FROM public.truthgame")[0][0]
     print(f"В таблице {how_many_rounds} записей, а вот счетчик сейчас {count}")
     if count < how_many_rounds:
