@@ -486,7 +486,6 @@ async def revealing_the_news(message: types.Message, state=FSMContext):
     data = await state.get_data()
     viewed_channel = data['viewed_channel']  # Просматриваемый канал  менять эту дату для следующих каналов
     count_news = data['count_news']  # Получаю номер новости
-    print(viewed_channel)
     if count_news <= 3:  # Проверка если новости закончились
         markup = await keyboard_for_next_chanel(f"Покажи еще новость с {viewed_channel}")
         channel_exposure = channels[channels.index(viewed_channel) + 1]
@@ -529,8 +528,6 @@ async def show_more(message: types.Message, state=FSMContext):
 @router.message((F.text.contains('Достаточно, мне все понятно')))
 async def revealing_the_news(message: Message, state=FSMContext):
     data = await state.get_data()
-    print(data['answers_str'])
-    print(data['all_viwed'])
     if len(data['answers_str']) - len(data['all_viwed']) != 0:
         # Посмотрел ли юзер все источники
         data = await state.get_data()

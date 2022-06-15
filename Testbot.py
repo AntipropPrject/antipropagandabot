@@ -11,8 +11,7 @@ from handlers.donbass_handlers import select_handler, option_two_hand, option_th
 from handlers.started_message import welcome_messages
 from handlers.other import other_file
 from log import logg
-
-
+from pymongo import MongoClient, errors
 
 try:
     # Подключение к существующей базе данных
@@ -21,7 +20,7 @@ try:
     cur = con.cursor()
     con.autocommit = True
 
-    # Выполнение SQL-запроса
+    # Получение версии
 
     cur.execute("SELECT version();")
     record = cur.fetchone()
@@ -29,13 +28,12 @@ try:
 
     # Удаление таблицы
 
-    # cur.execute("DROP TABLE IF EXISTS truthgame")
-    # logg.get_info("Table truthgame has been deleted".upper())
+    cur.execute("DROP TABLE IF EXISTS truthgame")
+    logg.get_info("Table truthgame has been deleted".upper())
     cur.execute("DROP TABLE IF EXISTS texts")
     logg.get_info("Table texts has been deleted".upper())
     cur.execute("DROP TABLE IF EXISTS assets")
     logg.get_info("Table assets has been deleted".upper())
-
 
     # Создание таблиц
 
@@ -51,8 +49,7 @@ try:
             )''')
     logg.get_info("Assets table created".upper())
 
-
-    cur.execute('''CREATE TABLE public.truthgame (
+    cur.execute('''CREATE TABLE public.truthgame(
 	            "id" int4 NOT NULL,
 	            truth bool NOT NULL,
 	            asset_name varchar NULL,
@@ -60,7 +57,9 @@ try:
 	            belivers int4 NOT NULL,
 	            nonbelivers int4 NOT NULL,
 	            rebuttal varchar NULL,
-	            CONSTRAINT truthgame_pk PRIMARY KEY (id));''')
+	            CONSTRAINT truthgame_pk PRIMARY KEY (id)
+	            );''')
+
 
     cur.execute('ALTER TABLE public.truthgame ADD CONSTRAINT truthgame_fk FOREIGN KEY (asset_name) REFERENCES public.assets("name");')
     cur.execute('ALTER TABLE public.truthgame ADD CONSTRAINT truthgame_fk_1 FOREIGN KEY (text_name) REFERENCES public.texts("name");')
@@ -92,6 +91,15 @@ try:
 
 except (Exception, Error) as error:
     logg.get_error(f"PostgreSQL, {error}", __file__)
+
+# MONGODB
+
+try:
+    client = all_data().get_mongo()
+    # Получение версии
+    logg.get_info(f"You connect to - server MongoDb - version - {client.server_info()['version']} \n".upper())
+except (Exception, Error) as error:
+    logg.get_error(f"MongoDB, {error}", __file__)
 
 
 async def main():

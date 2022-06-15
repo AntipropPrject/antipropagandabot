@@ -1,23 +1,30 @@
 from aiogram import Bot
 import psycopg2
 from redis import from_url
+import pymongo
 
 
 class all_data():
-    def __init__(hi):
-        hi.redis_url = 'redis://localhost:2342'
-        hi.postgres_data = 'dbname=antiprop_db user=postgres password=postgres'
-        hi.bot_token = '5480651654:AAHN90GGJui6qFWJUzS6DByNpCPYrsm83AM'
-        hi.admins = (5306348087, 5177494340, 5581082758, 5316104187)
-# фывфывфдв
-    def get_bot(hi):
-        return Bot(hi.bot_token, parse_mode="HTML")
+    def __init__(self):
+        self.redis_url = 'redis://localhost:2342'
+        self.postgres_data = 'dbname=antiprop_db user=postgres password=postgres'
+        self.mongodb_data = 'mongodb://localhost:27017'
+        self.bot_token = '5412151268:AAFZdBmq7K1D0x_KK6J7yf0PvL8UMM8pODE'
+        self.admins = (5306348087, 5177494340, 5581082758, 5316104187)
 
-    def get_postg(hi):
+
+# фывфывфдв
+    def get_bot(self):
+        return Bot(self.bot_token, parse_mode="HTML")
+
+    def get_postg(self):
         return psycopg2.connect(database="postgres", user="postgres", password="postgres", host="localhost")
 
-    def get_red(hi):
-        return from_url(hi.redis_url, decode_responses=True)
+    def get_mongo(self):
+        return pymongo.MongoClient(host=self.mongodb_data, username='mongoOTPOR', password='mongoOTPOR')
 
-    def get_data_red(hi):
+    def get_red(self):
+        return from_url(self.redis_url, decode_responses=True)
+
+    def get_data_red(self):
         return from_url('redis://localhost:2342/1', decode_responses=True)
