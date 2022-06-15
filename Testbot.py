@@ -5,9 +5,7 @@ from aiogram import Dispatcher
 from aiogram.dispatcher.fsm.storage.redis import RedisStorage
 from psycopg2 import Error
 from bata import all_data
-from handlers import admin_hand, start_hand, anti_prop_hand, smi_hand
-from handlers.donbass_handlers import select_handler, option_two_hand, option_three_hand, option_four_hand, \
-    option_five_hand, option_six_hand, option_seven_hand, option_eight_hand, final_donbass_hand
+from handlers import admin_hand, start_hand, anti_prop_hand, smi_hand, donbass_hand, true_resons_hand
 from handlers.started_message import welcome_messages
 from handlers.other import other_file
 from log import logg
@@ -29,11 +27,11 @@ try:
 
     # Удаление таблицы
 
-    # cur.execute("DROP TABLE IF EXISTS truthgame")
-    # logg.get_info("Table truthgame has been deleted".upper())
-    cur.execute("DROP TABLE IF EXISTS texts")
+    cur.execute("DROP TABLE IF EXISTS truthgame")
+    logg.get_info("Table truthgame has been deleted".upper())
+    cur.execute("DROP TABLE IF EXISTS texts ")
     logg.get_info("Table texts has been deleted".upper())
-    cur.execute("DROP TABLE IF EXISTS assets")
+    cur.execute("DROP TABLE IF EXISTS assets ")
     logg.get_info("Table assets has been deleted".upper())
 
 
@@ -99,20 +97,20 @@ async def main():
     bot = data.get_bot()
     storage = RedisStorage.from_url(data.redis_url)
     dp = Dispatcher(storage)
+    #Технические роутеры
+    dp.include_router(admin_hand.router)
+    dp.include_router(start_hand.router)
+
+    #Начало и антипропаганда
     dp.include_router(welcome_messages.router)
     dp.include_router(anti_prop_hand.router)
-    dp.include_router(start_hand.router)
     dp.include_router(smi_hand.router)
-    dp.include_router(admin_hand.router)
-    dp.include_router(select_handler.router)
-    dp.include_router(option_two_hand.router)
-    dp.include_router(option_three_hand.router)
-    dp.include_router(option_four_hand.router)
-    dp.include_router(option_five_hand.router)
-    dp.include_router(option_six_hand.router)
-    dp.include_router(option_seven_hand.router)
-    dp.include_router(option_eight_hand.router)
-    dp.include_router(final_donbass_hand.router)
+
+    #Роутеры причин войны
+    dp.include_router(true_resons_hand.router)
+    dp.include_router(donbass_hand.router)
+
+    #Роутер для неподошедшего
     dp.include_router(other_file.router)
 
     await bot.delete_webhook(drop_pending_updates=True)
