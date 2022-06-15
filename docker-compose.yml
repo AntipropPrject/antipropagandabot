@@ -1,6 +1,17 @@
 version: "3.8"
 
 services:
+
+  mongodb:
+    image: mongo:5.0
+    ports:
+      - 27017:27017
+    volumes:
+      - ~/apps/mongo:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=mongoOTPOR
+      - MONGO_INITDB_ROOT_PASSWORD=mongoOTPOR
+
   db:
     image: postgres:12
     container_name: antiprop_posgres

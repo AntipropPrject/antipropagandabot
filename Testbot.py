@@ -13,6 +13,7 @@ from handlers.other import other_file
 from log import logg
 
 
+
 try:
     # Подключение к существующей базе данных
     con = all_data().get_postg()
@@ -28,8 +29,8 @@ try:
 
     # Удаление таблицы
 
-    cur.execute("DROP TABLE IF EXISTS truthgame")
-    logg.get_info("Table truthgame has been deleted".upper())
+    # cur.execute("DROP TABLE IF EXISTS truthgame")
+    # logg.get_info("Table truthgame has been deleted".upper())
     cur.execute("DROP TABLE IF EXISTS texts")
     logg.get_info("Table texts has been deleted".upper())
     cur.execute("DROP TABLE IF EXISTS assets")
