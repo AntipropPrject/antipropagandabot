@@ -87,3 +87,11 @@ class WarReason(BaseFilter):
             return True
         else:
             return False
+
+
+class PutinFilter(BaseFilter):
+    async def __call__(self, message: Message):
+        if 'Владимир Путин' in await poll_get(f'Start_answers: who_to_trust: {message.from_user.id}'):
+            return True
+        else:
+            return False
