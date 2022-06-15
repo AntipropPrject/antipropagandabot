@@ -8,7 +8,7 @@ from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 import bata
-from DBuse import data_getter, pandas_csv_add
+from DBuse import data_getter, pandas_csv_add, sql_safe_select
 from handlers.admin_hand import admin_home
 from keyboards.admin_keys import main_admin_keyboard
 from states.antiprop_states import propaganda_victim
@@ -18,12 +18,13 @@ router = Router()
 
 
 @router.message(commands=["donbass"])
-async def cmd_start(message: Message):
+async def cmd_start(message: Message, state: FSMContext):
+    await state.clear()
+    await state.set_state(donbass_state.eight_years)
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="8 лет Украина бомбила Донбасс и убивала там детей"))
-    await message.answer("Здравствуйте. Вы решили поговорить о Донбассе, не так ли?",
-                         reply_markup=nmarkup.as_markup(resize_keyboard=True,
-                                                        input_field_placeholder="Кстати, я разместил тут разные фразы поддержки и советы, как вам?"))
+    nmarkup.row(types.KeyboardButton(text='Начнем'))
+    nmarkup.adjust(1,2)
+    await message.answer('Вход в донбасс', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 

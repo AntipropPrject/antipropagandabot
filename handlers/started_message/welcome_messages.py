@@ -64,9 +64,9 @@ async def message_2(message: types.Message, state: FSMContext):
     await state.set_state(welcome_states.start_dialog.dialogue_4)
 
 
-@router.message(welcome_states.start_dialog.dialogue_4, text_contains=('(СВО)'), content_types=types.ContentType.TEXT, text_ignore_case=True)
-@router.message(welcome_states.start_dialog.dialogue_4, text_contains=('Вторжение', 'Украину'), content_types=types.ContentType.TEXT, text_ignore_case=True)
+@router.message(welcome_states.start_dialog.dialogue_4, ((F.text == 'Специальная военная операция (СВО)') | (F.text == 'Война / Вторжение в Украину')))
 async def message_3(message: types.Message, state: FSMContext):  # Начало опроса
+    await poll_write(f'Start_answers: Is_it_war: {message.from_user.id}', message.text)
     markup = ReplyKeyboardBuilder()
     markup.add(types.KeyboardButton(text="Задавай"))
     markup.add(types.KeyboardButton(text="А долго будешь допрашивать?"))

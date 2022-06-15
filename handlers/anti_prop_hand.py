@@ -12,6 +12,7 @@ from keyboards.map_keys import antip_why_kb, antip_killme_kb
 from states.antiprop_states import propaganda_victim
 from resources.all_polls import web_prop
 from resources.other_lists import channels
+from handlers.true_resons_hand import truereasons_state
 
 
 router = Router()
@@ -50,7 +51,7 @@ async def antiprop_all_yes_second(message: Message, state=FSMContext):
 
 @router.message(TVPropagandaFilter(option="Скорее нет"), (F.text == 'Поехали!'))
 async def rather_no_TV(message: Message, state=FSMContext):
-    text = await sql_safe_select('text', 'texts', {'name': 'rather_no_TV'})
+    text = await sql_safe_select('text', 'texts', {'name': 'antip_rather_no_TV'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Открой мне глаза 👀"))
     nmarkup.row(types.KeyboardButton(text="Ну удиви меня 🤔"))
@@ -710,3 +711,13 @@ async def antip_to_the_main(message: Message, state=FSMContext):
 async def antip_to_the_main(message: Message, state=FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_prop_difference'})
     await message.answer(text, reply_markup=antip_why_kb())
+
+
+#По хорошему, это уже начало войны
+@router.message((F.text.contains('Поговорим')) & (F.text.contains('войну')) & (F.text.contains('Украине')))
+async def from_the_reasons(message: Message, state=FSMContext):
+    await state.set_state(truereasons_state.main)
+    text = await sql_safe_select('text', 'texts', {'name': 'war_point_now'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Продолжай"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
