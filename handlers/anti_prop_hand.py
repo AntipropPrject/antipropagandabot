@@ -5,8 +5,8 @@ from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-from DBuse import poll_get, redis_pop
-from DBuse import sql_safe_select, data_getter, sql_safe_update
+from data_base.DBuse import poll_get, redis_pop
+from data_base.DBuse import sql_safe_select, data_getter, sql_safe_update
 from filters.All_filters import WebPropagandaFilter, TVPropagandaFilter, PplPropagandaFilter
 from keyboards.map_keys import antip_why_kb, antip_killme_kb
 from states.antiprop_states import propaganda_victim

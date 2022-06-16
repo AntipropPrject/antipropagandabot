@@ -1,13 +1,6 @@
-from aiogram import Router, F, Bot
+from aiogram import Router
 from aiogram import types
-from aiogram.dispatcher.fsm.context import FSMContext
-from aiogram.utils.keyboard import ReplyKeyboardBuilder
-from aiogram.types import ReplyKeyboardRemove
-from DBuse import poll_get, poll_write
-from bata import all_data
-from states import welcome_states
-from DBuse import sql_safe_select
-from states.antiprop_states import propaganda_victim
+
 
 router = Router()
 

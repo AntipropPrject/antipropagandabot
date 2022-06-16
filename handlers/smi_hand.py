@@ -3,7 +3,7 @@ from aiogram import types
 from aiogram.types import Message, Update, Chat
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
-from DBuse import *
+from data_base.DBuse import *
 
 router = Router()
 
