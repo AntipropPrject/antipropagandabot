@@ -71,7 +71,6 @@ class OperationWar(BaseFilter):
 
     async def __call__(self, message: Message):
         war_or_not = await poll_get(f'Start_answers: Is_it_war: {message.from_user.id}')
-        print('HELLO WORLD OF BUGS', war_or_not)
         if war_or_not[0] == self.answer:
             return True
         else:
@@ -83,6 +82,7 @@ class WarReason(BaseFilter):
 
     async def __call__(self, message: Message):
         reason_list = await poll_get(f"Start_answers: Invasion: {message.from_user.id}")
+        print('HELLO WORLD OF BUGS', reason_list)
         if self.answer in reason_list:
             return True
         else:
@@ -90,6 +90,14 @@ class WarReason(BaseFilter):
 
 
 class PutinFilter(BaseFilter):
+    async def __call__(self, message: Message):
+        if 'Владимир Путин' in await poll_get(f'Start_answers: who_to_trust: {message.from_user.id}'):
+            return True
+        else:
+            return False
+
+
+class NaziFilter(BaseFilter):
     async def __call__(self, message: Message):
         if 'Владимир Путин' in await poll_get(f'Start_answers: who_to_trust: {message.from_user.id}'):
             return True

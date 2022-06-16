@@ -222,6 +222,14 @@ async def poll_get(key):
         logg.get_error(f"{error}", __file__)
 
 
+async def redis_delete_from_list(key, item):
+    try:
+        all_data().get_data_red().lrem(key, 0, item)
+    except Exception as error:
+        logg.get_error(f"{error}", __file__)
+
+
+#Одинаковая функция, лол
 async def redis_pop(key):
     try:
         all_data().get_data_red().lpop(key)

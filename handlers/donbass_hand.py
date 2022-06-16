@@ -4,24 +4,25 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
-from data_base.DBuse import poll_write, sql_safe_select, redis_pop, poll_get
+from data_base.DBuse import poll_write, sql_safe_select, redis_pop, poll_get, redis_delete_from_list
 from filters.All_filters import option_filter, WarReason, second_donbass_filter
 from keyboards.main_keys import filler_kb
 from resources.all_polls import donbass_first_poll, donbass_second_poll
 from states.donbass_states import donbass_state
+from handlers.true_resons_hand import truereasons_state
 
 router = Router()
-router.message.filter(WarReason(answer='Защитить русских в Донбассе'))
+router.message.filter(state = donbass_state)
 
 
-@router.message(((F.text == 'Начнем')))
+"""@router.message(((F.text == 'Начнем')))
 async def reasons_war(message: Message, state=FSMContext):
     await state.set_state(donbass_state.eight_years)
     text = await sql_safe_select('text', 'texts', {'name': 'donbass_big_tragedy'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Что главное?'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
-
+"""
 
 @router.message(F.text == 'Что главное?')
 async def donbass_chart_1(message: Message):
@@ -82,6 +83,9 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state=FSM
         await state.update_data(nazi='В Украине процветает неонацизм и геноцид русскоязычного населения')
         text = 'Считать, что люди заслуживают смерти только потому, что у них есть украинский паспорт — и есть нацизм.\n' \
                'В любом случае этот хэндлер будет готов принять любой сценарий, но пока что перейдите к следующей части.'
+        if 'Денацификация / Уничтожить нацистов' not in (
+        await poll_get(f'Start_answers: Invasion: {poll_answer.user.id}')):
+            await poll_write(f'Start_answers: Invasion: {poll_answer.user.id}', 'Денацификация / Уничтожить нацистов')
         await redis_pop(f'Donbass_polls: First: {poll_answer.user.id}')
         await bot.send_message(poll_answer.user.id, text, reply_markup=filler_kb(), parse_mode="HTML")
     elif 'Украинцам надо было просто сдаться, тогда бы стольких жертв не было' in true_options:
@@ -163,14 +167,15 @@ async def donbas_OOH(message: Message, state=FSMContext):
                 (F.text.in_({'Договорились', "Хорошо", "Понятно"})))
 async def donbas_nazi(message: Message, state=FSMContext):
     await state.update_data(nazi='В Украине процветает неонацизм и геноцид русскоязычного населения')
+    if 'Денацификация / Уничтожить нацистов' not in (await poll_get(f'Start_answers: Invasion: {message.from_user.id}')):
+        await poll_write(f'Start_answers: Invasion: {message.from_user.id}', 'Денацификация / Уничтожить нацистов')
+        print('TEST NAZI')
     text = await sql_safe_select('text', 'texts', {'name': 'donbas_nazi'})
     await redis_pop(f'Donbass_polls: First: {message.from_user.id}')
     await message.answer(text, reply_markup=filler_kb())
 
 
-@router.message(
-    option_filter(option='Это укронацисты стреляют по своим же жителям! Мы же бьем только по военным объектам'),
-    (F.text.in_({'Договорились', "Хорошо", "Понятно"})))
+@router.message(option_filter(option='Это укронацисты стреляют по своим же жителям! Мы же бьем только по военным объектам'), (F.text.in_({'Договорились', "Хорошо", "Понятно"})))
 async def donbas_only_war_objects(message: Message, state=FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'only_war_objects'})
     nmarkup = ReplyKeyboardBuilder()
@@ -377,10 +382,9 @@ async def donbas_no_army_here(message: Message, state=FSMContext):
 
 @router.message(state=donbass_state.after_second_poll)
 async def donbas_no_army_here(message: Message, state=FSMContext):
-    await redis_pop(f'Start_answers: Invasion: {message.from_user.id}')
-    await redis_pop(f'Start_answers: Invasion: {message.from_user.id}')
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Почему бы и нет"))
-    await message.answer(
-        "Рад, что мы разобрали все, что связано с Донбассом. Вернемся же к причинам войны.\nВ дальнейшем это сообщение может не понадобиться, но сейчас оно есть.",
-        reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    #Удаление из списка донбасса
+    await redis_delete_from_list(f'Start_answers: Invasion: {message.from_user.id}', "Защитить русских в Донбассе")
+    await state.set_state(truereasons_state.main)
+    await message.answer("Рад, что мы разобрали все, что связано с Донбассом. Вернемся же к причинам войны.\nВ дальнейшем это сообщение может не понадобиться, но сейчас оно есть.", reply_markup=nmarkup.as_markup(resize_keyboard=True))

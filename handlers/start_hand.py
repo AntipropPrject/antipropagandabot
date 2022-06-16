@@ -22,7 +22,7 @@ async def cmd_start(message: Message, state: FSMContext):
     await state.clear()
     await state.set_state(donbass_state.eight_years)
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text='Начнем'))
+    nmarkup.row(types.KeyboardButton(text='Что главное?'))
     nmarkup.adjust(1,2)
     await message.answer('Вход в донбасс', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
