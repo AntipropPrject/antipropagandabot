@@ -1,7 +1,7 @@
 from aiogram.dispatcher.filters import BaseFilter
 from aiogram.types import Message
 from typing import Union, Dict, Any
-from DBuse import poll_get
+from data_base.DBuse import poll_get
 
 
 class option_filter(BaseFilter):

@@ -3,13 +3,12 @@ from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from aiogram.types import ReplyKeyboardRemove
-from DBuse import poll_get, poll_write
+from data_base.DBuse import poll_get, poll_write, sql_safe_select, mongo_add, mongo_select, mongo_update
 from bata import all_data
 from states import welcome_states
-from DBuse import sql_safe_select
 from states.antiprop_states import propaganda_victim
 from resources.all_polls import web_prop
-from DBuse import mongo_add, mongo_select, mongo_update
+
 
 router = Router()
 
