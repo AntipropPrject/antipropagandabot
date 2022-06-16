@@ -8,7 +8,7 @@ from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 import bata
-from DBuse import data_getter, poll_write, sql_safe_select, redis_pop, poll_get, sql_safe_update
+from data_base.DBuse import data_getter, poll_write, sql_safe_select, redis_pop, poll_get, sql_safe_update
 from handlers.admin_hand import admin_home
 from keyboards.main_keys import filler_kb
 from keyboards.admin_keys import main_admin_keyboard
@@ -158,7 +158,7 @@ async def putin_game1_are_you_sure(message: Message, state:FSMContext):
 
 
 @router.message(((F.text == "Нет, хватит с меня")), state=StateofPutin.game1)
-async def putin_game1_are_you_sure(message: Message, state:FSMContext):
+async def putin_plenty_promises(message: Message, state:FSMContext):
     await state.clear()
     await state.set_state(StateofPutin.game2)
     text = await sql_safe_select('text', 'texts', {'name': 'putin_plenty_promises'})
@@ -168,7 +168,7 @@ async def putin_game1_are_you_sure(message: Message, state:FSMContext):
 
 
 @router.message(((F.text == "Давай")), state=StateofPutin.game2)
-async def putin_game1_are_you_sure(message: Message, state:FSMContext):
+async def putin_nothing_done(message: Message, state:FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'putin_nothing_done'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Начнем!"))
@@ -176,8 +176,10 @@ async def putin_game1_are_you_sure(message: Message, state:FSMContext):
 
 
 @router.message(((F.text == "Начнем!")), state=StateofPutin.game2)
-async def putin_game1_are_you_sure(message: Message, state:FSMContext):
-    text = await sql_safe_select('text', 'texts', {'name': 'putin_nothing_done'})
+async def putin_gaming(message: Message, state:FSMContext):
+    text = await sql_safe_select('text', 'texts', {'name': 'putin_gaming'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Начнем!"))
+    nmarkup.row(types.KeyboardButton(text="Я готов(а)"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
+
