@@ -205,6 +205,7 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, state=FSMCont
     for index in lst_answers:
         lst.append(lst_options[index])
         await poll_write(f'Start_answers: who_to_trust: {poll_answer.user.id}', lst_options[index])
+        await poll_write(f'Start_answers: who_to_trust_persons: {poll_answer.user.id}', lst_options[index])
     await state.update_data(answer_5=poll_answer.option_ids)
     text = await sql_safe_select("text", "texts", {"name": "start_thank_you"})
     await Bot(all_data().bot_token).send_message(poll_answer.user.id, text, reply_markup=markup.as_markup(resize_keyboard=True))
