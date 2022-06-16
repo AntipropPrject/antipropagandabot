@@ -72,9 +72,8 @@ async def putin_only_one(message: Message, state=FSMContext):
 async def putin_so_handsome(message: Message, state=FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'putin_so_handsome'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Может и есть, но пока их не видно"))
-    nmarkup.row(types.KeyboardButton(text="Конечно такие люди есть"))
-    nmarkup.row(types.KeyboardButton(text="Не говори так, Путин с нами надолго!"))
+    nmarkup.row(types.KeyboardButton(text="Скорее да"))
+    nmarkup.row(types.KeyboardButton(text="Скорее нет"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -96,7 +95,7 @@ async def putin_game_of_lie(message: Message, state:FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(((F.text == "Приступим!") | (F.text == "Ладно, давай еще")), state=StateofPutin.game1)
+@router.message(((F.text == "Приступим!") | (F.text == "Ладно, давай еще") | (F.text == "Продолжаем!")), state=StateofPutin.game1)
 async def putin_game1_question(message: Message, state:FSMContext):
     try:
         count = (await state.get_data())['pgamecount']
@@ -111,8 +110,7 @@ async def putin_game1_question(message: Message, state:FSMContext):
                                  "left outer join texts ON text_name = texts.name "
                                  f"where id = {count}")[0]
         print(truth_data)
-        await state.update_data(pgamecount=count, rebuttal=truth_data[4], belive=truth_data[2],
-                                not_belive=truth_data[3])
+        await state.update_data(pgamecount=count, belive=truth_data[2], not_belive=truth_data[3])
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Это случайная ошибка"))
         nmarkup.row(types.KeyboardButton(text="Специально соврал!"))
@@ -122,29 +120,33 @@ async def putin_game1_question(message: Message, state:FSMContext):
             except:
                 await message.answer_photo(truth_data[0], reply_markup=nmarkup.as_markup(resize_keyboard=True))
         else:
-            await message.answer(truth_data[1], reply_markup=nmarkup.as_markup(resize_keyboard=True))
+            await message.answer(f'{truth_data[1]}\n\nНа самом же деле...{truth_data[4]}\n', reply_markup=nmarkup.as_markup(resize_keyboard=True))
     else:
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Давай"))
         await message.answer(
-            "Ой, у меня закончились примеры :(\n\nДавайте я лучше вместо этого расскажу вам анекдот!",
-            reply_markup=nmarkup.as_markup())
+            "Ой, у меня закончились примеры :(\nНо не волуйтесь, у меня для вас есть еще одна игра!",
+            reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message(((F.text == "Это случайная ошибка") | (F.text == "Специально соврал!")), state=StateofPutin.game1)
 async def putin_game1_answer(message: Message, state=FSMContext):
     data = await state.get_data()
     base_update_dict = dict()
+    print (data)
     if message.text == "Это случайная ошибка":
-        base_update_dict.update({'belivers':data['belive']+1})
+        print(data['belive'] + 1)
+        base_update_dict.update({'belivers':(data['belive']+1)})
+        print(base_update_dict)
     elif message.text == "Специально соврал!":
-        base_update_dict.update({'nonbelivers': data['not_belive'] + 1})
-    await sql_safe_update("putin_lies", base_update_dict, {'id': str(data['pgamecount'])})
+        base_update_dict.update({'nonbelivers': (data['not_belive'] + 1)})
+        print(base_update_dict)
+    await sql_safe_update("putin_lies", base_update_dict, {'id': data['pgamecount']})
     t_percentage = data['belive'] / (data['belive'] + data['not_belive'])
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжаем!"))
     nmarkup.row(types.KeyboardButton(text="Достаточно."))
-    await message.answer(f'А вот что думают другие участники:\nПравда: {round(t_percentage * 100, 1)}%\nЛожь: {round((100 - t_percentage * 100), 1)}',
+    await message.answer(f'А вот что думают другие участники:\nСлучайная ошибка: {round(t_percentage * 100, 1)}%\nНамеренная ложь: {round((100 - t_percentage * 100), 1)}',
         reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -157,7 +159,7 @@ async def putin_game1_are_you_sure(message: Message, state:FSMContext):
 
 
 
-@router.message(((F.text == "Нет, хватит с меня")), state=StateofPutin.game1)
+@router.message(((F.text == "Нет, хватит с меня") | (F.text == "Давай")), state=StateofPutin.game1)
 async def putin_plenty_promises(message: Message, state:FSMContext):
     await state.clear()
     await state.set_state(StateofPutin.game2)
@@ -171,11 +173,11 @@ async def putin_plenty_promises(message: Message, state:FSMContext):
 async def putin_nothing_done(message: Message, state:FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'putin_nothing_done'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Начнем!"))
+    nmarkup.row(types.KeyboardButton(text="Да, начнем!"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(((F.text == "Начнем!")), state=StateofPutin.game2)
+@router.message(((F.text == "Да, начнем!")), state=StateofPutin.game2)
 async def putin_gaming(message: Message, state:FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'putin_gaming'})
     nmarkup = ReplyKeyboardBuilder()
@@ -183,3 +185,82 @@ async def putin_gaming(message: Message, state:FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
+@router.message(((F.text == "Я готов(а)") | (F.text == "Ну давай еще") | (F.text == "Продолжаем!")), state=StateofPutin.game2)
+async def putin_game2_question(message: Message, state:FSMContext):
+    try:
+        count = (await state.get_data())['pgamecount']
+    except:
+        count = 0
+    how_many_rounds = data_getter("SELECT COUNT (*) FROM public.putin_old_lies")[0][0]
+    print(f"В таблице {how_many_rounds} записей, а вот счетчик сейчас {count}")
+    if count < how_many_rounds:
+        count += 1
+        truth_data = data_getter("SELECT t_id, text, belivers, nonbelivers, rebuttal FROM public.putin_old_lies "
+                                 "left outer join assets on asset_name = assets.name "
+                                 "left outer join texts ON text_name = texts.name "
+                                 f"where id = {count}")[0]
+        print(truth_data)
+        await state.update_data(pgamecount=count, belive=truth_data[2], not_belive=truth_data[3])
+        nmarkup = ReplyKeyboardBuilder()
+        nmarkup.row(types.KeyboardButton(text="В этом он не виноват"))
+        nmarkup.row(types.KeyboardButton(text="Он виноват в этом"))
+        if truth_data[0] != None:
+            try:
+                await message.answer_video(truth_data[0], reply_markup=nmarkup.as_markup(resize_keyboard=True))
+            except:
+                await message.answer_photo(truth_data[0], reply_markup=nmarkup.as_markup(resize_keyboard=True))
+        else:
+            await message.answer(f'Вот что обещал Путин:\n\n{truth_data[1]}\n\nНа самом же деле...{truth_data[4]}\n', reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    else:
+        nmarkup = ReplyKeyboardBuilder()
+        nmarkup.row(types.KeyboardButton(text="Хорошо, давай дальше"))
+        await message.answer(
+            "Боюсь, что пока что у меня кончились примеры. Я поищу еще, а пока что продолжим",
+            reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
+
+@router.message(((F.text == "В этом он не виноват") | (F.text == "Он виноват в этом")), state=StateofPutin.game2)
+async def putin_game2_answer(message: Message, state=FSMContext):
+    data = await state.get_data()
+    print(data)
+    base_update_dict = dict()
+    if message.text == "В этом он не виноват":
+        print(data['belive'] + 1)
+        base_update_dict.update({'belivers': (data['belive'] + 1)})
+    elif message.text == "Он виноват в этом":
+        base_update_dict.update({'nonbelivers': (data['not_belive'] + 1)})
+    await sql_safe_update("putin_old_lies", base_update_dict, {'id': data['pgamecount']})
+    t_percentage = data['belive'] / (data['belive'] + data['not_belive'])
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Продолжаем!"))
+    nmarkup.row(types.KeyboardButton(text="Достаточно."))
+    await message.answer(
+        f'А вот что думают другие участники:\nПутин в этом виноват: {round((100 - t_percentage * 100), 1)}% \n Путин не виноват: {round(t_percentage * 100, 1)}%',
+        reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
+
+@router.message(((F.text == "Достаточно.")), state=StateofPutin.game2)
+async def putin_game2_are_you_sure(message: Message, state:FSMContext):
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Ну давай еще"))
+    nmarkup.row(types.KeyboardButton(text="Мне уже хватит"))
+    await message.answer('Вы уверены? У меня еще есть примеры',reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
+
+
+@router.message(((F.text == "Мне уже хватит") | (F.text == "Хорошо, давай дальше")), state=StateofPutin.game2)
+async def putin_in_the_past(message: Message, state:FSMContext):
+    await state.clear()
+    await state.set_state(StateofPutin.final)
+    text = await sql_safe_select('text', 'texts', {'name': 'putin_in_the_past'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Да, я согласен(сна)"))
+    nmarkup.row(types.KeyboardButton(text="Нет, я не согласен(сна)"))
+    nmarkup.row(types.KeyboardButton(text="Докажи"))
+    await message.answer(text,reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
+
+
+@router.message(((F.text == "Да, я согласен(сна)") | (F.text == "Военный преступник") | (F.text == "Был хорошим раньше")), state=StateofPutin)
+async def putin_plenty_promises(message: Message, state:FSMContext):
+    await message.answer('Тут мы переходим к карте "как остановить войну"')

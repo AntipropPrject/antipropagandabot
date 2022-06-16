@@ -119,7 +119,9 @@ async def sql_safe_update(table_name, data_dict, condition_dict):
                                                                             sql.SQL(", ").join(
                                                                                     map(sql.Placeholder, data_dict)),
                                                                             sql.Identifier(where), sql.Literal(equals))
+
         conn = all_data().get_postg()
+        print(safe_query.as_string(conn))
         with conn:
             with conn.cursor() as cur:
                 cur.execute(safe_query, data_dict)
@@ -205,6 +207,7 @@ def pandas_csv_update(table_name, new_values_dict, condition_dict):
         for value in new_values_dict:
             for condition in condition_dict:
                 df.loc[df[condition] == condition_dict[condition], value] = new_values_dict[value]
+        print(df)
         df.to_csv(f'resources/{table_name}.csv', header=True, index=False)
     except Exception as error:
         logg.get_error(f"{error}", __file__)

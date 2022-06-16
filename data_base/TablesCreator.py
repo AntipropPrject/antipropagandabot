@@ -17,6 +17,8 @@ def tables_god():
         logg.get_info(f"You connect to - {record}, \n")
 
         # Удаление таблицы
+        cur.execute("DROP TABLE IF EXISTS putin_old_lies")
+        logg.get_info("Table putin_old_lies has been deleted".upper())
         cur.execute("DROP TABLE IF EXISTS putin_lies")
         logg.get_info("Table putin_lies has been deleted".upper())
         cur.execute("DROP TABLE IF EXISTS truthgame")
@@ -80,6 +82,29 @@ def tables_god():
            REFERENCES public.assets("name");''')
         logg.get_info("PUTIN LIES".upper())
 
+        cur.execute('''CREATE TABLE public.putin_old_lies (
+                            id int4 NOT NULL,
+                            asset_name varchar(50) NULL,
+                            text_name varchar(50) NULL,
+                            belivers int4 NULL,
+                            nonbelivers int4 NULL,
+                            rebuttal varchar(50) NULL,
+                            CONSTRAINT putin_old_lies_pk PRIMARY KEY (id)
+                        );''')
+
+        cur.execute('''ALTER TABLE public.putin_old_lies
+         ADD CONSTRAINT putin_old_lies_fk
+          FOREIGN KEY (text_name)
+           REFERENCES public.texts("name");''')
+        cur.execute('''ALTER TABLE public.putin_old_lies
+         ADD CONSTRAINT putin_old_lies_fk_1
+          FOREIGN KEY (asset_name)
+           REFERENCES public.assets("name");''')
+        logg.get_info("PUTIN OLD LIES CREATED".upper())
+
+
+
+
         # MONGODB
         try:
             client = all_data().get_mongo()
@@ -110,6 +135,12 @@ def tables_god():
         try:
             csv_file_name = 'resources/putin_lies.csv'
             sql = "COPY putin_lies FROM STDIN DELIMITER ',' CSV HEADER"
+            cur.copy_expert(sql, open(csv_file_name, "r"))
+        except Exception as error:
+            logg.get_error(f"{error}", __file__)
+        try:
+            csv_file_name = 'resources/putin_old_lies.csv'
+            sql = "COPY putin_old_lies FROM STDIN DELIMITER ',' CSV HEADER"
             cur.copy_expert(sql, open(csv_file_name, "r"))
         except Exception as error:
             logg.get_error(f"{error}", __file__)
