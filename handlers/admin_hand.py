@@ -6,6 +6,7 @@ from aiogram.dispatcher.fsm.state import State, StatesGroup
 from aiogram.types import Message
 from pandas import DataFrame
 
+from bata import all_data
 from data_base.DBuse import safe_data_getter, data_getter, sql_safe_select, sql_safe_update, sql_safe_insert
 from keyboards.admin_keys import main_admin_keyboard, middle_admin_keyboard, app_admin_keyboard
 
@@ -21,6 +22,8 @@ class admin_home(StatesGroup):
     media_edit_tag = State()
     media_edit = State()
     media_edit_test = State()
+    game_change_tag = State()
+    game_changer_main = State()
 
 router = Router()
 router.message.filter(state = admin_home)
@@ -227,3 +230,22 @@ async def reset(message: Message, state: FSMContext):
         await message.answer('Хорошо, вернемся в меню',
                              reply_markup=main_admin_keyboard())
 
+
+
+@router.message((F.text == 'Изменить игру'), state = admin_home)
+async def game_change_tag(message: Message, state: FSMContext):
+    await state.set_state(admin_home.game_change_tag)
+    await message.answer('Уф. Хорошо, в целях безопасности я попрошу вас прислать внутреннее название необходимой игры')
+
+@router.message(state = admin_home.game_change_tag)
+async def game_changer_main(message: Message, state: FSMContext):
+    query = sql.SQL("SELECT * FROM {};").format(sql.Identifier(message.text))
+    conn = all_data().get_postg()
+    with conn:
+        with conn.cursor() as cur:
+            cur.execute(query)
+            data = cur.fetchall()
+    conn.close()
+    for thing in data:
+        print(thing)
+    await state.set_state(admin_home.game_changer_main)

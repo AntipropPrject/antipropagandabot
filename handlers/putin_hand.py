@@ -16,7 +16,7 @@ from states.antiprop_states import propaganda_victim
 from states.donbass_states import donbass_state
 from resources.all_polls import donbass_first_poll, donbass_second_poll
 from filters.All_filters import option_filter, PutinFilter, second_donbass_filter
-
+from handlers.stopwar_hand import StopWarState
 
 router = Router()
 
@@ -115,10 +115,13 @@ async def putin_game1_question(message: Message, state:FSMContext):
         nmarkup.row(types.KeyboardButton(text="Это случайная ошибка"))
         nmarkup.row(types.KeyboardButton(text="Специально соврал!"))
         if truth_data[0] != None:
+            capt = ""
+            if truth_data[1] != None:
+                capt = truth_data[1]
             try:
-                await message.answer_video(truth_data[0], reply_markup=nmarkup.as_markup(resize_keyboard=True))
+                await message.answer_video(truth_data[0], caption=capt, reply_markup=nmarkup.as_markup(resize_keyboard=True))
             except:
-                await message.answer_photo(truth_data[0], reply_markup=nmarkup.as_markup(resize_keyboard=True))
+                await message.answer_photo(truth_data[0], caption=capt, reply_markup=nmarkup.as_markup(resize_keyboard=True))
         else:
             await message.answer(f'{truth_data[1]}\n\nНа самом же деле...{truth_data[4]}\n', reply_markup=nmarkup.as_markup(resize_keyboard=True))
     else:
@@ -205,10 +208,13 @@ async def putin_game2_question(message: Message, state:FSMContext):
         nmarkup.row(types.KeyboardButton(text="В этом он не виноват"))
         nmarkup.row(types.KeyboardButton(text="Он виноват в этом"))
         if truth_data[0] != None:
+            capt = ""
+            if truth_data[1] != None:
+                capt = truth_data[1]
             try:
-                await message.answer_video(truth_data[0], reply_markup=nmarkup.as_markup(resize_keyboard=True))
+                await message.answer_video(truth_data[0], caption=capt, reply_markup=nmarkup.as_markup(resize_keyboard=True))
             except:
-                await message.answer_photo(truth_data[0], reply_markup=nmarkup.as_markup(resize_keyboard=True))
+                await message.answer_photo(truth_data[0], caption=capt, reply_markup=nmarkup.as_markup(resize_keyboard=True))
         else:
             await message.answer(f'Вот что обещал Путин:\n\n{truth_data[1]}\n\nНа самом же деле...{truth_data[4]}\n', reply_markup=nmarkup.as_markup(resize_keyboard=True))
     else:
@@ -262,5 +268,11 @@ async def putin_in_the_past(message: Message, state:FSMContext):
 
 
 @router.message(((F.text == "Да, я согласен(сна)") | (F.text == "Военный преступник") | (F.text == "Был хорошим раньше")), state=StateofPutin)
-async def putin_plenty_promises(message: Message, state:FSMContext):
-    await message.answer('Тут мы переходим к карте "как остановить войну"')
+async def stopwar_start(message: Message, state:FSMContext):
+    await state.set_state(StopWarState.main)
+    text = ('Давайте поговорим о том, как закончить войну\n\nКак считаете, Путин готов закончить эту войну в ближайшие месяцы?')
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Скорее да"))
+    nmarkup.row(types.KeyboardButton(text="Не знаю"))
+    nmarkup.row(types.KeyboardButton(text="Скорее нет"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))

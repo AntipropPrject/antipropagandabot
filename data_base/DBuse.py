@@ -207,7 +207,6 @@ def pandas_csv_update(table_name, new_values_dict, condition_dict):
         for value in new_values_dict:
             for condition in condition_dict:
                 df.loc[df[condition] == condition_dict[condition], value] = new_values_dict[value]
-        print(df)
         df.to_csv(f'resources/{table_name}.csv', header=True, index=False)
     except Exception as error:
         logg.get_error(f"{error}", __file__)

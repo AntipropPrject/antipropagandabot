@@ -604,10 +604,13 @@ async def antip_truth_game_start(message: Message, state=FSMContext):
         nmarkup.row(types.KeyboardButton(text="Это правда!"))
         nmarkup.row(types.KeyboardButton(text="Это ложь."))
         if truth_data[1] != None:
+            capt = ""
+            if truth_data[2] != None:
+                capt = truth_data[2]
             try:
-                await message.answer_video(truth_data[1], reply_markup=nmarkup.as_markup(resize_keyboard=True))
+                await message.answer_video(truth_data[1], caption=capt, reply_markup=nmarkup.as_markup(resize_keyboard=True))
             except:
-                await message.answer_photo(truth_data[1], reply_markup=nmarkup.as_markup(resize_keyboard=True))
+                await message.answer_photo(truth_data[1], caption=capt, reply_markup=nmarkup.as_markup(resize_keyboard=True))
         else:
             await message.answer(truth_data[2], reply_markup=nmarkup.as_markup(resize_keyboard=True))
     else:
@@ -640,7 +643,7 @@ async def antip_truth_game_answer(message: Message, state=FSMContext):
             reb = ""
         base_update_dict = {'nonbelivers': data['not_belive'] + 1}
         print('Этому верит', base_update_dict)
-    await sql_safe_update("truthgame", base_update_dict, {'id': str(data['gamecount'])})
+    await sql_safe_update("truthgame", base_update_dict, {'id': data['gamecount']})
     t_percentage = data['belive'] / (data['belive'] + data['not_belive'])
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжаем, давай еще!"))

@@ -4,7 +4,7 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message, Update, Chat
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
-from DBuse import *
+from data_base.DBuse import *
 from states.antiprop_states import propaganda_victim
 
 router = Router()
