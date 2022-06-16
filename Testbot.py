@@ -5,9 +5,7 @@ from aiogram import Dispatcher
 from aiogram.dispatcher.fsm.storage.redis import RedisStorage
 from psycopg2 import Error
 from bata import all_data
-from handlers import admin_hand, start_hand, anti_prop_hand, smi_hand
-from handlers.donbass_handlers import select_handler, option_two_hand, option_three_hand, option_four_hand, \
-    option_five_hand, option_six_hand, option_seven_hand, option_eight_hand, final_donbass_hand
+from handlers import admin_hand, start_hand, anti_prop_hand, smi_hand, donbass_hand, true_resons_hand
 from handlers.started_message import welcome_messages
 from handlers.other import other_file
 from log import logg
@@ -29,8 +27,8 @@ try:
 
     # Удаление таблицы
 
-    # cur.execute("DROP TABLE IF EXISTS truthgame")
-    # logg.get_info("Table truthgame has been deleted".upper())
+    cur.execute("DROP TABLE IF EXISTS truthgame")
+    logg.get_info("Table truthgame has been deleted".upper())
     cur.execute("DROP TABLE IF EXISTS texts")
     logg.get_info("Table texts has been deleted".upper())
     cur.execute("DROP TABLE IF EXISTS assets")
@@ -67,6 +65,21 @@ try:
 
     logg.get_info("Truthgame table is created".upper())
 
+    cur.execute('''CREATE TABLE games.putin_lies (
+                        id int4 NOT NULL,
+                        asset_name varchar(50) NULL,
+                        text_name varchar(50) NULL,
+                        belivers int4 NULL,
+                        nonbelivers int4 NULL,
+                        rebuttal varchar(50) NULL,
+                        CONSTRAINT putin_lies_pk PRIMARY KEY (id)
+                    );''')
+
+    cur.execute('ALTER TABLE games.putin_lies ADD CONSTRAINT putin_lies_fk FOREIGN KEY (text_name) REFERENCES public.texts("name");')
+    cur.execute('ALTER TABLE games.putin_lies ADD CONSTRAINT putin_lies_fk_1 FOREIGN KEY (asset_name) REFERENCES public.assets("name");')
+
+    logg.get_info("PUTIN LIES".upper())
+
     try:
         csv_file_name = 'resources/assets.csv'
         sql = "COPY assets FROM STDIN DELIMITER ',' CSV HEADER"
@@ -99,21 +112,24 @@ async def main():
     bot = data.get_bot()
     storage = RedisStorage.from_url(data.redis_url)
     dp = Dispatcher(storage)
+    #Технические роутеры
+    dp.include_router(admin_hand.router)
+    dp.include_router(start_hand.router)
+
+    #Начало и антипропаганда
     dp.include_router(welcome_messages.router)
     dp.include_router(anti_prop_hand.router)
-    dp.include_router(start_hand.router)
     dp.include_router(smi_hand.router)
-    dp.include_router(admin_hand.router)
-    dp.include_router(select_handler.router)
-    dp.include_router(option_two_hand.router)
-    dp.include_router(option_three_hand.router)
-    dp.include_router(option_four_hand.router)
-    dp.include_router(option_five_hand.router)
-    dp.include_router(option_six_hand.router)
-    dp.include_router(option_seven_hand.router)
-    dp.include_router(option_eight_hand.router)
-    dp.include_router(final_donbass_hand.router)
+
+    #Роутеры причин войны
+    dp.include_router(true_resons_hand.router)
+    dp.include_router(donbass_hand.router)
+
+    #Роутер для неподошедшего
     dp.include_router(other_file.router)
+
+    await bot.delete_webhook(drop_pending_updates=True)
+    await dp.start_polling(bot)
 
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
