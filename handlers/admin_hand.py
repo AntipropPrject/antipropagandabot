@@ -6,7 +6,7 @@ from aiogram.dispatcher.fsm.state import State, StatesGroup
 from aiogram.types import Message
 from pandas import DataFrame
 
-from DBuse import safe_data_getter, data_getter, sql_safe_select, sql_safe_update, sql_safe_insert
+from data_base.DBuse import safe_data_getter, data_getter, sql_safe_select, sql_safe_update, sql_safe_insert
 from keyboards.admin_keys import main_admin_keyboard, middle_admin_keyboard, app_admin_keyboard
 
 class admin_home(StatesGroup):

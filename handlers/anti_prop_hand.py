@@ -5,13 +5,14 @@ from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-from DBuse import poll_get, redis_pop
-from DBuse import sql_safe_select, data_getter, sql_safe_update
+from data_base.DBuse import poll_get, redis_pop
+from data_base.DBuse import sql_safe_select, data_getter, sql_safe_update
 from filters.All_filters import WebPropagandaFilter, TVPropagandaFilter, PplPropagandaFilter
 from keyboards.map_keys import antip_why_kb, antip_killme_kb
 from states.antiprop_states import propaganda_victim
 from resources.all_polls import web_prop
 from resources.other_lists import channels
+from handlers.true_resons_hand import truereasons_state
 
 
 router = Router()
@@ -50,7 +51,7 @@ async def antiprop_all_yes_second(message: Message, state=FSMContext):
 
 @router.message(TVPropagandaFilter(option="Скорее нет"), (F.text == 'Поехали!'))
 async def rather_no_TV(message: Message, state=FSMContext):
-    text = await sql_safe_select('text', 'texts', {'name': 'rather_no_TV'})
+    text = await sql_safe_select('text', 'texts', {'name': 'antip_rather_no_TV'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Открой мне глаза 👀"))
     nmarkup.row(types.KeyboardButton(text="Ну удиви меня 🤔"))
@@ -486,7 +487,6 @@ async def revealing_the_news(message: types.Message, state=FSMContext):
     data = await state.get_data()
     viewed_channel = data['viewed_channel']  # Просматриваемый канал  менять эту дату для следующих каналов
     count_news = data['count_news']  # Получаю номер новости
-    print(viewed_channel)
     if count_news <= 3:  # Проверка если новости закончились
         markup = await keyboard_for_next_chanel(f"Покажи еще новость с {viewed_channel}")
         channel_exposure = channels[channels.index(viewed_channel) + 1]
@@ -529,8 +529,6 @@ async def show_more(message: types.Message, state=FSMContext):
 @router.message((F.text.contains('Достаточно, мне все понятно')))
 async def revealing_the_news(message: Message, state=FSMContext):
     data = await state.get_data()
-    print(data['answers_str'])
-    print(data['all_viwed'])
     if len(data['answers_str']) - len(data['all_viwed']) != 0:
         # Посмотрел ли юзер все источники
         data = await state.get_data()
@@ -713,3 +711,13 @@ async def antip_to_the_main(message: Message, state=FSMContext):
 async def antip_to_the_main(message: Message, state=FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_prop_difference'})
     await message.answer(text, reply_markup=antip_why_kb())
+
+
+#По хорошему, это уже начало войны
+@router.message((F.text.contains('Поговорим')) & (F.text.contains('войну')) & (F.text.contains('Украине')))
+async def from_the_reasons(message: Message, state=FSMContext):
+    await state.set_state(truereasons_state.main)
+    text = await sql_safe_select('text', 'texts', {'name': 'war_point_now'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Продолжай"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))

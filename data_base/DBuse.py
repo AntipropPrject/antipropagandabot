@@ -2,10 +2,12 @@ from psycopg2 import sql
 from bata import all_data
 import os
 from pandas import DataFrame, read_csv
+
 from log import logg
 
+"""^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^PostgreSQL^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"""
 
-# postgresSQL
+
 def data_getter(query):
     try:
         conn = all_data().get_postg()
@@ -42,13 +44,14 @@ async def sql_safe_select(column, table_name, condition_dict):
                 ident_list.append(sql.Identifier(i))
         elif isinstance(column, str):
             ident_list.append(sql.Identifier(column))
-        safe_query = sql.SQL("SELECT {col_names} from {} WHERE {} = {};").format(
-            sql.Identifier(table_name), sql.SQL(', ').join(map(sql.Identifier, condition_dict)),
-            sql.SQL(", ").join(map(sql.Placeholder, condition_dict)),
-            col_names=sql.SQL(',').join(ident_list)
-        )
+        safe_query = sql.SQL("SELECT {col_names} from {} WHERE {} = {};").format(sql.Identifier(table_name),
+                                                                                 sql.SQL(', ').join(map(sql.Identifier,
+                                                                                                        condition_dict)),
+                                                                                 sql.SQL(", ").join(map(sql.Placeholder,
+                                                                                                        condition_dict)),
+                                                                                 col_names=sql.SQL(',').join(
+                                                                                     ident_list))
         conn = all_data().get_postg()
-        print(safe_query.as_string(conn))
         with conn:
             with conn.cursor() as cur:
                 cur.execute(safe_query, condition_dict)
@@ -63,12 +66,14 @@ async def sql_safe_select(column, table_name, condition_dict):
         return False
 
 
-async def sql_safe_select_like(column1, column2,  table_name, first_condition, second_condition):
+async def sql_safe_select_like(column1, column2, table_name, first_condition, second_condition):
     try:
-        safe_query = (
-            f"SELECT {column1} from {table_name} WHERE {column2} LIKE '%{first_condition}%' AND {column2} LIKE '%{str(second_condition)[-5:-1].strip()}%'")
-
-        print(safe_query)
+        safe_query = (f"SELECT {column1}"
+                      f" from {table_name}"
+                      f" WHERE {column2}"
+                      f" LIKE '%{first_condition}%'"
+                      f" AND {column2}"
+                      f" LIKE '%{str(second_condition)[-5:-1].strip()}%'")
         conn = all_data().get_postg()
         with conn:
             with conn.cursor() as cur:
@@ -90,13 +95,9 @@ async def poll_delete_value(key, value):
 
 async def sql_safe_insert(table_name, data_dict):
     try:
-        safe_query = sql.SQL("INSERT INTO {} ({}) VALUES ({});").format(sql.Identifier(table_name),
-                                                                        sql.SQL(', ').join(
-                                                                            map(sql.Identifier, data_dict)),
-                                                                        sql.SQL(", ").join(
-                                                                            map(sql.Placeholder, data_dict)), )
+        safe_query = sql.SQL("INSERT INTO {} ({}) VALUES ({});").format(sql.Identifier(table_name), sql.SQL(', ').join(
+                map(sql.Identifier, data_dict)), sql.SQL(", ").join(map(sql.Placeholder, data_dict)), )
         conn = all_data().get_postg()
-        print(safe_query.as_string(conn))
         with conn:
             with conn.cursor() as cur:
                 cur.execute(safe_query, data_dict)
@@ -114,12 +115,11 @@ async def sql_safe_update(table_name, data_dict, condition_dict):
         equals = condition_dict[where]
         safe_query = sql.SQL("UPDATE {} SET {} = {} WHERE {} = {};").format(sql.Identifier(table_name),
                                                                             sql.SQL(', ').join(
-                                                                                map(sql.Identifier, data_dict)),
+                                                                                    map(sql.Identifier, data_dict)),
                                                                             sql.SQL(", ").join(
-                                                                                map(sql.Placeholder, data_dict)),
+                                                                                    map(sql.Placeholder, data_dict)),
                                                                             sql.Identifier(where), sql.Literal(equals))
         conn = all_data().get_postg()
-        print(safe_query.as_string(conn))
         with conn:
             with conn.cursor() as cur:
                 cur.execute(safe_query, data_dict)
@@ -130,7 +130,62 @@ async def sql_safe_update(table_name, data_dict, condition_dict):
         logg.get_error(f"{error}", __file__)
 
 
-# add_to_csv
+"""^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^MongoDB^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"""
+
+
+async def mongo_add(tg_id, answers):
+    try:
+        answer_list = []
+        for answer in answers:
+            answer_list.append(answer)
+        client = all_data().get_mongo()
+        # client.drop_database('database')  # del
+        database = client['database']
+        collection = database['useranswer']
+
+        user_answer = {'_id': int(tg_id), 'answers_1': str(answer_list[0]), 'answers_2': (answer_list[1]),
+                       'answers_3': str(answer_list[2]), 'answers_4': (answer_list[3]), 'answers_5': (answer_list[4]),
+                       'other_answer': []}
+        collection.insert_one(user_answer)
+    except Exception as error:
+        logg.get_error(f"mongo_add | {error}", __file__)
+
+
+async def mongo_select(tg_id):
+    try:
+        client = all_data().get_mongo()
+        database = client['database']
+        collection = database['useranswer']
+        myquery = {"_id": int(tg_id)}
+        for answer in collection.find(myquery):
+            return answer
+    except Exception as error:
+        logg.get_error(f"mongo_select | {error}", __file__)
+
+
+async def mongo_update(tg_id, value_dict):
+    try:
+        client = all_data().get_mongo()
+        database = client['database']
+        collection = database['useranswer']
+        collection.update_one({'_id': int(tg_id)}, {"$push": {"other_answer": value_dict}}, True)
+    except Exception as error:
+        logg.get_error(f"mongo update | {error}", __file__)
+
+
+async def mongo_pop(tg_id, value_dict):
+    try:
+        client = all_data().get_mongo()
+        database = client['database']
+        collection = database['useranswer']
+        collection.update({'_id': int(tg_id)}, {'$pull': {'other_answer': value_dict}})
+    except Exception as error:
+        logg.get_error(f"mongo update | {error}", __file__)
+
+
+"""^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^CSV_UPDATE^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"""
+
+
 def pandas_csv_add(table_name, new_values_dict):
     try:
         dtframe = DataFrame([new_values_dict.values()], columns=new_values_dict.keys())
@@ -144,16 +199,20 @@ def pandas_csv_add(table_name, new_values_dict):
 
 # update_csv
 def pandas_csv_update(table_name, new_values_dict, condition_dict):
-    data = read_csv(f'resources/{table_name}.csv', header=0)
-    df = DataFrame(data)
-    for value in new_values_dict:
-        for condition in condition_dict:
-            print(value, new_values_dict[value])
-            df.loc[df[condition] == condition_dict[condition], value] = new_values_dict[value]
-    df.to_csv(f'resources/{table_name}.csv', header=True, index=False)
+    try:
+        data = read_csv(f'resources/{table_name}.csv', header=0)
+        df = DataFrame(data)
+        for value in new_values_dict:
+            for condition in condition_dict:
+                df.loc[df[condition] == condition_dict[condition], value] = new_values_dict[value]
+        df.to_csv(f'resources/{table_name}.csv', header=True, index=False)
+    except Exception as error:
+        logg.get_error(f"{error}", __file__)
 
 
-# redis
+"""^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^DATA_REDIS^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"""
+
+
 async def poll_get(key):
     try:
         return all_data().get_data_red().lrange(key, 0, -1)
@@ -187,18 +246,18 @@ async def redis_delete_first_item(key):
     try:
         all_data().get_data_red().lpop(key)
     except Exception as error:
-        logg.get_error(f"{error}", __file__)
+        logg.get_error(f"redis del item | {error}", __file__)
 
 
 async def redis_media_counter_write(user_id, value):
     try:
         all_data().get_data_red().rpush(f'Media_counter: Smi: {user_id}', value)
     except Exception as error:
-        logg.get_error(f"{error}", __file__)
+        logg.get_error(f"redis write | {error}", __file__)
 
 
 async def redis_media_counter_get(user_id):
     try:
         return all_data().get_data_red().lrange(f'Media_counter: Smi: {user_id}', 0, -1)
     except Exception as error:
-        logg.get_error(f"{error}", __file__)
+        logg.get_error(f"redis get | {error}", __file__)
