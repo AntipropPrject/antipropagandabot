@@ -351,7 +351,7 @@ async def antip_conspirasy(message: Message, state=FSMContext):
 @router.message(WebPropagandaFilter(), commands=["test"])
 async def antip_not_only_TV(message: Message, web_lies_list: List[str], state=FSMContext):
     print("HERE LIES LIES LIST", web_lies_list)
-    answer_id_str = await poll_get(f'Start_answers: ethernet_id: {message.from_user.id}')
+    answer_id_str = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: ethernet_id:')
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Показывай"))
     lies_list = web_lies_list
@@ -480,7 +480,7 @@ async def show_the_news(message: types.Message, state=FSMContext):
         await message.answer_video(media, caption=caption, reply_markup=markup.as_markup(resize_keyboard=True))
     else:
         await message.answer('Неправильная команда')
-        await poll_get(f'Start_answers: ethernet: {message.from_user.id}')
+        await poll_get(f'Usrs: {message.from_user.id}: Start_answers: ethernet:')
 
 @router.message((F.text.contains('Новость посмотрел(а). Что с ней не так?')))
 async def revealing_the_news(message: types.Message, state=FSMContext):
@@ -536,7 +536,7 @@ async def revealing_the_news(message: Message, state=FSMContext):
         text = await sql_safe_select('text', 'texts', {'name': 'antip_another_web_lie'})
         await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
     else:
-        await redis_pop(f'Start_answers: ethernet: {message.from_user.id}')
+        await redis_pop(f'Usrs: {message.from_user.id}: Start_answers: ethernet:')
         await message.answer("На этом моменте вы просмотрели все новости, переход к следующей ветке (она пока не поключена)")
 
 

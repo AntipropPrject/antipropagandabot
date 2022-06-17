@@ -29,25 +29,25 @@ async def smi_statement(message: Message):
 
     try:
 
-        person_list = await poll_get(f'Start_answers: who_to_trust_persons: {message.from_user.id}')
+        person_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
         statements = await sql_safe_select_like("t_id", "name", "assets", 'statement', f'{person_list[0]}')
-        assets_list = await poll_get(f'Statements:statement_assets: {message.from_user.id}')
+        assets_list = await poll_get(f'Usrs: {message.from_user.id}: Statements:statement_assets:')
         if assets_list.__len__() == 0:
             for st in statements:
                 print(st[0])
-                await poll_write(f'Statements:statement_assets: {message.from_user.id}', st[0])
+                await poll_write(f'Usrs: {message.from_user.id}: Statements:statement_assets:', st[0])
 
-        assets_list = await poll_get(f'Statements:statement_assets: {message.from_user.id}')
+        assets_list = await poll_get(f'Usrs: {message.from_user.id}: Statements:statement_assets:')
 
         print(assets_list[0])
         print(str(assets_list[0]))
 
         await message.answer_photo(str(assets_list[0]), reply_markup=nmarkup.as_markup(resize_keyboard=True))
-        await redis_delete_first_item(f'Statements:statement_assets: {message.from_user.id}')
+        await redis_delete_first_item(f'Usrs: {poll_answer.user.id}: Statements:statement_assets:')
 
-        assets_list = await poll_get(f'Statements:statement_assets: {message.from_user.id}')
+        assets_list = await poll_get(f'Usrs: {message.from_user.id}: Statements:statement_assets:')
         if assets_list.__len__() == 0:
-            await redis_delete_first_item(f'Start_answers: who_to_trust_persons: {message.from_user.id}')
+            await redis_delete_first_item(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
 
 
     except IndexError as err:

@@ -66,7 +66,7 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state=FSM
         if index == 0:
             continue
         true_options.append(donbass_first_poll[index])
-        await poll_write(f'Donbass_polls: First: {poll_answer.user.id}', donbass_first_poll[index])
+        await poll_write(f'Usrs: {poll_answer.user.id}: Donbass_polls: First:', donbass_first_poll[index])
     if 'Если бы мы не нанесли упреждающий удар, то Украина напала бы первая, и жертв было бы больше' in true_options:
         text = 'У меня есть уточняющий вопрос.\nПродолжите: "Если бы мы не нанесли упреждающий удар, то Украина напала бы первая..." Куда?'
         nmarkup = ReplyKeyboardBuilder()
@@ -77,16 +77,16 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state=FSM
         await bot.send_message(poll_answer.user.id, text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
     elif 'ООН врет, не может быть таких жертв среди гражданского населения' in true_options:
         text = await sql_safe_select('text', 'texts', {'name': 'civil_casualties'})
-        await redis_pop(f'Donbass_polls: First: {poll_answer.user.id}')
+        await redis_pop(f'Usrs: {poll_answer.user.id}: Donbass_polls: First:')
         await bot.send_message(poll_answer.user.id, text, reply_markup=filler_kb(), parse_mode="HTML")
     elif 'Эти "мирные люди" — жители Украины, а значит неонацисты, которых не жалко' in true_options:
         await state.update_data(nazi='В Украине процветает неонацизм и геноцид русскоязычного населения')
         text = 'Считать, что люди заслуживают смерти только потому, что у них есть украинский паспорт — и есть нацизм.\n' \
                'В любом случае этот хэндлер будет готов принять любой сценарий, но пока что перейдите к следующей части.'
         if 'Денацификация / Уничтожить нацистов' not in (
-        await poll_get(f'Start_answers: Invasion: {poll_answer.user.id}')):
-            await poll_write(f'Start_answers: Invasion: {poll_answer.user.id}', 'Денацификация / Уничтожить нацистов')
-        await redis_pop(f'Donbass_polls: First: {poll_answer.user.id}')
+        await poll_get(f'Usrs: {poll_answer.user.id}: Start_answers: Invasion:')):
+            await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: Invasion:', 'Денацификация / Уничтожить нацистов')
+        await redis_pop(f'Usrs: {poll_answer.user.id}: Donbass_polls: First:')
         await bot.send_message(poll_answer.user.id, text, reply_markup=filler_kb(), parse_mode="HTML")
     elif 'Украинцам надо было просто сдаться, тогда бы стольких жертв не было' in true_options:
         text = await sql_safe_select('text', 'texts', {'name': 'only_war_objects'})
@@ -122,7 +122,7 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state=FSM
         for reason in reason_list:
             reason_text = reason_text + '- ' + reason + '\n'
         text = text + '\n\n' + reason_text + '\n\nОбязательно их все обсудим, а пока что вернемся к теме Донбасса'
-        await redis_pop(f'Donbass_polls: First: {poll_answer.user.id}')
+        await redis_pop(f'Usrs: {poll_answer.user.id}: Donbass_polls: First:')
         await bot.send_message(poll_answer.user.id, text, reply_markup=filler_kb(), parse_mode="HTML")
     await state.set_state(donbass_state.after_poll)
 
@@ -149,7 +149,7 @@ async def donbas_reason_to_war(message: Message, state=FSMContext):
     if message.text == "Оба варианта":
         reason = 'Если бы мы не напали первыми, то Украина бы напала на ДНР/ЛНР и вместе с НАТО на Россию'
     await state.update_data(war_reasons=reason)
-    await redis_pop(f'Donbass_polls: First: {message.from_user.id}')
+    await redis_pop(f'Usrs: {message.from_user.id}: Donbass_polls: First:')
     text = await sql_safe_select('text', 'texts', {'name': 'reason_to_war'})
     video_id = await sql_safe_select('t_id', 'assets', {'name': 'putin_may'})
     await message.answer_video(video_id, caption=text, reply_markup=filler_kb())
@@ -159,7 +159,7 @@ async def donbas_reason_to_war(message: Message, state=FSMContext):
                 (F.text.in_({'Договорились', "Хорошо", "Понятно"})))
 async def donbas_OOH(message: Message, state=FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'donbass_OOH'})
-    await redis_pop(f'Donbass_polls: First: {message.from_user.id}')
+    await redis_pop(f'Usrs: {message.from_user.id}: Donbass_polls: First:')
     await message.answer(text, reply_markup=filler_kb())
 
 
@@ -167,11 +167,11 @@ async def donbas_OOH(message: Message, state=FSMContext):
                 (F.text.in_({'Договорились', "Хорошо", "Понятно"})))
 async def donbas_nazi(message: Message, state=FSMContext):
     await state.update_data(nazi='В Украине процветает неонацизм и геноцид русскоязычного населения')
-    if 'Денацификация / Уничтожить нацистов' not in (await poll_get(f'Start_answers: Invasion: {message.from_user.id}')):
-        await poll_write(f'Start_answers: Invasion: {message.from_user.id}', 'Денацификация / Уничтожить нацистов')
+    if 'Денацификация / Уничтожить нацистов' not in (await poll_get(f'Usrs: {message.from_user.id}: Start_answers: Invasion:')):
+        await poll_write(f'Usrs: {message.from_user.id}: Start_answers: Invasion:', 'Денацификация / Уничтожить нацистов')
         print('TEST NAZI')
     text = await sql_safe_select('text', 'texts', {'name': 'donbas_nazi'})
-    await redis_pop(f'Donbass_polls: First: {message.from_user.id}')
+    await redis_pop(f'Usrs: {message.from_user.id}: Donbass_polls: First:')
     await message.answer(text, reply_markup=filler_kb())
 
 
@@ -196,11 +196,11 @@ async def provocation(message: Message, state=FSMContext):
 
 @router.message(text_contains=('укронацисты', 'жилых'), content_types=types.ContentType.TEXT, text_ignore_case=True)
 async def exit_point_one(message: Message, state=FSMContext):
-    await redis_pop(f'Donbass_polls: First: {message.from_user.id}')
-    answers = await poll_get(f'Donbass_polls: First: {message.from_user.id}')
+    await redis_pop(f'Usrs: {message.from_user.id}: Donbass_polls: First:')
+    answers = await poll_get(f'Usrs: {message.from_user.id}: Donbass_polls: First:')
     thing = 'Так они используют население как живой щит! Поэтому погибают мирные жители'
     if thing not in answers:
-        await poll_write(f'Donbass_polls: First: {message.from_user.id}', thing)
+        await poll_write(f'Usrs: {message.from_user.id}: Donbass_polls: First:', thing)
     await state.update_data(live_shield='Украинская армия использует население, как живой щит!')
     await message.answer('Что же, я услышал ваш ответ.\nДавайте поговорим об этом позже.', reply_markup=filler_kb(),
                          parse_mode="HTML")
@@ -209,11 +209,11 @@ async def exit_point_one(message: Message, state=FSMContext):
 @router.message(text_contains=('жертвы', 'плохо', 'важных'), content_types=types.ContentType.TEXT,
                 text_ignore_case=True)
 async def exit_point_two(message: Message, state=FSMContext):
-    await redis_pop(f'Donbass_polls: First: {message.from_user.id}')
-    answers = await poll_get(f'Donbass_polls: First: {message.from_user.id}')
+    await redis_pop(f'Usrs: {message.from_user.id}: Donbass_polls: First:')
+    answers = await poll_get(f'Usrs: {message.from_user.id}: Donbass_polls: First:')
     thing = "Это ужасно, но помимо защиты жителей Донбасса есть более весомые причины для начала войны"
     if thing not in answers:
-        await poll_write(f'Donbass_polls: First: {message.from_user.id}', thing)
+        await poll_write(f'Usrs: {message.from_user.id}: Donbass_polls: First:', thing)
     await state.update_data(big_game='Помимо защиты жителей Донбасса есть более весомые причины для начала войны.')
     await message.answer('Возможно вы правы. Обязательно обсудим все причины\nА пока вернемся к теме Донбасса',
                          reply_markup=filler_kb(), parse_mode="HTML")
@@ -222,11 +222,11 @@ async def exit_point_two(message: Message, state=FSMContext):
 @router.message(text_contains=('ужас', 'следующей', 'теме'), content_types=types.ContentType.TEXT,
                 text_ignore_case=True)
 async def exit_point_zero(message: Message, state=FSMContext):
-    await redis_pop(f'Donbass_polls: First: {message.from_user.id}')
-    answers = await poll_get(f'Donbass_polls: First: {message.from_user.id}')
+    await redis_pop(f'Usrs: {message.from_user.id}: Donbass_polls: First:')
+    answers = await poll_get(f'Usrs: {message.from_user.id}: Donbass_polls: First:')
     thing = 'Так они используют население как живой щит! Поэтому погибают мирные жители'
     if thing not in answers:
-        await poll_write(f'Donbass_polls: First: {message.from_user.id}', thing)
+        await poll_write(f'Usrs: {message.from_user.id}: Donbass_polls: First:', thing)
     await message.answer('Полностью разделяю ваши чувства.', reply_markup=filler_kb(), parse_mode="HTML")
 
 
@@ -242,7 +242,7 @@ async def donbas_live_shield_start(message: Message, state=FSMContext):
 @router.message(text_contains=('сопротивлялись', 'добра'), content_types=types.ContentType.TEXT, text_ignore_case=True)
 async def provocation(message: Message, state=FSMContext):
     await state.update_data(surrender='Украинцам нужно было просто сдаться, тогда не было бы стольких жертв')
-    await redis_pop(f'Donbass_polls: First: {message.from_user.id}')
+    await redis_pop(f'Usrs: {message.from_user.id}: Donbass_polls: First:')
     await message.answer('Об этом чуть позже, но не волнуйтесь: до всего дойдет свой черед.', reply_markup=filler_kb(),
                          parse_mode="HTML")
 
@@ -262,7 +262,7 @@ async def donbas_why_not_surrender(message: Message, state=FSMContext):
 @router.message(text_contains=('другое', 'освобождать'), content_types=types.ContentType.TEXT, text_ignore_case=True)
 async def donbas_putin_unleashed(message: Message, state=FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'donbas_putin_unleashed'})
-    await redis_pop(f'Donbass_polls: First: {message.from_user.id}')
+    await redis_pop(f'Usrs: {message.from_user.id}: Donbass_polls: First:')
     await state.update_data(neonazi='В Украине процветает неонационализм и геноцид русского населения.')
     await message.answer(text, reply_markup=filler_kb(), parse_mode="HTML")
 
@@ -279,7 +279,7 @@ async def donbas_strange_world(message: Message, state=FSMContext):
 @router.message(text_contains=('Лучше', 'никто', 'кого'), content_types=types.ContentType.TEXT, text_ignore_case=True)
 async def donbas_sentient_bot(message: Message, state=FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'donbas_sentient_bot'})
-    await redis_pop(f'Donbass_polls: First: {message.from_user.id}')
+    await redis_pop(f'Usrs: {message.from_user.id}: Donbass_polls: First:')
     await message.answer(text, reply_markup=filler_kb(), parse_mode="HTML")
 
 
@@ -287,7 +287,7 @@ async def donbas_sentient_bot(message: Message, state=FSMContext):
                 text_ignore_case=True)
 async def donbas_understanding(message: Message, state=FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'donbas_understanding'})
-    await redis_pop(f'Donbass_polls: First: {message.from_user.id}')
+    await redis_pop(f'Usrs: {message.from_user.id}: Donbass_polls: First:')
     await message.answer(text, reply_markup=filler_kb(), parse_mode="HTML")
 
 
@@ -302,7 +302,7 @@ async def donbas_more_reasons(message: Message, state=FSMContext):
     for reason in reason_list:
         reason_text = reason_text + '- ' + reason + '\n'
     text = text + '\n\n' + reason_text + '\n\nОбязательно их все обсудим, а пока что вернемся к теме Донбасса'
-    await redis_pop(f'Donbass_polls: First: {message.from_user.id}')
+    await redis_pop(f'Usrs: {message.from_user.id}: Donbass_polls: First:')
     await message.answer(text, reply_markup=filler_kb(), parse_mode="HTML")
 
 
@@ -341,22 +341,22 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state=FSM
         if index == 0:
             continue
         true_options.append(donbass_second_poll[index])
-        await poll_write(f'Donbass_polls: Second: {poll_answer.user.id}', donbass_second_poll[index])
+        await poll_write(f'Usrs: {poll_answer.user.id}: Donbass_polls: Second:', donbass_second_poll[index])
     if 'Вообще-то, наших войск не было в ДНР/ ЛНР все эти 8 лет' in true_options:
         await bot.send_message(poll_answer.user.id,
                                "Вообще-то наши войска были в ДНР и ЛНР, вот доказательства:\n\n<i>Доказательства (существуют)</i>",
                                reply_markup=filler_kb())
-        await redis_pop(f'Donbass_polls: Second: {poll_answer.user.id}')
+        await redis_pop(f'Usrs: {poll_answer.user.id}: Donbass_polls: Second:')
     elif 'Путин просто помогал русскоязычному населению, которые не хотели жить в Украине после Майдана' in true_options:
         await bot.send_message(poll_answer.user.id,
                                "Русскоязычное население Украины с удовольствием бы помогло Путину перестать быть\n\n<i>Доказательства: (существуют)</i>",
                                reply_markup=filler_kb())
-        await redis_pop(f'Donbass_polls: Second: {poll_answer.user.id}')
+        await redis_pop(f'Usrs: {poll_answer.user.id}: Donbass_polls: Second: ')
     elif 'Путин помог разжечь этот конфликт, чтобы помешать Украине вступить в НАТО' in true_options:
         await bot.send_message(poll_answer.user.id,
                                "Теперь НАТО впору просить вступить в Украину. Где доказательства?..\n\n\n\n\nЗдесь: (доказателство) (доказательство)",
                                reply_markup=filler_kb())
-        await redis_pop(f'Donbass_polls: Second: {poll_answer.user.id}')
+        await redis_pop(f'Usrs: {poll_answer.user.id}: Donbass_polls: Second:')
     await state.set_state(donbass_state.after_second_poll)
 
 
@@ -367,7 +367,7 @@ async def donbas_no_army_here(message: Message, state=FSMContext):
     await message.answer(
         "Русскоязычное население Украины с удовольствием бы помогло Путину перестать быть\n\n<i>Доказательства: (существуют)</i>",
         reply_markup=filler_kb())
-    await redis_pop(f'Donbass_polls: Second: {message.from_user.id}')
+    await redis_pop(f'Usrs: {message.from_user.id}: Donbass_polls: Second:')
 
 
 @router.message(
@@ -377,7 +377,7 @@ async def donbas_no_army_here(message: Message, state=FSMContext):
     await message.answer(
         "Теперь НАТО впору просить вступить в Украину. Где доказательства?..\nЗдесь:\n\n\n\n (доказателство)\n           *кродется*\n\n(доказательство2)\n *спит*",
         reply_markup=filler_kb())
-    await redis_pop(f'Donbass_polls: Second: {message.from_user.id}')
+    await redis_pop(f'Usrs: {message.from_user.id}: Donbass_polls: Second:')
 
 
 @router.message(state=donbass_state.after_second_poll)
@@ -385,6 +385,6 @@ async def donbas_no_army_here(message: Message, state=FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Почему бы и нет"))
     #Удаление из списка донбасса
-    await redis_delete_from_list(f'Start_answers: Invasion: {message.from_user.id}', "Защитить русских в Донбассе")
+    await redis_delete_from_list(f'Usrs: {message.from_user.id}: Start_answers: Invasion:', "Защитить русских в Донбассе")
     await state.set_state(truereasons_state.main)
     await message.answer("Рад, что мы разобрали все, что связано с Донбассом. Вернемся же к причинам войны.\nВ дальнейшем это сообщение может не понадобиться, но сейчас оно есть.", reply_markup=nmarkup.as_markup(resize_keyboard=True))

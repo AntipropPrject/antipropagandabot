@@ -21,17 +21,14 @@ from handlers import true_resons_hand
 
 class NaziState(StatesGroup):
     main = State()
+    first_poll = State()
 
 
 router = Router()
 router.message.filter(state=NaziState)
 
-class nazizm(StatesGroup):
-    start_nazizm = State()
-
-
 @router.poll_answer()
-async def poll_answer_handler(poll_answer: types.PollAnswer, state=FSMContext):
+async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state=FSMContext):
     nazizm_answers = poll_answer.option_ids
     await state.update_data(nazizm_answers=nazizm_answers)
     if 0 in nazizm_answers:
@@ -43,7 +40,7 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, state=FSMContext):
         markup = ReplyKeyboardBuilder()
         markup.row(types.KeyboardButton(text="А как же неонацизм?"))
         text = await sql_safe_select("text", "texts", {"name": "nazi_negative"})
-        await Bot(bata.all_data().bot_token).send_message(chat_id=poll_answer.user.id, text=text, reply_markup=markup.as_markup(resize_keyboard=True))
+        await bot.send_message(poll_answer.user.id, text, reply_markup=markup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text.contains('Давай')))
@@ -87,8 +84,7 @@ async def nazi_simple(message: Message):
     text = await sql_safe_select("text", "texts", {"name": "nazi_simple"})
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
 
-class poll(StatesGroup):
-    poll_answer = State()
+
 @router.message((F.text.contains('Хорошо, продолжим')) | (F.text.contains('Так понятнее!')) | (F.text.contains('Понятно!'))) #AntisemitFilter(if answer != 'Ничего из вышеперечисленного...')
 async def nazi_how_many(message: Message, state: FSMContext):
     markup = ReplyKeyboardBuilder()
@@ -96,9 +92,9 @@ async def nazi_how_many(message: Message, state: FSMContext):
     text = await sql_safe_select("text", "texts", {"name": "nazi_how_many"})
     question = 'Выберите один ответ'
     await message.answer_poll(question=question, options=nazizm_pr, is_anonymous=False)
-    await state.set_state(poll.poll_answer)
+    await state.set_state(NaziState.first_poll)
 
-@router.poll_answer(state=poll.poll_answer)
+@router.poll_answer(state=NaziState.first_poll)
 async def poll_answer_handler(poll_answer: types.PollAnswer, state=FSMContext):
     data = await state.get_data()
     pr_answers = poll_answer.option_ids
@@ -133,3 +129,10 @@ async def nazi_many_forms(message: Message):
 async def nazi_many_forms(message: Message):
     #тут нужно делать либо иф либо еще как-то
     pass
+
+@router.message()
+async def nazi_exit(message: Message, state: FSMContext):
+    await state.set_state(true_resons_hand.truereasons_state.main)
+    markup = ReplyKeyboardBuilder()
+    markup.row(types.KeyboardButton(text="Продолжим"))
+    await message.answer('Это выход из нацизма', reply_markup=markup.as_markup())

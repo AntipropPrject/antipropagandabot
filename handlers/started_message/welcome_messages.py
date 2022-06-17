@@ -67,7 +67,7 @@ async def message_2(message: types.Message, state: FSMContext):
 
 @router.message(welcome_states.start_dialog.dialogue_4, ((F.text == 'Специальная военная операция (СВО)') | (F.text == 'Война / Вторжение в Украину')))
 async def message_3(message: types.Message, state: FSMContext):  # Начало опроса
-    await poll_write(f'Start_answers: Is_it_war: {message.from_user.id}', message.text)
+    await poll_write(f'Usrs: {message.from_user.id}: Start_answers: Is_it_war:', message.text)
     markup = ReplyKeyboardBuilder()
     markup.add(types.KeyboardButton(text="Задавай"))
     markup.add(types.KeyboardButton(text="А долго будешь допрашивать?"))
@@ -114,7 +114,7 @@ async def message_7(message: types.Message, state: FSMContext):
     # Сохранить 1 вопрос в базу
     text = message.text
     if text == 'Начал(а) интересоваться после 24 февраля' or text == "Скорее да" or text == "Скорее нет":
-        await poll_write(f'Start_answers: interest_in_politics: {message.from_user.id}', message.text)
+        await poll_write(f'Usrs: {message.from_user.id}: Start_answers: interest_in_politics:', message.text)
         options = ["Защитить русских в Донбассе",  # Вопросы опроса
                    "Предотвратить вторжение на территорию"
                    " России или ЛНР/ДНР", "Денацификация / Уничтожить нацистов", "Демилитаризация / Снижение военной мощи",
@@ -140,7 +140,7 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, state=FSMContext):
     lst = []
     for index in lst_answers:
         lst.append(lst_options[index])
-        await poll_write(f'Start_answers: Invasion: {poll_answer.user.id}', lst_options[index])
+        await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: Invasion:', lst_options[index])
     await state.update_data(answer_2=lst_answers)
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Да, полностью доверяю"))
@@ -158,7 +158,7 @@ async def message_8(message: types.Message, state: FSMContext):
 
         # сохранение 3 вопроса
 
-        await poll_write(f'Start_answers: tv: {message.from_user.id}', message.text)
+        await poll_write(f'Usrs: {message.from_user.id}: Start_answers: tv:', message.text)
         await state.update_data(option_3=web_prop)
         await state.update_data(answer_3=message.text)
         text=await sql_safe_select("text", "texts", {"name": "start_internet_belive"})
@@ -182,11 +182,11 @@ async def poll_answer_handler_tho(poll_answer: types.PollAnswer, state=FSMContex
     for index in lst_answers:
 
         lst.append(lst_options[index])
-        await poll_write(f'Start_answers: ethernet_id: {poll_answer.user.id}', int(index))
-        await poll_write(f'Start_answers: ethernet: {poll_answer.user.id}', lst_options[index])
+        await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: ethernet_id:', int(index))
+        await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: ethernet:', lst_options[index])
     await state.update_data(answer_4=poll_answer.option_ids)
     await state.update_data(option_4=options)
-    answer_id_str = await poll_get(f'Start_answers: ethernet_id: {poll_answer.user.id}')
+    answer_id_str = await poll_get(f'Usrs: {poll_answer.user.id}: Start_answers: ethernet_id:')
     text = await sql_safe_select("text", "texts", {"name": "start_people_belive"})
     await Bot(all_data().bot_token).send_poll(poll_answer.user.id, text, options, is_anonymous=False, allows_multiple_answers=True)
     await state.set_state(welcome_states.start_dialog.dialogue_10)
@@ -202,8 +202,8 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, state=FSMCont
     lst = []
     for index in lst_answers:
         lst.append(lst_options[index])
-        await poll_write(f'Start_answers: who_to_trust: {poll_answer.user.id}', lst_options[index])
-        await poll_write(f'Start_answers: who_to_trust_persons: {poll_answer.user.id}', lst_options[index])
+        await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust:', lst_options[index])
+        await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:', lst_options[index])
     await state.update_data(answer_5=poll_answer.option_ids)
     text = await sql_safe_select("text", "texts", {"name": "start_thank_you"})
     await Bot(all_data().bot_token).send_message(poll_answer.user.id, text, reply_markup=markup.as_markup(resize_keyboard=True))
