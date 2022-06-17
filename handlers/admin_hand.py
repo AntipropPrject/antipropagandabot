@@ -5,7 +5,7 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.dispatcher.fsm.state import State, StatesGroup
 from aiogram.types import Message
 from pandas import DataFrame
-
+from stats.stat import mongo_select
 from bata import all_data
 from data_base.DBuse import safe_data_getter, data_getter, sql_safe_select, sql_safe_update, sql_safe_insert
 from keyboards.admin_keys import main_admin_keyboard, middle_admin_keyboard, app_admin_keyboard
@@ -22,6 +22,7 @@ class admin_home(StatesGroup):
     media_edit_tag = State()
     media_edit = State()
     media_edit_test = State()
+    statistics = State()
     game_change_tag = State()
     game_changer_main = State()
 
@@ -249,3 +250,35 @@ async def game_changer_main(message: Message, state: FSMContext):
     for thing in data:
         print(thing)
     await state.set_state(admin_home.game_changer_main)
+
+
+@router.message((F.text == 'Аналитика'), state = admin_home.admin)
+async def statistics(message: Message, state: FSMContext):
+    count_come = 0
+    count_start = 0
+    count_antiprop = 0
+    count_donbass = 0
+    count_war_aims = 0
+    count_putin = 0
+    stat = await mongo_select()
+    for i in stat:
+        lst = []
+        for j in i.values():
+            if len(str(j))<2:
+                lst.append(j)
+        count_come += lst[0]
+        count_start += lst[1]
+        count_antiprop += lst[2]
+        count_donbass += lst[3]
+        count_war_aims += lst[4]
+        count_putin += lst[5]
+    await message.answer('АНАЛИТИКА О БОТЕ\n'
+                         '➖➖➖➖➖➖➖➖➖➖\n\n'
+                         f'Пользователей: {count_come}\n'
+                         f'➖➖➖➖➖➖➖➖➖➖\n\n'
+                         f'Прошли начало: {count_start} ({count_start/count_come*100}%)\n'
+                         f'Прошли Антипропаганду: {count_antiprop} ({count_antiprop/count_come*100}%)\n'
+                         f'Прошли Донбасс: {count_donbass} ({count_donbass/count_come*100}%)\n'
+                         f'Прошли Цели войны: {count_war_aims} ({count_war_aims/count_come*100}%)\n'
+                         f'Прошли Путина: {count_putin} ({count_putin/count_come*100}%)')
+

@@ -141,10 +141,8 @@ async def mongo_add(tg_id, answers):
         for answer in answers:
             answer_list.append(answer)
         client = all_data().get_mongo()
-        # client.drop_database('database')  # del
         database = client['database']
         collection = database['useranswer']
-
         user_answer = {'_id': int(tg_id), 'answers_1': str(answer_list[0]), 'answers_2': (answer_list[1]),
                        'answers_3': str(answer_list[2]), 'answers_4': (answer_list[3]), 'answers_5': (answer_list[4]),
                        'other_answer': []}
