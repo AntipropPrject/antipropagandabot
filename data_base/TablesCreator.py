@@ -1,4 +1,5 @@
 from psycopg2 import Error
+
 from bata import all_data
 from log import logg
 
@@ -16,7 +17,9 @@ def tables_god():
         record = cur.fetchone()
         logg.get_info(f"You connect to - {record}, \n")
 
-        # Удаление таблицы
+        # Удаление таблиц
+        cur.execute("DROP TABLE IF EXISTS normal_game")
+        logg.get_info("Table normal_game has been deleted".upper())
         cur.execute("DROP TABLE IF EXISTS putin_old_lies")
         logg.get_info("Table putin_old_lies has been deleted".upper())
         cur.execute("DROP TABLE IF EXISTS putin_lies")
@@ -42,14 +45,14 @@ def tables_god():
         logg.get_info("Assets table created".upper())
 
         cur.execute('''CREATE TABLE public.truthgame(
-        "id" int4 NOT NULL,
-         truth bool NOT NULL,
-          asset_name varchar NULL,
-           text_name varchar NULL,
-            belivers int4 NOT NULL,
-             nonbelivers int4 NOT NULL,
-              rebuttal varchar NULL,
-               CONSTRAINT truthgame_pk PRIMARY KEY (id)
+                "id" int4 NOT NULL,
+                truth bool NOT NULL,
+                asset_name varchar NULL,
+                text_name varchar NULL,
+                belivers int4 NOT NULL,
+                nonbelivers int4 NOT NULL,
+                rebuttal varchar NULL,
+                CONSTRAINT truthgame_pk PRIMARY KEY (id)
                );''')
 
         cur.execute('''ALTER TABLE public.truthgame
@@ -102,8 +105,24 @@ def tables_god():
            REFERENCES public.assets("name");''')
         logg.get_info("PUTIN OLD LIES CREATED".upper())
 
+        cur.execute('''CREATE TABLE public.normal_game (
+                            id int4 NOT NULL PRIMARY KEY,
+                            asset_name varchar(50) NULL,
+                            text_name varchar(50) NULL,
+                            belivers int4 NULL,
+                            nonbelivers int4 NULL,
+                            rebuttal varchar(50) NULL
+                        );''')
 
-
+        cur.execute('''ALTER TABLE public.normal_game
+         ADD CONSTRAINT normal_game_fk
+          FOREIGN KEY (text_name)
+           REFERENCES public.texts("name");''')
+        cur.execute('''ALTER TABLE public.normal_game
+         ADD CONSTRAINT normal_game_fk_1
+          FOREIGN KEY (asset_name)
+           REFERENCES public.assets("name");''')
+        logg.get_info("normal game is here".upper())
 
         # MONGODB
         try:
@@ -144,7 +163,12 @@ def tables_god():
             cur.copy_expert(sql, open(csv_file_name, "r"))
         except Exception as error:
             logg.get_error(f"{error}", __file__)
-
+        try:
+            csv_file_name = 'resources/normal_game.csv'
+            sql = "COPY normal_game FROM STDIN DELIMITER ',' CSV HEADER"
+            cur.copy_expert(sql, open(csv_file_name, "r"))
+        except Exception as error:
+            logg.get_error(f"{error}", __file__)
         con.close()
         cur.close()
 

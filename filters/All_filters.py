@@ -82,7 +82,6 @@ class WarReason(BaseFilter):
 
     async def __call__(self, message: Message):
         reason_list = await poll_get(f"Start_answers: Invasion: {message.from_user.id}")
-        print('HELLO WORLD OF BUGS', reason_list)
         if self.answer in reason_list:
             return True
         else:
