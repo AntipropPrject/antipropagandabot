@@ -8,13 +8,15 @@ from bata import all_data
 from states import welcome_states
 from states.antiprop_states import propaganda_victim
 from resources.all_polls import web_prop
+from stats.stat import mongo_stat, mongo_update
 
 
 router = Router()
 
 
 @router.message(commands=['start', 'help'], state="*")
-async def commands_start(message: types.Message, state: FSMContext): # Первое сообщение
+async def commands_start(message: types.Message, state: FSMContext):  # Первое сообщение
+    await mongo_stat(message.from_user.id)
     await state.clear()
     all_data().get_data_red().flushdb()
     markup = ReplyKeyboardBuilder()
@@ -206,7 +208,7 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, state=FSMCont
     text = await sql_safe_select("text", "texts", {"name": "start_thank_you"})
     await Bot(all_data().bot_token).send_message(poll_answer.user.id, text, reply_markup=markup.as_markup(resize_keyboard=True))
     data = await state.get_data()
-
+    await mongo_update(poll_answer.user.id, 'start')
     if await mongo_select(poll_answer.user.id):  # можно поставить счетчик повторных обращений
         print("Пользователь уже есть в базе")
     else:

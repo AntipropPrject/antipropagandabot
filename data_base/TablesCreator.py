@@ -129,6 +129,7 @@ def tables_god():
             client = all_data().get_mongo()
             # get version
             logg.get_info(f"You connect to - server MongoDb version - {client.server_info()['version']} \n".upper())
+            client.close()
         except (Exception, Error) as error:
             logg.get_error(f"MongoDB, {error}", __file__)
 

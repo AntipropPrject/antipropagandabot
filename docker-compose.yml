@@ -11,8 +11,7 @@ services:
     environment:
       - MONGO_INITDB_ROOT_USERNAME=mongoOTPOR
       - MONGO_INITDB_ROOT_PASSWORD=mongoOTPOR
-    command:
-      - bash -c 'mongod --quiet --logpath /dev/null'
+
 
   db:
     image: postgres:12

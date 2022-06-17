@@ -12,6 +12,7 @@ def main_admin_keyboard():
     nmarkup.row(types.KeyboardButton(text="Изменить медиа"))
     nmarkup.row(types.KeyboardButton(text="Добавить блок текста"))
     nmarkup.row(types.KeyboardButton(text="Отредактировать блок текста"))
+    nmarkup.row(types.KeyboardButton(text="Аналитика"))
     nmarkup.row(types.KeyboardButton(text="Выйти"))
     nmarkup.adjust(2, 2, 1)
     return nmarkup.as_markup(resize_keyboard=True, input_field_placeholder=random.choice(usless_list))
