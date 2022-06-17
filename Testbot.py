@@ -2,7 +2,7 @@ import asyncio
 from aiogram import Dispatcher
 from aiogram.dispatcher.fsm.storage.redis import RedisStorage
 from bata import all_data
-from handlers import admin_hand, start_hand, anti_prop_hand, smi_hand, donbass_hand, true_resons_hand, putin_hand, stopwar_hand, nazi_hand
+from handlers import admin_hand, start_hand, anti_prop_hand, smi_hand, donbass_hand, true_resons_hand, putin_hand, stopwar_hand, nazi_hand, preventive_strike
 from handlers.started_message import welcome_messages
 from handlers.other import other_file
 from data_base import TablesCreator
@@ -30,6 +30,7 @@ async def main():
     dp.include_router(true_resons_hand.router)
     dp.include_router(donbass_hand.router)
     dp.include_router(nazi_hand.router)
+    dp.include_router(preventive_strike.router)
     dp.include_router(putin_hand.router)
     dp.include_router(stopwar_hand.router)
 

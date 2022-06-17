@@ -18,6 +18,7 @@ from states.donbass_states import donbass_state
 from resources.all_polls import donbass_first_poll
 from filters.All_filters import OperationWar, WarReason
 from handlers.nazi_hand import NaziState
+from handlers.preventive_strike import PreventStrikeState
 from data_base.DBuse import redis_delete_from_list
 
 class truereasons_state(StatesGroup):
@@ -69,11 +70,13 @@ async def reasons_denazi(message: Message, state=FSMContext):
 
 
 @router.message(WarReason(answer="Предотвратить вторжение на территорию России или ЛНР/ДНР"))
-async def reasons_poor_russia(message: Message, state=FSMContext):
+async def prevent_strike_start(message: Message, state=FSMContext):
     await redis_delete_from_list(f'Start_answers: Invasion: {message.from_user.id}', "Предотвратить вторжение на территорию России или ЛНР/ДНР")
-    text = "Кусок про вторжение тут"
+    await state.clear()
+    await state.set_state(PreventStrikeState.main)
+    text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_start'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text='Кнопка'))
+    nmarkup.row(types.KeyboardButton(text='Давай разберем'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -186,7 +189,7 @@ async def reasons_normal_game_answer(message: Message, state: FSMContext):
         reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Достаточно."), state=truereasons_state.game)
+@router.message(((F.text == "Достаточно.") | (F.text == "Хорошо, давай дальше") | (F.text == "Пропустим в этот раз")), state=truereasons_state.game)
 async def reasons_normal_game_enough(message: Message, state:FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_normal_game_enough'})
     await state.set_state(truereasons_state.final)
@@ -195,10 +198,6 @@ async def reasons_normal_game_enough(message: Message, state:FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Достаточно."), state=truereasons_state.game)
+"""@router.message((F.text == "Властям виднее."), state=truereasons_state.final)
 async def reasons_putin_start(message: Message, state:FSMContext):
-    text = await sql_safe_select('text', 'texts', {'name': 'reasons_normal_game_enough'})
-    await state.set_state(truereasons_state.final)
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Властям виднее."))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await state"""
