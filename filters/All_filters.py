@@ -96,9 +96,11 @@ class PutinFilter(BaseFilter):
             return False
 
 
-class NaziFilter(BaseFilter):
-    async def __call__(self, message: Message):
-        if 'Владимир Путин' in await poll_get(f'Start_answers: who_to_trust: {message.from_user.id}'):
+class AntisemitFilter(BaseFilter):
+    answer: Union[str, list]
+
+    async def call(self, message: Message):
+        if self.answer in await poll_get(f'Nazi_answers: first_poll: {message.from_user.id}'):
             return True
         else:
             return False

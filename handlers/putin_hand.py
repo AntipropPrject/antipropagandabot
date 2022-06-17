@@ -32,7 +32,7 @@ async def putin_love_putin(message: Message):
 
 
 @router.message((F.text.in_({'Властям виднее.'})))
-async def putin_love_putin(message: Message):
+async def putin_not_love_putin(message: Message):
     text = "Выберите описание Владимира Путина, которое вы считаете наиболее точным:"
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Не лучший президент, но кто, если не Путин?"))

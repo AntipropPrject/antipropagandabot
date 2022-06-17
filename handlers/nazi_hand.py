@@ -15,7 +15,7 @@ from keyboards.admin_keys import main_admin_keyboard
 from states.antiprop_states import propaganda_victim
 from states.donbass_states import donbass_state
 from resources.all_polls import donbass_first_poll, donbass_second_poll
-from filters.All_filters import option_filter, PutinFilter, second_donbass_filter
+from filters.All_filters import option_filter, PutinFilter, second_donbass_filter, AntisemitFilter
 from handlers.stopwar_hand import StopWarState
 from handlers import true_resons_hand
 
@@ -37,9 +37,9 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, state=FSMContext):
 
 
 
-#@router.message()
-#async def empty(message: types.Message, state: FSMContext):
-#    await state.set_state(true_resons_hand.truereasons_state.main)
-#    nmarkup = ReplyKeyboardBuilder()
-#    nmarkup.row(types.KeyboardButton(text="Почему бы и нет"))
-#    await message.answer("Блок в разработке, возвращаю вас в причины войны", reply_markup=nmarkup.as_markup())
+@router.message(AntisemitFilter(answer="Многие украинцы ненавидят евреев"))
+async def empty(message: types.Message, state: FSMContext):
+    await state.set_state(true_resons_hand.truereasons_state.main)
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Почему бы и нет"))
+    await message.answer("Блок в разработке, возвращаю вас в причины войны", reply_markup=nmarkup.as_markup())
