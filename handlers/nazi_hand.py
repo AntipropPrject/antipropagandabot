@@ -26,10 +26,20 @@ class NaziState(StatesGroup):
 router = Router()
 router.message.filter(state=NaziState)
 
+class nazizm(StatesGroup):
+    start_nazizm = State()
 
-@router.message()
-async def empty(message: types.Message, state: FSMContext):
-    await state.set_state(true_resons_hand.truereasons_state.main)
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Почему бы и нет"))
-    await message.answer("Блок в разработке, возвращаю вас в причины войны", reply_markup=nmarkup.as_markup())
+
+@router.poll_answer()
+async def poll_answer_handler(poll_answer: types.PollAnswer, state=FSMContext):
+    nazizm_answers = poll_answer.option_ids
+    await Bot(bata.all_data().bot_token).send_message(chat_id=poll_answer.user.id, text=str(nazizm_answers))
+
+
+
+#@router.message()
+#async def empty(message: types.Message, state: FSMContext):
+#    await state.set_state(true_resons_hand.truereasons_state.main)
+#    nmarkup = ReplyKeyboardBuilder()
+#    nmarkup.row(types.KeyboardButton(text="Почему бы и нет"))
+#    await message.answer("Блок в разработке, возвращаю вас в причины войны", reply_markup=nmarkup.as_markup())
