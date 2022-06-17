@@ -62,22 +62,7 @@ async def donbass_big_tragedy(message: Message, state=FSMContext):
 async def reasons_denazi(message: Message, state=FSMContext):
     await state.set_state(NaziState.main)
     await redis_delete_from_list(f'Start_answers: Invasion: {message.from_user.id}', 'Денацификация / Уничтожить нацистов')
-    text = "Одной из причин вторжения в " \
-           "Украину Владимир Путин " \
-           "называл «денацификация».  " \
-           "Вокруг этого термина ходило " \
-           "много споров - что именно он " \
-           "означает. Кстати интересный " \
-           "факт: в итоге, от этого слова в " \
-           "Кремле решили отказаться. Вы и " \
-           "сами могли заметить, что в " \
-           "последнее время перестали " \
-           "слышать слово «денацификация».\n\n" \
-           "Тем не менее, нацизм в Украине " \
-           "назывался в качестве одной из " \
-           "причин ввода войск. Ниже я " \
-           "перечислю главные аргументы.\n\n" \
-           "<b>А с какими из них согласны вы?</b>"
+    text = await sql_safe_select('text', 'texts', {'name': 'nazi_start'})
     question = "Отметьте один или более вариантов, с которыми согласны или частично согласны"
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Кнопка'))
