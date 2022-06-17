@@ -18,7 +18,9 @@ router = Router()
 async def commands_start(message: types.Message, state: FSMContext):  # Первое сообщение
     await mongo_stat(message.from_user.id)
     await state.clear()
-    all_data().get_data_red().flushdb()
+    redis = all_data().get_data_red()
+    for key in redis.scan_iter(f"Usrs: {message.from_user.id}:*"):
+        redis.delete(key)
     markup = ReplyKeyboardBuilder()
     markup.add(types.KeyboardButton(text="Начнем!"))
     markup.add(types.KeyboardButton(text="А с чего мне тебе верить?"))
