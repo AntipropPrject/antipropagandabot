@@ -5,9 +5,12 @@ from aiogram.types import Message, Update, Chat
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from data_base.DBuse import *
+from middleware import CounterMiddleware
 from states.antiprop_states import propaganda_victim
 
 router = Router()
+router.message.middleware(CounterMiddleware())
+
 router.message.filter(state=propaganda_victim)
 
 

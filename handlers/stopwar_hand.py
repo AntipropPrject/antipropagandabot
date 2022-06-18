@@ -6,6 +6,7 @@ from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from data_base.DBuse import sql_safe_select
+from middleware import CounterMiddleware
 
 
 class StopWarState(StatesGroup):
@@ -13,6 +14,8 @@ class StopWarState(StatesGroup):
 
 
 router = Router()
+router.message.middleware(CounterMiddleware())
+
 router.message.filter(state=StopWarState)
 
 

@@ -1,8 +1,10 @@
 from aiogram import Router
 from aiogram import types
 
+from middleware import CounterMiddleware
 
 router = Router()
+router.message.middleware(CounterMiddleware())
 
 @router.message()
 async def empty(message: types.Message):

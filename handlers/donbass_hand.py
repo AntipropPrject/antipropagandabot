@@ -8,10 +8,13 @@ from data_base.DBuse import poll_write, sql_safe_select, redis_pop, poll_get, re
 from filters.All_filters import option_filter, second_donbass_filter
 from handlers.true_resons_hand import truereasons_state
 from keyboards.main_keys import filler_kb
+from middleware import CounterMiddleware
 from resources.all_polls import donbass_first_poll, donbass_second_poll
 from states.donbass_states import donbass_state
 
 router = Router()
+router.message.middleware(CounterMiddleware())
+
 router.message.filter(state = donbass_state)
 
 

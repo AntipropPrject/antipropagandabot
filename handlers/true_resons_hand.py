@@ -10,6 +10,7 @@ from data_base.DBuse import redis_delete_from_list
 from filters.All_filters import OperationWar, WarReason
 from handlers.nazi_hand import NaziState
 from handlers.preventive_strike import PreventStrikeState
+from middleware import CounterMiddleware
 from resources.all_polls import nazizm
 from states.donbass_states import donbass_state
 
@@ -21,6 +22,8 @@ class truereasons_state(StatesGroup):
 
 
 router = Router()
+router.message.middleware(CounterMiddleware())
+
 router.message.filter(state=truereasons_state)
 
 

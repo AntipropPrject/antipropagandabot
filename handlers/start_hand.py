@@ -11,9 +11,11 @@ import bata
 from data_base.DBuse import data_getter
 from handlers.admin_hand import admin_home
 from keyboards.admin_keys import main_admin_keyboard
+from middleware import CounterMiddleware
 from states.donbass_states import donbass_state
 
 router = Router()
+router.message.middleware(CounterMiddleware())
 
 
 @router.message(commands=["donbass"])

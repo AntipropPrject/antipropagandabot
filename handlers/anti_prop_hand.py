@@ -12,11 +12,14 @@ from data_base.DBuse import sql_safe_select, data_getter, sql_safe_update
 from filters.All_filters import WebPropagandaFilter, TVPropagandaFilter, PplPropagandaFilter
 from handlers.true_resons_hand import truereasons_state
 from keyboards.map_keys import antip_why_kb, antip_killme_kb
+from middleware import CounterMiddleware
 from resources.all_polls import web_prop
 from resources.other_lists import channels
 from states.antiprop_states import propaganda_victim
 
 router = Router()
+router.message.middleware(CounterMiddleware())
+
 router.message.filter(state=propaganda_victim)
 
 

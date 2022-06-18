@@ -7,6 +7,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from data_base.DBuse import sql_safe_select
 from handlers import true_resons_hand
+from middleware import CounterMiddleware
 
 
 class PreventStrikeState(StatesGroup):
@@ -18,6 +19,8 @@ class PreventStrikeState(StatesGroup):
 
 
 router = Router()
+router.message.middleware(CounterMiddleware())
+
 router.message.filter(state=PreventStrikeState)
 
 

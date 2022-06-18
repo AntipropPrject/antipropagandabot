@@ -11,6 +11,7 @@ import bata
 from data_base.DBuse import data_getter, poll_write, sql_safe_select, sql_safe_update, redis_delete_from_list, poll_get
 from filters.All_filters import NaziFilter, RusHate_pr, NotNothingNazi
 from handlers import true_resons_hand
+from middleware import CounterMiddleware
 from resources.all_polls import nazizm, nazizm_pr
 
 
@@ -27,6 +28,8 @@ class NaziState(StatesGroup):
 
 
 router = Router()
+router.message.middleware(CounterMiddleware())
+
 router.message.filter(state=NaziState)
 
 
