@@ -22,6 +22,7 @@ router.message.filter(state=propaganda_victim)
 @router.message((F.text.in_({"Начнем!", 'Скажи еще что нибудь!'})))
 @router.message(commands=["test1"])
 async def smi_statement(message: Message, state=FSMContext):
+    global truth_data
     person_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
 
     try:
@@ -32,15 +33,21 @@ async def smi_statement(message: Message, state=FSMContext):
     print(f"В таблице {how_many_rounds} записей, а вот счетчик сейчас {count}")
     if count < how_many_rounds:
         count += 1
-        truth_data = data_getter("SELECT truth, t_id, text, belivers, nonbelivers, rebuttal FROM public.mistakeOrLie "
-                                 "left outer join assets on asset_name = assets.name "
-                                 "left outer join texts ON text_name = texts.name "
-                                 f"where id = {count}")[0]
-        print('aaaaaa', truth_data)
+        try:
+            truth_data = data_getter("SELECT truth, t_id, text, belivers, nonbelivers, rebuttal FROM public.mistakeOrLie "
+                        "left outer join assets on asset_name = assets.name "
+                        "left outer join texts ON text_name = texts.name "
+                        f"where id = {count}")[0]
 
+            print('aaaaaa', truth_data)
 
-        await state.update_data(gamecount=count, truth=truth_data[0], rebuttal=truth_data[5], belive=truth_data[3],
-                                not_belive=truth_data[4])
+            await state.update_data(gamecount=count, truth=truth_data[0], rebuttal=truth_data[5], belive=truth_data[3],
+                                    not_belive=truth_data[4])
+
+        except IndexError as er:
+            await message.answer(text=f"Медиафайл не найден {er}")
+            await state.update_data(gamecount=count)
+
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Это правда!"))
         nmarkup.row(types.KeyboardButton(text="Это ложь."))
@@ -62,16 +69,16 @@ async def smi_statement(message: Message, state=FSMContext):
         await message.answer(
             "Ой, у меня закончились примеры для игры :(\n\nДавайте я лучше вместо этого расскажу вам анекдот!",
             reply_markup=nmarkup.as_markup())
+
+
 @router.message((F.text == "Посмотреть еще раз"))
 async def sme_statement_start_over(message: Message):
     # todo сделать сценарий если человех кочет посмотреть еще раз
     await message.answer('Еще не готово')
 
 
-
 @router.message((F.text.in_({"Cлучайная ошибка", "Целенаправленная ложь"})))
 async def smi_statement_enough(message: Message, state=FSMContext):
-
     if message.text == "Cлучайная ошибка":
         await sql_safe_update("mistakeOrLie", {"statement_asset": data["t_id"]}, {'name': data['name']})
     text = await sql_safe_select('text', 'texts',

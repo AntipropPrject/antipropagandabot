@@ -28,7 +28,7 @@ def tables_god():
         logg.get_info("Table putin_lies has been deleted".upper())
         cur.execute("DROP TABLE IF EXISTS truthgame")
         logg.get_info("Table truthgame has been deleted".upper())
-        cur.execute("DROP TABLE IF EXISTS truthgame")
+        cur.execute("DROP TABLE IF EXISTS mistakeOrLie")
         logg.get_info("Table mistakeOrLie has been deleted".upper())
 
         # Удаление основных таблиц
@@ -73,7 +73,7 @@ def tables_god():
 
 
 
-        cur.execute('''CREATE TABLE public.misakeOrLie(
+        cur.execute('''CREATE TABLE public.mistakeOrLie(
                         "id" int4 NOT NULL,
                         truth bool NOT NULL,
                         asset_name varchar NULL,
@@ -81,18 +81,18 @@ def tables_god():
                         belivers int4 NOT NULL,
                         nonbelivers int4 NOT NULL,
                         rebuttal varchar NULL,
-                        CONSTRAINT misakeOrLie_pk PRIMARY KEY (id)
+                        CONSTRAINT mistakeOrLie_pk PRIMARY KEY (id)
                        );''')
 
-        cur.execute('''ALTER TABLE public.misakeOrLie
-                 ADD CONSTRAINT misakeOrLie_fk
+        cur.execute('''ALTER TABLE public.mistakeOrLie
+                 ADD CONSTRAINT mistakeOrLie_fk
                   FOREIGN KEY (asset_name)
                    REFERENCES public.assets("name");''')
-        cur.execute('''ALTER TABLE public.misakeOrLie
-                 ADD CONSTRAINT misakeOrLie_fk_1
+        cur.execute('''ALTER TABLE public.mistakeOrLie
+                 ADD CONSTRAINT mistakeOrLie_fk_1
                   FOREIGN KEY (text_name)
                    REFERENCES public.texts("name");''')
-        logg.get_info("misakeOrLie table is created".upper())
+        logg.get_info("mistakeOrLie table is created".upper())
 
         cur.execute('''CREATE TABLE public.putin_lies (
                             id int4 NOT NULL,
