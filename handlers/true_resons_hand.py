@@ -60,7 +60,7 @@ async def donbass_big_tragedy(message: Message, state=FSMContext):
 
 @router.message(WarReason(answer='Денацификация / Уничтожить нацистов'))
 async def reasons_denazi(message: Message, state=FSMContext):
-    await state.set_state(NaziState.main)
+    await state.set_state(NaziState.first_poll)
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Start_answers: Invasion:', 'Денацификация / Уничтожить нацистов')
     text = await sql_safe_select('text', 'texts', {'name': 'nazi_start'})
     question = "Отметьте один или более вариантов, с которыми согласны или частично согласны"

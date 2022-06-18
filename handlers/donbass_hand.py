@@ -64,6 +64,7 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state=FSM
     print(indexes)
     for index in indexes:
         if index == 0:
+            #TODO:перекидывать дальше
             continue
         true_options.append(donbass_first_poll[index])
         await poll_write(f'Usrs: {poll_answer.user.id}: Donbass_polls: First:', donbass_first_poll[index])
@@ -124,6 +125,8 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state=FSM
         text = text + '\n\n' + reason_text + '\n\nОбязательно их все обсудим, а пока что вернемся к теме Донбасса'
         await redis_pop(f'Usrs: {poll_answer.user.id}: Donbass_polls: First:')
         await bot.send_message(poll_answer.user.id, text, reply_markup=filler_kb(), parse_mode="HTML")
+    elif indexes == [0]:
+        await bot.send_message(poll_answer.user.id, 'Ну что же, похоже мне не надо вас переубеждать. Пойдем дальше?', reply_markup=filler_kb())
     await state.set_state(donbass_state.after_poll)
 
 
@@ -351,12 +354,14 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state=FSM
         await bot.send_message(poll_answer.user.id,
                                "Русскоязычное население Украины с удовольствием бы помогло Путину перестать быть\n\n<i>Доказательства: (существуют)</i>",
                                reply_markup=filler_kb())
-        await redis_pop(f'Usrs: {poll_answer.user.id}: Donbass_polls: Second: ')
+        await redis_pop(f'Usrs: {poll_answer.user.id}: Donbass_polls: Second:')
     elif 'Путин помог разжечь этот конфликт, чтобы помешать Украине вступить в НАТО' in true_options:
         await bot.send_message(poll_answer.user.id,
                                "Теперь НАТО впору просить вступить в Украину. Где доказательства?..\n\n\n\n\nЗдесь: (доказателство) (доказательство)",
                                reply_markup=filler_kb())
         await redis_pop(f'Usrs: {poll_answer.user.id}: Donbass_polls: Second:')
+    elif indexes == [0]:
+        await bot.send_message(poll_answer.user.id, 'Ну что же, похоже мне не надо вас переубеждать. Пойдем дальше?', reply_markup=filler_kb())
     await state.set_state(donbass_state.after_second_poll)
 
 
