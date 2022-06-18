@@ -1,17 +1,19 @@
 from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
-from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from aiogram.types import ReplyKeyboardRemove
-from data_base.DBuse import poll_get, poll_write, sql_safe_select, mongo_add, mongo_select, mongo_update
+from aiogram.utils.keyboard import ReplyKeyboardBuilder
+
 from bata import all_data
+from data_base.DBuse import poll_get, poll_write, sql_safe_select, mongo_add, mongo_select, mongo_update
+from middleware import CounterMiddleware
+from resources.all_polls import web_prop
 from states import welcome_states
 from states.antiprop_states import propaganda_victim
-from resources.all_polls import web_prop
 from stats.stat import mongo_stat, mongo_update
 
-
 router = Router()
+router.message.middleware(CounterMiddleware())
 
 
 @router.message(commands=['start', 'help'], state="*")

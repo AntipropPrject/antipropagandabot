@@ -9,6 +9,7 @@ from data_base.DBuse import data_getter, sql_safe_select, sql_safe_update
 from filters.All_filters import PutinFilter
 from handlers.stopwar_hand import StopWarState
 from handlers.true_resons_hand import truereasons_state
+from middleware import CounterMiddleware
 
 
 class StateofPutin(StatesGroup):
@@ -19,6 +20,8 @@ class StateofPutin(StatesGroup):
 
 
 router = Router()
+router.message.middleware(CounterMiddleware())
+
 router.message.filter(state=(StateofPutin, truereasons_state))
 
 
