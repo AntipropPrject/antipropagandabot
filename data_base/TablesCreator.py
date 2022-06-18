@@ -17,7 +17,9 @@ def tables_god():
         record = cur.fetchone()
         logg.get_info(f"You connect to - {record}, \n")
 
-        # Удаление таблиц
+        # Удаление игровых таблиц
+        cur.execute("DROP TABLE IF EXISTS ucraine_or_not_game")
+        logg.get_info("Table ucraine_or_not_game has been deleted".upper())
         cur.execute("DROP TABLE IF EXISTS normal_game")
         logg.get_info("Table normal_game has been deleted".upper())
         cur.execute("DROP TABLE IF EXISTS putin_old_lies")
@@ -26,6 +28,8 @@ def tables_god():
         logg.get_info("Table putin_lies has been deleted".upper())
         cur.execute("DROP TABLE IF EXISTS truthgame")
         logg.get_info("Table truthgame has been deleted".upper())
+
+        # Удаление основных таблиц
         cur.execute("DROP TABLE IF EXISTS texts")
         logg.get_info("Table texts has been deleted".upper())
         cur.execute("DROP TABLE IF EXISTS assets")
@@ -124,6 +128,28 @@ def tables_god():
            REFERENCES public.assets("name");''')
         logg.get_info("normal game is here".upper())
 
+
+        cur.execute('''CREATE TABLE public.ucraine_or_not_game (
+                            id int4 NOT NULL PRIMARY KEY,
+                            asset_name varchar(50) NULL,
+                            text_name varchar(50) NULL,
+                            belivers int4 NULL,
+                            nonbelivers int4 NULL,
+                            rebuttal varchar(50) NULL,
+                            truth bool NOT NULL
+                        );''')
+
+        cur.execute('''ALTER TABLE public.ucraine_or_not_game
+         ADD CONSTRAINT normal_game_fk
+          FOREIGN KEY (text_name)
+           REFERENCES public.texts("name");''')
+        cur.execute('''ALTER TABLE public.ucraine_or_not_game
+         ADD CONSTRAINT normal_game_fk_1
+          FOREIGN KEY (asset_name)
+           REFERENCES public.assets("name");''')
+        logg.get_info("ucraine or not game table created".upper())
+
+
         # MONGODB
         try:
             client = all_data().get_mongo()
@@ -170,6 +196,13 @@ def tables_god():
             cur.copy_expert(sql, open(csv_file_name, "r"))
         except Exception as error:
             logg.get_error(f"{error}", __file__)
+        try:
+            csv_file_name = 'resources/ucraine_or_not_game.csv'
+            sql = "COPY ucraine_or_not_game FROM STDIN DELIMITER ',' CSV HEADER"
+            cur.copy_expert(sql, open(csv_file_name, "r"))
+        except Exception as error:
+            logg.get_error(f"{error}", __file__)
+
         con.close()
         cur.close()
 
