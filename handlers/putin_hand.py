@@ -36,7 +36,7 @@ async def putin_love_putin(message: Message, state: FSMContext):
 
 
 @router.message((F.text.in_({'Властям виднее.'})))
-async def putin_not_love_putin(message: Message):
+async def putin_not_love_putin(message: Message, state: FSMContext):
     await state.set_state(StateofPutin.main)
     text = "Выберите описание Владимира Путина, которое вы считаете наиболее точным:"
     nmarkup = ReplyKeyboardBuilder()
