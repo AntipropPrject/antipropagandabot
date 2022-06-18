@@ -7,9 +7,9 @@ import pymongo
 class all_data():
     def __init__(self):
         self.redis_url = 'redis://localhost:2342'
-        self.postgres_data = 'dbname=antiprop_db user=postgres password=postgres'
+        self.postgres_data = 'dbname=postgres user=postgres password=postgres port=5431'
         self.mongodb_data = 'mongodb://localhost:27017'
-        self.bot_token = '5412151268:AAFZdBmq7K1D0x_KK6J7yf0PvL8UMM8pODE'
+        self.bot_token = '5442636780:AAGpX8nFiJMqhzHeNwYHOA82IK40Srtsqe8'
         self.admins = (5306348087, 5177494340, 5581082758, 5316104187)
 
 
@@ -18,7 +18,7 @@ class all_data():
         return Bot(self.bot_token, parse_mode="HTML")
 
     def get_postg(self):
-        return psycopg2.connect(database="postgres", user="postgres", password="postgres", host="localhost")
+        return psycopg2.connect(database="postgres", user="postgres", password="postgres", host="localhost", port="5431")
 
     def get_mongo(self):
         return pymongo.MongoClient(host=self.mongodb_data, username='mongoOTPOR', password='mongoOTPOR')
