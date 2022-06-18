@@ -531,7 +531,7 @@ async def show_more(message: types.Message, state=FSMContext):
     await message.answer_video(media, caption=caption, reply_markup=markup.as_markup(resize_keyboard=True))
 
 @router.message((F.text.contains('Достаточно, мне все понятно')))
-async def revealing_the_news(message: Message, state=FSMContext):
+async def revealing_the_news(message: Message, state: FSMContext):
     data = await state.get_data()
     if len(data['answers_str']) - len(data['all_viwed']) != 0:
         # Посмотрел ли юзер все источники
