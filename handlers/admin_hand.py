@@ -1,14 +1,16 @@
-from psycopg2 import sql
 from aiogram import Router, F
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.dispatcher.fsm.state import State, StatesGroup
 from aiogram.types import Message
 from pandas import DataFrame
-from stats.stat import mongo_select
+from psycopg2 import sql
+
 from bata import all_data
-from data_base.DBuse import safe_data_getter, data_getter, sql_safe_select, sql_safe_update, sql_safe_insert
+from data_base.DBuse import sql_safe_select, sql_safe_update, sql_safe_insert
 from keyboards.admin_keys import main_admin_keyboard, middle_admin_keyboard, app_admin_keyboard
+from stats.stat import mongo_select
+
 
 class admin_home(StatesGroup):
     admin = State()

@@ -8,10 +8,9 @@ from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 import bata
-from data_base.DBuse import data_getter, pandas_csv_add, sql_safe_select
+from data_base.DBuse import data_getter
 from handlers.admin_hand import admin_home
 from keyboards.admin_keys import main_admin_keyboard
-from states.antiprop_states import propaganda_victim
 from states.donbass_states import donbass_state
 
 router = Router()
