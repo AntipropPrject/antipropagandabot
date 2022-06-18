@@ -1,9 +1,7 @@
 id,truth,asset_name,text_name,belivers,nonbelivers,rebuttal
-2,f,statement_Песков_1,,4,7,Нет
-3,f,statement_Песков_1,,5,2,Нет
-5,f,statement_Песков_2,,4,1,Ну серьезно
-6,t,statement_Соловьёв_1,,3,2,Это так
-7,f,statement_Соловьёв_2,,2,2,А может правда?
-8,t,statement_Скабеева_1,,2,2,Это точно не ложь?
-4,t,statement_Песков_1,,2,5,,
-1,f,statement_Скабеева_2,,20,14,Навальный не ест детей
+1,f,statement_Песков_2,,4,1,Ну серьезно
+2,t,statement_Соловьёв_1,,3,2,Это так
+3,f,statement_Соловьёв_2,,2,2,А может правда?
+4,t,statement_Скабеева_1,,2,2,Это точно не ложь?
+5,t,statement_Песков_1,,2,5,
+6,f,statement_Скабеева_2,,20,14,Навальный не ест детей

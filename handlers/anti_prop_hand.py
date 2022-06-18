@@ -540,7 +540,7 @@ async def revealing_the_news(message: Message, state=FSMContext):
         await message.answer("На этом моменте вы просмотрели все новости, переход к следующей ветке (она пока не поключена)")
 
 
-@router.message((F.text.contains('Хватит, пропустим остальные источники')))
+@router.message((F.text.contains('Хватит, не будем слушать остальных')))
 async def skip_web(message: Message, state=FSMContext):
     data = await state.get_data()
     answer_channel = data['answers_str']  # Все выбранные источники
