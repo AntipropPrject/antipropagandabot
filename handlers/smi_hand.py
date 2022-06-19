@@ -20,6 +20,7 @@ messageDict = dict()
 
 
 @router.message((F.text.contains("Давайте начнём!")))
+@router.message((F.text.contains("Хорошо, давай посмотрим")))
 @router.message((F.text.contains('скажи еще что нибудь!')))
 async def smi_statement(message: Message, state: FSMContext):
     messageDict.update({message.from_user.id: message})
@@ -140,8 +141,8 @@ async def sme_statement_skip(message: Message, state=FSMContext):
     not_viewed = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text='Хорошо, давай посмотрим'))
-    markup.row(types.KeyboardButton(text='Не надо, я и так знаю, что они врут'))
-    markup.row(types.KeyboardButton(text='Не надо, я все равно буду доверять им'))
+    markup.row(types.KeyboardButton(text='Не надо, я и так знаю, что они врут!!!'))
+    markup.row(types.KeyboardButton(text='Не надо, я все равно буду доверять им!!!'))
     lst_web_answers = str(', '.join(not_viewed))
     next_channel = str(not_viewed[0])
     await state.update_data(not_viewed_chanel=not_viewed[0])
@@ -178,7 +179,7 @@ async def smi_statement_enough(message: Message, state=FSMContext):
         reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.in_({"Не надо, я и так знаю, что они врут", "Не надо, я все равно буду доверять им", "Переход к игре в правду"})))
+@router.message((F.text.in_({"Не надо, я и так знаю, что они врут!!!", "Не надо, я все равно буду доверять им!!!", "Переход к игре в правду"})))
 async def smi_statement_enough(message: Message, state: FSMContext):
     for key in all_data().get_data_red().scan_iter(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:*'):
         all_data().get_data_red().delete(key)
