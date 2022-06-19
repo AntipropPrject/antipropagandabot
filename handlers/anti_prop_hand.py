@@ -10,7 +10,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from bata import all_data
 from data_base.DBuse import poll_get, redis_pop, redis_delete_from_list
 from data_base.DBuse import sql_safe_select, data_getter, sql_safe_update
-from filters.All_filters import WebPropagandaFilter, TVPropagandaFilter, PplPropagandaFilter
+from filters.All_filters import WebPropagandaFilter, TVPropagandaFilter, PplPropagandaFilter, INFOStateFilter
 from handlers.true_resons_hand import truereasons_state
 from keyboards.map_keys import antip_why_kb, antip_killme_kb
 from middleware import CounterMiddleware
@@ -75,13 +75,13 @@ async def antip_all_no_TV(message: Message, state=FSMContext):
 @router.message((F.text.in_({'Открой мне глаза 👀', "Ну удиви меня 🤔", "Покажи ложь на ТВ -- мне интересно посмотреть!"})))
 async def antiprop_tv_selecter(message: Message, state=FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_pile_of_lies'})
-    utv_list = ['1️⃣', '2️⃣4️⃣', '🇷🇺1️⃣', '❇️▶️', '⭐️🅾️', '🟠🍺']
+    utv_list = ['1️⃣ Первый', '🇷🇺1️⃣ Россия 24/1', '❇️▶️', '⭐️🅾️']
     nmarkup = ReplyKeyboardBuilder()
     for channel in utv_list:
         nmarkup.row(types.KeyboardButton(text=channel))
     nmarkup.row(types.KeyboardButton(text="Что такое пропаганда?"))
     nmarkup.row(types.KeyboardButton(text="Какая-то теория заговора, не верю"))
-    nmarkup.adjust(3, 3, 1, 1)
+    nmarkup.adjust(2, 2, 1, 1)
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -121,7 +121,7 @@ async def antiprop_tv_24(message: Message, state=FSMContext):
                                caption=f'{count} сюжет с России24')
 
 
-@router.message((F.text.contains('🇷🇺1️⃣')))
+"""@router.message((F.text.contains('🇷🇺1️⃣')))
 async def antiprop_tv_russia1(message: Message, state=FSMContext):
     await state.set_state(propaganda_victim.tv_russia1)
     try:
@@ -137,7 +137,7 @@ async def antiprop_tv_russia1(message: Message, state=FSMContext):
     nmarkup.row(types.KeyboardButton(text="Видео посмотрел, что с ним не так?"))
     await message.answer_video(vid_id, reply_markup=nmarkup.as_markup(resize_keyboard=True),
                                caption=f'{count} сюжет с России1')
-
+"""
 
 @router.message((F.text.contains('❇️▶️')))
 async def antiprop_tv_HTB(message: Message, state=FSMContext):
@@ -175,7 +175,7 @@ async def antiprop_tv_star(message: Message, state=FSMContext):
                                caption=f'{count} сюжет со Звезды')
 
 
-@router.message((F.text.contains('🟠🍺')))
+"""@router.message((F.text.contains('🟠🍺')))
 async def antiprop_tv_ren(message: Message, state=FSMContext):
     await state.set_state(propaganda_victim.tv_ren)
     try:
@@ -190,7 +190,7 @@ async def antiprop_tv_ren(message: Message, state=FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Видео посмотрел, что с ним не так?"))
     await message.answer_video(vid_id, reply_markup=nmarkup.as_markup(resize_keyboard=True),
-                               caption=f'{count} сюжет с Рентв')
+                               caption=f'{count} сюжет с Рентв')"""
 
 
 @router.message((F.text.contains('что')) & F.text.contains('не так'), state=propaganda_victim.tv_first)
@@ -219,7 +219,7 @@ async def tv_russia24_reb(message: Message, state=FSMContext):
     await message.answer_video(vid_id, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.contains('что')) & F.text.contains('не так'), state=propaganda_victim.tv_russia1)
+"""@router.message((F.text.contains('что')) & F.text.contains('не так'), state=propaganda_victim.tv_russia1)
 async def tv_russia1_reb(message: Message, state=FSMContext):
     count = (await state.get_data())['rus1_tv_count']
     text = f'{count} Разоблачение россии1'
@@ -229,7 +229,7 @@ async def tv_russia1_reb(message: Message, state=FSMContext):
     nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал"))
     if count < 5:
         nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет 🇷🇺1️⃣ России1"))
-    await message.answer_video(vid_id, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer_video(vid_id, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))"""
 
 
 @router.message((F.text.contains('что')) & F.text.contains('не так'), state=propaganda_victim.tv_HTB)
@@ -258,7 +258,7 @@ async def tv_star_reb(message: Message, state=FSMContext):
     await message.answer_video(vid_id, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.contains('что')) & F.text.contains('не так'), state=propaganda_victim.tv_ren)
+"""@router.message((F.text.contains('что')) & F.text.contains('не так'), state=propaganda_victim.tv_ren)
 async def russia_in_nutshell(message: Message, state=FSMContext):
     count = (await state.get_data())['ren_tv_count']
     text = f'{count} Разоблачение рентв'
@@ -268,7 +268,7 @@ async def russia_in_nutshell(message: Message, state=FSMContext):
     nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал"))
     if count < 5:
         nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет 🟠🍺 Рентв"))
-    await message.answer_video(vid_id, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer_video(vid_id, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))"""
 
 
 @router.message((F.text.contains('Хватит') & (F.text.contains('понятно'))))
@@ -300,7 +300,7 @@ async def antip_crossed_boy_3(message: Message, state=FSMContext):
 
 
 @router.message((F.text.contains('другой телеканал')) | (F.text.contains('посмотреть еще')))
-async def antip_another_tv(message: Message, state=FSMContext):
+async def antip_another_tv(message: Message, state: FSMContext):
     bigdata = await state.get_data()
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Хватит, мне все понятно"))
@@ -315,11 +315,6 @@ async def antip_another_tv(message: Message, state=FSMContext):
     except:
         nmarkup.row(types.KeyboardButton(text='2️⃣4️⃣'))
     try:
-        if bigdata['rus1_tv_count'] < 5:
-            raise Exception
-    except:
-        nmarkup.row(types.KeyboardButton(text='🇷🇺1️⃣'))
-    try:
         if bigdata['HTB_tv_count'] < 5:
             raise Exception
     except:
@@ -329,14 +324,9 @@ async def antip_another_tv(message: Message, state=FSMContext):
             raise Exception
     except:
         nmarkup.row(types.KeyboardButton(text='⭐️🅾️'))
-    try:
-        if bigdata['ren_tv_count'] < 5:
-            raise Exception
-    except:
-        nmarkup.row(types.KeyboardButton(text='🟠🍺'))
-    nmarkup.adjust(1, 3, 3)
+    nmarkup.adjust(1, 2, 2)
     await message.answer(
-        'Я собрал для вас большую базу лжи на фееральных каналах. Выбирайте любой -- и убедитесь сами!',
+        'Я собрал для вас большую базу лжи на федеральных каналах. Выбирайте любой -- и убедитесь сами!',
         reply_markup=nmarkup.as_markup())
 
 
@@ -547,7 +537,7 @@ async def revealing_the_news(message: Message, state: FSMContext):
         markup.row(types.KeyboardButton(text='Конечно!'))
         await message.answer("Среди того, что может казаться альтернативными источниками, может быть полно лжи. "
                              "Надеюсь, что теперь вы со мной в этом согласитесь. В любом случае, у меня кончились примеры."
-                             "\nГотовы продолжить?")
+                             "\nГотовы продолжить?", reply_markup=markup.as_markup())
 
 
 @router.message((F.text.contains('Хватит, пропустим остальные источники')))
@@ -683,7 +673,7 @@ async def antip_truth_game_answer(message: Message, state: FSMContext):
         reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == 'Не сейчас') | (F.text.contains("двигаемся дальше")))
+@router.message(INFOStateFilter(infostate='Жертва пропаганды'), ((F.text == 'Не сейчас') | (F.text.contains("двигаемся дальше"))))
 async def antip_ok(message: Message):
     await message.answer("Хорошо", reply_markup=ReplyKeyboardRemove())
     await asyncio.sleep(2)
@@ -694,8 +684,20 @@ async def antip_ok(message: Message):
     await message.answer("Хотите послушать?", reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
+
+@router.message((F.text == 'Не сейчас') | (F.text.contains("двигаемся дальше")))
+async def antip_skip_for_cool(message: Message, state: FSMContext):
+    await state.set_state(truereasons_state.main)
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Давай"))
+    await message.answer("Судя по вашим ответам, вас нельзя назвать жертвой пропаганды.\n"
+                         "Почему бы нам тогда не перейти к самому важному: причинам происходящего?",
+                         reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
+
+
 @router.message((F.text == 'Давай'))
-async def antip_anecdote(message: Message, state=FSMContext):
+async def antip_anecdote(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_anecdote'})
     await state.clear()
     await state.set_state(propaganda_victim.start)
@@ -708,7 +710,7 @@ async def antip_anecdote(message: Message, state=FSMContext):
 
 
 @router.message((F.text.in_({'😁', "🙂", "😕"})))
-async def antip_emoji(message: Message, state=FSMContext):
+async def antip_emoji(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Конечно! 🙂"))
     nmarkup.row(types.KeyboardButton(text="Ну давай 🤮"))
@@ -716,39 +718,67 @@ async def antip_emoji(message: Message, state=FSMContext):
 
 
 @router.message((F.text.in_({"Конечно! 🙂", "Ну давай 🤮"})))
-async def antip_do_you_agree(message: Message, state=FSMContext):
+async def antip_do_you_agree(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_do_you_agree'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Да, но почему тогда люди ей верят?"))
     nmarkup.row(types.KeyboardButton(text="Да, полностью согласен"))
     nmarkup.row(types.KeyboardButton(text="Возможно/Частично"))
     nmarkup.row(types.KeyboardButton(text="Да, как и во всех странах"))
-    nmarkup.row(types.KeyboardButton(text="Нет, не согласен"))
+    nmarkup.row(types.KeyboardButton(text="Нет, не согласен(сна)"))
     nmarkup.adjust(1, 2, 2)
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text.contains('почему')))
-async def antip_why_they_belive(message: Message, state=FSMContext):
+async def antip_why_they_belive(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_why_they_belive'})
     await message.answer(text, reply_markup=antip_why_kb())
 
 
-@router.message((F.text.contains('Возможно') | (F.text.contains('полностью'))))
-async def antip_to_the_main(message: Message, state=FSMContext):
+@router.message((F.text.contains('Возможно') | (F.text.contains('полностью')) | (F.text.contains('Скорее')) | (F.text.contains('Допускаю,'))))
+async def antip_to_the_main(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_to_the_main'})
     await message.answer(text, reply_markup=antip_why_kb())
 
 
-@router.message((F.text.contains('во всех')))
-async def antip_to_the_main(message: Message, state=FSMContext):
+@router.message((F.text.contains('странах')))
+async def antip_to_the_main(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_prop_difference'})
     await message.answer(text, reply_markup=antip_why_kb())
 
 
+@router.message((F.text.contains('Нет, не согласен(сна)')))
+async def antip_love_propaganda(message: Message, state: FSMContext):
+    text = await sql_safe_select('text', 'texts', {'name': 'antip_love_propaganda'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Да, как и во многих других странах"))
+    nmarkup.row(types.KeyboardButton(text="Нет, нам хотят донести правду"))
+    nmarkup.row(types.KeyboardButton(text="Скорее согласен(сна)"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+#TODO внести этот текст
+
+
+@router.message(F.text == 'Нет, не согласен(сна)')
+async def antip_love_propaganda(message: Message, state: FSMContext):
+    text = await sql_safe_select('text', 'texts', {'name': 'antip_big_love_propaganda'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Я передумал(а). Допускаю, что ТВ и гос. СМИ не ставят целью донести до людей правду."))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+#TODO внести этот текст
+
+
+@router.message((F.text.contains('правда. Откуда ты знаешь')))
+async def antip_reputation_matters(message: Message, state: FSMContext):
+    text = await sql_safe_select('text', 'texts', {'name': 'antip_reputation_matters'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Поговорим о чем-то еще"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
+
 #По хорошему, это уже начало войны
 @router.message((F.text.contains('Поговорим')) & (F.text.contains('войну')) & (F.text.contains('Украине')))
-async def from_the_reasons(message: Message, state=FSMContext):
+async def from_the_reasons(message: Message, state: FSMContext):
     await state.set_state(truereasons_state.main)
     text = await sql_safe_select('text', 'texts', {'name': 'war_point_now'})
     nmarkup = ReplyKeyboardBuilder()
