@@ -1,3 +1,5 @@
+import asyncio
+
 from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
@@ -129,10 +131,20 @@ async def message_7(message: types.Message, state: FSMContext):
         # Сохранение 1 вопроса в дату
         await state.update_data(option_1=options)
         text = await sql_safe_select("text", "texts", {"name": "start_russia_goal"})
-        await message.answer_poll(text, options, is_anonymous=False, allows_multiple_answers=True, reply_markup=ReplyKeyboardRemove())
+        markup = ReplyKeyboardBuilder()
+        markup.add(types.KeyboardButton(text="Продолжай"))
+        await message.answer_poll(text, options, is_anonymous=False, allows_multiple_answers=True, reply_markup=markup.as_markup(resize_keyboard=True))
         await state.set_state(welcome_states.start_dialog.dialogue_7)
     else:
         await message.answer("Неправильный ответ, вы можете выбрать вариант ответа на клавиатуре")
+
+
+@router.message(welcome_states.start_dialog.dialogue_7, (F.text == 'Продолжай'))
+async def poll_filler(message: types.Message, bot: Bot, state: FSMContext):
+    msg = await message.answer('Чтобы продолжить -- отметьте ответы выше и нажмите "Проголосовать" или "Vote"', reply_markup=ReplyKeyboardRemove())
+    await asyncio.sleep(10)
+    await bot.delete_message(message.from_user.id, msg.message_id)
+
 
 
 @router.poll_answer(state=welcome_states.start_dialog.dialogue_7)  # Сохраняю 2 вопрос
@@ -155,6 +167,7 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, state=FSMContext):
     await state.set_state(welcome_states.start_dialog.dialogue_8)
 
 
+
 @router.message(state=welcome_states.start_dialog.dialogue_8)  # Сохраняю 3 вопрос
 async def message_8(message: types.Message, state: FSMContext):
     text = message.text
@@ -166,10 +179,21 @@ async def message_8(message: types.Message, state: FSMContext):
         await state.update_data(option_3=web_prop)
         await state.update_data(answer_3=message.text)
         text=await sql_safe_select("text", "texts", {"name": "start_internet_belive"})
-        await message.answer_poll(text, web_prop, is_anonymous=False, allows_multiple_answers=True, reply_markup=ReplyKeyboardRemove())
+        markup = ReplyKeyboardBuilder()
+        markup.row(types.KeyboardButton(text="Продолжай"))
+        await message.answer_poll(text, web_prop, is_anonymous=False, allows_multiple_answers=True,
+                                  reply_markup=markup.as_markup(resize_keyboard=True))
         await state.set_state(welcome_states.start_dialog.dialogue_9)
     else:
         await message.answer("Неправильный ответ, вы можете выбрать вариант ответа на клавиатуре")
+
+
+@router.message(welcome_states.start_dialog.dialogue_9, (F.text == 'Продолжай'))
+async def poll_filler(message: types.Message, bot: Bot, state: FSMContext):
+    msg = await message.answer('Чтобы продолжить -- отметьте ответы выше и нажмите "Проголосовать" или "Vote"',
+                               reply_markup=ReplyKeyboardRemove())
+    await asyncio.sleep(10)
+    await bot.delete_message(message.from_user.id, msg.message_id)
 
 
 @router.poll_answer(state = welcome_states.start_dialog.dialogue_9)  # Сохраняю 4 вопрос
@@ -191,13 +215,25 @@ async def poll_answer_handler_tho(poll_answer: types.PollAnswer, state=FSMContex
     await state.update_data(answer_4=poll_answer.option_ids)
     await state.update_data(option_4=options)
     answer_id_str = await poll_get(f'Usrs: {poll_answer.user.id}: Start_answers: ethernet_id:')
+    markup = ReplyKeyboardBuilder()
+    markup.row(types.KeyboardButton(text="Продолжай"))
     text = await sql_safe_select("text", "texts", {"name": "start_people_belive"})
-    await Bot(all_data().bot_token).send_poll(poll_answer.user.id, text, options, is_anonymous=False, allows_multiple_answers=True)
+    await Bot(all_data().bot_token).send_poll(poll_answer.user.id, text, options, is_anonymous=False,
+                                              allows_multiple_answers=True,
+                                              reply_markup=markup.as_markup(resize_keyboard=True))
     await state.set_state(welcome_states.start_dialog.dialogue_10)
 
 
+@router.message(welcome_states.start_dialog.dialogue_10, (F.text == 'Продолжай'))
+async def poll_filler(message: types.Message, bot: Bot, state: FSMContext):
+    msg = await message.answer('Чтобы продолжить -- отметьте ответы выше и нажмите "Проголосовать" или "Vote"',
+                               reply_markup=ReplyKeyboardRemove())
+    await asyncio.sleep(10)
+    await bot.delete_message(message.from_user.id, msg.message_id)
+
+
 @router.poll_answer(state=welcome_states.start_dialog.dialogue_10)  # Сохраняю 5 вопрос
-async def poll_answer_handler_three(poll_answer: types.PollAnswer, state=FSMContext):
+async def poll_answer_handler_three(poll_answer: types.PollAnswer, state: FSMContext):
     markup = ReplyKeyboardBuilder()
     markup.add(types.KeyboardButton(text="Поехали!"))
     options = await state.get_data()
@@ -218,14 +254,20 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, state=FSMCont
     else:
         await mongo_add(poll_answer.user.id, [data['answer_1'], data['answer_2'], data['answer_3'], data['answer_4'], data['answer_5']])
     if data["answer_3"] != "Нет, не верю ни слову"\
-            or {0, 1, 3, 4, 5, 6, 7}.isdisjoint(set(data["answer_4"]))==False\
-            or {1, 2, 3, 4, 5, 6}.isdisjoint(set(data["answer_5"])) == False:  # Жертва пропаганды?
-        print("Жертва пропаганды")
+            or {0, 1, 3, 4, 5, 6, 7}.isdisjoint(set(data["answer_4"])) is False\
+            or {1, 2, 3, 4, 5, 6}.isdisjoint(set(data["answer_5"])) is False:  # Жертва пропаганды?
+        await poll_write(f'Usrs: {poll_answer.user.id}: INFOState:', 'Жертва пропаганды')
         print(await mongo_select(poll_answer.user.id))
-        await state.set_state(propaganda_victim.start)
-    elif {2, 8}.isdisjoint(set(data["answer_4"]))==False or {7}.isdisjoint(set(data["answer_5"]))==False:  # Король информации?
+    elif {2, 8}.isdisjoint(set(data["answer_4"])) is False or {7}.isdisjoint(set(data["answer_5"])) is False:  # Король информации?
         if len(data["answer_2"]) <= 2 and {0, 1, 2, 3, 5, 7, 8} not in set(data["answer_2"]):
-            print("Король информации")
+            await poll_write(f'Usrs: {poll_answer.user.id}: INFOState:', 'Король информации')
         else:
-            print("Фома неверующий")
+            await poll_write(f'Usrs: {poll_answer.user.id}: INFOState:', "Фома неверующий")
+    await state.set_state(propaganda_victim.start)
 
+"""    if 10 in data["answer_2"]:
+        await poll_write(f'Usrs: {poll_answer.user.id}: Politics:', 'Сторонник войны')
+    if 10 in data["answer_2"]:
+        await poll_write(f'Usrs: {poll_answer.user.id}: Politics:', 'Аполитичный')
+    if 7 in data["answer_2"] or 5 in data["answer_2"]:
+        await poll_write(f'Usrs: {poll_answer.user.id}: Politics:', 'Оппозиционер')"""

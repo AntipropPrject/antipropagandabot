@@ -16,6 +16,18 @@ class option_filter(BaseFilter):
                 return True
         return False
 
+
+class INFOStateFilter(BaseFilter):
+    infostate: Union[str, list]
+
+    async def __call__(self, message: Message) -> bool:
+        user_thoughts = await poll_get(f'Usrs: {poll_answer.user.id}: INFOState:')
+        for answ in user_thoughts:
+            if self.infostate == answ:
+                return True
+        return False
+
+
 class second_donbass_filter(BaseFilter):
     option: Union[str, list]
 
