@@ -1,11 +1,13 @@
-from aiogram import Router, F
+from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
-from aiogram.types import Message, Update, Chat, poll_answer
+from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from data_base.DBuse import *
+from handlers.anti_prop_hand import antip_truth_game_start
 from middleware import CounterMiddleware
+from states import antiprop_states
 from states.antiprop_states import propaganda_victim
 
 router = Router()
@@ -13,36 +15,42 @@ router.message.middleware(CounterMiddleware())
 
 router.message.filter(state=propaganda_victim)
 
-
-# todo Attach a state to this handler
-
-
-# todo Write a filter to allow access only for involved peaple
-
-# todo Get name of TVHosts and include in logic
+messageDict = dict()
 
 
-@router.message((F.text.in_({"Начнем!", 'Скажи еще что нибудь!'})))
-@router.message(commands=["test1"])
-async def smi_statement(message: Message, state=FSMContext):
+@router.message((F.text("Начнем!")))
+@router.message((F.text.contains('скажи еще что нибудь!')))
+async def smi_statement(message: Message, state: FSMContext):
+    messageDict.update({message.from_user.id: message})
+
     person_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
 
     try:
         count = (await state.get_data())['gamecount']
     except:
         count = 0
-    how_many_rounds = data_getter(f"SELECT COUNT (*) FROM public.mistakeorlie where asset_name like '%{str(person_list[0])[-5:-1].strip()}%'")[0][0]
+
+    try:
+        how_many_rounds = data_getter(
+            f"SELECT COUNT (*) FROM public.mistakeorlie where asset_name like '%{str(person_list[0])[-5:-1].strip()}%'")[
+            0][0]
+    except IndexError as er:
+        await message.answer("Похоже вы посмотрели всех личностей")
+        await antip_truth_game_start(message, state)
+        # Todo send user on truthgame
+
     print(f"В таблице {how_many_rounds} записей, а вот счетчик сейчас {count}")
-    if count < how_many_rounds :
+    if count < how_many_rounds:
         count += 1
         try:
-            truth_data = data_getter("SELECT truth, t_id, text, belivers, nonbelivers, rebuttal, asset_name FROM public.mistakeorlie "
-                                     "left outer join assets on asset_name = assets.name "
-                                     "left outer join texts ON text_name = texts.name "
-                                     f"where asset_name like '%{str(person_list[0])[-5:-1].strip()}%' and asset_name like '%{str(count)}%'")[0]
+            truth_data = data_getter(
+                "SELECT truth, t_id, text, belivers, nonbelivers, rebuttal, asset_name FROM public.mistakeorlie "
+                "left outer join assets on asset_name = assets.name "
+                "left outer join texts ON text_name = texts.name "
+                f"where asset_name like '%{str(person_list[0])[-5:-1].strip()}%' and asset_name like '%{str(count)}%'")[
+                0]
 
             print('aaaaaa', truth_data)
-
 
             await state.update_data(gamecount=count, truth=truth_data[0], rebuttal=truth_data[5], belive=truth_data[3],
                                     not_belive=truth_data[4], last_media=truth_data[6])
@@ -67,29 +75,54 @@ async def smi_statement(message: Message, state=FSMContext):
         else:
             await message.answer(truth_data[2], reply_markup=nmarkup.as_markup(resize_keyboard=True))
     else:
-        await redis_delete_first_item("Usrs: 5316104187: Start_answers: who_to_trust")
-        nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(types.KeyboardButton(text="Давай"))
+        await redis_delete_first_item("Usrs: 5316104187: Start_answers: who_to_trust_persons:")
+        await state.update_data(gamecount=0)
         # await message.answer(
         #     "Ой, у меня закончились примеры",
         #     reply_markup=nmarkup.as_markup())
-        await sme_statement_start_over(message)
+        await sme_statement_start_over(message, state)
 
 
-@router.message((F.text == "Посмотреть еще раз"))
-async def sme_statement_start_over(message: Message):
-    # todo сделать сценарий если человех кочет посмотреть еще раз
-    text = text = await sql_safe_select('text', 'texts',
-                                 {
-                                     'name': 'antip_game_continue'})
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Хватит, не будем слушать остальных"))
-    nmarkup.row(types.KeyboardButton(text="Давай посмотрим еще!"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+@router.poll_answer(state=antiprop_states.propaganda_victim.dialogue_start_over)
+async def smi_statement_poll(poll_answer: types.PollAnswer, state: FSMContext):
+    await state.update_data(gamecount=0)
+    options = await state.get_data()
+    lst_options = options["options_start_over"]
+    lst_answers = poll_answer.option_ids
+    lst = []
+    for index in lst_answers:
+        lst.append(lst_options[index])
+        await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:', lst_options[index])
+
+    try:
+        await smi_statement(messageDict.get(poll_answer.user.id), state)
+    except:
+        await Bot(all_data().bot_token).send_message(chat_id=poll_answer.user.id, text="Ошибка")
+
+
+@router.message((F.text == "Достаточно"))
+async def sme_statement_start_over(message: Message, state: FSMContext):
+    person_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
+
+    if person_list[0] == None:
+        await antip_truth_game_start(message, state)
+    else:
+        options = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:')
+        text = text = await sql_safe_select('text', 'texts',
+                                        {
+                                            'name': 'antip_game_continue'})
+        nmarkup = ReplyKeyboardBuilder()
+        nmarkup.row(types.KeyboardButton(text="Хватит, не будем слушать остальных"))
+        nmarkup.row(types.KeyboardButton(text="Давай посмотрим еще!"))
+        await state.update_data(options_start_over=options)
+        await message.answer(text)
+        await message.answer_poll(text, options, is_anonymous=False, allows_multiple_answers=False,
+                                  reply_markup=nmarkup.as_markup(resize_keyboard=True))
+        await state.set_state(antiprop_states.propaganda_victim.dialogue_start_over)
 
 
 @router.message((F.text.contains('Хватит, не будем слушать остальных')))
-async def sme_statement_skip(message: Message,state=FSMContext):
+async def sme_statement_skip(message: Message, state=FSMContext):
     data = await state.get_data()
 
     not_viewed = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
@@ -109,28 +142,36 @@ async def sme_statement_skip(message: Message,state=FSMContext):
                          f"сюжет от {next_channel}?", reply_markup=markup.as_markup(resize_keyboard=True))
 
 
-
-
-@router.message((F.text.in_({"Cлучайная ошибка", "Целенаправленная ложь"})))
+@router.message((F.text.in_({"Случайная ошибка", "Целенаправленная ложь"})))
 async def smi_statement_enough(message: Message, state=FSMContext):
+    person_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
+    data = await state.get_data()
+    base_update_dict = dict()
     if message.text == "Cлучайная ошибка":
-        await sql_safe_update("mistakeOrLie", {"statement_asset": data["t_id"]}, {'name': data['name']})
-    text = await sql_safe_select('text', 'texts',
-                                 {
-                                     'name': 'antip_people_stats'})  # todo Change asset name to correct\\check the media type
+        base_update_dict = {'belivers': data['belive'] + 1}
+        print('Этому верит', base_update_dict)
+    elif message.text == "Целенаправленная ложь":
+        base_update_dict = {'nonbelivers': data['not_belive'] + 1}
+        print('Этому верит', base_update_dict)
+    await sql_safe_update("mistakeorlie", base_update_dict, {'asset_name': f"{data['last_media']}"})
+    t_percentage = data['belive'] / (data['belive'] + data['not_belive'])
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Хватит, не будем слушать остальных"))
-    nmarkup.row(types.KeyboardButton(text="Скажи еще что нибудь!"))
+    try:
+        nmarkup.row(types.KeyboardButton(text=f"{person_list[0]} - скажи еще что нибудь!!"))
+        nmarkup.row(types.KeyboardButton(text="Достаточно"))
+    except IndexError as er:
+        print(er)
+    await message.answer(
+        f'А вот что думаютдругие мои собеседники:\nСлучайная ошибка: {round(t_percentage * 100, 1)}%\nЦеленаправленная ложь: {round((100 - t_percentage * 100), 1)}%',
+        reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
-
-
-@router.message((F.text == "Достаточно"))
-async def smi_statement(message: Message):
-    text = await sql_safe_select('text', 'texts',
-                                 {
-                                     'name': 'antip_people_stats'})  # todo Change asset name to correct\\check the media type
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Достаточно"))
-    nmarkup.row(types.KeyboardButton(text="Скажи еще что нибудь!"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+# @router.poll_answer(state=antiprop_states.propaganda_victim.dialogue_start_over)
+# async def smi_statement(poll_answer: types.PollAnswer, state=FSMContext):
+#     text = await sql_safe_select('text', 'texts',
+#                                  {
+#                                      'name': 'antip_people_stats'})  # todo Change asset name to correct\\check the media type
+#     nmarkup = ReplyKeyboardBuilder()
+#     nmarkup.row(types.KeyboardButton(text="Достаточно"))
+#     nmarkup.row(types.KeyboardButton(text="Скажи еще что нибудь!"))
+#     await Bot(all_data().bot_token).send_message(chat_id=poll_answer.user.id, text=text,
+#                                                  reply_markup=nmarkup.as_markup(resize_keyboard=True))

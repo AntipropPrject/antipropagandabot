@@ -257,9 +257,10 @@ async def redis_delete_first_item(key):
         logg.get_error(f"redis del item | {error}", __file__)
 
 
-async def redis_media_counter_write(user_id, value):
+async def redis_write(key, value):
     try:
-        all_data().get_data_red().rpush(f'Media_counter: Smi: {user_id}', value)
+        all_data().get_data_red().lpushx(key, value)
+
     except Exception as error:
         logg.get_error(f"redis write | {error}", __file__)
 
