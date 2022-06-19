@@ -587,7 +587,6 @@ async def antip_web_exit_1(message: Message, state=FSMContext):
 @router.message(PplPropagandaFilter(),
                 (F.text.contains('шаг')) | (F.text.contains('удивлен')) | (F.text.contains('шоке')) |
                 (F.text.contains('знал')) | (F.text == 'Конечно!') | (F.text == 'Ну давай'))
-@router.message(commands=["test1"])
 async def antip_bad_people_lies(message: Message, ppl_lies_list, state: FSMContext):
     print("HERE LIES LIES LIST", ppl_lies_list)
     redis = all_data().get_data_red()

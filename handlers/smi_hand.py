@@ -17,6 +17,16 @@ router.message.filter(state=propaganda_victim)
 
 messageDict = dict()
 
+@router.message(command='jumptomistakeorlie')
+async def smi_statement_start(message: Message, state: FSMContext):
+    text = await sql_safe_select('text', 'texts',
+                          {
+                              'name': 'antip_game_continue'})
+
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Начнём!"))
+    await message.answer(text=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
 
 @router.message((F.text("Начнем!")))
 @router.message((F.text.contains('скажи еще что нибудь!')))
@@ -108,7 +118,7 @@ async def sme_statement_start_over(message: Message, state: FSMContext):
         await antip_truth_game_start(message, state)
     else:
         options = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:')
-        text = text = await sql_safe_select('text', 'texts',
+        text = await sql_safe_select('text', 'texts',
                                         {
                                             'name': 'antip_game_continue'})
         nmarkup = ReplyKeyboardBuilder()
