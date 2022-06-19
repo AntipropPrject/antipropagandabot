@@ -24,9 +24,8 @@ async def cmd_start(message: Message, state: FSMContext):
     await state.set_state(donbass_state.eight_years)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Что главное?'))
-    nmarkup.adjust(1,2)
+    nmarkup.adjust(1, 2)
     await message.answer('Вход в донбасс', reply_markup=nmarkup.as_markup(resize_keyboard=True))
-
 
 
 @router.message(F.from_user.id.in_(bata.all_data().admins), commands=["admin"])
@@ -47,8 +46,13 @@ async def eight_years_point(message: Message, state=FSMContext):
     nmarkup.row(types.KeyboardButton(text="Да, знал"))
     nmarkup.row(types.KeyboardButton(text="Нет, не знал"))
     nmarkup.adjust(1, 2)
-    await message.answer_photo(photo_id, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True,
-                                                                                      input_field_placeholder="Найдите по-настоящему независимые источники"))
+    try:
+        await message.answer_photo(photo_id, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True,
+                                                                                          input_field_placeholder="Найдите по-настоящему независимые источники"))
+    except:
+        await message.answer_video(photo_id, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True,
+                                                                                          input_field_placeholder="Найдите по-настоящему независимые источники"))
+
 
 class add_id(StatesGroup):
     one = State()
@@ -72,6 +76,8 @@ async def csv_dump(message: Message, state: FSMContext):
         writer = csv.writer(f)
         for row in data:
             writer.writerow(row)
-
-    await message.answer_photo(ph_id, caption=capt)
-    await state.clear()
+    try:
+        await message.answer_photo(ph_id, caption=capt)
+    except:
+        await message.answer_video(ph_id, caption=capt)
+        await state.clear()

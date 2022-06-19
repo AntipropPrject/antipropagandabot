@@ -9,4 +9,5 @@ class propaganda_victim(StatesGroup):
     tv_HTB = State()
     tv_star = State()
     tv_ren = State()
+    dialogue_start_over = State()
     ppl_propaganda = State()

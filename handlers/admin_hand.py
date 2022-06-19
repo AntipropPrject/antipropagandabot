@@ -70,7 +70,7 @@ async def get_text(message: Message, state: FSMContext):
 async def text_hello(message: types.Message, state: FSMContext):
     await state.set_state(admin_home.add_media)
     photo = await sql_safe_select('t_id', 'assets', {'name':'test_photo_tag'})
-    await message.answer_photo(photo, caption = 'Пришлите фото или видео, подписав его удобным тегом подобного формата: some_unique_tag', reply_markup=middle_admin_keyboard())
+    await message.answer(text = 'Пришлите фото или видео, подписав его удобным тегом подобного формата: some_unique_tag', reply_markup=middle_admin_keyboard())
 
 @router.message(content_types='photo', state=admin_home.add_media)
 async def get_photo(message: Message, state: FSMContext):
