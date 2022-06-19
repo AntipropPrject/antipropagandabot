@@ -9,7 +9,7 @@ from psycopg2 import sql
 from bata import all_data
 from data_base.DBuse import sql_safe_select, sql_safe_update, sql_safe_insert
 from keyboards.admin_keys import main_admin_keyboard, middle_admin_keyboard, app_admin_keyboard
-from stats.stat import mongo_select
+from stats.stat import  mongo_select_stat
 
 
 class admin_home(StatesGroup):
@@ -262,7 +262,7 @@ async def statistics(message: Message, state: FSMContext):
     count_donbass = 0
     count_war_aims = 0
     count_putin = 0
-    stat = await mongo_select()
+    stat = await mongo_select_stat()
     for i in stat:
         lst = []
         for j in i.values():
@@ -274,7 +274,7 @@ async def statistics(message: Message, state: FSMContext):
         count_donbass += lst[3]
         count_war_aims += lst[4]
         count_putin += lst[5]
-    await message.answer('АНАЛИТИКА О БОТЕ\n'
+    await message.answer('<b>ИНФОРМАЦИЯ О БОТЕ</b>\n'
                          '➖➖➖➖➖➖➖➖➖➖\n\n'
                          f'Пользователей: {count_come}\n'
                          f'➖➖➖➖➖➖➖➖➖➖\n\n'

@@ -12,7 +12,7 @@ from middleware import CounterMiddleware
 from resources.all_polls import web_prop
 from states import welcome_states
 from states.antiprop_states import propaganda_victim
-from stats.stat import mongo_stat, mongo_update
+from stats.stat import mongo_stat, mongo_update_stat
 
 router = Router()
 router.message.middleware(CounterMiddleware())
@@ -248,7 +248,7 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, state: FSMCon
     text = await sql_safe_select("text", "texts", {"name": "start_thank_you"})
     await Bot(all_data().bot_token).send_message(poll_answer.user.id, text, reply_markup=markup.as_markup(resize_keyboard=True))
     data = await state.get_data()
-    await mongo_update(poll_answer.user.id, 'start')
+    await mongo_update_stat(poll_answer.user.id, 'start')
     if await mongo_select(poll_answer.user.id):  # можно поставить счетчик повторных обращений
         print("Пользователь уже есть в базе")
     else:

@@ -68,9 +68,9 @@ async def smi_statement(message: Message, state: FSMContext):
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Случайная ошибка"))
         nmarkup.row(types.KeyboardButton(text="Целенаправленная ложь"))
-        if truth_data[1] != None:
+        if truth_data[1] is not None:
             capt = ""
-            if truth_data[2] != None:
+            if truth_data[2] is not None:
                 capt = truth_data[2]
             try:
                 await message.answer_video(truth_data[1], caption=capt,
