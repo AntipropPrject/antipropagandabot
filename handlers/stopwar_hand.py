@@ -26,8 +26,10 @@ async def stopwar_rather_yes(message: Message, state:FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Согласен(сна)"))
     nmarkup.row(types.KeyboardButton(text="Не согласен(сна)"))
-    await message.answer_photo(photo, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
-
+    try:
+        await message.answer_photo(photo, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    except:
+        await message.answer_video(photo, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 @router.message(F.text == "Не знаю")
 async def stopwar_idk(message: Message, state:FSMContext):
@@ -36,8 +38,10 @@ async def stopwar_idk(message: Message, state:FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Согласен(сна)"))
     nmarkup.row(types.KeyboardButton(text="Не согласен(сна)"))
-    await message.answer_photo(photo, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
-
+    try:
+        await message.answer_photo(photo, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    except:
+        await message.answer_video(photo, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 @router.message(F.text == "Скорее нет")
 async def stopwar_rather_no(message: Message, state:FSMContext):
