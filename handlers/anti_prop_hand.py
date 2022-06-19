@@ -9,6 +9,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from bata import all_data
 from data_base.DBuse import poll_get, redis_pop, redis_delete_from_list, poll_write, redis_just_one_write
+from data_base.DBuse import poll_get, redis_pop, redis_delete_from_list, mongo_update
 from data_base.DBuse import sql_safe_select, data_getter, sql_safe_update
 from filters.All_filters import WebPropagandaFilter, TVPropagandaFilter, PplPropagandaFilter, PoliticsFilter
 from handlers.true_resons_hand import truereasons_state
@@ -17,6 +18,7 @@ from middleware import CounterMiddleware
 from resources.all_polls import web_prop
 from resources.other_lists import channels
 from states.antiprop_states import propaganda_victim
+from stats.stat import mongo_update_stat
 
 router = Router()
 router.message.middleware(CounterMiddleware())
@@ -767,6 +769,7 @@ async def antip_reputation_matters(message: Message, state: FSMContext):
 @router.message(PoliticsFilter(title='Сторонник войны'),
                 (F.text.contains('Поговорим')) & (F.text.contains('действия')) & (F.text.contains('Украине')))
 async def war_point_now(message: Message, state: FSMContext):
+    await mongo_update_stat(message.from_user.id, 'antiprop')
     await state.set_state(truereasons_state.main)
     text = await sql_safe_select('text', 'texts', {'name': 'war_point_now'})
     nmarkup = ReplyKeyboardBuilder()

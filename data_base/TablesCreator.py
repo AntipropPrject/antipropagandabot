@@ -42,13 +42,13 @@ def tables_god():
                     "text" TEXT NOT NULL,
                     "name" TEXT NOT NULL PRIMARY KEY
                     )''')
-        logg.get_info("Texts table created".upper())
+        logg.get_info("table text is created".upper())
 
         cur.execute('''CREATE TABLE IF NOT EXISTS assets(
                 "t_id" TEXT NOT NULL,
                 "name" TEXT NOT NULL PRIMARY KEY
                 )''')
-        logg.get_info("Assets table created".upper())
+        logg.get_info("table assets is created".upper())
 
         cur.execute('''CREATE TABLE public.truthgame(
                 "id" int4 NOT NULL,
@@ -69,9 +69,7 @@ def tables_god():
          ADD CONSTRAINT truthgame_fk_1
           FOREIGN KEY (text_name)
            REFERENCES public.texts("name");''')
-        logg.get_info("Truthgame table is created".upper())
-
-
+        logg.get_info("table Truthgame is created".upper())
 
         cur.execute('''CREATE TABLE public.mistakeOrLie(
                         "id" int4 NOT NULL,
@@ -132,7 +130,7 @@ def tables_god():
          ADD CONSTRAINT putin_old_lies_fk_1
           FOREIGN KEY (asset_name)
            REFERENCES public.assets("name");''')
-        logg.get_info("PUTIN OLD LIES CREATED".upper())
+        logg.get_info("Table putin_old_lies is CREATED".upper())
 
         cur.execute('''CREATE TABLE public.normal_game (
                             id int4 NOT NULL PRIMARY KEY,
@@ -151,8 +149,7 @@ def tables_god():
          ADD CONSTRAINT normal_game_fk_1
           FOREIGN KEY (asset_name)
            REFERENCES public.assets("name");''')
-        logg.get_info("normal game is here".upper())
-
+        logg.get_info("table normal_game is here".upper())
 
         cur.execute('''CREATE TABLE public.ucraine_or_not_game (
                             id int4 NOT NULL PRIMARY KEY,
@@ -172,8 +169,7 @@ def tables_god():
          ADD CONSTRAINT normal_game_fk_1
           FOREIGN KEY (asset_name)
            REFERENCES public.assets("name");''')
-        logg.get_info("ucraine or not game table created".upper())
-
+        logg.get_info("table ucraine_or_not_game is created".upper())
 
         # MONGODB
         try:
