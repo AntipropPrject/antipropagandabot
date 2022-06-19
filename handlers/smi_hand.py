@@ -97,7 +97,8 @@ async def smi_statement_poll(poll_answer: types.PollAnswer, state: FSMContext):
         await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:', lst_options[index])
         list_to_customize = await poll_get(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:')
         newset = set(list_to_customize)
-        await all_data().get_data_red().delete(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:')
+        redis = all_data().get_data_red()
+        all_data().get_data_red().delete(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:')
         for person in newset:
             await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:', person)
     try:
@@ -123,7 +124,7 @@ async def sme_statement_start_over(message: Message, state: FSMContext):
                                          'name': 'antip_game_continue'})
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Хватит, не будем слушать остальных"))
-        nmarkup.row(types.KeyboardButton(text="Давай посмотрим еще!"))
+        # nmarkup.row(types.KeyboardButton(text="Давай посмотрим еще!"))
         await state.update_data(options_start_over=options)
         await message.answer(text)
 
