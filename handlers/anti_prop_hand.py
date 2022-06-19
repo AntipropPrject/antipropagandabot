@@ -7,7 +7,8 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
-from data_base.DBuse import poll_get, redis_pop
+from bata import all_data
+from data_base.DBuse import poll_get, redis_pop, redis_delete_from_list
 from data_base.DBuse import sql_safe_select, data_getter, sql_safe_update
 from filters.All_filters import WebPropagandaFilter, TVPropagandaFilter, PplPropagandaFilter
 from handlers.true_resons_hand import truereasons_state
@@ -354,7 +355,6 @@ async def antip_conspirasy(message: Message, state=FSMContext):
 @router.message(WebPropagandaFilter(), ((F.text.contains('шаг')) | (F.text.contains('удивлен')) | (F.text.contains('шоке')) | (F.text.contains('знал'))))
 @router.message(WebPropagandaFilter(), commands=["test"])
 async def antip_not_only_TV(message: Message, web_lies_list: List[str], state=FSMContext):
-    print("HERE LIES LIES LIST", web_lies_list)
     answer_id_str = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: ethernet_id:')
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Показывай"))
@@ -516,7 +516,7 @@ async def revealing_the_news(message: types.Message, state=FSMContext):
 
 @router.message(text_contains=('Покажи', 'еще', 'новость'), content_types=types.ContentType.TEXT,
                 text_ignore_case=True)
-async def show_more(message: types.Message, state=FSMContext):
+async def show_more(message: types.Message, state: FSMContext):
     data = await state.get_data()
     new_data = data['count_news'] + 1
     await state.update_data(count_news=new_data)  # обновление счетчика
@@ -531,7 +531,7 @@ async def show_more(message: types.Message, state=FSMContext):
     await message.answer_video(media, caption=caption, reply_markup=markup.as_markup(resize_keyboard=True))
 
 @router.message((F.text.contains('Достаточно, мне все понятно')))
-async def revealing_the_news(message: Message, state=FSMContext):
+async def revealing_the_news(message: Message, state: FSMContext):
     data = await state.get_data()
     if len(data['answers_str']) - len(data['all_viwed']) != 0:
         # Посмотрел ли юзер все источники
@@ -540,12 +540,18 @@ async def revealing_the_news(message: Message, state=FSMContext):
         text = await sql_safe_select('text', 'texts', {'name': 'antip_another_web_lie'})
         await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
     else:
-        await redis_pop(f'Usrs: {message.from_user.id}: Start_answers: ethernet:')
-        await message.answer("На этом моменте вы просмотрели все новости, переход к следующей ветке (она пока не поключена)")
+        redis = all_data().get_data_red()
+        for key in redis.scan_iter(f"Usrs: {message.from_user.id}: Start_answers: ethernet:*"):
+            redis.delete(key)
+        markup = ReplyKeyboardBuilder()
+        markup.row(types.KeyboardButton(text='Конечно!'))
+        await message.answer("Среди того, что может казаться альтернативными источниками, может быть полно лжи. "
+                             "Надеюсь, что теперь вы со мной в этом согласитесь. В любом случае, у меня кончились примеры."
+                             "\nГотовы продолжить?")
 
 
-@router.message((F.text.contains('Хватит, не будем слушать остальных')))
-async def skip_web(message: Message, state=FSMContext):
+@router.message((F.text.contains('Хватит, пропустим остальные источники')))
+async def skip_web(message: Message, state: FSMContext):
     data = await state.get_data()
     answer_channel = data['answers_str']  # Все выбранные источники
     all_viwed = data['all_viwed']  # Все просмотренные источники
@@ -566,19 +572,39 @@ async def skip_web(message: Message, state=FSMContext):
                          f"сюжет от {next_channel}?", reply_markup=markup.as_markup(resize_keyboard=True))
 
 
+@router.message((F.text.contains('Не надо')))
+async def antip_web_exit_1(message: Message, state=FSMContext):
+    text = 'Хорошо, это ваше право. Тогда предлагаю продолжить -- мне столько нужно вам показать!'
+    redis = all_data().get_data_red()
+    for key in redis.scan_iter(f"Usrs: {message.from_user.id}: Start_answers: ethernet:"):
+        redis.delete(key)
+    markup = ReplyKeyboardBuilder()
+    markup.row(types.KeyboardButton(text='Ну давай'))
+    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
+
+
+
 @router.message(PplPropagandaFilter(),
-                (F.text.contains('шаг')) | (F.text.contains('удивлен')) | (F.text.contains('шоке')) | (
-                F.text.contains('знал')))
-async def antip_bad_people_lies(message: Message, ppl_lies_list, state=FSMContext):
+                (F.text.contains('шаг')) | (F.text.contains('удивлен')) | (F.text.contains('шоке')) |
+                (F.text.contains('знал')) | (F.text == 'Конечно!') | (F.text == 'Ну давай'))
+async def antip_bad_people_lies(message: Message, ppl_lies_list, state: FSMContext):
     print("HERE LIES LIES LIST", ppl_lies_list)
-    lies_list = ppl_lies_list
-    text = await sql_safe_select('text', 'texts', {'name': 'antip_bad_people_lies'})
-    await message.answer(text)
-    await message.answer('Начало блока с пропагандистами. В данный момент тупик.')
+    redis = all_data().get_data_red()
+
+    #ЭТИ ДВЕ СТРОКИ ДОЛЖНЫ БЫТЬ НА ВЫХОДЕ ИЗ БЛОКА С ПРОПАГАНДИСТАМИ
+    for key in redis.scan_iter(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:*'):
+        redis.delete(key)
+
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Ну давай"))
+    await message.answer('Этот блок однажды все же будет доработан, но пока что тут заглушка, потому что времени три часа ночи,'
+                         ' у меня не было выходных полторы недели, и я <i>не хочу</i> сейчас делать всю игру с динамическим списком. '
+                         'Предлагаю двинуться дальше.', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.contains('шаг')) | (F.text.contains('удивлен')) | (F.text.contains('шоке')) | (F.text.contains('знал')))
-async def antip_truth_game_start(message: Message, state=FSMContext):
+@router.message((F.text.contains('шаг')) | (F.text.contains('удивлен')) | (F.text.contains('шоке')) | (F.text.contains('знал'))
+                | (F.text == 'Конечно!') | (F.text == 'Ну давай'))
+async def antip_truth_game_start(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_truth_game_start'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Давай начнем"))
@@ -588,7 +614,7 @@ async def antip_truth_game_start(message: Message, state=FSMContext):
 
 
 @router.message((F.text == "Давай начнем") | (F.text == "Продолжаем, давай еще!"))
-async def antip_truth_game_start(message: Message, state=FSMContext):
+async def antip_truth_game_start(message: Message, state: FSMContext):
     try:
         count = (await state.get_data())['gamecount']
     except:
@@ -626,7 +652,7 @@ async def antip_truth_game_start(message: Message, state=FSMContext):
 
 
 @router.message((F.text == "Это правда!") | (F.text == "Это ложь."))
-async def antip_truth_game_answer(message: Message, state=FSMContext):
+async def antip_truth_game_answer(message: Message, state: FSMContext):
     data = await state.get_data()
     base_update_dict = dict()
     if message.text == "Это правда!":

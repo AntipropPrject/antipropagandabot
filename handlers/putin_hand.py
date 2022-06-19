@@ -26,7 +26,8 @@ router.message.filter(state=(StateofPutin, truereasons_state))
 
 
 @router.message(PutinFilter(), (F.text.in_({'Властям виднее.'})))
-async def putin_love_putin(message: Message):
+async def putin_love_putin(message: Message, state: FSMContext):
+    await state.set_state(StateofPutin.main)
     text = await sql_safe_select('text', 'texts', {'name': 'putin_love_putin'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Согласен, кто, если не Путин?"))
@@ -35,7 +36,8 @@ async def putin_love_putin(message: Message):
 
 
 @router.message((F.text.in_({'Властям виднее.'})))
-async def putin_not_love_putin(message: Message):
+async def putin_not_love_putin(message: Message, state: FSMContext):
+    await state.set_state(StateofPutin.main)
     text = "Выберите описание Владимира Путина, которое вы считаете наиболее точным:"
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Не лучший президент, но кто, если не Путин?"))

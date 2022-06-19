@@ -403,7 +403,7 @@ async def nazi_no_WW2(message: Message, state: FSMContext):
 
 
 @router.message(state=NaziState.after_small_poll)
-async def putin_gaming(message: Message, state: FSMContext):
+async def nazi_game_start(message: Message, state: FSMContext):
     await state.set_state(NaziState.game)
     text = await sql_safe_select('text', 'texts', {'name': 'nazi_game_start'})
     nmarkup = ReplyKeyboardBuilder()
