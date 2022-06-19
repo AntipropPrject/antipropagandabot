@@ -89,7 +89,7 @@ async def smi_statement(message: Message, state: FSMContext):
         await sme_statement_start_over(message, state)
 
 
-@router.poll_answer()
+@router.poll_answer(state=propaganda_victim.ppl_propaganda)
 async def smi_statement_poll(poll_answer: types.PollAnswer, state: FSMContext):
     await state.update_data(gamecount=0)
     options = await state.get_data()

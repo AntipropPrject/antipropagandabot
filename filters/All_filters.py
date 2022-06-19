@@ -1,7 +1,7 @@
 from aiogram.dispatcher.filters import BaseFilter
 from aiogram.types import Message
 from typing import Union, Dict, Any
-from data_base.DBuse import poll_get
+from data_base.DBuse import poll_get, redis_just_one_read
 
 
 class option_filter(BaseFilter):
@@ -21,10 +21,19 @@ class INFOStateFilter(BaseFilter):
     infostate: Union[str, list]
 
     async def __call__(self, message: Message) -> bool:
-        user_thoughts = await poll_get(f'Usrs: {poll_answer.user.id}: INFOState:')
-        for answ in user_thoughts:
-            if self.infostate == answ:
-                return True
+        restate = await redis_just_one_read(f'Usrs: {message.from_user.id}: INFOState:')
+        if self.infostate == restate:
+            return True
+        return False
+
+
+class PoliticsFilter(BaseFilter):
+    title: Union[str]
+
+    async def __call__(self, message: Message) -> bool:
+        user_thoughts = await redis_just_one_read(f'Usrs: {message.from_user.id}: Politics:')
+        if self.title == user_thoughts:
+            return True
         return False
 
 

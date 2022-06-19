@@ -7,7 +7,8 @@ from aiogram.types import ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from bata import all_data
-from data_base.DBuse import poll_get, poll_write, sql_safe_select, mongo_add, mongo_select, mongo_update
+from data_base.DBuse import poll_get, poll_write, sql_safe_select, mongo_add, mongo_select, mongo_update, \
+    redis_just_one_write
 from middleware import CounterMiddleware
 from resources.all_polls import web_prop
 from states import welcome_states
@@ -122,8 +123,8 @@ async def message_7(message: types.Message, state: FSMContext):
     if text == 'Начал(а) интересоваться после 24 февраля' or text == "Скорее да" or text == "Скорее нет":
         await poll_write(f'Usrs: {message.from_user.id}: Start_answers: interest_in_politics:', message.text)
         options = ["Защитить русских в Донбассе",  # Вопросы опроса
-                   "Предотвратить вторжение на территорию"
-                   " России или ЛНР/ДНР", "Денацификация / Уничтожить нацистов", "Демилитаризация / Снижение военной мощи",
+                   "Предотвратить вторжение на территорию России или ЛНР/ДНР",
+                   "Денацификация / Уничтожить нацистов", "Демилитаризация / Снижение военной мощи",
                    "Сменить власть в Украине", "Уничтожить биолаборатории / Предотвратить создание ядерного оружия",
                    "Повысить рейтинг доверия Владимира Путина", "Захватить территории Донбасса и юга Украины",
                    "Предотвратить размещение военных баз НАТО в Украине", "Я не знаю..."
@@ -196,7 +197,7 @@ async def poll_filler(message: types.Message, bot: Bot, state: FSMContext):
     await bot.delete_message(message.from_user.id, msg.message_id)
 
 
-@router.poll_answer(state = welcome_states.start_dialog.dialogue_9)  # Сохраняю 4 вопрос
+@router.poll_answer(state=welcome_states.start_dialog.dialogue_9)  # Сохраняю 4 вопрос
 async def poll_answer_handler_tho(poll_answer: types.PollAnswer, state=FSMContext):
     options = ["Владимир Путин", "Дмитрий Песков", "Рамзан Кадыров",
                "Сергей Лавров", "Юрий Подоляка", "Владимир Соловьев",
@@ -256,19 +257,19 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, state: FSMCon
     if data["answer_3"] != "Нет, не верю ни слову"\
             or {0, 1, 3, 4, 5, 6, 7}.isdisjoint(set(data["answer_4"])) is False\
             or {1, 2, 3, 4, 5, 6}.isdisjoint(set(data["answer_5"])) is False:  # Жертва пропаганды?
-        await poll_write(f'Usrs: {poll_answer.user.id}: INFOState:', 'Жертва пропаганды')
-        print(await mongo_select(poll_answer.user.id))
+        # Вот это все бы не в списки совать, потом займусь
+        await redis_just_one_write(f'Usrs: {poll_answer.user.id}: INFOState:', 'Жертва пропаганды')
     elif {2, 8}.isdisjoint(set(data["answer_4"])) is False or {7}.isdisjoint(set(data["answer_5"])) is False:  # Король информации?
         if len(data["answer_2"]) <= 2 and {0, 1, 2, 3, 5, 7, 8} not in set(data["answer_2"]):
-            await poll_write(f'Usrs: {poll_answer.user.id}: INFOState:', 'Король информации')
+            await redis_just_one_write(f'Usrs: {poll_answer.user.id}: INFOState:', 'Король информации')
         else:
-            await poll_write(f'Usrs: {poll_answer.user.id}: INFOState:', "Фома неверующий")
+            await redis_just_one_write(f'Usrs: {poll_answer.user.id}: INFOState:', "Фома неверующий")
     await state.set_state(propaganda_victim.start)
-    print(data["answer_2"])
-
-    if {0, 1, 2, 3, 5, 7, 8}.isdisjoint(set(data["answer_2"]) is False):
-        await poll_write(f'Usrs: {poll_answer.user.id}: Politics:', 'Сторонник войны')
+    print('fffffff', data["answer_2"])
+    #Вот это все бы не в списки совать
+    if {0, 1, 2, 3, 5, 7, 8}.isdisjoint(set(data["answer_2"])) is False:
+        await redis_just_one_write(f'Usrs: {poll_answer.user.id}: Politics:', 'Сторонник войны')
     elif {4, 6}.isdisjoint(set(data["answer_2"])) is False:
-        await poll_write(f'Usrs: {poll_answer.user.id}: Politics:', 'Аполитичный')
-        #if нажаты нужные кнопки:
-            #await poll_write(f'Usrs: {poll_answer.user.id}: Politics:', 'Оппозиционер')
+        await redis_just_one_write(f'Usrs: {poll_answer.user.id}: Politics:', 'Оппозиционер')
+    elif {9}.isdisjoint(set(data["answer_2"])) is False:
+        await redis_just_one_write(f'Usrs: {poll_answer.user.id}: Politics:', 'Аполитичный')

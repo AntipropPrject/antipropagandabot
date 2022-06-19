@@ -7,7 +7,7 @@ import random
 
 def antip_why_kb():
     markup = ReplyKeyboardBuilder()
-    markup.row(types.KeyboardButton(text="Поговорим про войну в Украине"))
+    markup.row(types.KeyboardButton(text="Поговорим про военные действия в Украине"))
     markup.row(types.KeyboardButton(text="Но ведь на войне первая жертва -- это правда. Откуда ты знаешь, кому можно верить?"))
     return markup.as_markup(resize_keyboard=True)
 

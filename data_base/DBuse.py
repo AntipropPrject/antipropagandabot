@@ -270,3 +270,17 @@ async def redis_media_counter_get(user_id):
         return all_data().get_data_red().lrange(f'Media_counter: Smi: {user_id}', 0, -1)
     except Exception as error:
         logg.get_error(f"redis get | {error}", __file__)
+
+
+async def redis_just_one_write(key, value):
+    try:
+        all_data().get_data_red().set(key, value)
+    except Exception as error:
+        logg.get_error(f"{error}", __file__)
+
+
+async def redis_just_one_read(key):
+    try:
+        return all_data().get_data_red().get(key)
+    except Exception as error:
+        logg.get_error(f"{error}", __file__)
