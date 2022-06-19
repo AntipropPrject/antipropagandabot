@@ -85,7 +85,6 @@ async def smi_statement(message: Message, state: FSMContext):
         else:
             await message.answer(truth_data[2], reply_markup=nmarkup.as_markup(resize_keyboard=True))
     else:
-        await redis_delete_first_item("Usrs: 5316104187: Start_answers: who_to_trust_persons:")
         await state.update_data(gamecount=0)
         # await message.answer(
         #     "Ой, у меня закончились примеры",
@@ -112,6 +111,7 @@ async def smi_statement_poll(poll_answer: types.PollAnswer, state: FSMContext):
 
 @router.message((F.text == "Достаточно"))
 async def sme_statement_start_over(message: Message, state: FSMContext):
+    await redis_delete_first_item("Usrs: 5316104187: Start_answers: who_to_trust_persons:")
     person_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
 
     if person_list[0] == None:
