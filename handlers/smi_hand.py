@@ -1,3 +1,5 @@
+from itertools import groupby
+
 from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
@@ -90,17 +92,18 @@ async def smi_statement(message: Message, state: FSMContext):
 async def smi_statement_poll(poll_answer: types.PollAnswer, state: FSMContext):
     await state.update_data(gamecount=0)
     options = await state.get_data()
+    redis = all_data().get_data_red()
     lst_options = options["options_start_over"]
     lst_answers = poll_answer.option_ids
     lst = []
     for index in lst_answers:
         lst.append(lst_options[index])
-        await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:', lst_options[index])
+
+        await redis_write(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:', lst_options[index])
         list_to_customize = await poll_get(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:')
-        newset = set(list_to_customize)
-        redis = all_data().get_data_red()
+        new_list = [el for el, _ in groupby(list_to_customize)]
         all_data().get_data_red().delete(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:')
-        for person in newset:
+        for person in new_list:
             await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:', person)
     try:
         await smi_statement(messageDict.get(poll_answer.user.id), state)
