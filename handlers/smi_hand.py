@@ -85,7 +85,7 @@ async def smi_statement(message: Message, state: FSMContext):
         await sme_statement_start_over(message, state)
 
 
-@router.poll_answer(state=antiprop_states.propaganda_victim.dialogue_start_over)
+@router.poll_answer(antiprop_states.propaganda_victim.ppl_propaganda.dialogue_start_over)
 async def smi_statement_poll(poll_answer: types.PollAnswer, state: FSMContext):
     await state.update_data(gamecount=0)
     options = await state.get_data()
@@ -130,7 +130,7 @@ async def sme_statement_start_over(message: Message, state: FSMContext):
 
         await message.answer_poll(text, options, is_anonymous=False, allows_multiple_answers=False,
                                   reply_markup=nmarkup.as_markup(resize_keyboard=True))
-        await state.set_state(antiprop_states.propaganda_victim.dialogue_start_over)
+        await state.set_state(antiprop_states.propaganda_victim.ppl_propaganda.dialogue_start_over)
 
 
 @router.message((F.text.contains('Хватит, не будем слушать остальных')))
