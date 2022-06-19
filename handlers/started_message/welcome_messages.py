@@ -264,10 +264,11 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, state: FSMCon
         else:
             await poll_write(f'Usrs: {poll_answer.user.id}: INFOState:', "Фома неверующий")
     await state.set_state(propaganda_victim.start)
+    print(data["answer_2"])
 
-"""    if 10 in data["answer_2"]:
+    if {0, 1, 2, 3, 5, 7, 8}.isdisjoint(set(data["answer_2"]) is False):
         await poll_write(f'Usrs: {poll_answer.user.id}: Politics:', 'Сторонник войны')
-    if 10 in data["answer_2"]:
+    elif {4, 6}.isdisjoint(set(data["answer_2"])) is False:
         await poll_write(f'Usrs: {poll_answer.user.id}: Politics:', 'Аполитичный')
-    if 7 in data["answer_2"] or 5 in data["answer_2"]:
-        await poll_write(f'Usrs: {poll_answer.user.id}: Politics:', 'Оппозиционер')"""
+        #if нажаты нужные кнопки:
+            #await poll_write(f'Usrs: {poll_answer.user.id}: Politics:', 'Оппозиционер')
