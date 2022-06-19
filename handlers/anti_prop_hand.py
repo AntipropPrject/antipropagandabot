@@ -614,7 +614,7 @@ async def antip_truth_game_start(message: Message, state: FSMContext):
 
 
 @router.message((F.text == "Давай начнем") | (F.text == "Продолжаем, давай еще!"))
-async def antip_truth_game_start(message: Message, state: FSMContext):
+async def antip_truth_game_start_question(message: Message, state: FSMContext):
     try:
         count = (await state.get_data())['gamecount']
     except:
