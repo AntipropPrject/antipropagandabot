@@ -17,7 +17,7 @@ router.message.filter(state=propaganda_victim)
 
 messageDict = dict()
 
-@router.message(command='jumptomistakeorlie')
+@router.message(commands=['jumptomistakeorlie'])
 async def smi_statement_start(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts',
                           {
