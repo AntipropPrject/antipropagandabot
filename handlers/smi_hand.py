@@ -1,11 +1,12 @@
 from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
+from aiogram.dispatcher.fsm.storage import redis
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from data_base.DBuse import *
-from handlers.anti_prop_hand import antip_truth_game_start
+from handlers.anti_prop_hand import antip_truth_game_start_question, antip_truth_game_start
 from middleware import CounterMiddleware
 from states import antiprop_states
 from states.antiprop_states import propaganda_victim
@@ -13,22 +14,12 @@ from states.antiprop_states import propaganda_victim
 router = Router()
 router.message.middleware(CounterMiddleware())
 
-router.message.filter(state=propaganda_victim)
+router.message.filter(state=propaganda_victim.ppl_propaganda)
 
 messageDict = dict()
 
-@router.message(commands=['jumptomistakeorlie'])
-async def smi_statement_start(message: Message, state: FSMContext):
-    text = await sql_safe_select('text', 'texts',
-                          {
-                              'name': 'antip_bad_people_lies'})
 
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Начнём!"))
-    await message.answer(text=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
-
-
-@router.message((F.text("Начнём!")))
+@router.message((F.text.contains("Давайте начнём!")))
 @router.message((F.text.contains('скажи еще что нибудь!')))
 async def smi_statement(message: Message, state: FSMContext):
     messageDict.update({message.from_user.id: message})
@@ -45,8 +36,9 @@ async def smi_statement(message: Message, state: FSMContext):
             f"SELECT COUNT (*) FROM public.mistakeorlie where asset_name like '%{str(person_list[0])[-5:-1].strip()}%'")[
             0][0]
     except IndexError as er:
-        await message.answer("Похоже вы посмотрели всех личностей")
-        await antip_truth_game_start(message, state)
+        errmarkup = ReplyKeyboardBuilder()
+        errmarkup.rows(types.KeyboardButton(text="Переход к игре в правду"))
+        await message.answer("У Надо продумать, что будет если закончились материалы и при этом нет больше красных личностей? ")
         # Todo send user on truthgame
 
     print(f"В таблице {how_many_rounds} записей, а вот счетчик сейчас {count}")
@@ -85,6 +77,7 @@ async def smi_statement(message: Message, state: FSMContext):
         else:
             await message.answer(truth_data[2], reply_markup=nmarkup.as_markup(resize_keyboard=True))
     else:
+        await redis_delete_first_item("Usrs: 5316104187: Start_answers: who_to_trust_persons:")
         await state.update_data(gamecount=0)
         # await message.answer(
         #     "Ой, у меня закончились примеры",
@@ -102,7 +95,11 @@ async def smi_statement_poll(poll_answer: types.PollAnswer, state: FSMContext):
     for index in lst_answers:
         lst.append(lst_options[index])
         await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:', lst_options[index])
-
+        list_to_customize = await poll_get(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:')
+        newset = set(list_to_customize)
+        await all_data().get_data_red().delete(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:')
+        for person in newset:
+            await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:', person)
     try:
         await smi_statement(messageDict.get(poll_answer.user.id), state)
     except:
@@ -111,21 +108,25 @@ async def smi_statement_poll(poll_answer: types.PollAnswer, state: FSMContext):
 
 @router.message((F.text == "Достаточно"))
 async def sme_statement_start_over(message: Message, state: FSMContext):
-    await redis_delete_first_item("Usrs: 5316104187: Start_answers: who_to_trust_persons:")
+
     person_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
 
-    if person_list[0] == None:
-        await antip_truth_game_start(message, state)
+    try:
+        person = person_list[0]
+    except IndexError:
+        await smi_statement_enough(message, state)
     else:
         options = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:')
+        options.append("Никого...")
         text = await sql_safe_select('text', 'texts',
-                                        {
-                                            'name': 'antip_game_continue'})
+                                     {
+                                         'name': 'antip_game_continue'})
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Хватит, не будем слушать остальных"))
         nmarkup.row(types.KeyboardButton(text="Давай посмотрим еще!"))
         await state.update_data(options_start_over=options)
         await message.answer(text)
+
         await message.answer_poll(text, options, is_anonymous=False, allows_multiple_answers=False,
                                   reply_markup=nmarkup.as_markup(resize_keyboard=True))
         await state.set_state(antiprop_states.propaganda_victim.dialogue_start_over)
@@ -174,6 +175,15 @@ async def smi_statement_enough(message: Message, state=FSMContext):
     await message.answer(
         f'А вот что думаютдругие мои собеседники:\nСлучайная ошибка: {round(t_percentage * 100, 1)}%\nЦеленаправленная ложь: {round((100 - t_percentage * 100), 1)}%',
         reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
+
+@router.message((F.text.in_({"Не надо, я и так знаю, что они врут", "Не надо, я все равно буду доверять им", "Переход к игре в правду"})))
+async def smi_statement_enough(message: Message, state: FSMContext):
+    for key in all_data().get_data_red().scan_iter(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:*'):
+        all_data().get_data_red().delete(key)
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Переход!!!"))
+    await message.answer("Переходим к игре в правду(как будет выглядетть жтот переход, решат наши дизайнеры. В это место мы так же попадаем, если закончились материалы и личности.", reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 # @router.poll_answer(state=antiprop_states.propaganda_victim.dialogue_start_over)
 # async def smi_statement(poll_answer: types.PollAnswer, state=FSMContext):
