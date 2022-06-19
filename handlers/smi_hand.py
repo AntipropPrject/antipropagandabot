@@ -41,7 +41,8 @@ async def smi_statement(message: Message, state: FSMContext):
     except IndexError as er:
         errmarkup = ReplyKeyboardBuilder()
         errmarkup.rows(types.KeyboardButton(text="Переход к игре в правду"))
-        await message.answer("У Надо продумать, что будет если закончились материалы и при этом нет больше красных личностей? ")
+        await message.answer(
+            "У Надо продумать, что будет если закончились материалы и при этом нет больше красных личностей? ")
         # Todo send user on truthgame
 
     print(f"В таблице {how_many_rounds} записей, а вот счетчик сейчас {count}")
@@ -104,7 +105,7 @@ async def smi_statement_poll(poll_answer: types.PollAnswer, state: FSMContext):
         new_list = [el for el, _ in groupby(list_to_customize)]
         all_data().get_data_red().delete(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:')
         for person in new_list:
-            redis.lrem(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:', 0 , person)
+            redis.lrem(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:', 0, person)
             await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:', person)
     try:
         await smi_statement(messageDict.get(poll_answer.user.id), state)
@@ -114,7 +115,6 @@ async def smi_statement_poll(poll_answer: types.PollAnswer, state: FSMContext):
 
 @router.message((F.text == "Достаточно"))
 async def sme_statement_start_over(message: Message, state: FSMContext):
-
     person_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
 
     try:
@@ -143,12 +143,16 @@ async def sme_statement_skip(message: Message, state=FSMContext):
     data = await state.get_data()
 
     not_viewed = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
+    try:
+        next_channel = str(not_viewed[0])
+    except:
+        massage.answer("Нету личностей в списке, надо зайти в раздел заново")
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text='Хорошо, давай посмотрим'))
     markup.row(types.KeyboardButton(text='Не надо, я и так знаю, что они врут!!!'))
     markup.row(types.KeyboardButton(text='Не надо, я все равно буду доверять им!!!'))
     lst_web_answers = str(', '.join(not_viewed))
-    next_channel = str(not_viewed[0])
+
     await state.update_data(not_viewed_chanel=not_viewed[0])
     await message.answer("Я хотел показать вам еще, как врут "
                          f"{lst_web_answers}, ведь вы "
@@ -183,13 +187,16 @@ async def smi_statement_enough(message: Message, state=FSMContext):
         reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.in_({"Не надо, я и так знаю, что они врут!!!", "Не надо, я все равно буду доверять им!!!", "Переход к игре в правду"})))
+@router.message((F.text.in_(
+    {"Не надо, я и так знаю, что они врут!!!", "Не надо, я все равно буду доверять им!!!", "Переход к игре в правду"})))
 async def smi_statement_enough(message: Message, state: FSMContext):
     for key in all_data().get_data_red().scan_iter(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:*'):
         all_data().get_data_red().delete(key)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Переход!!!"))
-    await message.answer("Переходим к игре в правду(как будет выглядетть жтот переход, решат наши дизайнеры. В это место мы так же попадаем, если закончились материалы и личности.", reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(
+        "Переходим к игре в правду(как будет выглядетть жтот переход, решат наши дизайнеры. В это место мы так же попадаем, если закончились материалы и личности.",
+        reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 # @router.poll_answer(state=antiprop_states.propaganda_victim.dialogue_start_over)
 # async def smi_statement(poll_answer: types.PollAnswer, state=FSMContext):
