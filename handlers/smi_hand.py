@@ -21,14 +21,14 @@ messageDict = dict()
 async def smi_statement_start(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts',
                           {
-                              'name': 'antip_game_continue'})
+                              'name': 'antip_bad_people_lies'})
 
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Начнём!"))
     await message.answer(text=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text("Начнем!")))
+@router.message((F.text("Начнём!")))
 @router.message((F.text.contains('скажи еще что нибудь!')))
 async def smi_statement(message: Message, state: FSMContext):
     messageDict.update({message.from_user.id: message})
