@@ -278,16 +278,11 @@ async def nazi_76_percent(poll_answer: types.PollAnswer, bot: Bot, state: FSMCon
 @router.message((F.text.contains('другие цифры')))
 async def nazi_manipulation(message: Message, state: FSMContext):
     await state.set_state(NaziState.third_part)
-    text = await sql_safe_select('text', 'texts', {'name': 'nazi_manipulation'})
-    photo = await sql_safe_select('t_id', 'assets', {'name': 'nazi_manipulation'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Я удивлен(а)"))
     nmarkup.row(types.KeyboardButton(text="Я не удивлен(а)"))
     nmarkup.row(types.KeyboardButton(text="Я не доверяю соц. опросам"))
-    try:
-        await message.answer_photo(photo, text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
-    except:
-        await message.answer_video(photo, text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await simple_media(message, 'nazi_manipulation', nmarkup.as_markup(resize_keyboard=True))
 
 @router.message((F.text.contains('удивлен')) | (F.text == "Хорошо, покажи"))
 async def nazi_not_really(message: Message, state: FSMContext):

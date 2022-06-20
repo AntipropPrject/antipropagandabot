@@ -11,3 +11,4 @@ class propaganda_victim(StatesGroup):
     tv_ren = State()
     dialogue_start_over = State()
     ppl_propaganda = State()
+    final = State()
