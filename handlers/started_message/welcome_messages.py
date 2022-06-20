@@ -149,7 +149,7 @@ async def poll_filler(message: types.Message, bot: Bot, state: FSMContext):
 
 
 @router.poll_answer(state=welcome_states.start_dialog.dialogue_7)  # Сохраняю 2 вопрос
-async def poll_answer_handler(poll_answer: types.PollAnswer, state=FSMContext):
+async def poll_answer_handler(poll_answer: types.PollAnswer, state: FSMContext):
     #сохранение 2 вопроса
     options = await state.get_data()
     lst_options = options["option_1"]
@@ -198,7 +198,7 @@ async def poll_filler(message: types.Message, bot: Bot, state: FSMContext):
 
 
 @router.poll_answer(state=welcome_states.start_dialog.dialogue_9)  # Сохраняю 4 вопрос
-async def poll_answer_handler_tho(poll_answer: types.PollAnswer, state=FSMContext):
+async def poll_answer_handler_tho(poll_answer: types.PollAnswer, state: FSMContext):
     options = ["Владимир Путин", "Дмитрий Песков", "Рамзан Кадыров",
                "Сергей Лавров", "Юрий Подоляка", "Владимир Соловьев",
                "Ольга Скабеева", "Никому из них..."
@@ -264,8 +264,8 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, state: FSMCon
             await redis_just_one_write(f'Usrs: {poll_answer.user.id}: INFOState:', 'Король информации')
         else:
             await redis_just_one_write(f'Usrs: {poll_answer.user.id}: INFOState:', "Фома неверующий")
+    await state.clear()
     await state.set_state(propaganda_victim.start)
-    print('fffffff', data["answer_2"])
     #Вот это все бы не в списки совать
     if {0, 1, 2, 3, 5, 7, 8}.isdisjoint(set(data["answer_2"])) is False:
         await redis_just_one_write(f'Usrs: {poll_answer.user.id}: Politics:', 'Сторонник войны')
