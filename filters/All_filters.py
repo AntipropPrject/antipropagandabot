@@ -53,7 +53,7 @@ class TVPropagandaFilter(BaseFilter):
     async def __call__(self, message: Message) -> bool:
         user_thoughts = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: tv:')
         for answ in user_thoughts:
-            if self.option == answ:
+            if int(answ.find(self.option)) != -1:
                 return True
         return False
 
@@ -67,7 +67,6 @@ class WebPropagandaFilter(BaseFilter):
                     "ТАСС / Комсомольская правда / АиФ / Ведомости / Лента / Интерфакс", "Яндекс.Новости")
         for bad_lie in bad_lies:
             if bad_lie in web_lies_list:
-                print("ОН ВЕРНУЛСЯ")
                 return {'web_lies_list': web_lies_list}
         return False
 
@@ -90,7 +89,7 @@ class OperationWar(BaseFilter):
 
     async def __call__(self, message: Message):
         war_or_not = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: Is_it_war:')
-        if war_or_not[0] == self.answer:
+        if int(war_or_not[0].find(self.answer)) != -1:
             return True
         else:
             return False
@@ -101,10 +100,11 @@ class WarReason(BaseFilter):
 
     async def __call__(self, message: Message):
         reason_list = await poll_get(f"Usrs: {message.from_user.id}: Start_answers: Invasion:")
-        if self.answer in reason_list:
-            return True
-        else:
-            return False
+        for thing in reason_list:
+            if int(thing.find(self.answer)) != -1:
+                return True
+            else:
+                return False
 
 
 class PutinFilter(BaseFilter):

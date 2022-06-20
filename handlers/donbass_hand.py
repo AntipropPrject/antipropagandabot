@@ -64,7 +64,7 @@ async def donbass_chart_2(message: Message, state=FSMContext):
     nmarkup.add(types.KeyboardButton(text='Продолжай'))
     await message.reply_poll("Отметьте один или более вариантов, с которыми вы согласны или частично согласны",
                              donbass_first_poll, is_anonymous=False, allows_multiple_answers=True,
-                             reply_markup=nmarkup.as_markup())
+                             reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message(donbass_state.eight_years_selection, (F.text == 'Продолжай'))
@@ -107,10 +107,10 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state=FSM
         if 'Денацификация / Уничтожить нацистов' not in (
                 await poll_get(f'Usrs: {poll_answer.user.id}: Start_answers: Invasion:')):
             await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: Invasion:',
-                             'Денацификация / Уничтожить нацистов')
+                             '🤬 Денацификация / Уничтожить нацистов')
         await redis_pop(f'Usrs: {poll_answer.user.id}: Donbass_polls: First:')
         await bot.send_message(poll_answer.user.id, text, reply_markup=filler_kb(), parse_mode="HTML")
-    elif 'Украинцам надо было просто сдаться, тогда бы стольких жертв не было' in true_options:
+    elif "Это укронацисты стреляют по своим же жителям! Мы же бьем только по военным объектам" in true_options:
         text = await sql_safe_select('text', 'texts', {'name': 'only_war_objects'})
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(
@@ -120,6 +120,7 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state=FSM
         await bot.send_message(poll_answer.user.id, text, reply_markup=nmarkup.as_markup(resize_keyboard=True),
                                parse_mode="HTML")
     elif 'Так они используют население как живой щит! Поэтому погибают мирные жители' in true_options:
+        await redis_pop(f'Usrs: {poll_answer.user.id}: Donbass_polls: First:')
         text = 'Еще одна заглушка. Блок про живой щит начинается здесь'
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Зачем они вообще сопротивлялись? Мы же им желаем добра!"))
@@ -200,7 +201,7 @@ async def donbas_nazi(message: Message, state=FSMContext):
     if 'Денацификация / Уничтожить нацистов' not in (
             await poll_get(f'Usrs: {message.from_user.id}: Start_answers: Invasion:')):
         await poll_write(f'Usrs: {message.from_user.id}: Start_answers: Invasion:',
-                         'Денацификация / Уничтожить нацистов')
+                         '🤬 Денацификация / Уничтожить нацистов')
         print('TEST NAZI')
     text = await sql_safe_select('text', 'texts', {'name': 'donbas_nazi'})
     await redis_pop(f'Usrs: {message.from_user.id}: Donbass_polls: First:')
@@ -427,7 +428,7 @@ async def donbas_no_army_here(message: Message, state=FSMContext):
     nmarkup.row(types.KeyboardButton(text="Почему бы и нет"))
     # Удаление из списка донбасса
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Start_answers: Invasion:',
-                                 "Защитить русских в Донбассе")
+                                 "👪 Защитить русских в Донбассе")
     await state.set_state(TruereasonsState.main)
     await message.answer(
             "Рад, что мы разобрали все, что связано с Донбассом."
