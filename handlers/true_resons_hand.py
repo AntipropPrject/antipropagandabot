@@ -4,7 +4,6 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.dispatcher.fsm.state import StatesGroup, State
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-
 from data_base.DBuse import data_getter, sql_safe_select, sql_safe_update, redis_just_one_write, poll_write
 from data_base.DBuse import redis_delete_from_list
 from filters.All_filters import OperationWar, WarReason
@@ -339,7 +338,7 @@ async def reasons_usa_gegemony(message: Message):
 
 
 @router.message((F.text == "Да, понимаю"), state=TruereasonsState.final)
-async def reasons_europe_cold(message: Message, state: FSMContext):
+async def reasons_europe_cold(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_Europe_cold'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Нет, цель не в этом"))

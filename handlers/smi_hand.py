@@ -1,23 +1,16 @@
 from itertools import groupby
-
 from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
-from aiogram.dispatcher.fsm.storage import redis
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-
 from data_base.DBuse import *
-from handlers.anti_prop_hand import antip_truth_game_start_question, antip_truth_game_start
 from middleware import CounterMiddleware
-from states import antiprop_states
 from states.antiprop_states import propaganda_victim
 
 router = Router()
 router.message.middleware(CounterMiddleware())
-
 router.message.filter(state=propaganda_victim.ppl_propaganda)
-
 messageDict = dict()
 
 
@@ -38,7 +31,7 @@ async def smi_statement(message: Message, state: FSMContext):
         how_many_rounds = data_getter(
             f"SELECT COUNT (*) FROM public.mistakeorlie where asset_name like '%{str(person_list[0])[-5:-1].strip()}%'")[
             0][0]
-    except IndexError as er:
+    except:
         errmarkup = ReplyKeyboardBuilder()
         errmarkup.rows(types.KeyboardButton(text="Переход к игре в правду"))
         await message.answer(
@@ -146,7 +139,7 @@ async def sme_statement_skip(message: Message, state=FSMContext):
     try:
         next_channel = str(not_viewed[0])
     except:
-        massage.answer("Нету личностей в списке, надо зайти в раздел заново")
+        await message.answer("Нету личностей в списке, надо зайти в раздел заново")
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text='Хорошо, давай посмотрим'))
     markup.row(types.KeyboardButton(text='Не надо, я и так знаю, что они врут!!!'))

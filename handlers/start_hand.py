@@ -47,11 +47,15 @@ async def eight_years_point(message: Message, state=FSMContext):
     nmarkup.row(types.KeyboardButton(text="Нет, не знал"))
     nmarkup.adjust(1, 2)
     try:
-        await message.answer_photo(photo_id, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True,
-                                                                                          input_field_placeholder="Найдите по-настоящему независимые источники"))
+        await message.answer_photo(photo_id,
+                                   caption=text,
+                                   reply_markup=nmarkup.as_markup(resize_keyboard=True,
+                                   input_field_placeholder="Найдите по-настоящему независимые источники"))
     except:
-        await message.answer_video(photo_id, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True,
-                                                                                          input_field_placeholder="Найдите по-настоящему независимые источники"))
+        await message.answer_video(photo_id,
+                                   caption=text,
+                                   reply_markup=nmarkup.as_markup(resize_keyboard=True,
+                                   input_field_placeholder="Найдите по-настоящему независимые источники"))
 
 
 class add_id(StatesGroup):
