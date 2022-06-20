@@ -4,6 +4,7 @@ from aiogram import Router, F
 from aiogram import types, Bot
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.dispatcher.fsm.state import StatesGroup, State
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
@@ -13,6 +14,7 @@ from filters.All_filters import NaziFilter, RusHate_pr, NotNaziFilter
 from handlers import true_resons_hand
 from middleware import CounterMiddleware
 from resources.all_polls import nazizm, nazizm_pr
+from utilts import simple_media
 
 
 class NaziState(StatesGroup):
@@ -174,13 +176,7 @@ async def nazi_many_forms(message: Message):
     markup.row(types.KeyboardButton(text="Нет, нельзя"))
     markup.row(types.KeyboardButton(text="Я не в праве давать такие оценки"))
     markup.adjust(1, 2, 1)
-    text = await sql_safe_select("text", "texts", {"name": "nazi_genocide_chart"})
-    photo = await sql_safe_select("t_id", "assets", {"name": "nazi_genocide_chart"})
-
-    try:
-        await message.answer_photo(photo, text, reply_markup=markup.as_markup(resize_keyboard=True))
-    except:
-        await message.answer_video(photo, text, reply_markup=markup.as_markup(resize_keyboard=True))
+    await simple_media(message, 'nazi_genocide_chart', markup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text.contains('пожар')), state=NaziState.genocide)
@@ -365,7 +361,7 @@ async def nazi_thirdpart_end(message: Message):
 
 
 # коридор с болванками
-@router.message(NaziFilter(answer="Власть на Украине захватили неонацисты"))
+"""@router.message(NaziFilter(answer="Власть на Украине захватили неонацисты"))
 async def nazi_one_neonazi(message: Message, state: FSMContext):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Nazi_answers: first_poll:',
                                  "Власть на Украине захватили неонацисты")
@@ -424,7 +420,7 @@ async def nazi_no_WW2(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'nazi_no_WW2'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Ну раз это не готово, пойду-ка я дальше"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))"""
 
 
 @router.message(state=NaziState.after_small_poll)
