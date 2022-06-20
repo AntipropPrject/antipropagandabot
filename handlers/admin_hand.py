@@ -305,3 +305,4 @@ async def statistics(message: Message):
                          f'Прошли Донбасс: {count_donbass} ({count_donbass / count_come * 100}%)\n'
                          f'Прошли Цели войны: {count_war_aims} ({count_war_aims / count_come * 100}%)\n'
                         )
+

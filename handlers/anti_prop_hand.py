@@ -365,7 +365,6 @@ async def show_the_news(message: types.Message, state=FSMContext):
         await state.update_data(count_news=0)  # Ставлю счетчик на 0 для первой новости
         await state.update_data(all_viwed=[user_answer_str[0]])  # записываю просмотренный источник
         await message.answer_video(one_media, caption=one_caption, reply_markup=markup.as_markup(resize_keyboard=True))
-
     elif message.text != 'Хорошо, давай вернемся и посмотрим':
         markup = ReplyKeyboardBuilder()
         markup.row(types.KeyboardButton(text="Новость посмотрел(а). Что с ней не так?"))

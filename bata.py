@@ -31,3 +31,4 @@ class all_data():
 
     def get_THROTTLE_TIME(self):
         return self.THROTTLE_TIME
+
