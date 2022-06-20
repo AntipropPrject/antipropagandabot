@@ -24,9 +24,8 @@ router.message.middleware(CounterMiddleware())
 router.message.filter(state=PreventStrikeState)
 
 
-
 @router.message((F.text == 'Давай разберем'))
-async def prevent_strike_any_brutality(message: Message, state: FSMContext):
+async def prevent_strike_any_brutality(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_any_brutality'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Каким образом?'))
@@ -73,7 +72,6 @@ async def prevent_strike_q3(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-
 @router.message((F.text.in_({'Да, это странно', 'Ничего подозрительного'})), state=PreventStrikeState.q4)
 async def prevent_strike_q4(message: Message, state: FSMContext):
     await state.set_state(PreventStrikeState.main)
@@ -84,9 +82,8 @@ async def prevent_strike_q4(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-
 @router.message((F.text.in_({'Да, это странно', 'Ничего подозрительного'})), state=PreventStrikeState.main)
-async def prevent_strike_now_you(message: Message, state: FSMContext):
+async def prevent_strike_now_you(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_now_you'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Да, превентивный удар -- лишь повод'))
@@ -95,8 +92,9 @@ async def prevent_strike_now_you(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(F.text.in_({'Да, превентивный удар -- лишь повод', 'Я и так не верил(а), что Украина готовит нападение'}))
-async def prevent_strike_hilter_allright(message: Message, state: FSMContext):
+@router.message(
+        F.text.in_({'Да, превентивный удар -- лишь повод', 'Я и так не верил(а), что Украина готовит нападение'}))
+async def prevent_strike_hilter_allright(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_hilter_allright'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Нет, продолжим разговор'))
@@ -124,7 +122,7 @@ async def prevent_strike_end_point(message: Message, state: FSMContext):
 
 
 @router.message(F.text == 'Да, хочу')
-async def prevent_strike_will_show(message: Message, state: FSMContext):
+async def prevent_strike_will_show(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_will_show'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Посмотрел(а)'))
@@ -153,6 +151,7 @@ async def prevent_strike_memes(message: Message, state: FSMContext):
     except:
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text='Да, давай продолжим'))
-        await message.answer('В моем хранилище закончились мемы по этому поводу, но вы можете легко найти новые в интернете.\nГотовы продолжить?',
-                             reply_markup=nmarkup.as_markup(resize_keyboard=True))
-
+        await message.answer(
+            'В моем хранилище закончились мемы по этому поводу,'
+            ' но вы можете легко найти новые в интернете.\nГотовы продолжить?',
+            reply_markup=nmarkup.as_markup(resize_keyboard=True))

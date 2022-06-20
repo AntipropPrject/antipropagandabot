@@ -20,7 +20,6 @@ class StateofPutin(StatesGroup):
 
 router = Router()
 router.message.middleware(CounterMiddleware())
-
 router.message.filter(state=(StateofPutin))
 
 
@@ -160,7 +159,7 @@ async def putin_game1_answer(message: Message, state: FSMContext):
 
 
 @router.message((F.text == "Достаточно."), state=StateofPutin.game1)
-async def putin_game1_are_you_sure(message: Message, state: FSMContext):
+async def putin_game1_are_you_sure(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Ладно, давай еще"))
     nmarkup.row(types.KeyboardButton(text="Нет, хватит с меня"))
@@ -178,7 +177,7 @@ async def putin_plenty_promises(message: Message, state: FSMContext):
 
 
 @router.message(((F.text == "Давай")), state=StateofPutin.game2)
-async def putin_nothing_done(message: Message, state: FSMContext):
+async def putin_nothing_done(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'putin_nothing_done'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Да, начнем!"))
@@ -186,7 +185,7 @@ async def putin_nothing_done(message: Message, state: FSMContext):
 
 
 @router.message(((F.text == "Да, начнем!")), state=StateofPutin.game2)
-async def putin_gaming(message: Message, state: FSMContext):
+async def putin_gaming(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'putin_gaming'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Я готов(а)"))
@@ -250,12 +249,13 @@ async def putin_game2_answer(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="Продолжаем!"))
     nmarkup.row(types.KeyboardButton(text="Достаточно."))
     await message.answer(
-        f'А вот что думают другие участники:\nПутин в этом виноват: {round((100 - t_percentage * 100), 1)}% \n Путин не виноват: {round(t_percentage * 100, 1)}%',
+        f'А вот что думают другие участники:\n'
+        f'Путин в этом виноват: {round((100 - t_percentage * 100), 1)}% \n Путин не виноват: {round(t_percentage * 100, 1)}%',
         reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message(((F.text == "Достаточно.")), state=StateofPutin.game2)
-async def putin_game2_are_you_sure(message: Message, state: FSMContext):
+async def putin_game2_are_you_sure(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Ну давай еще"))
     nmarkup.row(types.KeyboardButton(text="Мне уже хватит"))
@@ -280,7 +280,8 @@ async def putin_in_the_past(message: Message, state: FSMContext):
 async def stopwar_start(message: Message, state: FSMContext):
     await state.set_state(StopWarState.main)
     text = (
-        'Давайте поговорим о том, как закончить войну\n\nКак считаете, Путин готов закончить эту войну в ближайшие месяцы?')
+        'Давайте поговорим о том, как закончить войну\n\n'
+        'Как считаете, Путин готов закончить эту войну в ближайшие месяцы?')
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Скорее да"))
     nmarkup.row(types.KeyboardButton(text="Не знаю"))
