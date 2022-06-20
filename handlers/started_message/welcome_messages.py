@@ -1,11 +1,9 @@
 import asyncio
-
 from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-
 from bata import all_data
 from data_base.DBuse import poll_get, poll_write, sql_safe_select, mongo_add, mongo_select, mongo_update, \
     redis_just_one_write
@@ -265,7 +263,6 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, state: FSMCon
         else:
             await redis_just_one_write(f'Usrs: {poll_answer.user.id}: INFOState:', "Фома неверующий")
     await state.set_state(propaganda_victim.start)
-    print('fffffff', data["answer_2"])
     #Вот это все бы не в списки совать
     if {0, 1, 2, 3, 5, 7, 8}.isdisjoint(set(data["answer_2"])) is False:
         await redis_just_one_write(f'Usrs: {poll_answer.user.id}: Politics:', 'Сторонник войны')

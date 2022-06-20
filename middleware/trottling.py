@@ -22,11 +22,9 @@ class CounterMiddleware(BaseMiddleware):
     ) -> Any:
         try:
             if str(data['event_from_user'].id)+str(data['event_router']) in str(self.cache['user_id']):
-                print("Защита")
                 self.count +=1
 
         except:
-            print("Нет защиты")
             self.cache['user_id'] = str(data['event_from_user'].id)+str(data['event_router'])
             return await handler(event, data)
         if self.count >= 2:
