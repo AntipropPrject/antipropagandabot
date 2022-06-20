@@ -296,7 +296,6 @@ async def statistics(message: Message):
         count_antiprop += lst[2]
         count_donbass += lst[3]
         count_war_aims += lst[4]
-        count_putin += lst[5]
     await message.answer('<b>ИНФОРМАЦИЯ О БОТЕ</b>\n'
                          '➖➖➖➖➖➖➖➖➖➖\n\n'
                          f'Пользователей: {count_come}\n'
@@ -305,4 +304,4 @@ async def statistics(message: Message):
                          f'Прошли Антипропаганду: {count_antiprop} ({count_antiprop / count_come * 100}%)\n'
                          f'Прошли Донбасс: {count_donbass} ({count_donbass / count_come * 100}%)\n'
                          f'Прошли Цели войны: {count_war_aims} ({count_war_aims / count_come * 100}%)\n'
-                         f'Прошли Путина: {count_putin} ({count_putin / count_come * 100}%)')
+                        )

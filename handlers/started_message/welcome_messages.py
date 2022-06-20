@@ -5,7 +5,7 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from bata import all_data
-from data_base.DBuse import poll_write, sql_safe_select, mongo_add, mongo_select, redis_just_one_write
+from data_base.DBuse import poll_write, sql_safe_select, mongo_add, mongo_select, redis_just_one_write, mongo_user_info
 from middleware import CounterMiddleware
 from resources.all_polls import web_prop, welc_message_one
 from states import welcome_states
@@ -18,7 +18,9 @@ router.message.middleware(CounterMiddleware())
 
 @router.message(commands=['start', 'help'], state="*")
 async def commands_start(message: types.Message, state: FSMContext):  # Первое сообщение
-    await mongo_stat(message.from_user.id)
+    user_id = message.from_user.id
+    await mongo_stat(user_id)
+    await mongo_user_info(user_id, message.from_user.username)
     await state.clear()
     redis = all_data().get_data_red()
     for key in redis.scan_iter(f"Usrs: {message.from_user.id}:*"):

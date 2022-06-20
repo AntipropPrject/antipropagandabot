@@ -133,7 +133,32 @@ async def sql_safe_update(table_name, data_dict, condition_dict):
 
 
 """^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^MongoDB^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"""
+async def mongo_user_info(tg_id, username):
+    try:
+        client = all_data().get_mongo()
+        database = client['database']
+        collection = database['userinfo']
+        user_answer = {'_id': int(tg_id), 'username': str(username)}
+        collection.insert_one(user_answer)
+    except Exception as error:
+        logg.get_error(f"mongo_add_info | {error}", __file__)
 
+async def mongo_select_info(tg_id):
+    try:
+        client = all_data().get_mongo()
+        database = client['database']
+        collection = database['userinfo']
+
+        try:
+            x = collection.find_one({"_id": int(tg_id)})
+            print(x)
+        except:
+            x = collection.find_one({"username": str(tg_id)})
+            print(x)
+        return x
+
+    except Exception as error:
+        logg.get_error(f"mongo_select_info | {error}", __file__)
 
 async def mongo_add(tg_id, answers):
     try:
@@ -181,6 +206,40 @@ async def mongo_pop(tg_id, value_dict):
         collection.update({'_id': int(tg_id)}, {'$pull': {'other_answer': value_dict}})
     except Exception as error:
         logg.get_error(f"mongo update | {error}", __file__)
+
+
+# admin
+async def mongo_add_admin(tg_id):
+    try:
+        client = all_data().get_mongo()
+        database = client['database']
+        collection = database['admins']
+        user_answer = {'_id': int(tg_id)}
+        collection.insert_one(user_answer)
+    except Exception as error:
+        logg.get_error(f"mongo_add_admin | {error}", __file__)
+
+
+async def mongo_select_admins():
+    try:
+        client = all_data().get_mongo()
+        database = client['database']
+        collection = database['admins']
+        lst = []
+        for answer in collection.find():
+            lst.append(answer)
+        return lst
+    except Exception as error:
+        logg.get_error(f"mongo_select_admins | {error}", __file__)
+
+async def mongo_pop_admin(tg_id):
+    try:
+        client = all_data().get_mongo()
+        database = client['database']
+        collection = database['admins']
+        collection.delete_one({'_id': int(tg_id)})
+    except Exception as error:
+        logg.get_error(f"mongo_pop_admin | {error}", __file__)
 
 
 """^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^CSV_UPDATE^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"""

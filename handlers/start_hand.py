@@ -1,14 +1,12 @@
 import csv
-
 from aiogram import Router, F
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.dispatcher.fsm.state import StatesGroup, State
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-
 import bata
-from data_base.DBuse import data_getter
+from data_base.DBuse import data_getter, mongo_select_admins
 from handlers.admin_hand import admin_home
 from keyboards.admin_keys import main_admin_keyboard
 from middleware import CounterMiddleware
@@ -28,12 +26,18 @@ async def cmd_start(message: Message, state: FSMContext):
     await message.answer('Вход в донбасс', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(F.from_user.id.in_(bata.all_data().admins), commands=["admin"])
+@router.message((F.text == 'Вернуться в меню'))
+@router.message(commands=["admin"])
 async def admin_hi(message: Message, state: FSMContext) -> None:
-    await state.clear()
-    await state.set_state(admin_home.admin)
-    await message.answer("Добро пожаловать в режим администрации. Что вам угодно сегодня?",
-                         reply_markup=main_admin_keyboard())
+    admins_list = await mongo_select_admins()
+    admins = bata.all_data().super_admins
+    for admin in admins_list:
+        admins.append(int(admin["_id"]))
+    if int(message.from_user.id) in admins:
+        await state.clear()
+        await state.set_state(admin_home.admin)
+        await message.answer("Добро пожаловать в режим администрации. Что вам угодно сегодня?",
+                             reply_markup=main_admin_keyboard(message.from_user.id))
 
 
 @router.message(text_contains=('бомбила', '8', 'лет'), content_types=types.ContentType.TEXT, text_ignore_case=True)
