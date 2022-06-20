@@ -192,7 +192,7 @@ async def nazi_many_forms(message: Message):
 @router.message(((F.text == "Нет, нельзя") | (F.text == "Это трагедия, но не геноцид")), state=NaziState.genocide)
 async def nazi_many_forms(message: Message):
     markup = ReplyKeyboardBuilder()
-    markup.row(types.KeyboardButton(text="Продолжай"))
+    markup.row(types.KeyboardButton(text="Продолжай..."))
     text = await sql_safe_select("text", "texts", {"name": "nazi_emotional"})
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
 
@@ -214,7 +214,7 @@ async def nazi_many_forms(message: Message):
     await message.answer(text2, reply_markup=markup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.in_({'Продолжай', "Я тоже задаюсь этим вопросом", "ООН предпочитает закрывать на это глаза!"})),
+@router.message((F.text.in_({'Продолжай...', "Я тоже задаюсь этим вопросом", "ООН предпочитает закрывать на это глаза!"})),
                 state=NaziState.genocide)
 async def nazi_exaggeration(message: Message):
     markup = ReplyKeyboardBuilder()
@@ -283,6 +283,7 @@ async def nazi_manipulation(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="Я не удивлен(а)"))
     nmarkup.row(types.KeyboardButton(text="Я не доверяю соц. опросам"))
     await simple_media(message, 'nazi_manipulation', nmarkup.as_markup(resize_keyboard=True))
+
 
 @router.message((F.text.contains('удивлен')) | (F.text == "Хорошо, покажи"))
 async def nazi_not_really(message: Message, state: FSMContext):
@@ -355,6 +356,13 @@ async def nazi_thirdpart_end(message: Message):
                          reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
+@router.message(((F.text.contains('преувеличение')) | (F.text.contains('не соглашусь'))), state=NaziState.third_part)
+async def nazi_thirdpart_end(message: Message):
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Хорошо"))
+    await message.answer('Тогда отправимся дальше', reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
+
 # коридор с болванками
 """@router.message(NaziFilter(answer="Власть на Украине захватили неонацисты"))
 async def nazi_one_neonazi(message: Message, state: FSMContext):
@@ -418,7 +426,7 @@ async def nazi_no_WW2(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))"""
 
 
-@router.message(state=NaziState.after_small_poll)
+@router.message(state=(NaziState.after_small_poll, NaziState.third_part))
 async def nazi_game_start(message: Message, state: FSMContext):
     await state.set_state(NaziState.game)
     text = await sql_safe_select('text', 'texts', {'name': 'nazi_game_start'})

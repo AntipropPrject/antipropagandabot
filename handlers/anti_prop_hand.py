@@ -664,7 +664,7 @@ async def antip_to_the_main(message: Message):
     await message.answer(text, reply_markup=antip_why_kb())
 
 
-@router.message((F.text.contains('во всех')))
+@router.message((F.text.contains('во многих')))
 async def antip_to_the_main(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_prop_difference'})
     await message.answer(text, reply_markup=antip_why_kb())
@@ -674,7 +674,7 @@ async def antip_to_the_main(message: Message):
 async def antip_love_propaganda(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_love_propaganda'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Да, как и во многих других странах"))
+    nmarkup.row(types.KeyboardButton(text="Да, как и во многих других странах 🇺🇸"))
     nmarkup.row(types.KeyboardButton(text="Нет, нам хотят донести правду 😌"))
     nmarkup.row(types.KeyboardButton(text="Скорее согласен(сна)"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
@@ -685,7 +685,7 @@ async def antip_big_love_propaganda(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_big_love_propaganda'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(
-            text="Я передумал(а). Допускаю, что ТВ и гос. СМИ не ставят целью донести до людей правду."))
+            text="Продолжить 🇷🇺🇺🇦"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -700,8 +700,8 @@ async def antip_reputation_matters(message: Message):
 # По хорошему, это уже начало войны
 # Я НЕ ЗНАЮ КАК ЭТО НОРМАЛЬНО ПОВЕСИТЬ
 @router.message(PoliticsFilter(title='Сторонник войны'),
-                ((F.text.contains('Поговорим')) & (F.text.contains('действия')) & (F.text.contains('Украине'))) | (
-                        F.text.contains(' СМИ не ставят целью донести ')))
+                ((F.text.contains('действия')) & (F.text.contains('Украине'))) | (
+                        F.text.contains('Продолжить 🇷🇺🇺🇦')))
 async def war_point_now(message: Message, state: FSMContext):
     await mongo_update_stat(message.from_user.id, 'antiprop')
     await state.set_state(TruereasonsState.main)
@@ -712,8 +712,8 @@ async def war_point_now(message: Message, state: FSMContext):
 
 
 @router.message(PoliticsFilter(title='Аполитичный'),
-                ((F.text.contains('Поговорим')) & (F.text.contains('действия')) & (F.text.contains('Украине'))) | (
-                        F.text.contains(' СМИ не ставят целью донести ')))
+                ((F.text.contains('действия')) & (F.text.contains('Украине'))) | (
+                        F.text.contains("Продолжить 🇷🇺🇺🇦")))
 async def reasons_lets_figure(message: Message, state: FSMContext):
     await state.set_state(TruereasonsState.main)
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_lets_figure'})
@@ -724,8 +724,8 @@ async def reasons_lets_figure(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(((F.text.contains('Поговорим')) & (F.text.contains('действия')) & (F.text.contains('Украине'))) | (
-        F.text.contains(' СМИ не ставят целью донести ')))
+@router.message(((F.text.contains('действия')) & (F.text.contains('Украине'))) | (
+        F.text.contains('Продолжить 🇷🇺🇺🇦')))
 async def reasons_king_of_info(message: Message, state: FSMContext):
     await state.set_state(TruereasonsState.main)
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_king_of_info'})

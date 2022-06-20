@@ -105,7 +105,6 @@ async def prevent_strike_hilter_allright(message: Message):
 @router.message(F.text == 'Нет, это настоящая причина начала военных действий')
 async def prevent_strike_hilter_did_it(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_hilter_did_it'})
-    await state.set_state(true_resons_hand.TruereasonsState.main)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Нет, продолжим разговор'))
     nmarkup.row(types.KeyboardButton(text='Да, хочу'))
