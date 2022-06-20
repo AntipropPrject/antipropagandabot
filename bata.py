@@ -9,8 +9,9 @@ class all_data():
         self.redis_url = 'redis://localhost:2342'
         self.postgres_data = 'dbname=antiprop_db user=postgres password=postgres'
         self.mongodb_data = 'mongodb://localhost:27017'
-        self.bot_token = '5592039815:AAGRRXWh2vNm8T79SOhX1afycZEpRzEVVV4'
+        self.bot_token = 'BOT_TOKEN'
         self.admins = (5306348087, 5177494340, 5581082758, 5316104187)
+        self.THROTTLE_TIME = 0.5
 
 
 # фывфывфдв
@@ -28,3 +29,6 @@ class all_data():
 
     def get_data_red(self):
         return from_url('redis://localhost:2342/1', decode_responses=True)
+
+    def get_THROTTLE_TIME(self):
+        return self.THROTTLE_TIME

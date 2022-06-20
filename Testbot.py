@@ -10,12 +10,13 @@ from data_base import TablesCreator
 
 TablesCreator.tables_god()
 
+data = all_data()
+bot = data.get_bot()
+storage = RedisStorage.from_url(data.redis_url)
+dp = Dispatcher(storage)
 
 async def main():
-    data = all_data()
-    bot = data.get_bot()
-    storage = RedisStorage.from_url(data.redis_url)
-    dp = Dispatcher(storage)
+
 
     # Технические роутеры
     dp.include_router(admin_hand.router)
