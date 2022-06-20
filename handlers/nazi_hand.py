@@ -9,7 +9,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 import bata
 from data_base.DBuse import data_getter, poll_write, sql_safe_select, sql_safe_update, redis_delete_from_list, poll_get
-from filters.All_filters import NaziFilter, RusHate_pr, NotNothingNazi
+from filters.All_filters import NaziFilter, RusHate_pr, NotNaziFilter
 from handlers import true_resons_hand
 from middleware import CounterMiddleware
 from resources.all_polls import nazizm, nazizm_pr
@@ -75,7 +75,7 @@ async def nazi_propaganda(message: Message):
 @router.message((F.text.contains('А как же неонацизм?')))
 async def nazi_neonazi(message: Message):
     markup = ReplyKeyboardBuilder()
-    markup.row(types.KeyboardButton(text="Понятно"))
+    markup.row(types.KeyboardButton(text="Понятно!"))
     markup.row(types.KeyboardButton(text="Черт ногу сломит"))
     markup.row(types.KeyboardButton(text="А можно попроще?"))
     text = await sql_safe_select("text", "texts", {"name": "nazi_neonazi"})
@@ -99,8 +99,12 @@ async def nazi_simple(message: Message):
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
 
 
-@router.message(NotNothingNazi(), (
-        (F.text.contains('Хорошо, продолжим')) | (F.text.contains('Так понятнее!')) | (F.text.contains('Понятно!'))))
+@router.message(NotNaziFilter(), ((F.text.contains('Хорошо, продолжим')) | (F.text.contains('Так понятнее!')) | (F.text.contains('Понятно!'))))
+async def nazi_how_many(message: Message, state: FSMContext):
+    await nazi_game_start(message, state)
+
+
+@router.message(((F.text.contains('Хорошо, продолжим')) | (F.text.contains('Так понятнее!')) | (F.text.contains('Понятно!'))))
 async def nazi_how_many(message: Message, state: FSMContext):
     await state.set_state(NaziState.small_poll)
     markup = ReplyKeyboardBuilder()
@@ -127,10 +131,11 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FS
             media = await sql_safe_select('t_id', 'assets', {'name': 'nazi_piechart'})
             await bot.send_photo(chat_id=poll_answer.user.id, photo=media, caption=text,
                                  reply_markup=markup.as_markup(resize_keyboard=True))
-    markup_1 = ReplyKeyboardBuilder()
-    markup_1.row(types.KeyboardButton(text="Буду ждать"))
-    await bot.send_message(poll_answer.user.id, 'Спасибо, я запомнил ваш ответ. Позже в разговоре мы его обсудим',
-                           reply_markup=markup_1.as_markup(resize_keyboard=True))
+        else:
+            markup_1 = ReplyKeyboardBuilder()
+            markup_1.row(types.KeyboardButton(text="Буду ждать"))
+            await bot.send_message(poll_answer.user.id, 'Спасибо, я запомнил ваш ответ. Позже в разговоре мы его обсудим',
+                                   reply_markup=markup_1.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text.contains('Продолжай')), state=NaziState.after_small_poll)
@@ -183,12 +188,12 @@ async def nazi_many_forms(message: Message):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Да, это можно назвать геноцидом"))
     markup.row(types.KeyboardButton(text="Я не в праве давать такие оценки"))
-    markup.row(types.KeyboardButton(text="Это трагения, но не геноцид"))
+    markup.row(types.KeyboardButton(text="Это трагедия, но не геноцид"))
     text = await sql_safe_select("text", "texts", {"name": "nazi_odessa"})
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Нет, нельзя"), state=NaziState.genocide)
+@router.message(((F.text == "Нет, нельзя") | (F.text == "Это трагедия, но не геноцид")), state=NaziState.genocide)
 async def nazi_many_forms(message: Message):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Продолжай"))
@@ -523,7 +528,7 @@ async def putin_in_the_past(message: Message, state: FSMContext):
 
 @router.message()
 async def nazi_exit(message: Message, state: FSMContext):
-    await state.set_state(true_resons_hand.truereasons_state.main)
+    await state.set_state(true_resons_hand.TruereasonsState.main)
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Продолжим"))
     await message.answer('Это выход из нацизма', reply_markup=markup.as_markup())

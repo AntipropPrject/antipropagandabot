@@ -107,7 +107,7 @@ async def prevent_strike_hilter_allright(message: Message, state: FSMContext):
 @router.message(F.text == 'Нет, это настоящая причина начала военных действий')
 async def prevent_strike_hilter_did_it(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_hilter_did_it'})
-    await state.set_state(true_resons_hand.truereasons_state.main)
+    await state.set_state(true_resons_hand.TruereasonsState.main)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Нет, продолжим разговор'))
     nmarkup.row(types.KeyboardButton(text='Да, хочу'))
@@ -117,7 +117,7 @@ async def prevent_strike_hilter_did_it(message: Message, state: FSMContext):
 @router.message(F.text.contains('продолжим'))
 async def prevent_strike_end_point(message: Message, state: FSMContext):
     text = 'Договорились. У нас еще есть что обсудить.'
-    await state.set_state(true_resons_hand.truereasons_state.main)
+    await state.set_state(true_resons_hand.TruereasonsState.main)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='И что дальше?'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))

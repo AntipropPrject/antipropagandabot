@@ -136,10 +136,10 @@ class RusHate_pr(BaseFilter):
             return False
 
 
-class NotNothingNazi(BaseFilter):
+class NotNaziFilter(BaseFilter):
     async def __call__(self, message: Message):
         if "Ничего из вышеперечисленного..." in await poll_get(
                 f'Usrs: {message.from_user.id}: Nazi_answers: first_poll:'):
-            return False
-        else:
             return True
+        else:
+            return False

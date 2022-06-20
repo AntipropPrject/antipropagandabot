@@ -6,7 +6,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from data_base.DBuse import poll_write, sql_safe_select, redis_pop, poll_get, redis_delete_from_list
 from filters.All_filters import option_filter, second_donbass_filter
-from handlers.true_resons_hand import truereasons_state
+from handlers.true_resons_hand import TruereasonsState
 from keyboards.main_keys import filler_kb
 from middleware import CounterMiddleware
 from resources.all_polls import donbass_first_poll, donbass_second_poll
@@ -60,10 +60,16 @@ async def donbass_chart_2(message: Message, state=FSMContext):
         await message.answer_photo(ph_id, caption=text)
     except:
         await message.answer_video(ph_id, caption=text)
-
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.add(types.KeyboardButton(text='Продолжай'))
     await message.reply_poll("Отметьте один или более вариантов, с которыми вы согласны или частично согласны",
                              donbass_first_poll, is_anonymous=False, allows_multiple_answers=True,
-                             reply_markup=ReplyKeyboardRemove())
+                             reply_markup=nmarkup.as_markup())
+
+
+@router.message(donbass_state.eight_years_selection, (F.text == 'Продолжай'))
+async def poll_filler(message: types.Message, bot: Bot):
+    await message.answer('Чтобы продолжить -- отметьте ответы выше и нажмите "Проголосовать" или "Vote"', reply_markup=ReplyKeyboardRemove())
 
 
 # Тут удвоение первого поста каждой ветки, потому что нам надо отвечать СРАЗУ после опроса
@@ -411,7 +417,7 @@ async def donbas_no_army_here(message: Message, state=FSMContext):
     # Удаление из списка донбасса
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Start_answers: Invasion:',
                                  "Защитить русских в Донбассе")
-    await state.set_state(truereasons_state.main)
+    await state.set_state(TruereasonsState.main)
     await message.answer(
         "Рад, что мы разобрали все, что связано с Донбассом. Вернемся же к причинам войны.\nВ дальнейшем это сообщение может не понадобиться, но сейчас оно есть.",
         reply_markup=nmarkup.as_markup(resize_keyboard=True))
