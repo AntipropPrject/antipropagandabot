@@ -25,7 +25,7 @@ async def simple_media(message: Message, tag: str,
     """
     text = await sql_safe_select("text", "texts", {"name": tag})
     media = await sql_safe_select("t_id", "assets", {"name": tag})
-    if text is not None:
+    if text is not False:
         try:
             await message.answer_photo(media, caption=text, reply_markup=reply_markup)
         except TelegramBadRequest:

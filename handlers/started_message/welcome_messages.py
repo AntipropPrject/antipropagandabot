@@ -239,17 +239,19 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, state: FSMCon
     else:
         await mongo_add(poll_answer.user.id,
                         [data['answer_1'], data['answer_2'], data['answer_3'], data['answer_4'], data['answer_5']])
-    if data["answer_3"] != "Нет, не верю ни слову" or {0, 1, 3, 4, 5, 6, 7}.isdisjoint(
-            set(data["answer_4"])) is False or {1, 2, 3, 4, 5, 6}.isdisjoint(
-            set(data["answer_5"])) is False:  # Жертва пропаганды?
+    if data["answer_3"] != "Нет, не верю ни слову ⛔" or ({0, 1, 3, 4, 5, 6, 7}.isdisjoint(
+            set(data["answer_4"])) is False and {1, 2, 3, 4, 5, 6}.isdisjoint(
+            set(data["answer_5"])) is False):  # Жертва пропаганды?
         # Вот это все бы не в списки совать, потом займусь
         await redis_just_one_write(f'Usrs: {poll_answer.user.id}: INFOState:', 'Жертва пропаганды')
-    elif {2, 8}.isdisjoint(set(data["answer_4"])) is False or {7}.isdisjoint(
-            set(data["answer_5"])) is False:  # Король информации?
+        print('Жертва пропаганды')
+    elif {2, 8}.isdisjoint(set(data["answer_4"])) is False or {7}.isdisjoint(set(data["answer_5"])) is False:  # Король информации?
         if len(data["answer_2"]) <= 2 and {0, 1, 2, 3, 5, 7, 8} not in set(data["answer_2"]):
             await redis_just_one_write(f'Usrs: {poll_answer.user.id}: INFOState:', 'Король информации')
+            print('Король информации')
         else:
             await redis_just_one_write(f'Usrs: {poll_answer.user.id}: INFOState:', "Фома неверующий")
+            print('Фома неерующий')
 
     await state.clear()
     await state.set_state(propaganda_victim.start)

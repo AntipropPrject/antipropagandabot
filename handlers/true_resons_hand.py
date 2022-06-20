@@ -31,8 +31,8 @@ router.message.filter(state=TruereasonsState)
 @router.message((F.text.contains('не')) & (F.text.contains('интересуюсь')) & (F.text.contains('политикой')))
 async def reasons_true_reason_for_all(message: Message):
     await redis_just_one_write(f'Usrs: {message.from_user.id}: Politics:', 'Аполитичный')
-    base_list = ["Защитить русских в Донбассе", "Предотвратить вторжение на территорию России или ЛНР/ДНР",
-                 "Денацификация / Уничтожить нацистов"]
+    base_list = ("👪 Защитить русских в Донбассе", "🛡 Предотвратить вторжение на территорию России или ДНР/ЛНР",
+                 "🤬 Денацификация / Уничтожить нацистов")
     for thing in base_list:
         await poll_write(f'Usrs: {message.from_user.id}: Start_answers: Invasion:', thing)
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_true_reason_for_all'})
@@ -44,8 +44,8 @@ async def reasons_true_reason_for_all(message: Message):
 @router.message((F.text == "Подожди. Я такого не говорил(а). С чего ты взял, что это ненастоящие цели?"))
 async def reasons_king_of_info(message: Message):
     await redis_just_one_write(f'Usrs: {message.from_user.id}: Politics:', 'Сторонник войны')
-    base_list = ["Защитить русских в Донбассе", "Предотвратить вторжение на территорию России или ЛНР/ДНР",
-                 "Денацификация / Уничтожить нацистов"]
+    base_list = ("👪 Защитить русских в Донбассе", "🛡 Предотвратить вторжение на территорию России или ДНР/ЛНР",
+                 "🤬 Денацификация / Уничтожить нацистов")
     for thing in base_list:
         await poll_write(f'Usrs: {message.from_user.id}: Start_answers: Invasion:', thing)
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_not_so_fast'})
@@ -93,7 +93,7 @@ async def reasons_war(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(WarReason(answer='Защитить русских в Донбассе'))
+@router.message(WarReason(answer="👪 Защитить русских в Донбассе"))
 async def donbass_big_tragedy(message: Message, state=FSMContext):
     await state.set_state(donbass_state.eight_years)
     text = await sql_safe_select('text', 'texts', {'name': 'donbass_big_tragedy'})
@@ -102,11 +102,11 @@ async def donbass_big_tragedy(message: Message, state=FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(WarReason(answer='Денацификация / Уничтожить нацистов'))
+@router.message(WarReason(answer="🤬 Денацификация / Уничтожить нацистов"))
 async def reasons_denazi(message: Message, state=FSMContext):
     await state.set_state(NaziState.first_poll)
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Start_answers: Invasion:',
-                                 'Денацификация / Уничтожить нацистов')
+                                 "🤬 Денацификация / Уничтожить нацистов")
     text = await sql_safe_select('text', 'texts', {'name': 'nazi_start'})
     question = "Отметьте один или более вариантов, с которыми согласны или частично согласны"
     nmarkup = ReplyKeyboardBuilder()
@@ -115,10 +115,10 @@ async def reasons_denazi(message: Message, state=FSMContext):
     await message.answer_poll(question, nazizm, allows_multiple_answers=True, is_anonymous=False)
 
 
-@router.message(WarReason(answer="Предотвратить вторжение на территорию России или ЛНР/ДНР"))
+@router.message(WarReason(answer="🛡 Предотвратить вторжение на территорию России или ДНР/ЛНР"))
 async def prevent_strike_start(message: Message, state: FSMContext):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Start_answers: Invasion:',
-                                 "Предотвратить вторжение на территорию России или ЛНР/ДНР")
+                                 "🛡 Предотвратить вторжение на территорию России или ДНР/ЛНР")
     await state.clear()
     await state.set_state(PreventStrikeState.main)
     text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_start'})
@@ -130,7 +130,7 @@ async def prevent_strike_start(message: Message, state: FSMContext):
 @router.message(WarReason(answer="Демилитаризация / Снижение военной мощи"))
 async def reasons_demilitarism(message: Message):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Start_answers: Invasion:',
-                                 "Демилитаризация / Снижение военной мощи")
+                                 "💣 Демилитаризация / Снижение военной мощи")
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_putin_demilitar'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Им наверху виднее'))
@@ -153,7 +153,7 @@ async def reasons_lie_no_more_1(message: Message):
 @router.message((F.text.contains('размещение военных баз')))
 async def reasons_lie_no_more_2(message: Message):
     await poll_write(f'Usrs: {message.from_user.id}: Start_answers: Invasion:',
-                     "Предотвратить размещение военных баз НАТО в Украине")
+                     "💂 Предотвратить размещение военных баз НАТО в Украине")
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_lie_no_more_2'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Тогда продолжим'))
@@ -163,17 +163,17 @@ async def reasons_lie_no_more_2(message: Message):
 @router.message((F.text.contains('создание ядерного оружия на')))
 async def reasons_lie_no_more_3(message: Message):
     await poll_write(f'Usrs: {message.from_user.id}: Start_answers: Invasion:',
-                     "Уничтожить биолаборатории / Предотвратить создание ядерного оружия")
+                     "🤯 Предотвратить секретные разработки: биологическое оружие / ядерное оружие")
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_lie_no_more_3'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Тогда продолжим'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(WarReason(answer="Предотвратить размещение военных баз НАТО в Украине"))
+@router.message(WarReason(answer="💂 Предотвратить размещение военных баз НАТО в Украине"))
 async def reasons_big_bad_nato(message: Message):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Start_answers: Invasion:',
-                                 "Предотвратить размещение военных баз НАТО в Украине")
+                                 "💂 Предотвратить размещение военных баз НАТО в Украине")
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_big_bad_NATO'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Давай'))
@@ -188,20 +188,20 @@ async def reasons_lie_no_more_1(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(WarReason(answer="Уничтожить биолаборатории / Предотвратить создание ядерного оружия"))
+@router.message(WarReason(answer="🤯 Предотвратить секретные разработки: биологическое оружие / ядерное оружие"))
 async def reasons_biopigeons(message: Message):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Start_answers: Invasion:',
-                                 "Уничтожить биолаборатории / Предотвратить создание ядерного оружия")
+                                 "🤯 Предотвратить секретные разработки: биологическое оружие / ядерное оружие")
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_bio_nuclear'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Ладно'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-"""@router.message(WarReason(answer="Захватить территории Донбасса и юга Украины"))
+"""@router.message(WarReason(answer="🗺 Вернуть России исторические земли / Объединить русский народ"))
 async def reasons_take_lands(message: Message, state: FSMContext):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Start_answers: Invasion:', 
-                                                                        "Захватить территории Донбасса и юга Украины")
+                                                                        "🗺 Вернуть России исторические земли / Объединить русский народ")
     text = "Кусок про захват территорий, но мы его не выводим"
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Кнопка'))
@@ -210,7 +210,7 @@ async def reasons_take_lands(message: Message, state: FSMContext):
 
 @router.message(WarReason(answer="Сменить власть в Украине"))
 async def reasons_new_power(message: Message, state: FSMContext):
-    await redis_delete_from_list(f'Usrs: {message.from_user.id}: Start_answers: Invasion:', "Сменить власть в Украине")
+    await redis_delete_from_list(f'Usrs: {message.from_user.id}: Start_answers: Invasion:', "♻️ Сменить власть в Украине")
     text = "Кусок про смену власти в Украине. Но мы его не выводим."
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Кнопка'))
