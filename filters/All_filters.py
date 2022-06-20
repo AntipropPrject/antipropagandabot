@@ -4,13 +4,11 @@ from typing import Union, Dict, Any
 from data_base.DBuse import poll_get, redis_just_one_read
 
 
-class option_filter(BaseFilter):
+class DonbassOptionsFilter(BaseFilter):
     option: Union[str, list]
 
-    # async def __call__(self, key_one, key_two, message: Message) -> bool:
     async def __call__(self, message: Message) -> bool:
         user_lies = await poll_get(f'Usrs: {message.from_user.id}: Donbass_polls: First:')
-        # user_lies = await poll_get(f'{key_one}: {key_two}: {message.from_user.id}')
         for lie in user_lies:
             if self.option == lie:
                 return True

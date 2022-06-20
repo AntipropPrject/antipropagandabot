@@ -185,6 +185,7 @@ async def smi_statement_enough(message: Message, state=FSMContext):
 async def smi_statement_enough(message: Message, state: FSMContext):
     for key in all_data().get_data_red().scan_iter(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:*'):
         all_data().get_data_red().delete(key)
+    await state.set_state(propaganda_victim.final)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Переход!!!"))
     await message.answer(

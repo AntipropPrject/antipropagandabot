@@ -14,6 +14,7 @@ from handlers.putin_hand import StateofPutin
 from middleware import CounterMiddleware
 from resources.all_polls import nazizm
 from states.donbass_states import donbass_state
+from utilts import simple_media
 
 
 class TruereasonsState(StatesGroup):
@@ -286,16 +287,11 @@ async def reasons_normal_game_answer(message: Message, state: FSMContext):
 @router.message(((F.text == "Достаточно.") | (F.text == "Хорошо, давай дальше") | (F.text == "Пропустим в этот раз")),
                 state=TruereasonsState.game)
 async def reasons_real_reasons(message: Message, state: FSMContext):
-    text = await sql_safe_select('text', 'texts', {'name': 'reasons_real_reasons'})
-    media = await sql_safe_select('t_id', 'assets', {'name': 'reasons_real_reasons'})
     await state.set_state(TruereasonsState.final)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Подожди, а какие тогда настоящие цели войны?"))
     nmarkup.row(types.KeyboardButton(text="Продолжай"))
-    try:
-        await message.answer_video(media, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
-    except:
-        await message.answer_photo(media, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await simple_media(message, 'reasons_real_reasons', nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text == "Подожди, а какие тогда настоящие цели войны?"), state=TruereasonsState.final)
@@ -402,10 +398,7 @@ async def reasons_eritrea(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Показательный пример..."))
     nmarkup.row(types.KeyboardButton(text="Просто весь мир против нас"))
-    try:
-        await message.answer_video(media, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
-    except:
-        await message.answer_photo(media, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await simple_media(message, 'reasons_eritrea', nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text == "Показательный пример..."), state=TruereasonsState.final)
@@ -431,16 +424,11 @@ async def reasons_celeb_video(message: Message, state: FSMContext):
     await state.set_state(TruereasonsState.final)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="..."))
-    try:
-        await message.answer_video(media, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
-    except:
-        await message.answer_photo(media, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await simple_media(message, 'reasons_celeb_video', nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text == "..."), state=TruereasonsState.final)
 async def reasons_open_eyes(message: Message, state: FSMContext):
-    text = await sql_safe_select('text', 'texts', {'name': 'reasons_open_eyes'})
-    media = await sql_safe_select('t_id', 'assets', {'name': 'reasons_open_eyes'})
     await state.set_state(TruereasonsState.final)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Столько парней погибло, теперь у нас нет права проиграть..."))
@@ -449,25 +437,17 @@ async def reasons_open_eyes(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="Я не знаю...😨"))
     nmarkup.row(types.KeyboardButton(text="Да, я готов(а) это поддерживать"))
     nmarkup.row(types.KeyboardButton(text="Давайте закончим этот разговор"))
-    try:
-        await message.answer_video(media, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
-    except:
-        await message.answer_photo(media, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await simple_media(message, 'reasons_open_eyes', nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text == "Я хочу подумать, дайте паузу..."), state=TruereasonsState.final)
 async def reasons_pause(message: Message, state: FSMContext):
-    text = await sql_safe_select('text', 'texts', {'name': 'reasons_pause'})
-    media = await sql_safe_select('t_id', 'assets', {'name': 'reasons_pause'})
     await state.set_state(TruereasonsState.final)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Нет, мне не нужна эта война..."))
     nmarkup.row(types.KeyboardButton(text="Я не знаю...😨"))
     nmarkup.row(types.KeyboardButton(text="Да, я готов(а) это поддерживать"))
-    try:
-        await message.answer_video(media, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
-    except:
-        await message.answer_photo(media, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await simple_media(message, 'reasons_pause', nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text == "Столько парней погибло, теперь у нас нет права проиграть..."),

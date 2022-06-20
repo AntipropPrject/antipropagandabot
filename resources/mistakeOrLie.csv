@@ -3,7 +3,7 @@ id,truth,asset_name,text_name,belivers,nonbelivers,rebuttal
 2,t,statement_Соловьев_1,,3,15,Это так
 3,f,statement_Соловьев_2,,2,2,А может правда?
 4,t,statement_Скабеева_1,,2,2,Это точно не ложь?
-5,t,statement_Песков_1,,2,9,
+5,t,statement_Песков_1,,2,11,
 6,f,statement_Кадыров_1,,20,16,Навальный не ест детей
 7,f,statement_Кадыров_2,,20,16,Навальный не ест детей
 8,f,statement_Лавров_1,,20,14,Навальный не ест детей
