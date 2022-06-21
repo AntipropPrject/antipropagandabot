@@ -66,8 +66,8 @@ async def rather_no_TV(message: Message):
 async def antip_all_no_TV(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_all_no_TV'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Покажи ложь на ТВ -- мне интересно посмотреть! 📺"))
     nmarkup.row(types.KeyboardButton(text="Пропустим этот шаг"))
+    nmarkup.row(types.KeyboardButton(text="Покажи ложь на ТВ -- мне интересно посмотреть! 📺"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview = True)
 
 
@@ -77,11 +77,11 @@ async def antiprop_tv_selecter(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_pile_of_lies'})
     utv_list = ['1️⃣ Первый', '🇷🇺1️⃣ Россия 1 / 24', '❇️▶️НТВ', '⭐️🅾️ Звезда']
     nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Что такое пропаганда?"))
     for channel in utv_list:
         nmarkup.row(types.KeyboardButton(text=channel))
-    nmarkup.row(types.KeyboardButton(text="Что такое пропаганда?"))
     nmarkup.row(types.KeyboardButton(text="Какая-то теория заговора, не верю... 👽"))
-    nmarkup.adjust(2, 2, 1, 1)
+    nmarkup.adjust(1, 2, 2, 1)
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -161,10 +161,10 @@ async def russia_tv_first_reb(message: Message, state=FSMContext):
     text = f'{count} Разоблачение первого канала'
     vid_id = await sql_safe_select('t_id', 'assets', {'name': f'tv_first_reb_{count}'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Хватит, мне все понятно ✋"))
-    nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал 🔛"))
     if count < 5:
         nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет с 1️⃣ Первого канала 📺"))
+    nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал 🔛"))
+    nmarkup.row(types.KeyboardButton(text="Хватит, мне все понятно ✋"))
     await message.answer_video(vid_id, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -174,10 +174,10 @@ async def tv_russia24_reb(message: Message, state=FSMContext):
     text = f'{count} Разоблачение россии24'
     vid_id = await sql_safe_select('t_id', 'assets', {'name': f'tv_24_reb_{count}'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Хватит, мне все понятно ✋"))
-    nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал 🔛"))
     if count < 5:
         nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет 🇷🇺1️⃣ c России1/24 📺"))
+    nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал 🔛"))
+    nmarkup.row(types.KeyboardButton(text="Хватит, мне все понятно ✋"))
     await message.answer_video(vid_id, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -187,10 +187,10 @@ async def tv_HTB_reb(message: Message, state=FSMContext):
     text = f'{count} Разоблачение НТВ'
     vid_id = await sql_safe_select('t_id', 'assets', {'name': f'tv_HTB_reb_{count}'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Хватит, мне все понятно ✋"))
-    nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал 🔛"))
     if count < 5:
         nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет ❇️▶️ НТВ 📺"))
+    nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал 🔛"))
+    nmarkup.row(types.KeyboardButton(text="Хватит, мне все понятно ✋"))
     await message.answer_video(vid_id, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -200,10 +200,10 @@ async def tv_star_reb(message: Message, state=FSMContext):
     text = f'{count} Разоблачение совканала'
     vid_id = await sql_safe_select('t_id', 'assets', {'name': f'tv_star_reb_{count}'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Хватит, мне все понятно ✋"))
-    nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал 🔛"))
     if count < 5:
         nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет ⭐️🅾️ Звезды 📺"))
+    nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал 🔛"))
+    nmarkup.row(types.KeyboardButton(text="Хватит, мне все понятно ✋"))
     await message.answer_video(vid_id, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -259,6 +259,12 @@ async def antip_another_tv(message: Message, state: FSMContext):
 @router.message((F.text.contains('пропаганда')))
 async def russia_in_nutshell(message: Message, state=FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_what_is_prop'})
+    utv_list = ['1️⃣ Первый', '🇷🇺1️⃣ Россия 1 / 24', '❇️▶️НТВ', '⭐️🅾️ Звезда']
+    nmarkup = ReplyKeyboardBuilder()
+    for channel in utv_list:
+        nmarkup.row(types.KeyboardButton(text=channel))
+    nmarkup.row(types.KeyboardButton(text="Какая-то теория заговора, не верю... 👽"))
+    nmarkup.adjust(2, 2, 1)
     await message.answer(text, disable_web_page_preview=True)
 
 
@@ -578,7 +584,7 @@ async def antip_truth_game_answer(message: Message, state: FSMContext):
             reality = "чистая правда, вы правы!"
             reb = ""
         elif data['truth'] == False:
-            reality = "на самом деле настоящая ложь, боюсь, что вы ошиблись."
+            reality = "на самом деле чистая ложь, боюсь, что вы ошиблись."
             reb = f"И вот почему:\n{data['rebuttal']}\n"
         base_update_dict = {'belivers': data['belive'] + 1}
         print('Этому верит', base_update_dict)
@@ -587,7 +593,7 @@ async def antip_truth_game_answer(message: Message, state: FSMContext):
             reality = "чистая правда, вы совершили ошибку."
             reb = f"И вот почему:\n{data['rebuttal']}\n"
         elif data['truth'] == False:
-            reality = "лживая ложь из лживых лжей, совершенно верно!"
+            reality = "ложь, совершенно верно!"
             reb = ""
         base_update_dict = {'nonbelivers': data['not_belive'] + 1}
         print('Этому верит', base_update_dict)
@@ -644,12 +650,13 @@ async def antip_emoji(message: Message):
 async def antip_do_you_agree(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_do_you_agree'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Да, но почему тогда люди ей верят? 🤔"))
     nmarkup.row(types.KeyboardButton(text="Да, полностью согласен 👌🏼"))
     nmarkup.row(types.KeyboardButton(text="Возможно / частично 🤷‍♀️"))
-    nmarkup.row(types.KeyboardButton(text="Да, как и во многих других странах 🇺🇸"))
     nmarkup.row(types.KeyboardButton(text="Нет не, согласен(сна) 🙅‍♂️"))
-    nmarkup.adjust(1, 2, 2)
+    nmarkup.row(types.KeyboardButton(text="Да, но почему тогда люди ей верят? 🤔"))
+    nmarkup.row(types.KeyboardButton(text="Да, как и во многих других странах 🇺🇸"))
+
+    nmarkup.adjust(2, 1, 2)
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -675,9 +682,9 @@ async def antip_to_the_main(message: Message):
 async def antip_love_propaganda(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_love_propaganda'})
     nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Скорее согласен(сна)"))
     nmarkup.row(types.KeyboardButton(text="Да, как и во многих других странах 🇺🇸"))
     nmarkup.row(types.KeyboardButton(text="Нет, нам хотят донести правду 😌"))
-    nmarkup.row(types.KeyboardButton(text="Скорее согласен(сна)"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -722,6 +729,7 @@ async def reasons_lets_figure(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="Давай попробуем 👌🏼"))
     nmarkup.row(types.KeyboardButton(text="Я не интересуюсь политикой 😐"))
     nmarkup.row(types.KeyboardButton(text="Незачем, ведь эти цели - бессмысленны 🤬"))
+    nmarkup.adjust(2,1)
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 

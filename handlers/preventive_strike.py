@@ -94,8 +94,8 @@ async def prevent_strike_now_you(message: Message):
 
 @router.message(
         F.text.in_({'Да, превентивный удар - лишь повод 👌🏼', 'Я и так не верил(а) в то, что Украина готовит нападение 🤷‍♂️'}))
-async def prevent_strike_hilter_allright(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_hilter_allright'})
+async def prevent_strike_hitler_allright(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_hitler_allright'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Нет, продолжим разговор ⏱'))
     nmarkup.row(types.KeyboardButton(text='Да, хочу 🙂'))
@@ -103,8 +103,8 @@ async def prevent_strike_hilter_allright(message: Message):
 
 
 @router.message(F.text == 'Нет, это настоящая причина начала военных действий ☝️')
-async def prevent_strike_hilter_did_it(message: Message, state: FSMContext):
-    text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_hilter_did_it'})
+async def prevent_strike_hitler_did_it(message: Message, state: FSMContext):
+    text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_hitler_did_it'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Нет, продолжим разговор'))
     nmarkup.row(types.KeyboardButton(text='Да, хочу 🙂'))
