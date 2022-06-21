@@ -116,15 +116,13 @@ async def nazi_simple(message: Message):
 
 
 @router.message(NotNaziFilter(), ((F.text.contains('Хорошо, продолжим')) | (F.text.contains('Так понятнее!')) | (F.text.contains('Понятно!'))))
-async def nazi_how_many(message: Message, state: FSMContext):
+async def nazi_not_zombie(message: Message, state: FSMContext):
     await nazi_game_start(message, state)
 
 
 @router.message(((F.text.contains('Хорошо, продолжим')) | (F.text.contains('Так понятнее!')) | (F.text.contains('Понятно!'))))
 async def nazi_how_many(message: Message, state: FSMContext):
     await state.set_state(NaziState.small_poll)
-    markup = ReplyKeyboardBuilder()
-    markup.row(types.KeyboardButton(text="Хорошо, продолжим"))
     text = await sql_safe_select("text", "texts", {"name": "nazi_how_many"})
     question = 'Выберите один ответ'
     await message.answer(text)
@@ -273,9 +271,17 @@ async def nazi_second_poll(message: Message, state: FSMContext):
                                  "Многие украинцы ненавидят русских только за то, что они русские")
     text = await sql_safe_select('text', 'texts', {'name': 'nazi_second_poll'})
     await state.set_state(NaziState.third_part)
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Продолжай"))
     await message.answer(text)
     await message.answer_poll(question='Попробуйте угадать!', options=['95%', '76%', '45%', '21%', '6%'],
                               is_anonymous=False, allows_multiple_answers=False, correct_option_id=1)
+
+
+@router.message(NaziState.third_part, (F.text == 'Продолжай'))
+async def poll_filler(message: types.Message):
+    await message.answer('Чтобы продолжить -- отметьте ответы выше и нажмите "Проголосовать" или "Vote"',
+                         reply_markup=ReplyKeyboardRemove())
 
 
 @router.poll_answer(state=NaziState.third_part)

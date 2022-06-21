@@ -145,9 +145,9 @@ async def reasons_demilitarism(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Им наверху виднее 🤔'))
     nmarkup.row(types.KeyboardButton(text='Я не знаю 🤷‍♀️'))
-    nmarkup.row(types.KeyboardButton(text='Думаю он хотел, как лучше, а получилось наоборот 🤷‍♂️'))
     nmarkup.row(types.KeyboardButton(text='Предотвратить размещение военных баз НАТО 🛡'))
     nmarkup.row(types.KeyboardButton(text='Предотвратить создание ядерного оружия на Украине 💥'))
+    nmarkup.row(types.KeyboardButton(text='Думаю он хотел, как лучше, а получилось наоборот 🤷‍♂️'))
     nmarkup.adjust(2, 1, 1, 1)
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
@@ -234,6 +234,7 @@ async def reasons_normal_game_start(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Начнем! 🚀'))
     nmarkup.row(types.KeyboardButton(text='Пропустим игру 🙅‍♀️'))
+    nmarkup.adjust(2)
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -300,8 +301,8 @@ async def reasons_normal_game_answer(message: Message, state: FSMContext):
 async def reasons_real_reasons(message: Message, state: FSMContext):
     await state.set_state(TruereasonsState.final)
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Подожди, а какие тогда настоящие цели войны? 🎯"))
     nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
+    nmarkup.row(types.KeyboardButton(text="Подожди, а какие тогда настоящие цели войны? 🎯"))
     await simple_media(message, 'reasons_real_reasons', nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -347,8 +348,9 @@ async def reasons_usa_gegemony(message: Message):
 async def reasons_europe_cold(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_Europe_cold'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Нет, цель не в этом 🙅‍♂️"))
     nmarkup.row(types.KeyboardButton(text="Да, именно в этом 👍"))
+    nmarkup.row(types.KeyboardButton(text="Нет, цель не в этом 🙅‍♂️"))
+    nmarkup.adjust(2)
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -439,12 +441,13 @@ async def reasons_celeb_video(message: Message, state: FSMContext):
 async def reasons_open_eyes(message: Message, state: FSMContext):
     await state.set_state(TruereasonsState.final)
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Столько парней погибло, теперь мы не имеем права проиграть... 😔"))
-    nmarkup.row(types.KeyboardButton(text="Я хочу подумать, давай сделаем паузу... ⏱"))
     nmarkup.row(types.KeyboardButton(text="Нет, мне не нужна эта война... 🙅♂️"))
     nmarkup.row(types.KeyboardButton(text="Я не знаю... 😰"))
     nmarkup.row(types.KeyboardButton(text="Да, я готов(а) поддержать войну / спецоперацию 💥"))
+    nmarkup.row(types.KeyboardButton(text="Столько парней погибло, теперь мы не имеем права проиграть... 😔"))
+    nmarkup.row(types.KeyboardButton(text="Я хочу подумать, давай сделаем паузу... ⏱"))
     nmarkup.row(types.KeyboardButton(text="Давай закончим этот разговор! 🖕"))
+    nmarkup.adjust(2,1,1,1,1)
     await simple_media(message, 'reasons_open_eyes', nmarkup.as_markup(resize_keyboard=True))
 
 
