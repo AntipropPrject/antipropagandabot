@@ -484,11 +484,10 @@ async def reasons_now_he_normal(message: Message, state: FSMContext):
 @router.message(((F.text == "Да, я готов(а) поддержать войну / спецоперацию 💥") | (F.text == "Давай закончим этот разговор! 🖕")),
                 state=TruereasonsState.final)
 async def reasons_he_needs_war(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'reasons_he_needs_war'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Покажи текст песни 📝"))
     nmarkup.row(types.KeyboardButton(text="Я передумал(а), мне не нужна эта война..."))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await simple_media(message, 'reasons_he_needs_war', nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text == "Покажи текст песни 📝"), state=TruereasonsState.final)
