@@ -291,7 +291,7 @@ async def stopwar_start(message: Message, state: FSMContext):
         'Давайте поговорим о том, как закончить войну\n\n'
         'Как считаете, Путин готов закончить эту войну в ближайшие месяцы?')
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Скорее да"))
-    nmarkup.row(types.KeyboardButton(text="Не знаю"))
-    nmarkup.row(types.KeyboardButton(text="Скорее нет"))
+    nmarkup.row(types.KeyboardButton(text="Скорее да ✅"))
+    nmarkup.row(types.KeyboardButton(text="Не знаю 🤷‍♂️"))
+    nmarkup.row(types.KeyboardButton(text="Скорее нет ❌"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))

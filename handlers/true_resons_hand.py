@@ -89,7 +89,7 @@ async def reasons_operation(message: Message):
 
 
 @router.message((F.text.contains('спецоперация')))
-async def reasons_war(message: Message):
+async def reasons_sorry_im_bot(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_sorry_im_bot'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Хорошо...'))
@@ -101,7 +101,7 @@ async def reasons_war(message: Message):
 async def reasons_war(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_war'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text='Давай попробуем 👌🏼'))
+    nmarkup.row(types.KeyboardButton(text='Давай попробуем! 👌🏼'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -134,7 +134,7 @@ async def prevent_strike_start(message: Message, state: FSMContext):
     await state.set_state(PreventStrikeState.main)
     text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_start'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text='Давай разберем'))
+    nmarkup.row(types.KeyboardButton(text='Давай разберем 👌🏼'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -316,13 +316,12 @@ async def reasons_are_they_real(message: Message):
 
 @router.message((F.text == "Продолжай ⏳"), state=TruereasonsState.final)
 async def reasons_war_of_noone(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'reasons_war_of_noone'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Скорее да"))
     nmarkup.row(types.KeyboardButton(text="Скорее нет 🙅‍♂️"))
     nmarkup.row(types.KeyboardButton(text="Я думаю, что люди наверху знают, что делают 👮‍♂️"))
     nmarkup.adjust(2, 1)
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await simple_media(message, 'reasons_war_of_noone', nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message(((F.text == "Я думаю, что люди наверху знают, что делают 👮‍♂️") | (F.text == "Скорее нет 🙅‍♂️")),

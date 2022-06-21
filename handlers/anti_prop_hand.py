@@ -721,7 +721,7 @@ async def reasons_lets_figure(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Давай попробуем 👌🏼"))
     nmarkup.row(types.KeyboardButton(text="Я не интересуюсь политикой 😐"))
-    nmarkup.row(types.KeyboardButton(text="Не за чем, ведь эти цели - бессмысленны 🤬"))
+    nmarkup.row(types.KeyboardButton(text="Незачем, ведь эти цели - бессмысленны 🤬"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=False)
 
 
