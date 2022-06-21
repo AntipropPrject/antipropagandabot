@@ -118,16 +118,16 @@ class NaziFilter(BaseFilter):
     answer: Union[str, list]
 
     async def __call__(self, message: Message):
-        print(self.answer)
-        if self.answer in await poll_get(f'Usrs: {message.from_user.id}: Nazi_answers: first_poll:'):
-            return True
-        else:
-            return False
+        list = await poll_get(f'Usrs: {message.from_user.id}: Nazi_answers: first_poll:')
+        for thing in list:
+            if int(thing.find(self.answer)) != -1:
+                return True
+        return False
 
 
 class RusHate_pr(BaseFilter):
     async def __call__(self, message: Message):
-        if "Менее 5%" in await poll_get(f'Usrs: {message.from_user.id}: Nazi_answers: small_poll:'):
+        if "📊 Менее 5%" in await poll_get(f'Usrs: {message.from_user.id}: Nazi_answers: small_poll:'):
             return True
         else:
             return False
@@ -136,7 +136,7 @@ class RusHate_pr(BaseFilter):
 class NotNaziFilter(BaseFilter):
     async def __call__(self, message: Message):
         nazi_answers = await poll_get(f'Usrs: {message.from_user.id}: Nazi_answers: first_poll:')
-        if "Ничего из вышеперечисленного..." in nazi_answers and len(nazi_answers) == 1:
+        if "🙅 Ничего из вышеперечисленного..." in nazi_answers and len(nazi_answers) == 1:
             print('Ошибочка вышла, он не нацист')
             return True
         else:
