@@ -59,4 +59,4 @@ async def mongo_export_to_file(message: types.Message):
     await asyncio.sleep(0.2)
     await message.answer_document(FSInputFile(f"export_to_csv/backups/PostgreSQL/Assets-{today}.csv"), caption="Assets")
     await asyncio.sleep(0.2)
-    await message.answer_document(FSInputFile(f'Log/logs/log-{today}.log'), caption="Logs")
+    await message.answer_document(FSInputFile(f'log/logs/Log-{today}.log'), caption="Logs")
