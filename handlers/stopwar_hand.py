@@ -131,4 +131,3 @@ async def stopwar_lets_fight(message: Message):
     text2 = await sql_safe_select('text', 'texts', {'name': 'stopwar_send_me'})
     await message.answer(text)
     await message.answer(text2)
-    

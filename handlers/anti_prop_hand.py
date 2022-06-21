@@ -68,7 +68,7 @@ async def antip_all_no_TV(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Покажи ложь на ТВ -- мне интересно посмотреть! 📺"))
     nmarkup.row(types.KeyboardButton(text="Пропустим этот шаг"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview = True)
 
 
 @router.message(
@@ -259,7 +259,7 @@ async def antip_another_tv(message: Message, state: FSMContext):
 @router.message((F.text.contains('пропаганда')))
 async def russia_in_nutshell(message: Message, state=FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_what_is_prop'})
-    await message.answer(text)
+    await message.answer(text, disable_web_page_preview=True)
 
 
 @router.message((F.text.contains('заговора')))
@@ -709,7 +709,7 @@ async def war_point_now(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_war_point_now'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=False)
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message(PoliticsFilter(title='Аполитичный'),
@@ -722,7 +722,7 @@ async def reasons_lets_figure(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="Давай попробуем 👌🏼"))
     nmarkup.row(types.KeyboardButton(text="Я не интересуюсь политикой 😐"))
     nmarkup.row(types.KeyboardButton(text="Незачем, ведь эти цели - бессмысленны 🤬"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=False)
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 

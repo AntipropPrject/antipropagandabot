@@ -12,7 +12,6 @@ from handlers.nazi_hand import NaziState
 from handlers.preventive_strike import PreventStrikeState
 from handlers.putin_hand import StateofPutin
 from middleware import CounterMiddleware
-from resources.all_polls import nazizm
 from states.donbass_states import donbass_state
 from utilts import simple_media
 
@@ -414,18 +413,16 @@ async def reasons_eritrea(message: Message, state: FSMContext):
 
 @router.message((F.text == "Это показательный пример... 🙁"), state=TruereasonsState.final)
 async def reasons_mb_think(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'reasons_mb_think'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Давай"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await simple_media(message, 'reasons_mb_think', nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text == "Просто весь мир против нас 🖕"), state=TruereasonsState.final)
 async def reasons_propaganda_man(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'reasons_propaganda_man'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Давай"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await simple_media(message, 'reasons_propaganda_man', nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text == "Давай"), state=TruereasonsState.final)
