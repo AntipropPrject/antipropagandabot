@@ -172,7 +172,7 @@ async def edit_media(message: Message, state: FSMContext):
         await state.set_state(admin_home.media_edit)
         await state.update_data(name=message.text)
     else:
-        await message.answer('К сожалению, медиа под этим тжгом нет в базе.\nПопробуйте еще раз.',
+        await message.answer('К сожалению, медиа под этим тэгом нет в базе.\nПопробуйте еще раз.',
                              reply_markup=middle_admin_keyboard())
 
 

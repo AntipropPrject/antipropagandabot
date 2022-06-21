@@ -23,7 +23,7 @@ router.message.middleware(CounterMiddleware())
 router.message.filter(state=(StateofPutin))
 
 
-@router.message(PutinFilter(), (F.text.in_({"Хорошо, давай", })))
+@router.message(PutinFilter(), (F.text.in_({"Давай 🤝"})))
 async def putin_love_putin(message: Message, state: FSMContext):
     await state.set_state(StateofPutin.main)
     text = await sql_safe_select('text', 'texts', {'name': 'putin_love_putin'})
@@ -33,7 +33,7 @@ async def putin_love_putin(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.in_({"Хорошо, давай", })))
+@router.message((F.text.in_({"Давай 🤝"})))
 async def putin_not_love_putin(message: Message, state: FSMContext):
     await state.set_state(StateofPutin.main)
     text = "Выберите описание Владимира Путина, которое вы считаете наиболее точным:"

@@ -532,8 +532,8 @@ async def putin_game2_are_you_sure(message: Message, state: FSMContext):
 @router.message(((F.text == "Мне уже хватит") | (F.text == "Хорошо, давай дальше")), state=NaziState.game)
 async def putin_in_the_past(message: Message, state: FSMContext):
     await state.clear()
-    await state.set_state(NaziState.final)
+    await state.set_state(true_resons_hand.TruereasonsState.main)
     text = await sql_safe_select('text', 'texts', {'name': 'nazi_finish'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Ого, да сценарий блока не готов! Пойду-ка я к следующим..."))
+    nmarkup.row(types.KeyboardButton(text="Продолжим 👌🏼"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))

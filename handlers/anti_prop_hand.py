@@ -708,7 +708,7 @@ async def war_point_now(message: Message, state: FSMContext):
     await state.set_state(TruereasonsState.main)
     text = await sql_safe_select('text', 'texts', {'name': 'war_point_now'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Продолжай"))
+    nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -719,10 +719,11 @@ async def reasons_lets_figure(message: Message, state: FSMContext):
     await state.set_state(TruereasonsState.main)
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_lets_figure'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Давай попробуем"))
-    nmarkup.row(types.KeyboardButton(text="Я не интересуюсь политикой"))
-    nmarkup.row(types.KeyboardButton(text="Незачем, ведь эти цели бессмысленны"))
+    nmarkup.row(types.KeyboardButton(text="Давай попробуем 👌🏼"))
+    nmarkup.row(types.KeyboardButton(text="Я не интересуюсь политикой 😐"))
+    nmarkup.row(types.KeyboardButton(text="Не за чем, ведь эти цели - бессмысленны 🤬"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
 
 
 @router.message(((F.text.contains('действия')) & (F.text.contains('Украине'))) | (
@@ -731,6 +732,6 @@ async def reasons_king_of_info(message: Message, state: FSMContext):
     await state.set_state(TruereasonsState.main)
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_king_of_info'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Хорошо!"))
-    nmarkup.row(types.KeyboardButton(text="Подожди. Я такого не говорил(а). С чего ты взял, что это ненастоящие цели?"))
+    nmarkup.row(types.KeyboardButton(text="Хорошо 👌🏼"))
+    nmarkup.row(types.KeyboardButton(text="Подожди. Я так не говорил(а). С чего ты взял, что это ненастоящие цели? 🤷‍♂️"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))

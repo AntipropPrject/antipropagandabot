@@ -37,11 +37,18 @@ async def reasons_true_reason_for_all(message: Message):
         await poll_write(f'Usrs: {message.from_user.id}: Start_answers: Invasion:', thing)
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_true_reason_for_all'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Давай поговорим о целях"))
+    nmarkup.row(types.KeyboardButton(text="Давай поговорим о целях 👌🏼"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Подожди. Я такого не говорил(а). С чего ты взял, что это ненастоящие цели?"))
+@router.message(((F.text.contains('цели')) & (F.text.contains('бессмысленны')) & (F.text.contains('Не'))))
+async def reasons_king_of_info(message: Message, state: FSMContext):
+    await redis_just_one_write(f'Usrs: {message.from_user.id}: Politics:', 'Сторонник войны')
+    await state.set_state(anti_prop_hand.propaganda_victim.final)
+    await anti_prop_hand.reasons_king_of_info(message, state)
+
+
+@router.message((F.text == "Подожди. Я так не говорил(а). С чего ты взял, что это ненастоящие цели? 🤷‍♂️"))
 async def reasons_king_of_info(message: Message):
     await redis_just_one_write(f'Usrs: {message.from_user.id}: Politics:', 'Сторонник войны')
     base_list = ("👪 Защитить русских в Донбассе", "🛡 Предотвратить вторжение на территорию России или ДНР/ЛНР",
@@ -54,7 +61,12 @@ async def reasons_king_of_info(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Давай попробуем"))
+@router.message((F.text == "Давай поговорим о целях 👌🏼"))
+async def reasons_now_you_nothing(message: Message, state: FSMContext):
+    await anti_prop_hand.war_point_now(message, state)
+
+
+@router.message((F.text == "Давай попробуем 👌🏼"))
 async def reasons_now_you_fucked(message: Message, state: FSMContext):
     await redis_just_one_write(f'Usrs: {message.from_user.id}: Politics:', 'Сторонник войны')
     await anti_prop_hand.war_point_now(message, state)
@@ -66,17 +78,17 @@ async def reasons_now_you_blessed(message: Message, state: FSMContext):
     await reasons_normal_game_start(message, state)
 
 
-@router.message(OperationWar(answer='Специальная военная операция (СВО)'), (F.text == 'Продолжай'),
+@router.message(OperationWar(answer='Специальная военная операция (СВО)'), (F.text == 'Продолжай ⏳'),
                 state=TruereasonsState.main)
 async def reasons_operation(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_operation'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text='Хорошо -- "война".'))
-    nmarkup.row(types.KeyboardButton(text='Нет, это спецоперация.'))
+    nmarkup.row(types.KeyboardButton(text='Хорошо - война 🗡'))
+    nmarkup.row(types.KeyboardButton(text='Нет - спецоперация 🛡'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.contains('это спецоперация')))
+@router.message((F.text.contains('спецоперация')))
 async def reasons_war(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_sorry_im_bot'})
     nmarkup = ReplyKeyboardBuilder()
@@ -85,11 +97,11 @@ async def reasons_war(message: Message):
 
 
 @router.message((F.text.contains('война') & (F.text.contains('Хорошо...'))))
-@router.message(OperationWar(answer='Война / Вторжение в Украину'), (F.text == 'Продолжай'), state=TruereasonsState.main)
+@router.message(OperationWar(answer='Война / Вторжение в Украину'), (F.text == 'Продолжай ⏳'), state=TruereasonsState.main)
 async def reasons_war(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_war'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text='Начнем'))
+    nmarkup.row(types.KeyboardButton(text='Давай попробуем 👌🏼'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -132,20 +144,20 @@ async def reasons_demilitarism(message: Message):
                                  "💣 Демилитаризация / Снижение военной мощи")
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_putin_demilitar'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text='Им наверху виднее'))
-    nmarkup.row(types.KeyboardButton(text='Я не знаю'))
-    nmarkup.row(types.KeyboardButton(text='Думаю он хотел, как лучше, а получилось наоборот'))
-    nmarkup.row(types.KeyboardButton(text='Предотвратить размещение военных баз НАТО'))
-    nmarkup.row(types.KeyboardButton(text='Предотвратить создание ядерного оружия на Украине'))
+    nmarkup.row(types.KeyboardButton(text='Им наверху виднее 🤔'))
+    nmarkup.row(types.KeyboardButton(text='Я не знаю 🤷‍♀️'))
+    nmarkup.row(types.KeyboardButton(text='Думаю он хотел, как лучше, а получилось наоборот 🤷‍♂️'))
+    nmarkup.row(types.KeyboardButton(text='Предотвратить размещение военных баз НАТО 🛡'))
+    nmarkup.row(types.KeyboardButton(text='Предотвратить создание ядерного оружия на Украине 💥'))
     nmarkup.adjust(2, 1, 1, 1)
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == 'Им наверху виднее') | (F.text == 'Я не знаю') | (F.text.contains('хотел, как лучше')))
+@router.message((F.text == 'Им наверху виднее 🤔') | (F.text == 'Я не знаю 🤷‍♀️') | (F.text.contains('хотел, как лучше')))
 async def reasons_lie_no_more_1(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_lie_no_more_1'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text='Тогда продолжим'))
+    nmarkup.row(types.KeyboardButton(text='Тогда продолжим 👌🏼'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -155,7 +167,7 @@ async def reasons_lie_no_more_2(message: Message):
                      "💂 Предотвратить размещение военных баз НАТО в Украине")
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_lie_no_more_2'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text='Тогда продолжим'))
+    nmarkup.row(types.KeyboardButton(text='Тогда продолжим 👌🏼'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -165,7 +177,7 @@ async def reasons_lie_no_more_3(message: Message):
                      "🤯 Предотвратить секретные разработки: биологическое оружие / ядерное оружие")
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_lie_no_more_3'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text='Тогда продолжим'))
+    nmarkup.row(types.KeyboardButton(text='Тогда продолжим 👌🏼'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -175,15 +187,15 @@ async def reasons_big_bad_nato(message: Message):
                                  "💂 Предотвратить размещение военных баз НАТО в Украине")
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_big_bad_NATO'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text='Давай'))
+    nmarkup.row(types.KeyboardButton(text='Давай 👌🏼'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == 'Давай'), state=TruereasonsState.main)
+@router.message((F.text == 'Давай 👌🏼'), state=TruereasonsState.main)
 async def reasons_lie_no_more_1(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_NATO_is_coming'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text='А почему бы и нет'))
+    nmarkup.row(types.KeyboardButton(text='А почему бы и нет 👌🏼'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -193,7 +205,7 @@ async def reasons_biopigeons(message: Message):
                                  "🤯 Предотвратить секретные разработки: биологическое оружие / ядерное оружие")
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_bio_nuclear'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text='Ладно'))
+    nmarkup.row(types.KeyboardButton(text='Хорошо, продолжим 👌🏼'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -221,12 +233,12 @@ async def reasons_normal_game_start(message: Message, state: FSMContext):
     await state.set_state(TruereasonsState.game)
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_normal_game_start'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text='Начнем!'))
-    nmarkup.row(types.KeyboardButton(text='Пропустим в этот раз'))
+    nmarkup.row(types.KeyboardButton(text='Начнем! 🚀'))
+    nmarkup.row(types.KeyboardButton(text='Пропустим игру 🙅‍♀️'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(((F.text == "Начнем!") | (F.text == "Продолжаем, давай еще!")), state=TruereasonsState.game)
+@router.message(((F.text == "Начнем! 🚀") | (F.text == "Продолжаем, давай еще! 👉")), state=TruereasonsState.game)
 async def reasons_normal_game_question(message: Message, state: FSMContext):
     try:
         count = (await state.get_data())['ngamecount']
@@ -242,8 +254,8 @@ async def reasons_normal_game_question(message: Message, state: FSMContext):
                                  f"where id = {count}")[0]
         await state.update_data(ngamecount=count, belive=truth_data[2], not_belive=truth_data[3])
         nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(types.KeyboardButton(text="Это ненормально!"))
-        nmarkup.row(types.KeyboardButton(text="Это нормально."))
+        nmarkup.row(types.KeyboardButton(text="Это абсурд🤦🏼‍♀️"))
+        nmarkup.row(types.KeyboardButton(text="Это нормально👌🏼"))
         if truth_data[0] is not None:
             capt = ""
             if truth_data[1] is not None:
@@ -258,86 +270,87 @@ async def reasons_normal_game_question(message: Message, state: FSMContext):
             await message.answer(f'{truth_data[1]}', reply_markup=nmarkup.as_markup(resize_keyboard=True))
     else:
         nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(types.KeyboardButton(text="Хорошо, давай дальше"))
+        nmarkup.row(types.KeyboardButton(text="Продолжим 🤝"))
         await message.answer(
-            "Боюсь, что пока что у меня кончились примеры. Я поищу еще, а пока что продолжим",
+            "У меня закончились новости. Спасибо за игру 🤝",
             reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(((F.text == "Это ненормально!") | (F.text == "Это нормально.")), state=TruereasonsState.game)
+@router.message(((F.text == "Это абсурд🤦🏼‍♀️") | (F.text == "Это нормально👌🏼")), state=TruereasonsState.game)
 async def reasons_normal_game_answer(message: Message, state: FSMContext):
     data = await state.get_data()
     base_update_dict = dict()
-    if message.text == "Это нормально.":
+    if message.text == "Это абсурд🤦🏼‍♀️":
         base_update_dict.update({'belivers': (data['belive'] + 1)})
-    elif message.text == "Это ненормально!":
+    elif message.text == "Это нормально👌🏼":
         base_update_dict.update({'nonbelivers': (data['not_belive'] + 1)})
     await sql_safe_update("normal_game", base_update_dict, {'id': data['ngamecount']})
     t_percentage = data['belive'] / (data['belive'] + data['not_belive'])
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Продолжаем, давай еще!"))
-    nmarkup.row(types.KeyboardButton(text="Достаточно."))
+    nmarkup.row(types.KeyboardButton(text="Продолжаем, давай еще! 👉"))
+    nmarkup.row(types.KeyboardButton(text="Достаточно, давай закончим 🙅"))
     await message.answer(
-        f'Результаты других участников:\n\nЭто ненормально: {round((100 - t_percentage * 100), 1)}% \n Все в порядке: '
+        f'Результаты других участников:\n\n<b>Это абсурд:</b> {round((100 - t_percentage * 100), 1)}% '
+        f'\n<b>Все в порядке:</b>'
         f'{round(t_percentage * 100, 1)}%',
         reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(((F.text == "Достаточно.") | (F.text == "Хорошо, давай дальше") | (F.text == "Пропустим в этот раз")),
+@router.message(((F.text.contains("Достаточно,")) | (F.text == "Продолжим 🤝") | (F.text == 'Пропустим игру 🙅‍♀️')),
                 state=TruereasonsState.game)
 async def reasons_real_reasons(message: Message, state: FSMContext):
     await state.set_state(TruereasonsState.final)
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Подожди, а какие тогда настоящие цели войны?"))
-    nmarkup.row(types.KeyboardButton(text="Продолжай"))
+    nmarkup.row(types.KeyboardButton(text="Подожди, а какие тогда настоящие цели войны? 🎯"))
+    nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
     await simple_media(message, 'reasons_real_reasons', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Подожди, а какие тогда настоящие цели войны?"), state=TruereasonsState.final)
+@router.message((F.text == "Подожди, а какие тогда настоящие цели войны? 🎯"), state=TruereasonsState.final)
 async def reasons_are_they_real(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_are_they_real'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Продолжай"))
+    nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Продолжай"), state=TruereasonsState.final)
+@router.message((F.text == "Продолжай ⏳"), state=TruereasonsState.final)
 async def reasons_war_of_noone(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_war_of_noone'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Скорее да"))
-    nmarkup.row(types.KeyboardButton(text="Скорее нет"))
-    nmarkup.row(types.KeyboardButton(text="Думаю, люди наверху знают, что делают"))
+    nmarkup.row(types.KeyboardButton(text="Скорее нет 🙅‍♂️"))
+    nmarkup.row(types.KeyboardButton(text="Я думаю, что люди наверху знают, что делают 👮‍♂️"))
     nmarkup.adjust(2, 1)
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(((F.text == "Думаю, люди наверху знают, что делают") | (F.text == "Скорее нет")),
+@router.message(((F.text == "Я думаю, что люди наверху знают, что делают 👮‍♂️") | (F.text == "Скорее нет 🙅‍♂️")),
                 state=TruereasonsState.final)
 async def reasons_cynical_view(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_cynical_view'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Ни в чем не улучшилось"))
-    nmarkup.row(types.KeyboardButton(text="Импортозамещение"))
-    nmarkup.row(types.KeyboardButton(text="Конец гегемонии США"))
+    nmarkup.row(types.KeyboardButton(text="Импортозамещение 📦"))
+    nmarkup.row(types.KeyboardButton(text="Конец гегемонии США / Однополярного мира 🇺🇸"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Конец гегемонии США"), state=TruereasonsState.final)
+@router.message((F.text == "Конец гегемонии США / Однополярного мира 🇺🇸"), state=TruereasonsState.final)
 async def reasons_usa_gegemony(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_USA_gegemony'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Нет, не понимаю"))
-    nmarkup.row(types.KeyboardButton(text="Да, понимаю"))
+    nmarkup.row(types.KeyboardButton(text="Нет, не понимаю 🤷‍♂️"))
+    nmarkup.row(types.KeyboardButton(text="Да, понимаю ✔️"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Да, понимаю"), state=TruereasonsState.final)
+@router.message((F.text == "Да, понимаю ✔️"), state=TruereasonsState.final)
 async def reasons_europe_cold(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_Europe_cold'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Нет, цель не в этом"))
-    nmarkup.row(types.KeyboardButton(text="Да, именно в этом"))
+    nmarkup.row(types.KeyboardButton(text="Нет, цель не в этом 🙅‍♂️"))
+    nmarkup.row(types.KeyboardButton(text="Да, именно в этом 👍"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -345,23 +358,23 @@ async def reasons_europe_cold(message: Message):
 async def reasons_only_misery(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_only_misery'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Давай"))
+    nmarkup.row(types.KeyboardButton(text="Давай 👌🏼"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Импортозамещение"), state=TruereasonsState.final)
+@router.message((F.text == "Импортозамещение 📦"), state=TruereasonsState.final)
 async def reasons_nails_lol(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_nails_lol'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Давай"))
+    nmarkup.row(types.KeyboardButton(text="Давай 👌🏼"))
     await simple_media(message, 'reasons_nails_lol', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Нет, не понимаю"), state=TruereasonsState.final)
+@router.message((F.text == "Нет, не понимаю 🤷‍♂️"), state=TruereasonsState.final)
 async def reasons_21_cent(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_21_cent'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Давай"))
+    nmarkup.row(types.KeyboardButton(text="Давай 👌🏼"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -369,7 +382,7 @@ async def reasons_21_cent(message: Message):
 async def reasons_hail_china(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_hail_China'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Давай"))
+    nmarkup.row(types.KeyboardButton(text="Давай 👌🏼"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -377,46 +390,46 @@ async def reasons_hail_china(message: Message):
 async def reasons_bot_afraid(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_bot_afraid'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Давай"))
+    nmarkup.row(types.KeyboardButton(text="Давай 👌🏼"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Давай"), state=TruereasonsState.final)
+@router.message((F.text == "Давай 👌🏼"), state=TruereasonsState.final)
 async def reasons_why_only_rus(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_why_only_rus'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Какие результаты?"))
+    nmarkup.row(types.KeyboardButton(text="Какие результаты? 📊"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Какие результаты?"), state=TruereasonsState.final)
+@router.message((F.text == "Какие результаты? 📊"), state=TruereasonsState.final)
 async def reasons_eritrea(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_eritrea'})
     media = await sql_safe_select('t_id', 'assets', {'name': 'reasons_eritrea'})
     await state.set_state(TruereasonsState.final)
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Показательный пример..."))
-    nmarkup.row(types.KeyboardButton(text="Просто весь мир против нас"))
+    nmarkup.row(types.KeyboardButton(text="Это показательный пример... 🙁"))
+    nmarkup.row(types.KeyboardButton(text="Просто весь мир против нас 🖕"))
     await simple_media(message, 'reasons_eritrea', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Показательный пример..."), state=TruereasonsState.final)
+@router.message((F.text == "Это показательный пример... 🙁"), state=TruereasonsState.final)
 async def reasons_mb_think(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_mb_think'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Хорошо"))
+    nmarkup.row(types.KeyboardButton(text="Давай"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Просто весь мир против нас"), state=TruereasonsState.final)
+@router.message((F.text == "Просто весь мир против нас 🖕"), state=TruereasonsState.final)
 async def reasons_propaganda_man(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_propaganda_man'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Хорошо"))
+    nmarkup.row(types.KeyboardButton(text="Давай"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Хорошо"), state=TruereasonsState.final)
+@router.message((F.text == "Давай"), state=TruereasonsState.final)
 async def reasons_celeb_video(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_celeb_video'})
     media = await sql_safe_select('t_id', 'assets', {'name': 'reasons_celeb_video'})
@@ -430,34 +443,35 @@ async def reasons_celeb_video(message: Message, state: FSMContext):
 async def reasons_open_eyes(message: Message, state: FSMContext):
     await state.set_state(TruereasonsState.final)
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Столько парней погибло, теперь у нас нет права проиграть..."))
-    nmarkup.row(types.KeyboardButton(text="Я хочу подумать, дайте паузу..."))
-    nmarkup.row(types.KeyboardButton(text="Нет, мне не нужна эта война..."))
-    nmarkup.row(types.KeyboardButton(text="Я не знаю...😨"))
-    nmarkup.row(types.KeyboardButton(text="Да, я готов(а) это поддерживать"))
-    nmarkup.row(types.KeyboardButton(text="Давайте закончим этот разговор"))
+    nmarkup.row(types.KeyboardButton(text="Столько парней погибло, теперь мы не имеем права проиграть... 😔"))
+    nmarkup.row(types.KeyboardButton(text="Я хочу подумать, давай сделаем паузу... ⏱"))
+    nmarkup.row(types.KeyboardButton(text="Нет, мне не нужна эта война... 🙅♂️"))
+    nmarkup.row(types.KeyboardButton(text="Я не знаю... 😰"))
+    nmarkup.row(types.KeyboardButton(text="Да, я готов(а) поддержать войну / спецоперацию 💥"))
+    nmarkup.row(types.KeyboardButton(text="Давай закончим этот разговор! 🖕"))
     await simple_media(message, 'reasons_open_eyes', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Я хочу подумать, дайте паузу..."), state=TruereasonsState.final)
+@router.message((F.text == "Я хочу подумать, давай сделаем паузу... ⏱"), state=TruereasonsState.final)
 async def reasons_pause(message: Message, state: FSMContext):
     await state.set_state(TruereasonsState.final)
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Нет, мне не нужна эта война..."))
-    nmarkup.row(types.KeyboardButton(text="Я не знаю...😨"))
-    nmarkup.row(types.KeyboardButton(text="Да, я готов(а) это поддерживать"))
+    nmarkup.row(types.KeyboardButton(text="Нет, мне не нужна эта война... 🙅♂️"))
+    nmarkup.row(types.KeyboardButton(text="Я не знаю... 😰"))
+    nmarkup.row(types.KeyboardButton(text="Да, я готов(а) поддержать войну / спецоперацию 💥"))
+    nmarkup.row(types.KeyboardButton(text="Столько парней погибло, теперь мы не имеем права проиграть... 😔"))
     await simple_media(message, 'reasons_pause', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Столько парней погибло, теперь у нас нет права проиграть..."),
+@router.message((F.text == "Столько парней погибло, теперь мы не имеем права проиграть... 😔"),
                 state=TruereasonsState.final)
 async def reasons_why_support_war(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_why_support_war'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Нет, мне не нужна эта война..."))
-    nmarkup.row(types.KeyboardButton(text="Я не знаю...😨"))
-    nmarkup.row(types.KeyboardButton(text="Да, я готов(а) это поддерживать"))
-    nmarkup.row(types.KeyboardButton(text="Давайте закончим этот разговор"))
+    nmarkup.row(types.KeyboardButton(text="Нет, мне не нужна эта война... 🙅♂️"))
+    nmarkup.row(types.KeyboardButton(text="Я не знаю... 😰"))
+    nmarkup.row(types.KeyboardButton(text="Да, я готов(а) поддержать войну / спецоперацию 💥"))
+    nmarkup.row(types.KeyboardButton(text="Давай закончим этот разговор! 🖕"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -467,21 +481,21 @@ async def reasons_now_he_normal(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_now_he_normal'})
     await state.set_state(StateofPutin.main)
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Хорошо, давай"))
+    nmarkup.row(types.KeyboardButton(text="Давай 🤝"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(((F.text == "Да, я готов(а) это поддерживать") | (F.text == "Давайте закончим этот разговор")),
+@router.message(((F.text == "Да, я готов(а) поддержать войну / спецоперацию 💥") | (F.text == "Давай закончим этот разговор! 🖕")),
                 state=TruereasonsState.final)
 async def reasons_he_needs_war(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_he_needs_war'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Показать текст песни"))
+    nmarkup.row(types.KeyboardButton(text="Покажи текст песни 📝"))
     nmarkup.row(types.KeyboardButton(text="Я передумал(а), мне не нужна эта война..."))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Показать текст песни"), state=TruereasonsState.final)
+@router.message((F.text == "Покажи текст песни 📝"), state=TruereasonsState.final)
 async def reasons_generation_z(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_generation_Z'})
     await message.answer(text)
@@ -492,5 +506,5 @@ async def reasons_who_to_blame(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_who_to_blame'})
     await state.set_state(StateofPutin.main)
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Хорошо, давай"))
+    nmarkup.row(types.KeyboardButton(text="Давай 🤝"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
