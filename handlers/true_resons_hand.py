@@ -96,7 +96,7 @@ async def reasons_war(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.contains('война') & (F.text.contains('Хорошо...'))))
+@router.message((F.text.contains('война') & (F.text.contains('Хорошо'))))
 @router.message(OperationWar(answer='Война / Вторжение в Украину'), (F.text == 'Продолжай ⏳'), state=TruereasonsState.main)
 async def reasons_war(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_war'})

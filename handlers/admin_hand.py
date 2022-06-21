@@ -33,7 +33,7 @@ router = Router()
 router.message.filter(state=admin_home)
 
 
-@router.message(content_types=types.ContentType.TEXT, text_ignore_case=True, text_contains='Выйти', state=admin_home)
+@router.message((F.text == "Выйти"), state=admin_home)
 async def cmd_cancel(message: types.Message, state: FSMContext):
     await state.clear()
     await message.answer("Вы покинули уютный режим администрирования.\nУдачи!",
