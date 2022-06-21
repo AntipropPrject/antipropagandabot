@@ -120,6 +120,7 @@ class NaziFilter(BaseFilter):
     async def __call__(self, message: Message):
         list = await poll_get(f'Usrs: {message.from_user.id}: Nazi_answers: first_poll:')
         for thing in list:
+            print(thing, '|||', self.answer)
             if int(thing.find(self.answer)) != -1:
                 return True
         return False

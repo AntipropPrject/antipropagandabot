@@ -652,7 +652,7 @@ async def antip_do_you_agree(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Да, полностью согласен 👌🏼"))
     nmarkup.row(types.KeyboardButton(text="Возможно / частично 🤷‍♀️"))
-    nmarkup.row(types.KeyboardButton(text="Нет не, согласен(сна) 🙅‍♂️"))
+    nmarkup.row(types.KeyboardButton(text="Нет, не согласен(сна) 🙅‍♂️"))
     nmarkup.row(types.KeyboardButton(text="Да, но почему тогда люди ей верят? 🤔"))
     nmarkup.row(types.KeyboardButton(text="Да, как и во многих других странах 🇺🇸"))
 

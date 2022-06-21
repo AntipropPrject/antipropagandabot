@@ -169,14 +169,14 @@ async def nazi_many_forms(message: Message):
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
 
 
-@router.message(NaziFilter(answer="В Украине происходит геноцид русскоязычного населения"),
+@router.message(NaziFilter(answer="На Украине происходит геноцид русскоязычного населения"),
                 state=NaziState.after_small_poll)
 async def nazi_many_forms(message: Message, state: FSMContext):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Продолжай"))
     await state.set_state(NaziState.genocide)
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Nazi_answers: first_poll:',
-                                 "В Украине происходит геноцид русскоязычного населения")
+                                 nazizm[2])
     text = await sql_safe_select("text", "texts", {"name": "nazi_genocide"})
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
 
@@ -268,7 +268,7 @@ async def nazi_bounds(message: Message, state: FSMContext):
                 state=NaziState.after_small_poll)
 async def nazi_second_poll(message: Message, state: FSMContext):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Nazi_answers: first_poll:',
-                                 "Многие украинцы ненавидят русских только за то, что они русские")
+                                 nazizm[0])
     text = await sql_safe_select('text', 'texts', {'name': 'nazi_second_poll'})
     await state.set_state(NaziState.third_part)
     nmarkup = ReplyKeyboardBuilder()
@@ -439,7 +439,7 @@ async def nazi_parade(message: Message, state: FSMContext):
 
 
 @router.message(NaziFilter(
-    answer="В Украине переписывают историю Второй Мировой /  Разрушают советские памятники / Унижают ветеранов"))
+    answer="На Украине переписывают историю / Разрушают советские памятники / Унижают ветеранов"))
 async def nazi_no_WW2(message: Message, state: FSMContext):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Nazi_answers: first_poll:',
                                  "В Украине переписывают историю Второй Мировой /  Разрушают советские памятники / Унижают ветеранов")
