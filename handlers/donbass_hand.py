@@ -85,7 +85,7 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state=FSM
             continue
         true_options.append(donbass_first_poll[index])
         await poll_write(f'Usrs: {poll_answer.user.id}: Donbass_polls: First:', donbass_first_poll[index])
-    if 'Если бы мы не нанесли упреждающий удар, то Украина напала бы первая, и жертв было бы больше' in true_options:
+    if "🛡 Если бы мы не нанесли упреждающий удар, то Украина напала бы первая, и жертв было бы больше" in true_options:
         text = 'У меня есть уточняющий вопрос.\n' \
                'Продолжите: "Если бы мы не нанесли упреждающий удар, то Украина напала бы первая..." Куда?'
         nmarkup = ReplyKeyboardBuilder()
@@ -94,11 +94,11 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state=FSM
         nmarkup.row(types.KeyboardButton(text="Оба варианта"))
         nmarkup.adjust(2, 1)
         await bot.send_message(poll_answer.user.id, text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
-    elif 'ООН врет, не может быть таких жертв среди гражданского населения' in true_options:
+    elif "📊 ООН врет, не может быть таких жертв среди гражданского населения" in true_options:
         text = await sql_safe_select('text', 'texts', {'name': 'civil_casualties'})
         await redis_pop(f'Usrs: {poll_answer.user.id}: Donbass_polls: First:')
         await bot.send_message(poll_answer.user.id, text, reply_markup=filler_kb(), parse_mode="HTML")
-    elif 'Эти "мирные люди" — жители Украины, а значит неонацисты, которых не жалко' in true_options:
+    elif "😕 Эти \"мирные люди\" — жители Украины, а значит неонацисты, которых не жалко" in true_options:
         await state.update_data(nazi='В Украине процветает неонацизм и геноцид русскоязычного населения')
         text = 'Считать, что люди заслуживают смерти только потому,' \
                ' что у них есть украинский паспорт — и есть нацизм.\n' \
@@ -110,7 +110,7 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state=FSM
                              '🤬 Денацификация / Уничтожить нацистов')
         await redis_pop(f'Usrs: {poll_answer.user.id}: Donbass_polls: First:')
         await bot.send_message(poll_answer.user.id, text, reply_markup=filler_kb(), parse_mode="HTML")
-    elif "Это укронацисты стреляют по своим же жителям! Мы же бьем только по военным объектам" in true_options:
+    elif "🏢 Это укронацисты стреляют по своим же жителям! Мы же бьем только по военным объектам" in true_options:
         text = await sql_safe_select('text', 'texts', {'name': 'only_war_objects'})
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(
@@ -121,14 +121,14 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state=FSM
             types.KeyboardButton(text="Просто укронацисты размещаются в домах и делают их легитимной военной целью 😡"))
         await bot.send_message(poll_answer.user.id, text, reply_markup=nmarkup.as_markup(resize_keyboard=True),
                                parse_mode="HTML")
-    elif 'Так они используют население как живой щит! Поэтому погибают мирные жители' in true_options:
+    elif "👨👩👧👦 Так они используют население как живой щит! Поэтому погибают мирные жители" in true_options:
         await redis_pop(f'Usrs: {poll_answer.user.id}: Donbass_polls: First:')
         text = 'Еще одна заглушка. Блок про живой щит начинается здесь'
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Зачем они вообще сопротивлялись? Мы же им желаем добра!"))
         await bot.send_message(poll_answer.user.id, text, reply_markup=nmarkup.as_markup(resize_keyboard=True),
                                parse_mode="HTML")
-    elif 'Украинцам надо было просто сдаться, тогда бы стольких жертв не было' in true_options:
+    elif "🏳️ Украинцам надо было просто сдаться, тогда бы стольких жертв не было" in true_options:
         await state.update_data(nazi='В Украине процветает неонацизм и геноцид русскоязычного населения')
         text = await sql_safe_select('text', 'texts', {'name': 'war_beginning'})
         nmarkup = ReplyKeyboardBuilder()
@@ -139,7 +139,7 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state=FSM
             text="Не согласен, в случае нападения на Россию пусть лучше солдаты сложат оружие, зато не будет жертв."))
         await bot.send_message(poll_answer.user.id, text, reply_markup=nmarkup.as_markup(resize_keyboard=True),
                                parse_mode="HTML")
-    elif 'Это ужасно, но помимо защиты жителей Донбасса есть более весомые причины для начала войны' in true_options:
+    elif "🎯 Это ужасно, но помимо защиты жителей Донбасса есть более весомые причины для начала войны" in true_options:
         text = await sql_safe_select('text', 'texts', {'name': 'reasons_here'})
         data = await state.get_data()
         reason_list = data.values()
