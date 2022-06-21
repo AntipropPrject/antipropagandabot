@@ -1,3 +1,4 @@
+import psycopg2
 from psycopg2 import sql
 from bata import all_data
 import os
@@ -17,7 +18,7 @@ def data_getter(query):
                 data = cur.fetchall()
         conn.close()
         return data
-    except Exception as error:
+    except psycopg2.Error as error:
         logg.get_error(f"{error}", __file__)
         return error
 
@@ -31,7 +32,7 @@ def safe_data_getter(safe_query, values_dict):
                 data = cur.fetchall()
         conn.close()
         return data
-    except Exception as error:
+    except psycopg2.Error as error:
         logg.get_error(f"{error}", __file__)
         return False
 
@@ -61,7 +62,7 @@ async def sql_safe_select(column, table_name, condition_dict):
             return data[0]
         else:
             return data[0][0]
-    except Exception as error:
+    except psycopg2.Error as error:
         logg.get_error(f"{error}", __file__)
         return False
 
@@ -81,7 +82,7 @@ async def sql_safe_select_like(column1, column2, table_name, first_condition, se
                 data = cur.fetchall()
         conn.close()
         return data
-    except Exception as error:
+    except psycopg2.Error as error:
         logg.get_error(f"{error}", __file__)
         return False
 
@@ -104,7 +105,7 @@ async def sql_safe_insert(table_name, data_dict):
         conn.close()
         pandas_csv_add(table_name, data_dict)
         return True
-    except Exception as error:
+    except psycopg2.Error as error:
         logg.get_error(f"{error}", __file__)
         return False
 
@@ -128,7 +129,7 @@ async def sql_safe_update(table_name, data_dict, condition_dict):
         conn.close()
         pandas_csv_update(table_name, data_dict, condition_dict)
         return "Complete"
-    except Exception as error:
+    except psycopg2.Error as error:
         logg.get_error(f"{error}", __file__)
 
 
