@@ -11,6 +11,7 @@ from keyboards.main_keys import filler_kb
 from middleware import CounterMiddleware
 from resources.all_polls import donbass_first_poll, donbass_second_poll
 from states.donbass_states import donbass_state
+from utilts import simple_media
 
 router = Router()
 router.message.middleware(CounterMiddleware())
@@ -29,17 +30,12 @@ async def reasons_war(message: Message, state=FSMContext):
 
 @router.message(F.text == 'Что главное?')
 async def donbass_chart_1(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'donbass_chart_1'})
-    ph_id = await sql_safe_select('t_id', 'assets', {'name': 'donbass_chart_1'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Что значит "гражданские"?'))
     nmarkup.add(types.KeyboardButton(text='Да, знал'))
     nmarkup.add(types.KeyboardButton(text='Нет, не знал'))
     nmarkup.adjust(1, 2)
-    try:
-        await message.answer_photo(ph_id, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
-    except:
-        await message.answer_video(ph_id, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await simple_media(message, 'donbass_chart_1', nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message(text_contains='значит', content_types=types.ContentType.TEXT, text_ignore_case=True)
@@ -75,7 +71,7 @@ async def poll_filler(message: types.Message):
 
 # Тут удвоение первого поста каждой ветки, потому что нам надо отвечать СРАЗУ после опроса
 @router.poll_answer(state=donbass_state.eight_years_selection)
-async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state=FSMContext):
+async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FSMContext):
     indexes = poll_answer.option_ids
     true_options = list()
     print(indexes)
@@ -118,7 +114,7 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state=FSM
         nmarkup.row(types.KeyboardButton(text="Просто укронацисты размещаются в жилых домах или рядом."))
         nmarkup.row(types.KeyboardButton(text="Просто ужас. Давай к следующей теме."))
         await bot.send_message(poll_answer.user.id, text, reply_markup=nmarkup.as_markup(resize_keyboard=True),
-                               parse_mode="HTML")
+                               parse_mode="HTML", disable_web_page_preview=True)
     elif "👨👩👧👦 Так они используют население как живой щит! Поэтому погибают мирные жители" in true_options:
         await redis_pop(f'Usrs: {poll_answer.user.id}: Donbass_polls: First:')
         text = 'Еще одна заглушка. Блок про живой щит начинается здесь'
@@ -218,7 +214,7 @@ async def donbas_only_war_objects(message: Message):
     nmarkup.row(types.KeyboardButton(text="А кто сказал, что это сделали российские войска? Может, это провокация!"))
     nmarkup.row(types.KeyboardButton(text="Просто укронацисты размещаются в жилых домах или рядом."))
     nmarkup.row(types.KeyboardButton(text="Просто ужас. Давай к следующей теме."))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message(text_contains=('российские', 'провокация'), content_types=types.ContentType.TEXT, text_ignore_case=True)
@@ -227,7 +223,7 @@ async def provocation(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Просто укронацисты размещаются в жилых домах или рядом."))
     nmarkup.row(types.KeyboardButton(text="Жертвы среди мирного населения - плохо, но все ради важных целей."))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), parse_mode="HTML")
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), parse_mode="HTML", disable_web_page_preview=True)
 
 
 @router.message(text_contains=('укронацисты', 'жилых'), content_types=types.ContentType.TEXT, text_ignore_case=True)
