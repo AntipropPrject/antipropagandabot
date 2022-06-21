@@ -1,3 +1,4 @@
+import asyncio
 import os
 from datetime import datetime
 import psycopg2
@@ -16,7 +17,7 @@ router.message.middleware(CounterMiddleware())
 @router.message(commands=["export"])
 async def mongo_export_to_file(message: types.Message):
     today = datetime.today()
-    today = today.strftime("%m-%d-%Y")
+    today = today.strftime("%d-%m-%Y")
     client = all_data().get_mongo()
     database = client['database']
     collection = database['userinfo']
@@ -28,7 +29,7 @@ async def mongo_export_to_file(message: types.Message):
 
     # compute the output file directory and name
     output_dir_mongo = os.path.join('export_to_csv', 'backups', 'MongoDB')
-    output_file = os.path.join(output_dir_mongo, today +'.csv')
+    output_file = os.path.join(output_dir_mongo, 'Mongo_user-' + today + '.csv')
 
     docs.to_csv(output_file, ",", index=False)  # CSV delimited by commas
 
@@ -38,8 +39,8 @@ async def mongo_export_to_file(message: types.Message):
             SQL_texts = "COPY (SELECT * FROM texts) TO STDOUT WITH CSV HEADER"
             SQL_assets = "COPY (SELECT * FROM assets) TO STDOUT WITH CSV HEADER"
             # Set up a variable to store our file path and name.
-            t_path_n_texts = f"export_to_csv/backups/PostgreSQL/{today}-texts.csv"
-            t_path_n_assets = f"export_to_csv/backups/PostgreSQL/{today}-assets.csv"
+            t_path_n_texts = f"export_to_csv/backups/PostgreSQL/Texts-{today}.csv"
+            t_path_n_assets = f"export_to_csv/backups/PostgreSQL/Assets-{today}.csv"
             # Trap errors for opening the file
             try:
                 with open(t_path_n_texts, 'w') as f_output:
@@ -52,6 +53,10 @@ async def mongo_export_to_file(message: types.Message):
             except psycopg2.Error as er:
                 logg.get_error(er)
 
-    await message.answer_document(FSInputFile(f"export_to_csv/backups/MongoDB/{today}.csv"), caption="MongoDB_info")
-    await message.answer_document(FSInputFile(f"export_to_csv/backups/PostgreSQL/{today}-texts.csv"), caption="Texts")
-    await message.answer_document(FSInputFile(f"export_to_csv/backups/PostgreSQL/{today}-assets.csv"), caption="Assets")
+    await message.answer_document(FSInputFile(f"export_to_csv/backups/MongoDB/Mongo_user-{today}.csv"), caption="MongoDB info")
+    await asyncio.sleep(0.2)
+    await message.answer_document(FSInputFile(f"export_to_csv/backups/PostgreSQL/Texts-{today}.csv"), caption="Texts")
+    await asyncio.sleep(0.2)
+    await message.answer_document(FSInputFile(f"export_to_csv/backups/PostgreSQL/Assets-{today}.csv"), caption="Assets")
+    await asyncio.sleep(0.2)
+    await message.answer_document(FSInputFile(f'Log/logs/log-{today}.log'), caption="Logs")
