@@ -2,6 +2,7 @@ from aiogram import Router, F
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.dispatcher.fsm.state import State, StatesGroup
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message
 from pandas import DataFrame
 from psycopg2 import sql
@@ -60,8 +61,8 @@ async def text_hello(message: types.Message, state: FSMContext):
 @router.message(content_types=types.ContentType.TEXT, state=admin_home.add_text)
 async def get_text(message: Message, state: FSMContext):
     try:
-        new_name = message.text.split("|\n")[0]
-        new_text = message.text.split("|\n")[1]
+        new_name = message.html_text.split("|\n")[0]
+        new_text = message.html_text.split("|\n")[1]
         await state.update_data(text=new_text, name=new_name)
         await state.set_state(admin_home.testing_text)
         await message.answer(f'<b>Тэг текста:</b>{new_name}\n<b>Текст:\n</b>{new_text}', parse_mode="HTML",
@@ -75,10 +76,14 @@ async def get_text(message: Message, state: FSMContext):
 async def text_hello(message: types.Message, state: FSMContext):
     await state.set_state(admin_home.add_media)
     photo = await sql_safe_select('t_id', 'assets', {'name': 'test_photo_tag'})
-    await message.answer(text='Пришлите фото или видео,'
-                              ' подписав его удобным тегом подобного формата: some_unique_tag',
-                         reply_markup=middle_admin_keyboard())
-
+    try:
+        await message.answer(text='Пришлите фото или видео,'
+                                  ' подписав его удобным тегом подобного формата: some_unique_tag',
+                             reply_markup=middle_admin_keyboard())
+    except TelegramBadRequest:
+        await message.answer('Похоже, что картинка, которую показывает бот в качестве примера, для вашего бота не работает.\n'
+                             'Вы можете заменить ее на свою, воспользовавшись опцией "Изменить медиа" в главном меню, '
+                             'и указав таг <b>test_photo_tag</b>')
 
 @router.message(content_types='photo', state=admin_home.add_media)
 async def get_photo(message: Message, state: FSMContext):
@@ -130,9 +135,9 @@ async def text_edit_text_tag(message: Message, state: FSMContext):
 async def text_edit_text_test(message: Message, state: FSMContext):
     data = await state.get_data()
     await message.answer(
-        f'Проверьте правильность внесенных данных.\n\n\nТэг текста:{data["name"]}\n\nНовый текст:\n{message.text}',
+        f'Проверьте правильность внесенных данных.\n\n\nТэг текста:{data["name"]}\n\nНовый текст:\n{message.html_text}',
         parse_mode="HTML", reply_markup=app_admin_keyboard())
-    await state.update_data({"text": message.text})
+    await state.update_data({"text": message.html_text})
     await state.set_state(admin_home.text_edit_test)
 
     test = await state.get_data()
@@ -154,14 +159,16 @@ async def edit_media(message: Message, state: FSMContext):
             await message.answer_photo(media_id, caption='Это выбранная вами картинка. Если все верно, отправьте ту, '
                                                          'на которую вы хотите ее заменить',
                                        reply_markup=middle_admin_keyboard())
-        except:
-            pass
-        try:
-            await message.answer_video(media_id,
-                                       caption='Это выбранное вами видео. Если все верно, отправьте то, на которое его надо заменить',
-                                       reply_markup=middle_admin_keyboard())
-        except:
-            pass
+        except TelegramBadRequest:
+            try:
+                await message.answer_video(media_id,
+                                           caption='Это выбранное вами видео. Если все верно, отправьте то, на которое его надо заменить',
+                                           reply_markup=middle_admin_keyboard())
+            except TelegramBadRequest:
+                await message.answer('Похоже, что медиа, которое вы хотите заменить, предназначалось другому боту, '
+                                     'и поэтому я не смогу вам его показать.\n\n'
+                                     'Но все в порядке, вы можете отправить мне новое медиа, и мы починим медиа '
+                                     'по этому тегу.')
         await state.set_state(admin_home.media_edit)
         await state.update_data(name=message.text)
     else:

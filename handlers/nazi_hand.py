@@ -35,6 +35,20 @@ router.message.middleware(CounterMiddleware())
 router.message.filter(state=NaziState)
 
 
+@router.message((F.text == "Получить опрос"), state=NaziState.first_poll)
+async def nazi_first_poll(message: Message):
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text='Продолжить'))
+    question = "Отметьте один или более вариантов, с которыми согласны или частично согласны"
+    await message.answer_poll(question, nazizm, allows_multiple_answers=True, is_anonymous=False)
+
+
+@router.message((F.text == "Продолжить"), state=NaziState.first_poll)
+async def nazi_poll_filler(message: Message):
+    await message.answer('Пожалуйста, выберите в опросе те пункты, с которыми вы согласны, '
+                         'и нажмите кнопку <b>"Подтвердить"</b> или <b>"Vote"</b>', reply_markup=ReplyKeyboardRemove())
+
+
 @router.poll_answer(state=NaziState.first_poll)
 async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FSMContext):
     nazizm_answers = poll_answer.option_ids
@@ -523,11 +537,3 @@ async def putin_in_the_past(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Ого, да сценарий блока не готов! Пойду-ка я к следующим..."))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
-
-
-@router.message()
-async def nazi_exit(message: Message, state: FSMContext):
-    await state.set_state(true_resons_hand.TruereasonsState.main)
-    markup = ReplyKeyboardBuilder()
-    markup.row(types.KeyboardButton(text="Продолжим"))
-    await message.answer('Это выход из нацизма', reply_markup=markup.as_markup())

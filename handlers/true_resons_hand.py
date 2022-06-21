@@ -108,11 +108,10 @@ async def reasons_denazi(message: Message, state=FSMContext):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Start_answers: Invasion:',
                                  "🤬 Денацификация / Уничтожить нацистов")
     text = await sql_safe_select('text', 'texts', {'name': 'nazi_start'})
-    question = "Отметьте один или более вариантов, с которыми согласны или частично согласны"
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text='Кнопка'))
+    nmarkup.row(types.KeyboardButton(text='Получить опрос'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
-    await message.answer_poll(question, nazizm, allows_multiple_answers=True, is_anonymous=False)
+
 
 
 @router.message(WarReason(answer="🛡 Предотвратить вторжение на территорию России или ДНР/ЛНР"))
@@ -355,7 +354,7 @@ async def reasons_nails_lol(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_nails_lol'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Давай"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await simple_media(message, 'reasons_nails_lol', nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text == "Нет, не понимаю"), state=TruereasonsState.final)
