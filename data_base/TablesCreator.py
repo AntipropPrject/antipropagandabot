@@ -1,5 +1,5 @@
-from psycopg2 import Error
-
+import psycopg2
+import pymongo
 from bata import all_data
 from log import logg
 
@@ -177,7 +177,7 @@ def tables_god():
             # get version
             logg.get_info(f"You connect to - server MongoDb version - {client.server_info()['version']} \n".upper())
             client.close()
-        except (Exception, Error) as error:
+        except Exception as error:
             logg.get_error(f"MongoDB, {error}", __file__)
 
         # import CSV
@@ -235,5 +235,5 @@ def tables_god():
         con.close()
         cur.close()
 
-    except (Exception, Error) as error:
+    except psycopg2.Error as error:
         logg.get_error(f"PostgreSQL, {error}", __file__)
