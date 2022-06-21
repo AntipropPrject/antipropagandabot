@@ -1,4 +1,4 @@
-channels = ["РИА Новости",[{("RIANEWS_media_1", "RIANEWS_caption_1"): ("RIANEWS_exposure_1", "RIANEWS_cap_exposure_1")},
+channels = ["РИА Новости", [{("RIANEWS_media_1", "RIANEWS_caption_1"): ("RIANEWS_exposure_1", "RIANEWS_cap_exposure_1")},
      {("RIANEWS_media_2", "RIANEWS_caption_2"): ("RIANEWS_exposure_2", "RIANEWS_cap_exposure_2")},
      {("RIANEWS_media_3", "RIANEWS_caption_3"): ("RIANEWS_exposure_3", "RIANEWS_cap_exposure_3")},
      {("RIANEWS_media_4", "RIANEWS_caption_4"): ("RIANEWS_exposure_4", "RIANEWS_cap_exposure_4")},

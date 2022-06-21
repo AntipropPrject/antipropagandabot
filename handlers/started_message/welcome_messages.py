@@ -115,7 +115,7 @@ async def message_6(message: types.Message, state: FSMContext):
 async def message_7(message: types.Message, state: FSMContext):
     # Сохранить 1 вопрос в базу
     text = message.text
-    if text == 'Начал(а) интересоваться после 24 февраля' or text == "Скорее да 🙂" or text == "Скорее нет 🙅":
+    if text == 'Начал(а) интересоваться после 24 февраля' or text == "Скорее да 🙂" or text == "Скорее нет 🙅‍♂":
         await poll_write(f'Usrs: {message.from_user.id}: Start_answers: interest_in_politics:', message.text[:-2].strip())
         options = welc_message_one
         # Сохранение 1 вопроса в дату
