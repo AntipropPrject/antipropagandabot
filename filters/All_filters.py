@@ -10,7 +10,7 @@ class DonbassOptionsFilter(BaseFilter):
     async def __call__(self, message: Message) -> bool:
         user_lies = await poll_get(f'Usrs: {message.from_user.id}: Donbass_polls: First:')
         for lie in user_lies:
-            if self.option == lie:
+            if int(lie.find(self.option)) != -1:
                 return True
         return False
 
@@ -42,7 +42,7 @@ class second_donbass_filter(BaseFilter):
         user_lies = await poll_get(f'Usrs: {message.from_user.id}: Donbass_polls: Second:')
         print(user_lies)
         for lie in user_lies:
-            if self.option == lie:
+            if int(lie.find(self.option)) != -1:
                 return True
         return False
 
@@ -75,8 +75,8 @@ class PplPropagandaFilter(BaseFilter):
 
     async def __call__(self, message: Message) -> Union[bool, Dict[str, Any]]:
         ppl_lies_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:')
-        bad_ppl_lies = (
-        "Дмитрий Песков", "Рамзан Кадыров", "Сергей Лавров", "Юрий Подоляка", "Владимир Соловьев", "Ольга Скабеева")
+        bad_ppl_lies = ("Дмитрий Песков", "Рамзан Кадыров", "Сергей Лавров",
+                        "Юрий Подоляка", "Владимир Соловьев", "Ольга Скабеева")
         for bad_lie in bad_ppl_lies:
             if bad_lie in ppl_lies_list:
                 return {'ppl_lies_list': ppl_lies_list}
@@ -96,15 +96,14 @@ class OperationWar(BaseFilter):
 
 
 class WarReason(BaseFilter):
-    answer: Union[str, list]
+    answer: str
 
     async def __call__(self, message: Message):
         reason_list = await poll_get(f"Usrs: {message.from_user.id}: Start_answers: Invasion:")
         for thing in reason_list:
             if int(thing.find(self.answer)) != -1:
                 return True
-            else:
-                return False
+        return False
 
 
 class PutinFilter(BaseFilter):
