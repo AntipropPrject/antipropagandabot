@@ -110,7 +110,7 @@ async def donbass_big_tragedy(message: Message, state=FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'donbass_big_tragedy'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Что главное?'))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message(WarReason(answer="🤬 Денацификация / Уничтожить нацистов"))
@@ -149,7 +149,7 @@ async def reasons_demilitarism(message: Message):
     nmarkup.row(types.KeyboardButton(text='Предотвратить создание ядерного оружия на Украине 💥'))
     nmarkup.row(types.KeyboardButton(text='Думаю он хотел, как лучше, а получилось наоборот 🤷‍♂️'))
     nmarkup.adjust(2, 1, 1, 1)
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text == 'Им наверху виднее 🤔') | (F.text == 'Я не знаю 🤷‍♀️') | (F.text.contains('хотел, как лучше')))
@@ -167,7 +167,7 @@ async def reasons_lie_no_more_2(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_lie_no_more_2'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Тогда продолжим 👌🏼'))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text.contains('создание ядерного оружия на')))
@@ -187,7 +187,7 @@ async def reasons_big_bad_nato(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_big_bad_NATO'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Давай 👌🏼'))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text == 'Давай 👌🏼'), state=TruereasonsState.main)
@@ -205,7 +205,7 @@ async def reasons_biopigeons(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_bio_nuclear'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Хорошо, продолжим 👌🏼'))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 """@router.message(WarReason(answer="🗺 Вернуть России исторические земли / Объединить русский народ"))
@@ -359,7 +359,7 @@ async def reasons_only_misery(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_only_misery'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Давай 👌🏼"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text == "Импортозамещение 📦"), state=TruereasonsState.final)
@@ -375,7 +375,7 @@ async def reasons_21_cent(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_21_cent'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Давай 👌🏼"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text == "Нет, цель не в этом"), state=TruereasonsState.final)
@@ -383,7 +383,7 @@ async def reasons_hail_china(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_hail_China'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Давай 👌🏼"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text == "Да, именно в этом"), state=TruereasonsState.final)
@@ -399,7 +399,7 @@ async def reasons_why_only_rus(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_why_only_rus'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Какие результаты? 📊"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text == "Какие результаты? 📊"), state=TruereasonsState.final)
@@ -447,7 +447,7 @@ async def reasons_open_eyes(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="Столько парней погибло, теперь мы не имеем права проиграть... 😔"))
     nmarkup.row(types.KeyboardButton(text="Я хочу подумать, давай сделаем паузу... ⏱"))
     nmarkup.row(types.KeyboardButton(text="Давай закончим этот разговор! 🖕"))
-    nmarkup.adjust(2,1,1,1,1)
+    nmarkup.adjust(2, 1, 1, 1, 1)
     await simple_media(message, 'reasons_open_eyes', nmarkup.as_markup(resize_keyboard=True))
 
 
