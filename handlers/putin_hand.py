@@ -125,7 +125,7 @@ async def putin_game1_question(message: Message, state: FSMContext):
                 await message.answer_photo(truth_data[0], caption=capt,
                                            reply_markup=nmarkup.as_markup(resize_keyboard=True))
         else:
-            await message.answer(f'{truth_data[1]}\n\nНа самом же деле...{truth_data[4]}\n',
+            await message.answer(f'{truth_data[1]}\n',
                                  reply_markup=nmarkup.as_markup(resize_keyboard=True))
     else:
         nmarkup = ReplyKeyboardBuilder()
@@ -223,7 +223,7 @@ async def putin_game2_question(message: Message, state: FSMContext):
                 await message.answer_photo(truth_data[0], caption=capt,
                                            reply_markup=nmarkup.as_markup(resize_keyboard=True))
         else:
-            await message.answer(f'Вот что обещал Путин:\n\n{truth_data[1]}\n\nНа самом же деле...{truth_data[4]}\n',
+            await message.answer(f'Вот что обещал Путин:\n\n{truth_data[1]}',
                                  reply_markup=nmarkup.as_markup(resize_keyboard=True))
     else:
         nmarkup = ReplyKeyboardBuilder()

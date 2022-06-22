@@ -548,12 +548,11 @@ async def antip_truth_game_start_question(message: Message, state: FSMContext):
     print(f"В таблице {how_many_rounds} записей, а вот счетчик сейчас {count}")
     if count < how_many_rounds:
         count += 1
-        truth_data = data_getter('SELECT truth, t_id, text, belivers, nonbelivers, rebuttal, reb_asset_name'
+        truth_data = data_getter('SELECT truth, t_id, text, belivers, nonbelivers, rebuttal, t_id as t_id3'
                                  ' FROM public.truthgame '
                                  'left outer join assets on asset_name = assets.name '
                                  'left outer join texts ON text_name = texts.name '
                                  f'where id = {count}')[0]
-        print('aaaaaa', truth_data)
         await state.update_data(gamecount=count, truth=truth_data[0], rebuttal=truth_data[5], belive=truth_data[3],
                                 not_belive=truth_data[4], reb_media_tag=truth_data[6])
         nmarkup = ReplyKeyboardBuilder()
@@ -576,7 +575,7 @@ async def antip_truth_game_start_question(message: Message, state: FSMContext):
         nmarkup.row(types.KeyboardButton(text="Давай"))
         await message.answer(
                 "Ой, у меня закончились примеры для игры :(\n\nДавайте я лучше вместо этого расскажу вам анекдот!",
-                reply_markup=nmarkup.as_markup())
+                reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text == "Это правда ✅") | (F.text == "Это ложь ❌"))
@@ -614,6 +613,7 @@ async def antip_truth_game_answer(message: Message, state: FSMContext):
             await message.answer_video(media, caption=f'Конечно же это {reality}\n{reb}\nРезультаты других участников:\nПравда: {round(t_percentage * 100, 1)}%\nЛожь: {round((100 - t_percentage * 100), 1)}', reply_markup=nmarkup.as_markup(resize_keyboard=True))
         except:
             await message.answer_photo(media, caption=f'Конечно же это {reality}\n{reb}\nРезультаты других участников:\nПравда: {round(t_percentage * 100, 1)}%\nЛожь: {round((100 - t_percentage * 100), 1)}', reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
 
 @router.message((F.text == "Пропустим игру 🙅‍♀️") | (F.text.contains("двигаемся дальше")))
 async def antip_ok(message: Message):
