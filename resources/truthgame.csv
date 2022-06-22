@@ -1,9 +1,8 @@
-id,truth,asset_name,text_name,belivers,nonbelivers,rebuttal
-2,f,tgame_photo_2,,8,17,Нет
-3,f,,truthgame_3,6,8,Нет
-5,f,,truthgame_5,5,1,Ну серьезно
-6,t,,truthgame_6,3,3,Это так
-7,f,,truthgame_7,2,2,А может правда?
-8,t,,truthgame_8,2,2,Это точно не ложь?
-1,f,,truthgame_1,33,32,Навальный не ест детей
-4,t,,truthgame_4,4,3,Бедные олени!
+2,false,tgame_photo_2,,8,17,Нет
+3,false,,truthgame_3,6,8,Нет
+5,false,,truthgame_5,5,1,Ну серьезно
+6,true,,truthgame_6,3,3,Это так
+7,false,,truthgame_7,2,2,А может правда?
+8,true,,truthgame_8,2,2,Это точно не ложь?
+1,false,,truthgame_1,33,33,Навальный не ест детей
+4,true,,truthgame_4,4,3,Бедные олени!
