@@ -153,7 +153,7 @@ async def putin_game1_answer(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="Продолжаем 👉"))
     nmarkup.row(types.KeyboardButton(text="Достаточно ✋"))
     await message.answer(
-        f'А вот что думают другие участники:\nСлучайная ошибка: {round(t_percentage * 100, 1)}%\nНамеренная ложь: '
+        f'А вот что думают другие участники:\n👍 <b>Случайная ошибка / не ложь:</b> {round(t_percentage * 100, 1)}%\n👎 <b>Намеренная ложь: </b>'
         f'{round((100 - t_percentage * 100), 1)}',
         reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
@@ -249,8 +249,8 @@ async def putin_game2_answer(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="Продолжаем! 👉"))
     nmarkup.row(types.KeyboardButton(text="Достаточно ✋"))
     await message.answer(
-        f'А вот что думают другие участники:\n'
-        f'Путин в этом виноват: {round((100 - t_percentage * 100), 1)}% \n Путин не виноват: {round(t_percentage * 100, 1)}%',
+        f'А вот что думают другие участники:\n\n'
+        f'👎 <b>Виноват</b>: {round((100 - t_percentage * 100), 1)}% \n👍 <b>Не виноват</b>: {round(t_percentage * 100, 1)}%',
         reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 

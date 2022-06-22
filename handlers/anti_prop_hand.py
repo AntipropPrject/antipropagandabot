@@ -168,7 +168,7 @@ async def tv_russia24_reb(message: Message, state: FSMContext):
     count = (await state.get_data())['rus24_tv_count']
     nmarkup = ReplyKeyboardBuilder()
     if count < 5:
-        nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет 🇷🇺1️⃣ c России1/24 📺"))
+        nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет 🇷🇺1️⃣ c России1 / 24 📺"))
     nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал 🔛"))
     nmarkup.row(types.KeyboardButton(text="Хватит, мне все понятно ✋"))
     await simple_media(message, f'tv_24_reb_{count}', nmarkup.as_markup(resize_keyboard=True))
@@ -178,7 +178,7 @@ async def tv_russia24_reb(message: Message, state: FSMContext):
 async def tv_HTB_reb(message: Message, state: FSMContext):
     count = (await state.get_data())['HTB_tv_count']
     nmarkup = ReplyKeyboardBuilder()
-    if count < 5:
+    if count < 4:
         nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет ❇️▶️ НТВ 📺"))
     nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал 🔛"))
     nmarkup.row(types.KeyboardButton(text="Хватит, мне все понятно ✋"))
@@ -189,7 +189,7 @@ async def tv_HTB_reb(message: Message, state: FSMContext):
 async def tv_star_reb(message: Message, state: FSMContext):
     count = (await state.get_data())['Star_tv_count']
     nmarkup = ReplyKeyboardBuilder()
-    if count < 5:
+    if count < 2:
         nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет ⭐️🅾️ Звезды 📺"))
     nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал 🔛"))
     nmarkup.row(types.KeyboardButton(text="Хватит, мне все понятно ✋"))
@@ -647,19 +647,19 @@ async def antip_truth_game_answer(message: Message, state: FSMContext):
     base_update_dict = dict()
     if message.text == "Это правда ✅":
         if data['truth'] == True:
-            reality = "чистая правда, вы правы!"
+            reality = "<b>чистая правда</b>, вы правы!"
             reb = ""
         elif data['truth'] == False:
-            reality = "на самом деле чистая ложь, боюсь, что вы ошиблись."
-            reb = f"И вот почему:\n\n{data['rebuttal']}\n\n"
+            reality = "<b>ложь</b>, боюсь, что вы ошиблись."
+            reb = f"И вот почему:\n\n{data['rebuttal']}\n"
         base_update_dict = {'belivers': data['belive'] + 1}
         print('Этому верит', base_update_dict)
     elif message.text == "Это ложь ❌":
         if data['truth'] == True:
-            reality = "чистая правда, вы совершили ошибку."
-            reb = f"И вот почему:\n\n{data['rebuttal']}\n\n"
+            reality = "<b>правда</b>, вы ошиблись"
+            reb = f"И вот почему:\n\n{data['rebuttal']}\n"
         elif data['truth'] == False:
-            reality = "ложь, совершенно верно!"
+            reality = "<b>ложь</b>, совершенно верно!"
             reb = ""
         base_update_dict = {'nonbelivers': data['not_belive'] + 1}
         print('Этому верит', base_update_dict)
@@ -670,12 +670,12 @@ async def antip_truth_game_answer(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="Достаточно, двигаемся дальше  🙅‍♀️"))
     media = await sql_safe_select('t_id', 'assets', {'name': data['reb_media_tag']})
     if media == False:
-        await message.answer(f'Конечно же это {reality}\n{reb}\nРезультаты других участников:\nПравда: {round(t_percentage * 100, 1)}%\nЛожь: {round((100 - t_percentage * 100), 1)}', reply_markup=nmarkup.as_markup(resize_keyboard=True))
+        await message.answer(f'Конечно же это {reality}\n{reb}\nРезультаты других участников:\n✅ Правда: {round(t_percentage * 100, 1)}%\n❌ Ложь: {round((100 - t_percentage * 100), 1)}', reply_markup=nmarkup.as_markup(resize_keyboard=True))
     else:
         try:
-            await message.answer_video(media, caption=f'Конечно же это {reality}\n{reb}\nРезультаты других участников:\nПравда: {round(t_percentage * 100, 1)}%\nЛожь: {round((100 - t_percentage * 100), 1)}', reply_markup=nmarkup.as_markup(resize_keyboard=True))
+            await message.answer_video(media, caption=f'Конечно же это {reality}\n{reb}\nРезультаты других участников:\n✅ Правда: {round(t_percentage * 100, 1)}%\n❌ Ложь: {round((100 - t_percentage * 100), 1)}', reply_markup=nmarkup.as_markup(resize_keyboard=True))
         except:
-            await message.answer_photo(media, caption=f'Конечно же это {reality}\n{reb}\nРезультаты других участников:\nПравда: {round(t_percentage * 100, 1)}%\nЛожь: {round((100 - t_percentage * 100), 1)}', reply_markup=nmarkup.as_markup(resize_keyboard=True))
+            await message.answer_photo(media, caption=f'Конечно же это {reality}\n{reb}\nРезультаты других участников:\n✅ Правда: {round(t_percentage * 100, 1)}%\n❌ Ложь: {round((100 - t_percentage * 100), 1)}', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text == "Пропустим игру 🙅‍♀️") | (F.text.contains("двигаемся дальше")))
@@ -773,7 +773,7 @@ async def antip_reputation_matters(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_reputation_matters'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Я готов продолжить. Поговорим про военные действия в Украине."))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 # По хорошему, это уже начало войны
