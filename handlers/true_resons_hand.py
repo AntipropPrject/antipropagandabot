@@ -495,8 +495,7 @@ async def reasons_he_needs_war(message: Message):
 
 @router.message((F.text == "Покажи текст песни 📝"), state=TruereasonsState.final)
 async def reasons_generation_z(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'reasons_generation_Z'})
-    await message.answer(text)
+    await simple_media(message, 'reasons_generation_Z')
 
 
 @router.message((F.text == "Скорее да"), state=TruereasonsState.final)

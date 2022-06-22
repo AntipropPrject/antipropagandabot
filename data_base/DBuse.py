@@ -62,7 +62,7 @@ async def sql_safe_select(column, table_name, condition_dict):
             return data[0]
         else:
             return data[0][0]
-    except psycopg2.Error as error:
+    except (psycopg2.Error, IndexError) as error:
         logg.get_error(f"{error}", __file__)
         return False
 
