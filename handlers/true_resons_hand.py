@@ -2,6 +2,7 @@ from aiogram import Router, F
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.dispatcher.fsm.state import StatesGroup, State
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from data_base.DBuse import data_getter, sql_safe_select, sql_safe_update, redis_just_one_write, poll_write
@@ -266,7 +267,7 @@ async def reasons_normal_game_question(message: Message, state: FSMContext):
             try:
                 await message.answer_video(truth_data[0], caption=capt,
                                            reply_markup=nmarkup.as_markup(resize_keyboard=True))
-            except:
+            except TelegramBadRequest:
                 await message.answer_photo(truth_data[0], caption=capt,
                                            reply_markup=nmarkup.as_markup(resize_keyboard=True))
         else:
