@@ -202,7 +202,7 @@ async def antip_crossed_boy_1(message: Message):
     vid_id = await sql_safe_select('t_id', 'assets', {'name': 'TV_rebuttal_filler'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Посмотрел(а) 📺'))
-    await simple_media(message, 'antip_crossed_boy_1', nmarkup.as_markup())
+    await simple_media(message, 'antip_crossed_boy_1', nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text == 'Посмотрел(а) 📺'))
@@ -611,13 +611,13 @@ async def antip_truth_game_start_question(message: Message, state: FSMContext):
     print(f"В таблице {how_many_rounds} записей, а вот счетчик сейчас {count}")
     if count < how_many_rounds:
         count += 1
-        truth_data = data_getter("SELECT truth, t_id, text, belivers, nonbelivers, rebuttal FROM public.truthgame "
-                                 "left outer join assets on asset_name = assets.name "
-                                 "left outer join texts ON text_name = texts.name "
-                                 f"where id = {count}")[0]
-        print('aaaaaa', truth_data)
+        truth_data = data_getter('SELECT truth, t_id, text, belivers, nonbelivers, rebuttal, t_id as t_id3'
+                                 ' FROM public.truthgame '
+                                 'left outer join assets on asset_name = assets.name '
+                                 'left outer join texts ON text_name = texts.name '
+                                 f'where id = {count}')[0]
         await state.update_data(gamecount=count, truth=truth_data[0], rebuttal=truth_data[5], belive=truth_data[3],
-                                not_belive=truth_data[4])
+                                not_belive=truth_data[4], reb_media_tag=truth_data[6])
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Это правда ✅"))
         nmarkup.row(types.KeyboardButton(text="Это ложь ❌"))
@@ -638,7 +638,7 @@ async def antip_truth_game_start_question(message: Message, state: FSMContext):
         nmarkup.row(types.KeyboardButton(text="Давай"))
         await message.answer(
                 "Ой, у меня закончились примеры для игры :(\n\nДавайте я лучше вместо этого расскажу вам анекдот!",
-                reply_markup=nmarkup.as_markup())
+                reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text == "Это правда ✅") | (F.text == "Это ложь ❌"))
@@ -651,13 +651,13 @@ async def antip_truth_game_answer(message: Message, state: FSMContext):
             reb = ""
         elif data['truth'] == False:
             reality = "на самом деле чистая ложь, боюсь, что вы ошиблись."
-            reb = f"И вот почему:\n{data['rebuttal']}\n"
+            reb = f"И вот почему:\n\n{data['rebuttal']}\n\n"
         base_update_dict = {'belivers': data['belive'] + 1}
         print('Этому верит', base_update_dict)
     elif message.text == "Это ложь ❌":
         if data['truth'] == True:
             reality = "чистая правда, вы совершили ошибку."
-            reb = f"И вот почему:\n{data['rebuttal']}\n"
+            reb = f"И вот почему:\n\n{data['rebuttal']}\n\n"
         elif data['truth'] == False:
             reality = "ложь, совершенно верно!"
             reb = ""
@@ -668,9 +668,14 @@ async def antip_truth_game_answer(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжаем, давай еще! 👉"))
     nmarkup.row(types.KeyboardButton(text="Достаточно, двигаемся дальше  🙅‍♀️"))
-    await message.answer(
-            f'Конечно же это {reality}\n{reb}\nРезультаты других участников:\nПравда: {round(t_percentage * 100, 1)}%\nЛожь: {round((100 - t_percentage * 100), 1)}',
-            reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    media = await sql_safe_select('t_id', 'assets', {'name': data['reb_media_tag']})
+    if media == False:
+        await message.answer(f'Конечно же это {reality}\n{reb}\nРезультаты других участников:\nПравда: {round(t_percentage * 100, 1)}%\nЛожь: {round((100 - t_percentage * 100), 1)}', reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    else:
+        try:
+            await message.answer_video(media, caption=f'Конечно же это {reality}\n{reb}\nРезультаты других участников:\nПравда: {round(t_percentage * 100, 1)}%\nЛожь: {round((100 - t_percentage * 100), 1)}', reply_markup=nmarkup.as_markup(resize_keyboard=True))
+        except:
+            await message.answer_photo(media, caption=f'Конечно же это {reality}\n{reb}\nРезультаты других участников:\nПравда: {round(t_percentage * 100, 1)}%\nЛожь: {round((100 - t_percentage * 100), 1)}', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text == "Пропустим игру 🙅‍♀️") | (F.text.contains("двигаемся дальше")))

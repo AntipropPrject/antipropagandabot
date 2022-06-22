@@ -58,6 +58,7 @@ def tables_god():
                 belivers int4 NOT NULL,
                 nonbelivers int4 NOT NULL,
                 rebuttal varchar NULL,
+                reb_asset_name varchar NULL,
                 CONSTRAINT truthgame_pk PRIMARY KEY (id)
                );''')
 
@@ -69,6 +70,10 @@ def tables_god():
          ADD CONSTRAINT truthgame_fk_1
           FOREIGN KEY (text_name)
            REFERENCES public.texts("name");''')
+        cur.execute('''ALTER TABLE public.truthgame
+         ADD CONSTRAINT truthgame_fk_2
+          FOREIGN KEY (reb_asset_name)
+           REFERENCES public.assets("name");''')
         logg.get_info("table Truthgame is created".upper())
 
         cur.execute('''CREATE TABLE public.mistakeOrLie(
