@@ -11,12 +11,12 @@ channels = ["РИА Новости", [{("RIANEWS_media_1", "RIANEWS_caption_1"):
      {("RUSSIATODAY_media_4", "RUSSIATODAY_caption_4"): ("RUSSIATODAY_exposure_4", "RUSSIATODAY_cap_exposure_4")},
      {("RUSSIATODAY_media_5", "RUSSIATODAY_caption_5"): ("RUSSIATODAY_exposure_5", "RUSSIATODAY_cap_exposure_5")}],
 
-    "Телеграм-каналы: Военный осведомитель / WarGonzo / Kotsnews",
-    [{("TCHANEL_media_1", "TCHANEL_caption_1"): ("TCHANEL_exposure_1", "TCHANEL_cap_exposure_1")},
-     {("TCHANEL_media_2", "TCHANEL_caption_2"): ("TCHANEL_exposure_2", "TCHANEL_cap_exposure_2")},
-     {("TCHANEL_media_3", "TCHANEL_caption_3"): ("TCHANEL_exposure_3", "TCHANEL_cap_exposure_3")},
-     {("TCHANEL_media_4", "TCHANEL_caption_4"): ("TCHANEL_exposure_4", "TCHANEL_cap_exposure_4")},
-     {("TCHANEL_media_5", "TCHANEL_caption_5"): ("TCHANEL_exposure_5", "TCHANEL_cap_exposure_5")}],
+    "Министерство обороны РФ",
+    [{("MINISTRY_media_1", "MINISTRY_caption_1"): ("MINISTRY_exposure_1", "MINISTRY_cap_exposure_1")},
+     {("MINISTRY_media_2", "MINISTRY_caption_2"): ("MINISTRY_exposure_2", "MINISTRY_cap_exposure_2")},
+     {("MINISTRY_media_3", "MINISTRY_caption_3"): ("MINISTRY_exposure_3", "MINISTRY_cap_exposure_3")},
+     {("MINISTRY_media_4", "MINISTRY_caption_4"): ("MINISTRY_exposure_4", "MINISTRY_cap_exposure_4")},
+     {("MINISTRY_media_5", "MINISTRY_caption_5"): ("MINISTRY_exposure_5", "MINISTRY_cap_exposure_5")}],
 
     "Телеграм-канал: Война с фейками",
     [{("TCHANEL_WAR_media_1", "TCHANEL_WAR_caption_1"): ("TCHANEL_WAR_exposure_1", "TC_WAR_cap_exposure_1")},
