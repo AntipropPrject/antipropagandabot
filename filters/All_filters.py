@@ -128,7 +128,7 @@ class NaziFilter(BaseFilter):
 
 class RusHate_pr(BaseFilter):
     async def __call__(self, message: Message):
-        if "📊 Менее 5%" in await poll_get(f'Usrs: {message.from_user.id}: Nazi_answers: small_poll:'):
+        if "Менее 5%" in await poll_get(f'Usrs: {message.from_user.id}: Nazi_answers: small_poll:'):
             return True
         else:
             return False

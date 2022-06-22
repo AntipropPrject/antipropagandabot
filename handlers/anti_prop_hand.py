@@ -221,7 +221,7 @@ async def antip_crossed_boy_2(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_crossed_boy_2'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжай... ⏳"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text == 'Продолжай... ⏳'))
