@@ -120,7 +120,7 @@ async def reasons_denazi(message: Message, state=FSMContext):
                                  "🤬 Денацификация / Уничтожить нацистов")
     text = await sql_safe_select('text', 'texts', {'name': 'nazi_start'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text='Получить опрос'))
+    nmarkup.row(types.KeyboardButton(text='Покажи варианты ✍️'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
