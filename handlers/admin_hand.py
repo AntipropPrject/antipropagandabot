@@ -307,9 +307,9 @@ async def statistics(message: Message):
                          '➖➖➖➖➖➖➖➖➖➖\n\n'
                          f'Пользователей: {count_come}\n'
                          f'➖➖➖➖➖➖➖➖➖➖\n\n'
-                         f'Прошли начало: {count_start} ({count_start / count_come * 100}%)\n'
-                         f'Прошли Антипропаганду: {count_antiprop} ({count_antiprop / count_come * 100}%)\n'
-                         f'Прошли Донбасс: {count_donbass} ({count_donbass / count_come * 100}%)\n'
-                         f'Прошли Цели войны: {count_war_aims} ({count_war_aims / count_come * 100}%)\n'
+                         f'Прошли начало: {count_start} ({round(count_start / count_come * 100, 1)}%)\n'
+                         f'Прошли Антипропаганду: {count_antiprop} ({round(count_antiprop / count_come * 100, 1)}%)\n'
+                         f'Прошли Донбасс: {count_donbass} ({round(count_donbass / count_come * 100, 1)}%)\n'
+                         f'Прошли Цели войны: {count_war_aims} ({round(count_war_aims / count_come * 100, 1)}%)\n'
                         )
 
