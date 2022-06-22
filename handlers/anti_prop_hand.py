@@ -295,13 +295,13 @@ async def antip_not_only_TV(message: Message, web_lies_list: List[str], state=FS
     except:
         pass
     try:
-        answer_id_int.remove(8)
+        answer_id_int.remove(7)
         lies_list.remove('Википедия')
         all_answers.remove("Википедия")
     except:
         pass
     try:
-        answer_id_int.remove(9)
+        answer_id_int.remove(8)
         lies_list.remove('Никому из них...')
         all_answers.remove("Никому из них...")
     except:
@@ -309,6 +309,7 @@ async def antip_not_only_TV(message: Message, web_lies_list: List[str], state=FS
 
     await state.update_data(all_answers=all_answers)  # Все ответы опроса
     await state.update_data(answers_int=answer_id_int)  # Все ответы пользователя индексы
+    print(lies_list)
     await state.update_data(answers_str=lies_list)  # Все ответы пользователя строки
     channel = lies_list[0]
     text = 'Но пропаганда в России не заканчивается ' \
@@ -350,7 +351,7 @@ async def keyboard_for_all_chanel(lst_kb):
 
 @router.message(((F.text.contains('Показывай')) | (F.text.contains('РИА Новости 👀')) | (
         F.text.contains('Russia Today 👀')) | (
-                         F.text.contains('Телеграм-каналы: Военный осведомитель / WarGonzo / Kotsnews 👀')) | (
+                         F.text.contains('Министерство обороны РФ 👀')) | (
                          F.text.contains('Телеграм-канал: Война с фейками 👀')) | (F.text.contains('РБК 👀')) | (
                          F.text.contains('ТАСС / Комсомольская правда / АиФ / Ведомости / Лента / Интерфакс 👀')) | (
                          F.text.contains('Яндекс.Новости 👀')) | (
@@ -364,6 +365,7 @@ async def show_the_news(message: types.Message, state=FSMContext):
         # получить самый первый источник из списка выбранных каналов
         user_answer_str = data['answers_str']
         one_channel = channels[channels.index(user_answer_str[0]) + 1]  # получаю первый канал из ответа пользователя
+        print(one_channel)
         one_media = await sql_safe_select('t_id', 'assets',
                                           {'name': list(one_channel[0].keys())[0][0]})  # Получаю id видео
         one_caption = await sql_safe_select('text', 'texts',
