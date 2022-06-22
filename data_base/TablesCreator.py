@@ -1,5 +1,4 @@
 import psycopg2
-import pymongo
 from bata import all_data
 from log import logg
 

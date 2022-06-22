@@ -63,7 +63,7 @@ async def sql_safe_select(column, table_name, condition_dict):
         else:
             return data[0][0]
     except (psycopg2.Error, IndexError) as error:
-        logg.get_error(f"{error}", __file__)
+        await logg.get_error(f"{error}", __file__)
         return False
 
 
@@ -83,7 +83,7 @@ async def sql_safe_select_like(column1, column2, table_name, first_condition, se
         conn.close()
         return data
     except psycopg2.Error as error:
-        logg.get_error(f"{error}", __file__)
+        await logg.get_error(f"{error}", __file__)
         return False
 
 
@@ -91,7 +91,7 @@ async def poll_delete_value(key, value):
     try:
         return all_data().get_data_red().delete(value)
     except Exception as error:
-        logg.get_error(f"{error}", __file__)
+        await logg.get_error(f"{error}", __file__)
 
 
 async def sql_safe_insert(table_name, data_dict):
@@ -106,7 +106,7 @@ async def sql_safe_insert(table_name, data_dict):
         pandas_csv_add(table_name, data_dict)
         return True
     except psycopg2.Error as error:
-        logg.get_error(f"{error}", __file__)
+        await logg.get_error(f"{error}", __file__)
         return False
 
 
@@ -130,7 +130,7 @@ async def sql_safe_update(table_name, data_dict, condition_dict):
         pandas_csv_update(table_name, data_dict, condition_dict)
         return "Complete"
     except psycopg2.Error as error:
-        logg.get_error(f"{error}", __file__)
+        await logg.get_error(f"{error}", __file__)
 
 
 """^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^MongoDB^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"""
@@ -142,7 +142,7 @@ async def mongo_user_info(tg_id, username):
         user_answer = {'_id': int(tg_id), 'username': str(username)}
         collection.insert_one(user_answer)
     except Exception as error:
-        logg.get_error(f"mongo_add_info | {error}", __file__)
+        await logg.get_error(f"mongo_add_info | {error}", __file__)
 
 async def mongo_select_info(tg_id):
     try:
@@ -159,7 +159,7 @@ async def mongo_select_info(tg_id):
         return x
 
     except Exception as error:
-        logg.get_error(f"mongo_select_info | {error}", __file__)
+        await logg.get_error(f"mongo_select_info | {error}", __file__)
 
 async def mongo_add(tg_id, answers):
     try:
@@ -174,7 +174,7 @@ async def mongo_add(tg_id, answers):
                        'other_answer': []}
         collection.insert_one(user_answer)
     except Exception as error:
-        logg.get_error(f"mongo_add | {error}", __file__)
+        await logg.get_error(f"mongo_add | {error}", __file__)
 
 
 async def mongo_select(tg_id):
@@ -186,7 +186,7 @@ async def mongo_select(tg_id):
         for answer in collection.find(myquery):
             return answer
     except Exception as error:
-        logg.get_error(f"mongo_select | {error}", __file__)
+        await logg.get_error(f"mongo_select | {error}", __file__)
 
 
 async def mongo_update(tg_id, value_dict):
@@ -196,7 +196,7 @@ async def mongo_update(tg_id, value_dict):
         collection = database['useranswer']
         collection.update_one({'_id': int(tg_id)}, {"$push": {"other_answer": value_dict}}, True)
     except Exception as error:
-        logg.get_error(f"mongo update | {error}", __file__)
+        await logg.get_error(f"mongo update | {error}", __file__)
 
 
 async def mongo_pop(tg_id, value_dict):
@@ -206,7 +206,7 @@ async def mongo_pop(tg_id, value_dict):
         collection = database['useranswer']
         collection.update({'_id': int(tg_id)}, {'$pull': {'other_answer': value_dict}})
     except Exception as error:
-        logg.get_error(f"mongo update | {error}", __file__)
+        await logg.get_error(f"mongo update | {error}", __file__)
 
 
 # admin
@@ -218,7 +218,7 @@ async def mongo_add_admin(tg_id):
         user_answer = {'_id': int(tg_id)}
         collection.insert_one(user_answer)
     except Exception as error:
-        logg.get_error(f"mongo_add_admin | {error}", __file__)
+        await logg.get_error(f"mongo_add_admin | {error}", __file__)
 
 
 async def mongo_select_admins():
@@ -231,7 +231,7 @@ async def mongo_select_admins():
             lst.append(answer)
         return lst
     except Exception as error:
-        logg.get_error(f"mongo_select_admins | {error}", __file__)
+        await logg.get_error(f"mongo_select_admins | {error}", __file__)
 
 async def mongo_pop_admin(tg_id):
     try:
@@ -240,7 +240,7 @@ async def mongo_pop_admin(tg_id):
         collection = database['admins']
         collection.delete_one({'_id': int(tg_id)})
     except Exception as error:
-        logg.get_error(f"mongo_pop_admin | {error}", __file__)
+        await logg.get_error(f"mongo_pop_admin | {error}", __file__)
 
 
 """^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^CSV_UPDATE^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"""
@@ -277,14 +277,14 @@ async def poll_get(key):
     try:
         return all_data().get_data_red().lrange(key, 0, -1)
     except Exception as error:
-        logg.get_error(f"{error}", __file__)
+        await logg.get_error(f"{error}", __file__)
 
 
 async def redis_delete_from_list(key, item):
     try:
         all_data().get_data_red().lrem(key, 0, item)
     except Exception as error:
-        logg.get_error(f"{error}", __file__)
+        await logg.get_error(f"{error}", __file__)
 
 
 #Одинаковая функция, лол
@@ -292,14 +292,14 @@ async def redis_pop(key):
     try:
         all_data().get_data_red().lpop(key)
     except Exception as error:
-        logg.get_error(f"{error}", __file__)
+        await logg.get_error(f"{error}", __file__)
 
 
 async def poll_write(key, value):
     try:
         all_data().get_data_red().rpush(key, value)
     except Exception as error:
-        logg.get_error(f"{error}", __file__)
+        await logg.get_error(f"{error}", __file__)
 
 
 async def redis_key_exists(key):
@@ -307,14 +307,14 @@ async def redis_key_exists(key):
         all_data().get_data_red().info(key)
 
     except Exception as error:
-        logg.get_error(f"{error}", __file__)
+        await logg.get_error(f"{error}", __file__)
 
 
 async def redis_delete_first_item(key):
     try:
         all_data().get_data_red().lpop(key)
     except Exception as error:
-        logg.get_error(f"redis del item | {error}", __file__)
+        await logg.get_error(f"redis del item | {error}", __file__)
 
 
 async def redis_write(key, value):
@@ -322,25 +322,25 @@ async def redis_write(key, value):
         all_data().get_data_red().lpush(key, value)
 
     except Exception as error:
-        logg.get_error(f"redis write | {error}", __file__)
+        await logg.get_error(f"redis write | {error}", __file__)
 
 
 async def redis_media_counter_get(user_id):
     try:
         return all_data().get_data_red().lrange(f'Media_counter: Smi: {user_id}', 0, -1)
     except Exception as error:
-        logg.get_error(f"redis get | {error}", __file__)
+        await logg.get_error(f"redis get | {error}", __file__)
 
 
 async def redis_just_one_write(key, value):
     try:
         all_data().get_data_red().set(key, value)
     except Exception as error:
-        logg.get_error(f"{error}", __file__)
+        await logg.get_error(f"{error}", __file__)
 
 
 async def redis_just_one_read(key):
     try:
         return all_data().get_data_red().get(key)
     except Exception as error:
-        logg.get_error(f"{error}", __file__)
+        await logg.get_error(f"{error}", __file__)
