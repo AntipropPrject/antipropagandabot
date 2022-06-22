@@ -142,7 +142,7 @@ async def mongo_user_info(tg_id, username):
         user_answer = {'_id': int(tg_id), 'username': str(username)}
         collection.insert_one(user_answer)
     except Exception as error:
-        await logg.get_error(f"mongo_add_info | {error}", __file__)
+        pass
 
 async def mongo_select_info(tg_id):
     try:
