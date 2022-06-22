@@ -88,6 +88,7 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FS
         await redis_delete_from_list(f'Usrs: {poll_answer.user.id}: Donbass_polls: First:', donbass_first_poll[2])
         await bot.send_video(poll_answer.user.id, video, caption=text, reply_markup=filler_kb())
     elif "🏢 Это украинцы сами стреляют по своим же жителям! Мы же бьем только по военным объектам" in true_options:
+        await redis_delete_from_list(f'Usrs: {poll_answer.user.id}: Donbass_polls: First:', donbass_first_poll[4])
         text = await sql_safe_select('text', 'texts', {'name': 'only_war_objects'})
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Просто ужас. 😨 Давай к следующей теме."))
@@ -97,7 +98,7 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FS
         await bot.send_message(poll_answer.user.id, text, reply_markup=nmarkup.as_markup(resize_keyboard=True),
                                parse_mode="HTML", disable_web_page_preview=True)
     elif "👨👩👧👦 Так они используют население, как живой щит! Поэтому погибают мирные жители" in true_options:
-        await redis_pop(f'Usrs: {poll_answer.user.id}: Donbass_polls: First:')
+        await redis_delete_from_list(f'Usrs: {poll_answer.user.id}: Donbass_polls: First:', donbass_first_poll[5])
         text = 'Еще одна заглушка. Блок про живой щит начинается здесь'
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Зачем они вообще сопротивлялись? Мы же им желаем добра!"))
