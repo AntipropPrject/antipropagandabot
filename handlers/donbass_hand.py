@@ -115,7 +115,7 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FS
         await bot.send_message(poll_answer.user.id, text, reply_markup=nmarkup.as_markup(resize_keyboard=True),
                                parse_mode="HTML")
     elif "🎯 Это ужасно, но помимо защиты жителей Донбасса есть более весомые причины для начала войны" in true_options:
-        await redis_delete_from_list(f'Usrs: {message.from_user.id}: Donbass_polls: First:', donbass_first_poll[7])
+        await redis_delete_from_list(f'Usrs: {poll_answer.user.id}: Donbass_polls: First:', donbass_first_poll[7])
         text = await sql_safe_select('text', 'texts', {'name': 'reasons_here'})
         data = await state.get_data()
         reason_list = data.values()
