@@ -157,8 +157,7 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FS
 async def nazi_many_forms(message: Message):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Посмотрел(а)"))
-    text = await sql_safe_select("text", "texts", {"name": "nazi_canny"})
-    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
+    await simple_media(message, "nazi_canny", markup.as_markup())
 
 
 @router.message((F.text.contains('Посмотрел(а)')), state=NaziState.after_small_poll)
@@ -310,10 +309,9 @@ async def nazi_manipulation(message: Message, state: FSMContext):
 @router.message((F.text.contains('удивлен')) | (F.text == "Хорошо, покажи"))
 async def nazi_not_really(message: Message, state: FSMContext):
     await state.set_state(NaziState.third_part)
-    text = await sql_safe_select('text', 'texts', {'name': 'nazi_not_really'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Посмотрел(а)"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await simple_media(message, 'nazi_not_really', nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text.contains('не доверяю соц. опросам')))
