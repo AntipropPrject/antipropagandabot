@@ -35,7 +35,7 @@ async def eight_years_add(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'donbas_years_add'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.add(types.KeyboardButton(text='Да, знал(а) 👌🏼'))
-    nmarkup.add(types.KeyboardButton(text='Нет, не знал(а)'))
+    nmarkup.add(types.KeyboardButton(text='Нет, не знал(а) 🤔'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 

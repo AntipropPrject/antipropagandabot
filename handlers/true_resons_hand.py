@@ -106,11 +106,14 @@ async def reasons_war(message: Message):
 
 @router.message(WarReason(answer="👪 Защитить русских в Донбассе"))
 async def donbass_big_tragedy(message: Message, state=FSMContext):
+    await redis_delete_from_list(f'Usrs: {message.from_user.id}: Start_answers: Invasion:',
+                                 "👪 Защитить русских в Донбассе")
     await state.set_state(donbass_state.eight_years)
     text = await sql_safe_select('text', 'texts', {'name': 'donbass_big_tragedy'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text='Что главное?'))
+    nmarkup.row(types.KeyboardButton(text='Что главное? 🤔'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
 
 
 @router.message(WarReason(answer="🤬 Денацификация / Уничтожить нацистов"))
