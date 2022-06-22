@@ -58,6 +58,7 @@ def tables_god():
                 belivers int4 NOT NULL,
                 nonbelivers int4 NOT NULL,
                 rebuttal varchar NULL,
+                reb_asset_name varchar NULL,
                 CONSTRAINT truthgame_pk PRIMARY KEY (id)
                );''')
 
