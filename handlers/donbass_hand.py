@@ -454,7 +454,6 @@ async def donbas_no_army_here(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Да, замечаю‍♀"))
     nmarkup.row(types.KeyboardButton(text="Нет, не замечаю🤷‍♀"))
-    nmarkup.row(types.KeyboardButton(text="Вообще-то, наших войск не было в ДНР/ ЛНР все эти 8 лет 🙅"))
     await simple_media(message, 'donbass_no_male', nmarkup.as_markup(resize_keyboard=True))
 
 

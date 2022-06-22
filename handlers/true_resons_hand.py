@@ -390,7 +390,7 @@ async def reasons_hail_china(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Да, именно в этом"), state=TruereasonsState.final)
+@router.message((F.text == "Да, именно в этом 👍"), state=TruereasonsState.final)
 async def reasons_bot_afraid(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_bot_afraid'})
     nmarkup = ReplyKeyboardBuilder()
