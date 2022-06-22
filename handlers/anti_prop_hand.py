@@ -611,7 +611,7 @@ async def antip_truth_game_start_question(message: Message, state: FSMContext):
     print(f"В таблице {how_many_rounds} записей, а вот счетчик сейчас {count}")
     if count < how_many_rounds:
         count += 1
-        truth_data = data_getter('SELECT truth, t_id, text, belivers, nonbelivers, rebuttal, t_id as t_id3'
+        truth_data = data_getter('SELECT truth, t_id, text, belivers, nonbelivers, rebuttal, reb_asset_name'
                                  ' FROM public.truthgame '
                                  'left outer join assets on asset_name = assets.name '
                                  'left outer join texts ON text_name = texts.name '
