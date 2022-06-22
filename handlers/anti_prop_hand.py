@@ -1,10 +1,13 @@
 import asyncio
+import csv
 from typing import List
 from aiogram import Router, F
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
+from psycopg2 import sql
+
 from bata import all_data
 from data_base.DBuse import poll_get, redis_just_one_read
 from data_base.DBuse import sql_safe_select, data_getter, sql_safe_update
@@ -349,6 +352,19 @@ async def keyboard_for_all_chanel(lst_kb):
     return markup
 
 
+async def check_name(tag):
+    try:
+        conn = all_data().get_postg()
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute(f"SELECT t_id from public.assets WHERE name = '{tag}';")
+                data = cur.fetchall()
+        conn.close()
+        return data[0]
+    except:
+        return False
+
+
 @router.message(((F.text.contains('Показывай')) | (F.text.contains('РИА Новости 👀')) | (
         F.text.contains('Russia Today 👀')) | (
                          F.text.contains('Министерство обороны РФ 👀')) | (
@@ -364,55 +380,87 @@ async def show_the_news(message: types.Message, state=FSMContext):
         markup.row(types.KeyboardButton(text="Новость посмотрел(а). Что с ней не так? 🤔"))
         # получить самый первый источник из списка выбранных каналов
         user_answer_str = data['answers_str']
-        one_channel = channels[channels.index(user_answer_str[0]) + 1]  # получаю первый канал из ответа пользователя
+        one_channel = channels[channels.index(user_answer_str[0])]  # получаю первый канал из ответа пользователя
+        await state.update_data(count_news=1)  # Ставлю счетчик на 0 для первой новости
+        tag_media = ''
         print(one_channel)
-        one_media = await sql_safe_select('t_id', 'assets',
-                                          {'name': list(one_channel[0].keys())[0][0]})  # Получаю id видео
-        one_caption = await sql_safe_select('text', 'texts',
-                                            {'name': list(one_channel[0].keys())[0][1]})  # Получаю описание
+        if one_channel == web_prop[0]:
+            tag_media = 'RIANEWS_media_'
+        elif one_channel == web_prop[1]:
+            tag_media = 'RUSSIATODAY_media_'
+        elif one_channel == web_prop[3]:
+            tag_media = 'TCHANEL_WAR_media_'
+        elif one_channel == web_prop[4]:
+            tag_media = 'TACC_media_'
+        elif one_channel == web_prop[5]:
+            tag_media = 'MINISTRY_media_'
+        elif one_channel == web_prop[6]:
+            tag_media = 'YANDEXNEWS_media_'
+
+        one_media = await sql_safe_select('t_id', 'assets', {'name': tag_media+"1"})  # Получаю id видео
+        one_caption = await sql_safe_select('text', 'texts', {'name': tag_media+"1"})  # Получаю описание
         await state.update_data(viewed_channel=user_answer_str[0])  # передаю канал для разоблачения
-        await state.update_data(count_news=0)  # Ставлю счетчик на 0 для первой новости
         await state.update_data(all_viwed=[user_answer_str[0]])  # записываю просмотренный источник
         await message.answer_video(one_media, caption=one_caption, reply_markup=markup.as_markup(resize_keyboard=True))
     elif message.text != 'Хорошо, давай вернемся и посмотрим 👀':
         markup = ReplyKeyboardBuilder()
         markup.row(types.KeyboardButton(text="Новость посмотрел(а). Что с ней не так? 🤔"))
-        await state.update_data(count_news=0)
+        await state.update_data(count_news=1)
         await state.update_data(viewed_channel=message.text[:-2])
-        new_data = 0
+        new_data = 1
         other_channel = message.text
         if other_channel != 'Хватит, пропустим остальные источники 🙅‍♂️':
             viewed = data["all_viwed"]
             viewed.append(other_channel)
             await state.update_data(all_viwed=list(set(viewed)))  # Список просмотренных источников
 
-        channel_exposure = channels[channels.index(other_channel[:-2]) + 1]
-        media = await sql_safe_select('t_id', 'assets',
-                                      {'name': list(channel_exposure[new_data].keys())[0][0]})  # Получаю id видео
-        caption = await sql_safe_select('text', 'texts',
-                                        {'name': list(channel_exposure[new_data].keys())[0][1]})  # Получаю описание
+        if other_channel[:-2] == web_prop[0]:
+            tag_media = 'RIANEWS_media_'
+        elif other_channel[:-2] == web_prop[1]:
+            tag_media = 'RUSSIATODAY_media_'
+        elif other_channel[:-2] == web_prop[3]:
+            tag_media = 'TCHANEL_WAR_media_'
+        elif other_channel[:-2] == web_prop[4]:
+            tag_media = 'TACC_media_'
+        elif other_channel[:-2] == web_prop[5]:
+            tag_media = 'MINISTRY_media_'
+        elif other_channel[:-2] == web_prop[6]:
+            tag_media = 'YANDEXNEWS_media_'
+        media = await sql_safe_select('t_id', 'assets', {'name': tag_media+str(new_data)})  # Получаю id видео
+        caption = await sql_safe_select('text', 'texts', {'name': tag_media+str(new_data)})  # Получаю описание
         await message.answer_video(media, caption=caption, reply_markup=markup.as_markup(resize_keyboard=True))
 
     elif message.text == 'Хорошо, давай вернемся и посмотрим 👀':
         markup = ReplyKeyboardBuilder()
         markup.row(types.KeyboardButton(text="Новость посмотрел(а). Что с ней не так? 🤔"))
-        await state.update_data(count_news=0)
-        new_data = 0
+        await state.update_data(count_news=1)
+        new_data = 1
         other_channel = data['not_viewed_chanel']
+        if other_channel == web_prop[0]:
+            tag_media = 'RIANEWS_media_'
+        elif other_channel == web_prop[1]:
+            tag_media = 'RUSSIATODAY_media_'
+        elif other_channel == web_prop[3]:
+            tag_media = 'TCHANEL_WAR_media_'
+        elif other_channel == web_prop[4]:
+            tag_media = 'TACC_media_'
+        elif other_channel == web_prop[5]:
+            tag_media = 'MINISTRY_media_'
+        elif other_channel == web_prop[6]:
+            tag_media = 'YANDEXNEWS_media_'
         await state.update_data(viewed_channel=other_channel)
         if other_channel != 'Хватит, пропустим остальные источники 🙅‍♂️':
             viewed = data["all_viwed"]
             viewed.append(other_channel)
             await state.update_data(all_viwed=list(set(viewed)))  # Список просмотренных источников
-        channel_exposure = channels[channels.index(other_channel) + 1]
-        media = await sql_safe_select('t_id', 'assets',
-                                      {'name': list(channel_exposure[new_data].keys())[0][0]})  # Получаю id видео
+        media = await sql_safe_select('t_id', 'assets', {'name': tag_media+str(new_data)})  # Получаю id видео
         caption = await sql_safe_select('text', 'texts',
-                                        {'name': list(channel_exposure[new_data].keys())[0][1]})  # Получаю описание
+                                        {'name': tag_media+str(new_data)})  # Получаю описание
         await message.answer_video(media, caption=caption, reply_markup=markup.as_markup(resize_keyboard=True))
     else:
         await message.answer('Неправильная команда')
         await poll_get(f'Usrs: {message.from_user.id}: Start_answers: ethernet:')
+
 
 
 @router.message((F.text.contains('Новость посмотрел(а). Что с ней не так? 🤔')))
@@ -420,28 +468,34 @@ async def revealing_the_news(message: types.Message, state=FSMContext):
     data = await state.get_data()
     viewed_channel = data['viewed_channel']  # Просматриваемый канал  менять эту дату для следующих каналов
     count_news = data['count_news']  # Получаю номер новости
-    if count_news <= 3:  # Проверка если новости закончились
+    tag_exposure = ''
+    if viewed_channel == web_prop[0]:
+        tag_exposure = 'RIANEWS_exposure_'
+    elif viewed_channel == web_prop[1]:
+        tag_exposure = 'RUSSIATODAY_exposure_'
+    elif viewed_channel == web_prop[3]:
+        tag_exposure = 'TCHANEL_WAR_exposure_'
+    elif viewed_channel == web_prop[4]:
+        tag_exposure = 'TACC_exposure_'
+    elif viewed_channel == web_prop[5]:
+        tag_exposure = 'MINISTRY_exposure_'
+    elif viewed_channel == web_prop[6]:
+        tag_exposure = 'YANDEXNEWS_exposure_'
+    check_end = await check_name(tag_exposure+str(count_news+1))
+    if check_end is not False:  # Проверка если новости закончились
+        media_exposure = await sql_safe_select('t_id', 'assets', {'name': tag_exposure+str(count_news)})  # Получаю id видео
+        caption_exposure = await sql_safe_select('text', 'texts', {'name': tag_exposure+str(count_news)})  # Получаю описание
         markup = await keyboard_for_next_chanel(f"Покажи еще новость с {viewed_channel} 👀")
-        channel_exposure = channels[channels.index(viewed_channel) + 1]
-
-        media_exposure = await sql_safe_select('t_id', 'assets', {
-            'name': list(channel_exposure[count_news].values())[0][0]})  # Получаю id видео
-        caption_exposure = await sql_safe_select('text', 'texts', {
-            'name': list(channel_exposure[count_news].values())[0][1]})  # Получаю описание
-
-        await message.answer_video(media_exposure, caption=caption_exposure,
-                                   reply_markup=markup.as_markup(resize_keyboard=True))
+        await message.answer_video(media_exposure, caption=caption_exposure, reply_markup=markup.as_markup(resize_keyboard=True))
     else:
         markup = ReplyKeyboardBuilder()
         markup.row(types.KeyboardButton(text="Достаточно, мне все понятно 🤚"))
-        channel_exposure = channels[channels.index(viewed_channel) + 1]
-
-        media_exposure = await sql_safe_select('t_id', 'assets', {
-            'name': list(channel_exposure[count_news].values())[0][0]})  # Получаю id видео
-        caption_exposure = await sql_safe_select('text', 'texts', {
-            'name': list(channel_exposure[count_news].values())[0][1]})  # Получаю описание
+        media_exposure = await sql_safe_select('t_id', 'assets', {'name': tag_exposure+str(count_news)})  # Получаю id видео
+        caption_exposure = await sql_safe_select('text', 'texts', {'name': tag_exposure+str(count_news)})  # Получаю описание
         await message.answer_video(media_exposure, caption=caption_exposure,
                                    reply_markup=markup.as_markup(resize_keyboard=True))
+
+
 
 
 @router.message(text_contains=('Покажи', 'еще', 'новость'), content_types=types.ContentType.TEXT, text_ignore_case=True)
@@ -450,11 +504,20 @@ async def show_more(message: types.Message, state: FSMContext):
     new_data = data['count_news'] + 1
     await state.update_data(count_news=new_data)  # обновление счетчика
     viewed_channel = data['viewed_channel']  # Просматриваемый канал
-    channel_exposure = channels[channels.index(viewed_channel) + 1]
-    media = await sql_safe_select('t_id', 'assets',
-                                  {'name': list(channel_exposure[new_data].keys())[0][0]})  # Получаю id видео
-    caption = await sql_safe_select('text', 'texts',
-                                    {'name': list(channel_exposure[new_data].keys())[0][1]})  # Получаю описание
+    if viewed_channel == web_prop[0]:
+        tag_media = 'RIANEWS_media_'
+    elif viewed_channel == web_prop[1]:
+        tag_media = 'RUSSIATODAY_media_'
+    elif viewed_channel == web_prop[3]:
+        tag_media = 'TCHANEL_WAR_media_'
+    elif viewed_channel == web_prop[4]:
+        tag_media = 'TACC_media_'
+    elif viewed_channel == web_prop[5]:
+        tag_media = 'MINISTRY_media_'
+    elif viewed_channel == web_prop[6]:
+        tag_media = 'YANDEXNEWS_media_'
+    media = await sql_safe_select('t_id', 'assets', {'name': tag_media+str(new_data)})  # Получаю id видео
+    caption = await sql_safe_select('text', 'texts', {'name': tag_media+str(new_data)})  # Получаю описание
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Новость посмотрел(а). Что с ней не так? 🤔"))
     await message.answer_video(media, caption=caption, reply_markup=markup.as_markup(resize_keyboard=True))
@@ -548,7 +611,7 @@ async def antip_truth_game_start_question(message: Message, state: FSMContext):
     print(f"В таблице {how_many_rounds} записей, а вот счетчик сейчас {count}")
     if count < how_many_rounds:
         count += 1
-        truth_data = data_getter('SELECT truth, t_id, text, belivers, nonbelivers, rebuttal, t_id as t_id3'
+        truth_data = data_getter('SELECT truth, t_id, text, belivers, nonbelivers, rebuttal, reb_asset_name'
                                  ' FROM public.truthgame '
                                  'left outer join assets on asset_name = assets.name '
                                  'left outer join texts ON text_name = texts.name '

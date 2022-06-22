@@ -535,8 +535,8 @@ async def country_game_answer(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="Продолжаем, давай еще! 👉"))
     nmarkup.row(types.KeyboardButton(text="Достаточно, давай закончим 🙅"))
     await message.answer(
-        f'{text}\n\n{data["rebutt"]} \n\n\nА вот как считают другие участники:\n'
-        f'Это Россия: {round((100 - t_percentage * 100), 1)}% \nЭто Украина: {round(t_percentage * 100, 1)}%',
+        f'{text}\nА вот как считают другие участники:\n'
+        f'Это 🇷🇺 Россия: {round((100 - t_percentage * 100), 1)}% \nЭто 🇺🇦 Украина: {round(t_percentage * 100, 1)}%',
         reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
