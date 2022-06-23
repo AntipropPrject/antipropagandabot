@@ -224,8 +224,7 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
         await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:', lst_options[index])
     await state.update_data(answer_5=poll_answer.option_ids)
     text = await sql_safe_select("text", "texts", {"name": "start_thank_you"})
-    await bot.send_message(poll_answer.user.id, text,
-                                                 reply_markup=markup.as_markup(resize_keyboard=True))
+    await bot.send_message(poll_answer.user.id, text)
     data = await state.get_data()
     await mongo_update_stat(poll_answer.user.id, 'start')
     if await mongo_select(poll_answer.user.id):  # можно поставить счетчик повторных обращений
@@ -259,25 +258,28 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
     await state.set_state(propaganda_victim.start)
     if data["answer_3"] == "Нет, не верю ни слову ⛔":
         markup = ReplyKeyboardBuilder()
-        markup.add(types.KeyboardButton(text="Пропустим этот шаг 👉"))
-        markup.row(types.KeyboardButton(text="Ну удиви меня 🤔"))
+        markup.row(types.KeyboardButton(text="Пропустим этот шаг"))
+        markup.row(types.KeyboardButton(text="Покажи ложь на ТВ -- мне интересно посмотреть! 📺"))
         text = await sql_safe_select("text", "texts", {"name": "antip_all_no_TV"})
-        await bot.send_message(poll_answer.user.id, text, reply_markup=markup.as_markup(resize_keyboard=True))
+        await bot.send_message(poll_answer.user.id, text, reply_markup=markup.as_markup(resize_keyboard=True),
+                               disable_web_page_preview=True)
     elif data["answer_3"] == "Да, полностью доверяю ✅":
-        text = await sql_safe_select('text', 'texts', {'name': 'antip_all_yes_TV_2'})
+        text = await sql_safe_select('text', 'texts', {'name': 'antip_all_yes_TV'})
         nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(types.KeyboardButton(text="Открой мне глаза 👀"))
-        nmarkup.row(types.KeyboardButton(text="Ну удиви меня 🤔"))
-        await bot.send_message(poll_answer.user.id, text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+        nmarkup.row(types.KeyboardButton(text="Продолжай 📺"))
+        await bot.send_message(poll_answer.user.id, text, reply_markup=nmarkup.as_markup(resize_keyboard=True),
+                               disable_web_page_preview=True)
     elif data["answer_3"] == "Скорее нет 👎":
         text = await sql_safe_select('text', 'texts', {'name': 'antip_rather_no_TV'})
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Открой мне глаза 👀"))
         nmarkup.row(types.KeyboardButton(text="Ну удиви меня 🤔"))
-        await bot.send_message(poll_answer.user.id, text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+        await bot.send_message(poll_answer.user.id, text, reply_markup=nmarkup.as_markup(resize_keyboard=True),
+                               disable_web_page_preview=True)
     elif data["answer_3"] == "Скорее да 👍":
         text = await sql_safe_select('text', 'texts', {'name': 'antip_rather_yes_TV'})
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Открой мне глаза 👀"))
         nmarkup.row(types.KeyboardButton(text="Ну удиви меня 🤔"))
-        await bot.send_message(poll_answer.user.id, text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+        await bot.send_message(poll_answer.user.id, text, reply_markup=nmarkup.as_markup(resize_keyboard=True),
+                               disable_web_page_preview=True)
