@@ -28,9 +28,6 @@ router.message.middleware(CounterMiddleware())
 router.message.filter(state=propaganda_victim)
 
 
-# Подразумевается, что человеку был присвоен статус "жертва пропаганды", после чего он нажал на кнопку "Поехали!".
-
-
 @router.message(TVPropagandaFilter(option="Скорее да"), (F.text == 'Поехали!'))
 async def antiprop_rather_yes_start(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_rather_yes_TV'})
@@ -234,7 +231,6 @@ async def antip_crossed_boy_3(message: Message):
 async def antip_another_tv(message: Message, state: FSMContext):
     bigdata = await state.get_data()
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Хватит, мне все понятно ✋"))
     if await sql_safe_select('t_id', 'assets', {'name': f'tv_first_lie_{bigdata["first_tv_count"] + 1}'}) is not False:
         nmarkup.row(types.KeyboardButton(text='1 канал 📺'))
     if await sql_safe_select('t_id', 'assets', {'name': f'tv_24_lie_{bigdata["rus24_tv_count"] + 1}'}) is not False:
@@ -243,7 +239,8 @@ async def antip_another_tv(message: Message, state: FSMContext):
         nmarkup.row(types.KeyboardButton(text='Звезда 📺'))
     if await sql_safe_select('t_id', 'assets', {'name': f'tv_HTB_lie_{bigdata["HTB_tv_count"] + 1}'}) is not False:
         nmarkup.row(types.KeyboardButton(text='НТВ 📺'))
-    nmarkup.adjust(1, 2, 2)
+    nmarkup.row(types.KeyboardButton(text="Хватит, мне все понятно ✋"))
+    nmarkup.adjust(2, 2, 1)
     await message.answer('Я собрал для вас большую базу лжи на федеральных каналах.'
                          ' Выбирайте любой -- и убедитесь сами!', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
