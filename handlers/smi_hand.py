@@ -15,8 +15,8 @@ messageDict = dict()
 
 
 @router.message((F.text.contains("Давайте начнём!")))
-@router.message((F.text.contains("Хорошо, давай посмотрим")))
-@router.message((F.text.contains('скажи еще что нибудь!')))
+@router.message((F.text.contains("Хорошо, давай послушаем 🗣")))
+@router.message((F.text.contains('послушаем его еще! 🗣')))
 async def smi_statement(message: Message, state: FSMContext):
     messageDict.update({message.from_user.id: message})
 
@@ -59,12 +59,12 @@ async def smi_statement(message: Message, state: FSMContext):
             await state.update_data(gamecount=count)
 
         nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(types.KeyboardButton(text="Случайная ошибка"))
-        nmarkup.row(types.KeyboardButton(text="Целенаправленная ложь"))
+        nmarkup.row(types.KeyboardButton(text="Целенаправленная ложь 👎"))
+        nmarkup.row(types.KeyboardButton(text="Случайная ошибка / Не ложь 👍"))
         if truth_data[1] is not None:
             capt = ""
-            if truth_data[2] is not None:
-                capt = truth_data[2]
+            if truth_data[5] is not None:
+                capt = truth_data[5]
             try:
                 await message.answer_video(truth_data[1], caption=capt,
                                            reply_markup=nmarkup.as_markup(resize_keyboard=True))
@@ -89,24 +89,33 @@ async def smi_statement_poll(poll_answer: types.PollAnswer, state: FSMContext):
     redis = all_data().get_data_red()
     lst_options = options["options_start_over"]
     lst_answers = poll_answer.option_ids
-    lst = []
-    for index in lst_answers:
-        lst.append(lst_options[index])
 
-        await redis_write(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:', lst_options[index])
-        list_to_customize = await poll_get(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:')
-        new_list = [el for el, _ in groupby(list_to_customize)]
-        all_data().get_data_red().delete(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:')
-        for person in new_list:
-            redis.lrem(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:', 0, person)
-            await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:', person)
+    list_to_customize = await poll_get(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:')
+    print(list_to_customize)
+    print(lst_answers[0])
+    print(lst_options[lst_answers[0]])
     try:
-        await smi_statement(messageDict.get(poll_answer.user.id), state)
+        list_to_customize.remove(lst_options[lst_answers[0]])
     except:
-        await Bot(all_data().bot_token).send_message(chat_id=poll_answer.user.id, text="Ошибка")
+        print('дубликатов нет')
+    print(list_to_customize)
+
+    for index in lst_answers:
+        if lst_options[index] != "Никого...":
+            all_data().get_data_red().delete(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:')
+            await redis_lpush(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:', lst_options[index])
+            try:
+                await smi_statement(messageDict.get(poll_answer.user.id), state)
+            except:
+                await Bot(all_data().bot_token).send_message(chat_id=poll_answer.user.id, text="Ошибка")
+        else:
+            await sme_statement_skip(messageDict.get(poll_answer.user.id), state)
+        for person in list_to_customize:
+            await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:', person)
 
 
-@router.message((F.text == "Достаточно"))
+
+@router.message((F.text == "Достаточно 🤚"))
 async def sme_statement_start_over(message: Message, state: FSMContext):
     person_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
 
@@ -121,7 +130,7 @@ async def sme_statement_start_over(message: Message, state: FSMContext):
                                      {
                                          'name': 'antip_game_continue'})
         nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(types.KeyboardButton(text="Хватит, не будем слушать остальных"))
+        nmarkup.row(types.KeyboardButton(text="Хватит, не будем слушать остальных 🙅‍♂️"))
         # nmarkup.row(types.KeyboardButton(text="Давай посмотрим еще!"))
         await state.update_data(options_start_over=options)
         await message.answer(text)
@@ -131,7 +140,7 @@ async def sme_statement_start_over(message: Message, state: FSMContext):
         # await state.set_state(antiprop_states.propaganda_victim.ppl_propaganda.dialogue_start_over)
 
 
-@router.message((F.text.contains('Хватит, не будем слушать остальных')))
+@router.message((F.text.contains('Хватит, не будем слушать остальных 🙅‍♂️')))
 async def sme_statement_skip(message: Message, state=FSMContext):
     data = await state.get_data()
 
@@ -141,9 +150,9 @@ async def sme_statement_skip(message: Message, state=FSMContext):
     except:
         await message.answer("Нету личностей в списке, надо зайти в раздел заново")
     markup = ReplyKeyboardBuilder()
-    markup.row(types.KeyboardButton(text='Хорошо, давай посмотрим'))
-    markup.row(types.KeyboardButton(text='Не надо, я и так знаю, что они врут!!!'))
-    markup.row(types.KeyboardButton(text='Не надо, я все равно буду доверять им!!!'))
+    markup.row(types.KeyboardButton(text='Хорошо, давай послушаем 🗣'))
+    markup.row(types.KeyboardButton(text='Не надо, я и так знаю, что они врут 😒'))
+    markup.row(types.KeyboardButton(text='Не надо, я все равно буду доверять им 👍'))
     lst_web_answers = str(', '.join(not_viewed))
 
     await state.update_data(not_viewed_chanel=not_viewed[0])
@@ -156,23 +165,24 @@ async def sme_statement_skip(message: Message, state=FSMContext):
                          f"сюжет от {next_channel}?", reply_markup=markup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.in_({"Случайная ошибка", "Целенаправленная ложь"})))
+@router.message((F.text.in_({"Случайная ошибка / Не ложь 👍", "Целенаправленная ложь 👎"})))
 async def smi_statement_enough(message: Message, state=FSMContext):
     person_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
     data = await state.get_data()
     base_update_dict = dict()
-    if message.text == "Cлучайная ошибка":
+    print(message.text)
+    if message.text == "Случайная ошибка / Не ложь 👍":
         base_update_dict = {'belivers': data['belive'] + 1}
         print('Этому верит', base_update_dict)
-    elif message.text == "Целенаправленная ложь":
+    elif message.text == "Целенаправленная ложь 👎":
         base_update_dict = {'nonbelivers': data['not_belive'] + 1}
         print('Этому верит', base_update_dict)
-    await sql_safe_update("mistakeorlie", base_update_dict, {'asset_name': f"{data['last_media']}"})
+    await sql_safe_update("mistakeorlie", base_update_dict, {'asset_name': data['last_media']})
     t_percentage = data['belive'] / (data['belive'] + data['not_belive'])
     nmarkup = ReplyKeyboardBuilder()
     try:
-        nmarkup.row(types.KeyboardButton(text=f"{person_list[0]} - скажи еще что нибудь!!"))
-        nmarkup.row(types.KeyboardButton(text="Достаточно"))
+        nmarkup.row(types.KeyboardButton(text=f"{person_list[0]} - послушаем его еще! 🗣"))
+        nmarkup.row(types.KeyboardButton(text="Достаточно 🤚"))
     except IndexError as er:
         print(er)
     await message.answer(

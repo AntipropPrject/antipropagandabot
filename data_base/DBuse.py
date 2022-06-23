@@ -305,6 +305,13 @@ async def poll_write(key, value):
     except Exception as error:
         await logg.get_error(f"{error}", __file__)
 
+async def redis_lpush(key, value):
+    try:
+        all_data().get_data_red().lpush(key, value)
+    except Exception as error:
+        await logg.get_error(f"{error}", __file__)
+
+
 
 async def redis_key_exists(key):
     try:
