@@ -578,13 +578,14 @@ async def antip_web_exit_1(message: Message, state=FSMContext):
 
 @router.message(PplPropagandaFilter(),
                 (F.text.contains('шаг')) | (F.text.contains('удивлен')) | (F.text.contains('шоке')) | (
-                        F.text.contains('знал')) | (F.text == 'Конечно!') | (F.text == 'Ну давай'))
+                        F.text.contains('знал')) | (F.text == 'Конечно!'))
 async def antip_bad_people_lies(message: Message, ppl_lies_list, state: FSMContext):
     redis = all_data().get_data_red()
     await state.set_state(propaganda_victim.ppl_propaganda)
     text = await sql_safe_select('text', 'texts', {'name': 'antip_bad_people_lies'})
-    for key in redis.scan_iter(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:*'):
-        redis.delete(key)
+    text = text.replace('[[первая красная личность]]',
+                        ((await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:'))[0]))
+
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Давайте начнём!"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
