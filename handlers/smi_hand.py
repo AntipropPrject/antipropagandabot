@@ -64,7 +64,7 @@ async def smi_statement(message: Message, state: FSMContext):
         if truth_data[1] is not None:
             capt = ""
             if truth_data[2] is not None:
-                capt = truth_data[2]
+                capt = truth_data[5]
             try:
                 await message.answer_video(truth_data[1], caption=capt,
                                            reply_markup=nmarkup.as_markup(resize_keyboard=True))
@@ -96,15 +96,16 @@ async def smi_statement_poll(poll_answer: types.PollAnswer, state: FSMContext):
     print(lst_options[lst_answers[0]])
     try:
         list_to_customize.remove(lst_options[lst_answers[0]])
-    except :
+    except:
         print('дубликатов нет')
     print(list_to_customize)
 
     for index in lst_answers:
-
-        all_data().get_data_red().delete(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:')
-        await redis_lpush(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:', lst_options[index])
-
+        if lst_options[index] != "Никого...":
+            all_data().get_data_red().delete(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:')
+            await redis_lpush(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:', lst_options[index])
+        else:
+            await sme_statement_skip(messageDict.get(poll_answer.user.id), state)
         for person in list_to_customize:
             await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:', person)
     try:
