@@ -104,14 +104,15 @@ async def smi_statement_poll(poll_answer: types.PollAnswer, state: FSMContext):
         if lst_options[index] != "Никого...":
             all_data().get_data_red().delete(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:')
             await redis_lpush(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:', lst_options[index])
+            try:
+                await smi_statement(messageDict.get(poll_answer.user.id), state)
+            except:
+                await Bot(all_data().bot_token).send_message(chat_id=poll_answer.user.id, text="Ошибка")
         else:
             await sme_statement_skip(messageDict.get(poll_answer.user.id), state)
         for person in list_to_customize:
             await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:', person)
-    try:
-        await smi_statement(messageDict.get(poll_answer.user.id), state)
-    except:
-        await Bot(all_data().bot_token).send_message(chat_id=poll_answer.user.id, text="Ошибка")
+
 
 
 @router.message((F.text == "Достаточно 🤚"))
