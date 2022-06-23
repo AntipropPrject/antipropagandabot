@@ -112,6 +112,8 @@ async def sql_safe_insert(table_name, data_dict):
 
 async def sql_safe_update(table_name, data_dict, condition_dict):
     try:
+        assert data_dict != {}, 'You have empty datadict in updater'
+        assert data_dict != {}, 'You have empty conditiondict in updater'
         where = list(condition_dict.keys())[0]
         equals = condition_dict[where]
         safe_query = sql.SQL("UPDATE {} SET {} = {} WHERE {} = {};").format(sql.Identifier(table_name),
@@ -129,6 +131,8 @@ async def sql_safe_update(table_name, data_dict, condition_dict):
         conn.close()
         pandas_csv_update(table_name, data_dict, condition_dict)
         return "Complete"
+    except AssertionError as error:
+        logg.get_info(f"{error}")
     except psycopg2.Error as error:
         await logg.get_error(f"{error}", __file__)
 
