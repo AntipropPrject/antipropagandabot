@@ -1,7 +1,7 @@
 from aiogram import Router, F
 from aiogram import types
 from aiogram.dispatcher.fsm.state import StatesGroup, State
-from aiogram.types import Message
+from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from data_base.DBuse import sql_safe_select
 from middleware import CounterMiddleware
@@ -129,5 +129,5 @@ async def stopwar_lets_fight(message: Message):
 async def stopwar_lets_fight(message: Message):
     text = 'Чтобы рассказать обо мне - отправьте человеку ссылку на Правдобот: \nhttps://t.me/Russia_Ukraine_Bot\n\nИли просто перешлите сообщение ниже.'
     text2 = await sql_safe_select('text', 'texts', {'name': 'stopwar_send_me'})
-    await message.answer(text)
+    await message.answer(text, reply_markup=ReplyKeyboardRemove())
     await message.answer(text2)
