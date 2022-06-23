@@ -19,6 +19,6 @@ def antip_killme_kb():
     nmarkup.row(types.KeyboardButton(text="Немного удивлен 😯"))
     nmarkup.row(types.KeyboardButton(text="Не удивлен 😐"))
     nmarkup.row(types.KeyboardButton(text="Я и так знал, что по ТВ врут 🤨"))
-    nmarkup.row(types.KeyboardButton(text="Хочу посмотреть еще!"))
-    nmarkup.adjust(2,2,1,1)
+    nmarkup.row(types.KeyboardButton(text="Подождите! Я хочу вернуться и посмотреть еще! 📺"))
+    nmarkup.adjust(2, 2, 1, 1)
     return nmarkup.as_markup(resize_keyboard=True)
