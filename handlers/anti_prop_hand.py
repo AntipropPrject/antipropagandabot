@@ -665,12 +665,12 @@ async def antip_truth_game_answer(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="Достаточно, двигаемся дальше  🙅‍♀️"))
     media = await sql_safe_select('t_id', 'assets', {'name': data['reb_media_tag']})
     if media == False:
-        await message.answer(f'Конечно же это {reality}\n{reb}\nРезультаты других участников:\n✅ Правда: {round(t_percentage * 100, 1)}%\n❌ Ложь: {round((100 - t_percentage * 100), 1)}', reply_markup=nmarkup.as_markup(resize_keyboard=True))
+        await message.answer(f'Конечно же это {reality}\n{reb}\nРезультаты других участников:\n\n✅ <b>Правда:</b> {round(t_percentage * 100, 1)}%\n❌ <b>Ложь:</b> {round((100 - t_percentage * 100), 1)}', reply_markup=nmarkup.as_markup(resize_keyboard=True))
     else:
         try:
-            await message.answer_video(media, caption=f'Конечно же это {reality}\n{reb}\nРезультаты других участников:\n✅ Правда: {round(t_percentage * 100, 1)}%\n❌ Ложь: {round((100 - t_percentage * 100), 1)}', reply_markup=nmarkup.as_markup(resize_keyboard=True))
+            await message.answer_video(media, caption=f'Конечно же это {reality}\n{reb}\nРезультаты других участников:\n\n✅ <b>Правда:</b> {round(t_percentage * 100, 1)}%\n❌ <b>Ложь</b>: {round((100 - t_percentage * 100), 1)}', reply_markup=nmarkup.as_markup(resize_keyboard=True))
         except:
-            await message.answer_photo(media, caption=f'Конечно же это {reality}\n{reb}\nРезультаты других участников:\n✅ Правда: {round(t_percentage * 100, 1)}%\n❌ Ложь: {round((100 - t_percentage * 100), 1)}', reply_markup=nmarkup.as_markup(resize_keyboard=True))
+            await message.answer_photo(media, caption=f'Конечно же это {reality}\n{reb}\nРезультаты других участников:\n\n✅ <b>Правда:</b> {round(t_percentage * 100, 1)}%\n❌ <b>Ложь</b>: {round((100 - t_percentage * 100), 1)}', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text == "Пропустим игру 🙅‍♀️") | (F.text.contains("двигаемся дальше")))
@@ -686,7 +686,7 @@ async def antip_ok(message: Message):
     else:
         await asyncio.sleep(1)
         nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(types.KeyboardButton(text="Давай поговорим про военные действия в Украине"))
+        nmarkup.row(types.KeyboardButton(text="Давай поговорим про военные действия в Украине 🇷🇺🇺🇦"))
         await message.answer("Похоже, что пропаганда до вас не добралась. Тогда давай поговорим о главном...",
                              reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
@@ -767,7 +767,7 @@ async def antip_big_love_propaganda(message: Message):
 async def antip_reputation_matters(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_reputation_matters'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Я готов продолжить. Поговорим про военные действия в Украине."))
+    nmarkup.row(types.KeyboardButton(text="Продолжить 🇷🇺🇺🇦"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
