@@ -604,13 +604,14 @@ async def antip_truth_game_start_question(message: Message, state: FSMContext):
     print(f"В таблице {how_many_rounds} записей, а вот счетчик сейчас {count}")
     if count < how_many_rounds:
         count += 1
-        truth_data = data_getter('SELECT truth, t_id, text, belivers, nonbelivers, rebuttal, reb_asset_name'
-                                 ' FROM public.truthgame '
-                                 'left outer join assets on asset_name = assets.name '
-                                 'left outer join texts ON text_name = texts.name '
-                                 f'where id = {count}')[0]
+        truth_data = data_getter(f"""SELECT * FROM ( SELECT truth, t_id, text, belivers, nonbelivers,
+                                         rebuttal, reb_asset_name,
+                                         ROW_NUMBER () OVER (ORDER BY id), id FROM public.truthgame
+                                         left outer join assets on asset_name = assets.name
+                                         left outer join texts ON text_name = texts.name)
+                                         AS sub WHERE row_number = {count}""")[0]
         await state.update_data(gamecount=count, truth=truth_data[0], rebuttal=truth_data[5], belive=truth_data[3],
-                                not_belive=truth_data[4], reb_media_tag=truth_data[6])
+                                not_belive=truth_data[4], reb_media_tag=truth_data[6], game_id=truth_data[8])
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Это правда ✅"))
         nmarkup.row(types.KeyboardButton(text="Это ложь ❌"))
@@ -628,50 +629,50 @@ async def antip_truth_game_start_question(message: Message, state: FSMContext):
             await message.answer(truth_data[2], reply_markup=nmarkup.as_markup(resize_keyboard=True))
     else:
         nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(types.KeyboardButton(text="Давай"))
+        nmarkup.row(types.KeyboardButton(text="🤝 Продолжим"))
         await message.answer(
-                "Ой, у меня закончились примеры для игры :(\n\nДавайте я лучше вместо этого расскажу вам анекдот!",
+                "У меня закончились сюжеты. Спасибо за игру🤝",
                 reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text == "Это правда ✅") | (F.text == "Это ложь ❌"))
 async def antip_truth_game_answer(message: Message, state: FSMContext):
     data = await state.get_data()
-    base_update_dict = dict()
+    base_update_dict, reality = dict(), str()
     if message.text == "Это правда ✅":
         if data['truth'] == True:
-            reality = "<b>чистая правда</b>, вы правы!"
-            reb = ""
+            reality = "Правильно! Это правда!"
         elif data['truth'] == False:
-            reality = "<b>ложь</b>, боюсь, что вы ошиблись."
-            reb = f"И вот почему:\n\n{data['rebuttal']}\n"
+            reality = "Неверно! Это ложь!"
         base_update_dict = {'belivers': data['belive'] + 1}
-        print('Этому верит', base_update_dict)
     elif message.text == "Это ложь ❌":
         if data['truth'] == True:
-            reality = "<b>правда</b>, вы ошиблись"
-            reb = f"И вот почему:\n\n{data['rebuttal']}\n"
+            reality = "Неверно! Это правда!"
         elif data['truth'] == False:
-            reality = "<b>ложь</b>, совершенно верно!"
-            reb = ""
+            reality = "Правильно! Это ложь!"
         base_update_dict = {'nonbelivers': data['not_belive'] + 1}
-        print('Этому верит', base_update_dict)
-    await sql_safe_update("truthgame", base_update_dict, {'id': data['gamecount']})
     t_percentage = data['belive'] / (data['belive'] + data['not_belive'])
+    text = reality + f'\n\nРезультаты других участников:\n✅ <b>Правда:</b> {round(t_percentage * 100, 1)}%\n' \
+                     f'❌ <b>Ложь</b>: {round((100 - t_percentage * 100), 1)}' + '\n\nПодтверждение - ниже.'
+    reb = data['rebuttal']
+    await sql_safe_update("truthgame", base_update_dict, {'id': data['game_id']})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжаем, давай еще! 👉"))
     nmarkup.row(types.KeyboardButton(text="Достаточно, двигаемся дальше  🙅‍♀️"))
     media = await sql_safe_select('t_id', 'assets', {'name': data['reb_media_tag']})
-    if media == False:
-        await message.answer(f'Конечно же это {reality}\n{reb}\nРезультаты других участников:\n\n✅ <b>Правда:</b> {round(t_percentage * 100, 1)}%\n❌ <b>Ложь:</b> {round((100 - t_percentage * 100), 1)}', reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    if media is False:
+        await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+        await message.answer(reb)
     else:
         try:
-            await message.answer_video(media, caption=f'Конечно же это {reality}\n{reb}\nРезультаты других участников:\n\n✅ <b>Правда:</b> {round(t_percentage * 100, 1)}%\n❌ <b>Ложь</b>: {round((100 - t_percentage * 100), 1)}', reply_markup=nmarkup.as_markup(resize_keyboard=True))
-        except:
-            await message.answer_photo(media, caption=f'Конечно же это {reality}\n{reb}\nРезультаты других участников:\n\n✅ <b>Правда:</b> {round(t_percentage * 100, 1)}%\n❌ <b>Ложь</b>: {round((100 - t_percentage * 100), 1)}', reply_markup=nmarkup.as_markup(resize_keyboard=True))
+            await message.answer_video(media, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+            await message.answer(reb)
+        except TelegramBadRequest:
+            await message.answer_photo(media, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+            await message.answer(reb)
 
 
-@router.message((F.text == "Пропустим игру 🙅‍♀️") | (F.text.contains("двигаемся дальше")))
+@router.message((F.text == "Пропустим игру 🙅‍♀️") | (F.text == '🤝 Продолжим'))
 async def antip_ok(message: Message):
     await message.answer("Хорошо", reply_markup=ReplyKeyboardRemove())
     if await redis_just_one_read(f'Usrs: {message.from_user.id}: INFOState:') == 'Жертва пропаганды':
