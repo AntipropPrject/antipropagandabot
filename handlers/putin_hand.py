@@ -154,7 +154,7 @@ async def putin_game1_answer(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="Достаточно ✋"))
     await message.answer(
         f'А вот что думают другие участники:\n👍 <b>Случайная ошибка / не ложь:</b> {round(t_percentage * 100, 1)}%\n👎 <b>Намеренная ложь: </b>'
-        f'{round((100 - t_percentage * 100), 1)}',
+        f'{round((100 - t_percentage * 100), 1)}%',
         reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 

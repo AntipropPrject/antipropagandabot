@@ -1,3 +1,5 @@
+import asyncio
+
 from aiogram import Router, F
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
@@ -382,7 +384,7 @@ async def reasons_21_cent(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Нет, цель не в этом"), state=TruereasonsState.final)
+@router.message((F.text == "Нет, цель не в этом 🙅‍♂️"), state=TruereasonsState.final)
 async def reasons_hail_china(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_hail_China'})
     nmarkup = ReplyKeyboardBuilder()
@@ -500,6 +502,9 @@ async def reasons_he_needs_war(message: Message):
 @router.message((F.text == "Покажи текст песни 📝"), state=TruereasonsState.final)
 async def reasons_generation_z(message: Message):
     await simple_media(message, 'reasons_generation_Z')
+    await asyncio.sleep(4)
+    text = await sql_safe_select('text', 'texts', {'name': 'reasons_generation_Z_1'})
+    await message.answer(text)
 
 
 @router.message((F.text == "Скорее да"), state=TruereasonsState.final)
