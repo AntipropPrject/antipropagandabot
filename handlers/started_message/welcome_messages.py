@@ -52,10 +52,11 @@ async def message_1(message: types.Message, state: FSMContext):
 async def message_2(message: types.Message, state: FSMContext):
     # запись значения в базу
     markup = ReplyKeyboardBuilder()
-    markup.row(types.KeyboardButton(text="Сейчас даже такое мнение "
-                                         "выражать незаконно. Вдруг вы из ФСБ? 🤐"))
+
     markup.row(types.KeyboardButton(text="1️⃣ Специальная военная операция (СВО)"))
     markup.row(types.KeyboardButton(text="2️⃣ Война / Вторжение в Украину"))
+    markup.row(types.KeyboardButton(text="3️⃣ Сейчас даже такое мнение "
+                                         "выражать незаконно. Вдруг вы из ФСБ? 🤐"))
     text = await sql_safe_select("text", "texts", {"name": "start_what_about_you"})
 
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
@@ -194,8 +195,7 @@ async def poll_filler(message: types.Message, bot: Bot):
 
 @router.poll_answer(state=welcome_states.start_dialog.dialogue_9)  # Сохраняю 4 вопрос
 async def poll_answer_handler_tho(poll_answer: types.PollAnswer, state=FSMContext):
-    options = ["Владимир Путин", "Дмитрий Песков", "Рамзан Кадыров", "Сергей Лавров", "Юрий Подоляка",
-               "Владимир Соловьев", "Ольга Скабеева", "Никому из них..."]
+    options = ["Владимир Путин", "Дмитрий Песков", "Сергей Лавров","Владимир Соловьев", "Юрий Подоляка", "Никому из них..."]
     # сохранение 4 вопроса
     option = await state.get_data()
     lst_options = option["option_3"]
