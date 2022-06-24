@@ -672,7 +672,7 @@ async def antip_truth_game_answer(message: Message, state: FSMContext):
             await message.answer(reb)
 
 
-@router.message((F.text == "Пропустим игру 🙅‍♀️") | (F.text == '🤝 Продолжим'))
+@router.message((F.text == "Пропустим игру 🙅‍♀️") | (F.text == '🤝 Продолжим') | (F.text == 'Достаточно, двигаемся дальше  🙅‍♀️'))
 async def antip_ok(message: Message):
     await message.answer("Хорошо", reply_markup=ReplyKeyboardRemove())
     if await redis_just_one_read(f'Usrs: {message.from_user.id}: INFOState:') == 'Жертва пропаганды':
