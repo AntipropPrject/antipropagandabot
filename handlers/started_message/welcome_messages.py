@@ -118,28 +118,27 @@ async def message_6to7(message: types.Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Покажи варианты ✍"))
     text = await sql_safe_select("text", "texts", {"name": "start_russia_goal"})
-    await message.answer(text,reply_markup=nmarkup.as_markup(resize_keyboard=True) )
-
-
-@router.message(welcome_states.start_dialog.dialogue_6, text_contains='Покажи варианты')  # Сохраняю 1 вопрос
-async def message_7(message: types.Message, state: FSMContext):
-    # Сохранить 1 вопрос в базу
-    text = message.text
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
     if text == 'Начал(а) интересоваться после 24 февраля' or text == "Скорее да 🙂" or text == "Скорее нет 🙅‍♂":
         await poll_write(f'Usrs: {message.from_user.id}: Start_answers: interest_in_politics:',
                          message.text[:-2].strip())
-        options = welc_message_one
-        # Сохранение 1 вопроса в дату
-        await state.update_data(option_1=options)
-        markup = ReplyKeyboardBuilder()
-        markup.add(types.KeyboardButton(text="Продолжай"))
-        await message.answer_poll(
-            question="Выберите все цели, с которыми согласны или частично согласны. Затем нажмите «Проголосовать»",
-            options=options, is_anonymous=False, allows_multiple_answers=True,
-            reply_markup=markup.as_markup(resize_keyboard=True))
-        await state.set_state(welcome_states.start_dialog.dialogue_7)
-    else:
-        await message.answer("Неправильный ответ, вы можете выбрать вариант ответа на клавиатуре")
+
+
+@router.message(text_contains='Покажи варианты')  # Сохраняю 1 вопрос
+async def message_7(message: types.Message, state: FSMContext):
+    # Сохранить 1 вопрос в базу
+    text = message.text
+
+    options = welc_message_one
+    # Сохранение 1 вопроса в дату
+    await state.update_data(option_1=options)
+    markup = ReplyKeyboardBuilder()
+    markup.add(types.KeyboardButton(text="Продолжай"))
+    await message.answer_poll(
+        question="Выберите все цели, с которыми согласны или частично согласны. Затем нажмите «Проголосовать»",
+        options=options, is_anonymous=False, allows_multiple_answers=True,
+        reply_markup=markup.as_markup(resize_keyboard=True))
+    await state.set_state(welcome_states.start_dialog.dialogue_7)
 
 
 @router.message(welcome_states.start_dialog.dialogue_7, (F.text == 'Продолжай'))
