@@ -274,7 +274,8 @@ async def donbas_why_not_surrender(message: Message):
 
 @router.message(text_contains=('освобождаем', 'неонац'), content_types=types.ContentType.TEXT, text_ignore_case=True)
 async def donbas_putin_unleashed(message: Message, state: FSMContext):
-    text = await sql_safe_select('text', 'texts', {'name': 'donbas_putin_unleashed'})
+
+    text = await simple_media(message, donbas_putin_unleashed)
     await state.update_data(neonazi='В Украине процветает неонационализм и геноцид русского населения.')
     await poll_write(f'Usrs: {message.from_user.id}: Nazi_answers: first_poll:',
                      "💀 На Украине происходит геноцид русскоязычного населения")
