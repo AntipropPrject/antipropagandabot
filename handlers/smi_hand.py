@@ -166,7 +166,7 @@ async def sme_statement_skip(message: Message, state=FSMContext):
 
 
 @router.message((F.text.in_({"Случайная ошибка / Не ложь 👍", "Целенаправленная ложь 👎"})))
-async def smi_statement_enough(message: Message, state=FSMContext):
+async def smi_statement_enough(message: Message, state: FSMContext):
     person_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
     data = await state.get_data()
     base_update_dict = dict()

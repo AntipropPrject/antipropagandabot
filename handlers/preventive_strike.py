@@ -30,7 +30,7 @@ async def prevent_strike_any_brutality(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Каким образом? 🤔'))
     nmarkup.row(types.KeyboardButton(text='Ну попробуй 😕'))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text.in_({'Каким образом? 🤔', 'Ну попробуй 😕'})))
@@ -39,7 +39,7 @@ async def prevent_strike_some_days(message: Message, state: FSMContext):
     await state.set_state(PreventStrikeState.q1)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Какие ❓'))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text.in_({'Какие ❓'})), state=PreventStrikeState.q1)
@@ -49,7 +49,7 @@ async def prevent_strike_q1(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text='Да, это странно 🤔'))
     nmarkup.row(types.KeyboardButton(text='Ничего подозрительного 🙅‍♂️'))
     await state.set_state(PreventStrikeState.q2)
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text.in_({'Да, это странно 🤔', 'Ничего подозрительного 🙅‍♂️'})), state=PreventStrikeState.q2)
@@ -89,7 +89,7 @@ async def prevent_strike_now_you(message: Message):
     nmarkup.row(types.KeyboardButton(text='Да, превентивный удар - лишь повод 👌🏼'))
     nmarkup.row(types.KeyboardButton(text='Я и так не верил(а) в то, что Украина готовит нападение 🤷‍♂️'))
     nmarkup.row(types.KeyboardButton(text='Нет, это настоящая причина начала военных действий ☝️'))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message(
@@ -99,7 +99,7 @@ async def prevent_strike_hitler_allright(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Нет, продолжим разговор ⏱'))
     nmarkup.row(types.KeyboardButton(text='Да, хочу 🙂'))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message(F.text == 'Нет, это настоящая причина начала военных действий ☝️')
@@ -117,7 +117,7 @@ async def prevent_strike_end_point(message: Message, state: FSMContext):
     await state.set_state(true_resons_hand.TruereasonsState.main)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='И что дальше?'))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message(F.text == 'Да, хочу 🙂')
@@ -125,7 +125,7 @@ async def prevent_strike_will_show(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_will_show'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Посмотрел(а) 📺'))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message(F.text.in_({'Посмотрел(а) 📺', '😁', '🙂', '😕', 'Достаточно, продолжим ✋'}))

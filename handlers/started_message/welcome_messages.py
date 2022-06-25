@@ -29,7 +29,7 @@ async def commands_start(message: types.Message, state: FSMContext):  # Перв
     markup.add(types.KeyboardButton(text="Начнем 🇷🇺🇺🇦"))
     markup.add(types.KeyboardButton(text="А с чего мне тебе верить? 🤔"))
     text = await sql_safe_select("text", "texts", {"name": "start_hello"})
-    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     await state.set_state(welcome_states.start_dialog.dialogue_1)
 
 
@@ -40,7 +40,7 @@ async def message_1(message: types.Message, state: FSMContext):
     markup.add(types.KeyboardButton(text="Хорошо"))
     text = await sql_safe_select("text", "texts", {"name": "start_why_belive"})
 
-    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     await state.set_state(welcome_states.start_dialog.dialogue_2)
 
 
@@ -60,7 +60,7 @@ async def message_2(message: types.Message, state: FSMContext):
                                          "выражать незаконно. Вдруг вы из ФСБ? 🤐"))
     text = await sql_safe_select("text", "texts", {"name": "start_what_about_you"})
 
-    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     # if на ты
     await state.set_state(welcome_states.start_dialog.dialogue_4)
 
@@ -74,7 +74,7 @@ async def message_3(message: types.Message, state: FSMContext):  # Начало 
     markup.add(types.KeyboardButton(text="А долго будешь допрашивать? ⏱"))
     await state.update_data(answer_1=message.text)
     text = await sql_safe_select("text", "texts", {"name": "start_lets_start"})
-    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     # if на ты
     await state.set_state(welcome_states.start_dialog.dialogue_5)
 
@@ -87,7 +87,7 @@ async def message_4(message: types.Message):
     markup.row(types.KeyboardButton(text="2️⃣ Война / Вторжение в Украину"))
     text = await sql_safe_select("text", "texts", {"name": "start_afraid"})
     # if на ты
-    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message(welcome_states.start_dialog.dialogue_5, text_contains=('долго', 'допрашивать'),
@@ -96,7 +96,7 @@ async def message_5(message: types.Message, state: FSMContext):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Хорошо, задавай свои вопросы 👌🏼"))
     text = await sql_safe_select("text", "texts", {"name": "start_only_five"})
-    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     await state.set_state(welcome_states.start_dialog.dialogue_5)
 
 
@@ -109,7 +109,7 @@ async def message_6(message: types.Message, state: FSMContext):
     markup.row(types.KeyboardButton(text="Скорее да 🙂"), types.KeyboardButton(text="Скорее нет 🙅‍♂"))
     markup.row(types.KeyboardButton(text="Начал(а) интересоваться после 24 февраля"))
     text = await sql_safe_select("text", "texts", {"name": "start_do_you_love_politics"})
-    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     await state.set_state(welcome_states.start_dialog.dialogue_6)
 
 
@@ -118,7 +118,7 @@ async def message_6to7(message: types.Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Покажи варианты ✍"))
     text = await sql_safe_select("text", "texts", {"name": "start_russia_goal"})
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     if text == 'Начал(а) интересоваться после 24 февраля' or text == "Скорее да 🙂" or text == "Скорее нет 🙅‍♂":
         await poll_write(f'Usrs: {message.from_user.id}: Start_answers: interest_in_politics:',
                          message.text[:-2].strip())
@@ -144,7 +144,7 @@ async def message_7(message: types.Message, state: FSMContext):
 @router.message(welcome_states.start_dialog.dialogue_7, (F.text == 'Продолжай'))
 async def poll_filler(message: types.Message, bot: Bot):
     msg = await message.answer('Чтобы продолжить -- отметьте ответы выше и нажмите "Проголосовать" или "Vote"',
-                               reply_markup=ReplyKeyboardRemove())
+                               reply_markup=ReplyKeyboardRemove(), disable_web_page_preview=True)
     await asyncio.sleep(10)
     await bot.delete_message(message.from_user.id, msg.message_id)
 
@@ -181,10 +181,10 @@ async def message_8(message: types.Message, state: FSMContext):
         markup = ReplyKeyboardBuilder()
         markup.row(types.KeyboardButton(text="Покажи варианты ✍️"))
         mess = await sql_safe_select("text", "texts", {"name": "start_internet_belive"})
-        await message.answer(text=mess, reply_markup=markup.as_markup(resize_keyboard=True))
+        await message.answer(text=mess, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
         await state.set_state(welcome_states.start_dialog.button_next)
     else:
-        await message.answer("Неправильный ответ, вы можете выбрать вариант ответа на клавиатуре")
+        await message.answer("Неправильный ответ, вы можете выбрать вариант ответа на клавиатуре", disable_web_page_preview=True)
 
 
 @router.message((F.text.contains("Покажи варианты ✍️")), state=welcome_states.start_dialog.button_next)
@@ -200,7 +200,7 @@ async def button(message: types.Message, state: FSMContext):
 @router.message(welcome_states.start_dialog.dialogue_9, (F.text == 'Продолжай'))
 async def poll_filler(message: types.Message, bot: Bot):
     msg = await message.answer('Чтобы продолжить -- отметьте ответы выше и нажмите "Проголосовать" или "Vote"',
-                               reply_markup=ReplyKeyboardRemove())
+                               reply_markup=ReplyKeyboardRemove(), disable_web_page_preview=True)
     await asyncio.sleep(10)
     await bot.delete_message(message.from_user.id, msg.message_id)
 
@@ -232,7 +232,7 @@ async def poll_answer_handler_tho(poll_answer: types.PollAnswer, state=FSMContex
 @router.message(welcome_states.start_dialog.dialogue_10, (F.text == 'Продолжай'))
 async def poll_filler(message: types.Message, bot: Bot):
     msg = await message.answer('Чтобы продолжить -- отметьте ответы выше и нажмите "Проголосовать" или "Vote"',
-                               reply_markup=ReplyKeyboardRemove())
+                               reply_markup=ReplyKeyboardRemove(), disable_web_page_preview=True)
     await asyncio.sleep(10)
     await bot.delete_message(message.from_user.id, msg.message_id)
 

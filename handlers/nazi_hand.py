@@ -41,7 +41,8 @@ async def nazi_first_poll(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Продолжить'))
     question = "Отметьте один или более вариантов, с которыми согласны или частично согласны"
-    await message.answer_poll(question, nazizm, allows_multiple_answers=True, is_anonymous=False)
+    await message.answer_poll(question, nazizm, allows_multiple_answers=True, is_anonymous=False,
+                              reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text == "Продолжить"), state=NaziState.first_poll)
@@ -78,7 +79,7 @@ async def nazi_in_masses(message: Message):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Продолжай ⏳"))
     text = await sql_safe_select("text", "texts", {"name": "nazi_in_masses"})
-    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text.contains('Продолжай ⏳')), state=NaziState.after_first_poll)
@@ -86,7 +87,7 @@ async def nazi_propaganda(message: Message):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="А как же неонацизм? 🤨"))
     text = await sql_safe_select("text", "texts", {"name": "nazi_propaganda"})
-    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text.contains('А как же неонацизм? 🤨')))
@@ -97,7 +98,7 @@ async def nazi_neonazi(message: Message):
     markup.row(types.KeyboardButton(text="А можно попроще? 🤔"))
     markup.adjust(2,1)
     text = await sql_safe_select("text", "texts", {"name": "nazi_neonazi"})
-    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text.contains('Черт ногу сломит 🤦‍♂️')) | (F.text.contains('А можно попроще? 🤔')))
@@ -106,7 +107,7 @@ async def nazi_many_forms(message: Message):
     markup.row(types.KeyboardButton(text="Так понятнее! 👌🏼"))
     markup.row(types.KeyboardButton(text="Ты всё слишком упрощаешь 🤷‍♀️"))
     text = await sql_safe_select("text", "texts", {"name": "nazi_many_forms"})
-    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text.contains('Ты всё слишком упрощаешь 🤷‍♀️')))
@@ -114,7 +115,7 @@ async def nazi_simple(message: Message):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Хорошо, продолжим 👌🏼"))
     text = await sql_safe_select("text", "texts", {"name": "nazi_simple"})
-    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message(NotNaziFilter(), ((F.text.contains('Хорошо, продолжим 👌🏼')) | (F.text.contains('Так понятнее! 👌🏼')) | (F.text.contains('Понятно 👌🏼'))))
@@ -127,7 +128,7 @@ async def nazi_how_many(message: Message, state: FSMContext):
     await state.set_state(NaziState.small_poll)
     text = await sql_safe_select("text", "texts", {"name": "nazi_how_many"})
     question = 'Выберите один ответ'
-    await message.answer(text)
+    await message.answer(text, disable_web_page_preview=True)
     await message.answer_poll(question=question, options=nazizm_pr, is_anonymous=False, reply_markup=ReplyKeyboardRemove())
 
 
@@ -166,7 +167,7 @@ async def nazi_many_forms(message: Message):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Продолжим 👌🏼"))
     text = await sql_safe_select("text", "texts", {"name": "nazi_feels"})
-    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message(NaziFilter(answer="На Украине происходит геноцид русскоязычного населения"),
@@ -178,7 +179,7 @@ async def nazi_many_forms(message: Message, state: FSMContext):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Nazi_answers: first_poll:',
                                  nazizm[2])
     text = await sql_safe_select("text", "texts", {"name": "nazi_genocide"})
-    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text == "Продолжай ⏳"), state=NaziState.genocide)
@@ -199,7 +200,7 @@ async def nazi_odessa(message: Message):
     markup.row(types.KeyboardButton(text="Это трагедия, но не геноцид 🙅‍♀️"))
     markup.row(types.KeyboardButton(text="Я не в праве давать такие оценки 🤷"))
     text = await sql_safe_select("text", "texts", {"name": "nazi_odessa"})
-    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message(((F.text == "Нет, нельзя 🙅‍♀️") | (F.text == "Это трагедия, но не геноцид 🙅‍♀️")), state=NaziState.genocide)
@@ -207,7 +208,7 @@ async def nazi_many_forms(message: Message):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Продолжай..."))
     text = await sql_safe_select("text", "texts", {"name": "nazi_emotional"})
-    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message(((F.text.contains("можно")) | (F.text == "Я не в праве давать такие оценки 🤷")), state=NaziState.genocide)
@@ -216,14 +217,14 @@ async def nazi_eight_years(message: Message):
         text = 'Понимаю, поэтому пусть оценку дадут факты. Задайте себе вопрос:'
     else:
         text = "В таком случае, если это так, у меня есть к вам большой вопрос:"
-    await message.answer(text, reply_markup=ReplyKeyboardRemove())
+    await message.answer(text, reply_markup=ReplyKeyboardRemove(), disable_web_page_preview=True)
     await asyncio.sleep(3)
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Я тоже задаюсь этим вопросом 🤔"))
     markup.row(types.KeyboardButton(text="Геноцида не было, но ненависть к русским - есть 😠"))
     markup.row(types.KeyboardButton(text="ООН предпочитает закрывать глаза на это ☝️"))
     text2 = await sql_safe_select("text", "texts", {"name": "nazi_eight_years"})
-    await message.answer(text2, reply_markup=markup.as_markup(resize_keyboard=True))
+    await message.answer(text2, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text.in_({'Продолжай...', "Я тоже задаюсь этим вопросом", "ООН предпочитает закрывать глаза на это ☝️"})),
@@ -234,7 +235,7 @@ async def nazi_exaggeration(message: Message):
     markup.row(types.KeyboardButton(text="Нет, это геноцид 💀"))
     markup.row(types.KeyboardButton(text="Геноцида не было, но ненависть к русским - есть 😠"))
     text = await sql_safe_select("text", "texts", {"name": "nazi_exaggeration"})
-    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text == "Да, сильное преувеличение 👌🏼"), state=NaziState.genocide)
@@ -261,7 +262,7 @@ async def nazi_bounds(message: Message, state: FSMContext):
     text = await sql_safe_select("text", "texts", {"name": "nazi_bounds"})
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Хорошо, давай"))
-    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message(NaziFilter(answer="Многие украинцы ненавидят русских только за то, что они русские"),
@@ -273,7 +274,7 @@ async def nazi_second_poll(message: Message, state: FSMContext):
     await state.set_state(NaziState.third_part)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжай"))
-    await message.answer(text)
+    await message.answer(text, disable_web_page_preview=True)
     await message.answer_poll(question='Попробуйте угадать!', options=['95%', '76%', '45%', '21%', '6%'],
                               is_anonymous=False, allows_multiple_answers=False, correct_option_id=1)
 
@@ -322,7 +323,7 @@ async def nazi_poll_is_cool(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'nazi_poll_is_cool'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Хорошо, покажи"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text == "Посмотрел(а) 📺"), state=NaziState.third_part)
@@ -330,7 +331,7 @@ async def nazi_vs_gopnics(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'nazi_vs_gopnics'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Понятно ✔️"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message(RusHate_pr(), (F.text == "Понятно ✔️"), state=NaziState.third_part)
@@ -342,7 +343,7 @@ async def nazi_very_little(message: Message):
     nmarkup.row(types.KeyboardButton(text="Украинцы - хорошие люди. А власть у них захватили неонацисты. 😡"))
     nmarkup.row(types.KeyboardButton(text="Это было в 2021 году, а сейчас их полстраны 😬"))
     await message.answer(text)
-    await message.answer(text2, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text2, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text == "Понятно ✔️"), state=NaziState.third_part)
@@ -357,7 +358,7 @@ async def nazi_you_wrong(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="Украинцы - хорошие люди. А власть у них захватили неонацисты. 😡"))
     nmarkup.row(types.KeyboardButton(text="Это было в 2021 году, а сейчас их полстраны 😬"))
     await message.answer(text)
-    await message.answer(text2, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text2, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text == "Это было в 2021 году, а сейчас их полстраны 😬"), state=NaziState.third_part)
@@ -367,7 +368,7 @@ async def nazi_vs_gopnics(message: Message):
     nmarkup.row(types.KeyboardButton(text="Я согласен(на), неонацизм на Украине - преувеличение 👌🏼"))
     nmarkup.row(types.KeyboardButton(text="Но мы освобождаем Украину, ведь власть у них захватили неонацисты 😡"))
     nmarkup.row(types.KeyboardButton(text="Я тут не соглашусь. 🙅‍♂️ Давай сменим тему"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text.contains('захватили')), state=NaziState.third_part)
@@ -465,7 +466,7 @@ async def nazi_game_start(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Начнем! 🚀"))
     nmarkup.row(types.KeyboardButton(text="Пропустим игру 🙅‍♂️"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message(((F.text == "Начнем! 🚀") | (F.text == "Ну давай еще 😎") | (F.text == "Продолжаем, давай еще! 👉")),
@@ -555,4 +556,4 @@ async def putin_in_the_past(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'nazi_finish'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжим 👌🏼"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
