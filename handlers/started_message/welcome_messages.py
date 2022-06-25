@@ -55,7 +55,7 @@ async def message_2(message: types.Message, state: FSMContext):
 
     markup.row(types.KeyboardButton(text="1️⃣ Специальная военная операция (СВО)"))
     markup.row(types.KeyboardButton(text="2️⃣ Война / Вторжение в Украину"))
-    markup.row(types.KeyboardButton(text="3️⃣ Сейчас даже такое мнение "
+    markup.row(types.KeyboardButton(text="Сейчас даже такое мнение "
                                          "выражать незаконно. Вдруг вы из ФСБ? 🤐"))
     text = await sql_safe_select("text", "texts", {"name": "start_what_about_you"})
 
