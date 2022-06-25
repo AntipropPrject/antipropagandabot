@@ -10,7 +10,7 @@ from bata import all_data
 from data_base.DBuse import poll_get, redis_just_one_read
 from data_base.DBuse import sql_safe_select, data_getter, sql_safe_update
 from filters.All_filters import WebPropagandaFilter, TVPropagandaFilter, PplPropagandaFilter, PoliticsFilter
-from handlers.true_resons_hand import TruereasonsState
+from handlers import true_resons_hand
 from keyboards.map_keys import antip_why_kb, antip_killme_kb
 from middleware import CounterMiddleware
 from resources.all_polls import web_prop
@@ -745,7 +745,7 @@ async def antip_big_love_propaganda(message: Message):
 @router.message((F.text.contains('правда. Откуда ты знаешь')))
 async def antip_reputation_matters(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_reputation_matters'})
-    await simple_media(message, 'antip_reputation_matters', antip_why_kb())
+    await message.answer(text, antip_why_kb(), disable_web_page_preview=True)
 
 
 # По хорошему, это уже начало войны
@@ -755,7 +755,7 @@ async def antip_reputation_matters(message: Message):
                         F.text.contains('Продолжим 🇷🇺🇺🇦')))
 async def war_point_now(message: Message, state: FSMContext):
     await mongo_update_stat(message.from_user.id, 'antiprop')
-    await state.set_state(TruereasonsState.main)
+    await state.set_state(true_resons_hand.TruereasonsState.main)
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_war_point_now'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
@@ -766,7 +766,7 @@ async def war_point_now(message: Message, state: FSMContext):
                 ((F.text.contains('действия')) & (F.text.contains('Украине'))) | (
                         F.text.contains("Продолжим 🇷🇺🇺🇦")))
 async def reasons_lets_figure(message: Message, state: FSMContext):
-    await state.set_state(TruereasonsState.main)
+    await state.set_state(true_resons_hand.TruereasonsState.main)
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_lets_figure'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Давай попробуем 👌🏼"))
@@ -779,7 +779,7 @@ async def reasons_lets_figure(message: Message, state: FSMContext):
 @router.message(((F.text.contains('действия')) & (F.text.contains('Украине'))) | (
         F.text.contains('Продолжим 🇷🇺🇺🇦')))
 async def reasons_king_of_info(message: Message, state: FSMContext):
-    await state.set_state(TruereasonsState.main)
+    await state.set_state(true_resons_hand.TruereasonsState.main)
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_king_of_info'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Хорошо 👌🏼"))

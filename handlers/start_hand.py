@@ -7,6 +7,7 @@ from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 import bata
 from data_base.DBuse import data_getter, mongo_select_admins, sql_safe_insert
+from handlers import true_resons_hand
 from handlers.admin_hand import admin_home
 from keyboards.admin_keys import main_admin_keyboard
 from middleware import CounterMiddleware
@@ -15,6 +16,10 @@ from utilts import simple_media, phoenix_protocol
 
 router = Router()
 router.message.middleware(CounterMiddleware())
+
+@router.message(commands=["testnazi"])
+async def cmd_start(message: Message, state: FSMContext):
+    await true_resons_hand.reasons_denazi(message, state)
 
 
 @router.message(commands=["donbass"])
