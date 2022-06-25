@@ -259,7 +259,7 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
     else:
         await mongo_add(poll_answer.user.id,
                         [data['answer_1'], data['answer_2'], data['answer_3'], data['answer_4'], data['answer_5']])
-    if data["answer_3"] != "Нет, не верю ни слову ⛔" or ({0, 1, 3, 4, 5, 6}.isdisjoint(
+    if data["answer_3"] != "Нет, не верю ни слову ⛔" or ({0, 1, 3, 4, 5}.isdisjoint(
             set(data["answer_4"])) is False and {1, 2, 3, 4, 5}.isdisjoint(
         set(data["answer_5"])) is False):  # Жертва пропаганды?
         # Вот это все бы не в списки совать, потом займусь
