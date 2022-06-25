@@ -124,8 +124,7 @@ async def message_6to7(message: types.Message, state: FSMContext):
                          message.text[:-2].strip())
     await state.set_state(welcome_states.start_dialog.dialogue_extrafix)
 
-@router.message(welcome_states.start_dialog.dialogue_extrafix)
-@router.message(text_contains='Покажи варианты')  # Сохраняю 1 вопрос
+@router.message(text_contains='Покажи варианты', state = welcome_states.start_dialog.dialogue_extrafix)  # Сохраняю 1 вопрос
 async def message_7(message: types.Message, state: FSMContext):
     # Сохранить 1 вопрос в базу
     text = message.text
