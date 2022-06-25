@@ -114,7 +114,7 @@ async def message_6(message: types.Message, state: FSMContext):
 
 
 @router.message(welcome_states.start_dialog.dialogue_6)
-async def message_6to7(message: types.Message):
+async def message_6to7(message: types.Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Покажи варианты ✍"))
     text = await sql_safe_select("text", "texts", {"name": "start_russia_goal"})
@@ -122,13 +122,13 @@ async def message_6to7(message: types.Message):
     if text == 'Начал(а) интересоваться после 24 февраля' or text == "Скорее да 🙂" or text == "Скорее нет 🙅‍♂":
         await poll_write(f'Usrs: {message.from_user.id}: Start_answers: interest_in_politics:',
                          message.text[:-2].strip())
+    await state.set_state(welcome_states.start_dialog.dialogue_extrafix)
 
-
+@router.message(welcome_states.start_dialog.dialogue_extrafix)
 @router.message(text_contains='Покажи варианты')  # Сохраняю 1 вопрос
 async def message_7(message: types.Message, state: FSMContext):
     # Сохранить 1 вопрос в базу
     text = message.text
-
     options = welc_message_one
     # Сохранение 1 вопроса в дату
     await state.update_data(option_1=options)
