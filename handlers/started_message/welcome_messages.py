@@ -118,7 +118,7 @@ async def message_6to7(message: types.Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Покажи варианты ✍"))
     text = await sql_safe_select("text", "texts", {"name": "start_russia_goal"})
-    await message.answer(text)
+    await message.answer(text,reply_markup=nmarkup.as_markup(resize_keyboard=True) )
 
 
 @router.message(welcome_states.start_dialog.dialogue_6, text_contains='Покажи варианты')  # Сохраняю 1 вопрос
