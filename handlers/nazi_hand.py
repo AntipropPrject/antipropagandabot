@@ -473,7 +473,7 @@ async def country_game_question(message: Message, state: FSMContext):
         count = (await state.get_data())['ngamecount']
     except:
         count = 0
-    how_many_rounds = data_getter("SELECT COUNT (*) FROM public.putin_old_lies")[0][0]
+    how_many_rounds = data_getter("SELECT COUNT (*) FROM public.ucraine_or_not_game")[0][0]
     print(f"В таблице {how_many_rounds} записей, а вот счетчик сейчас {count}")
     if count < how_many_rounds:
         count += 1
