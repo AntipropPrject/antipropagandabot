@@ -46,7 +46,8 @@ async def message_1(message: types.Message, state: FSMContext):
 
 @router.message(welcome_states.start_dialog.dialogue_2, text_contains='Хорошо', content_types=types.ContentType.TEXT,
                 text_ignore_case=True)
-@router.message(welcome_states.start_dialog.dialogue_1, text_contains='Начнем 🇷🇺🇺🇦', content_types=types.ContentType.TEXT,
+@router.message(welcome_states.start_dialog.dialogue_1, text_contains='Начнем 🇷🇺🇺🇦',
+                content_types=types.ContentType.TEXT,
                 text_ignore_case=True)
 # @router.message(welcome_states.start_dialog.dialogue_3) запомнить на ты или на вы в базу
 async def message_2(message: types.Message, state: FSMContext):
@@ -112,20 +113,30 @@ async def message_6(message: types.Message, state: FSMContext):
     await state.set_state(welcome_states.start_dialog.dialogue_6)
 
 
-@router.message(welcome_states.start_dialog.dialogue_6)  # Сохраняю 1 вопрос
+@router.message(welcome_states.start_dialog.dialogue_6)
+async def message_6to7(message: types.Message):
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Покажи варианты ✍"))
+    text = await sql_safe_select("text", "texts", {"name": "start_russia_goal"})
+    await message.answer(text)
+
+
+@router.message(welcome_states.start_dialog.dialogue_6, text_contains='Покажи варианты')  # Сохраняю 1 вопрос
 async def message_7(message: types.Message, state: FSMContext):
     # Сохранить 1 вопрос в базу
     text = message.text
     if text == 'Начал(а) интересоваться после 24 февраля' or text == "Скорее да 🙂" or text == "Скорее нет 🙅‍♂":
-        await poll_write(f'Usrs: {message.from_user.id}: Start_answers: interest_in_politics:', message.text[:-2].strip())
+        await poll_write(f'Usrs: {message.from_user.id}: Start_answers: interest_in_politics:',
+                         message.text[:-2].strip())
         options = welc_message_one
         # Сохранение 1 вопроса в дату
         await state.update_data(option_1=options)
-        text = await sql_safe_select("text", "texts", {"name": "start_russia_goal"})
         markup = ReplyKeyboardBuilder()
         markup.add(types.KeyboardButton(text="Продолжай"))
-        await message.answer_poll(text, options, is_anonymous=False, allows_multiple_answers=True,
-                                  reply_markup=markup.as_markup(resize_keyboard=True))
+        await message.answer_poll(
+            question="Выберите все цели, с которыми согласны или частично согласны. Затем нажмите «Проголосовать»",
+            options=options, is_anonymous=False, allows_multiple_answers=True,
+            reply_markup=markup.as_markup(resize_keyboard=True))
         await state.set_state(welcome_states.start_dialog.dialogue_7)
     else:
         await message.answer("Неправильный ответ, вы можете выбрать вариант ответа на клавиатуре")
@@ -141,7 +152,7 @@ async def poll_filler(message: types.Message, bot: Bot):
 
 @router.poll_answer(state=welcome_states.start_dialog.dialogue_7)  # Сохраняю 2 вопрос
 async def poll_answer_handler(poll_answer: types.PollAnswer, state: FSMContext):
-    #сохранение 2 вопроса
+    # сохранение 2 вопроса
     options = await state.get_data()
     lst_options = options["option_1"]
     lst_answers = poll_answer.option_ids
@@ -161,7 +172,7 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, state: FSMContext):
 @router.message(state=welcome_states.start_dialog.dialogue_8)  # Сохраняю 3 вопрос
 async def message_8(message: types.Message, state: FSMContext):
     text = message.text
-    if text == "Да, полностью доверяю ✅" or text == "Скорее да 👍" or\
+    if text == "Да, полностью доверяю ✅" or text == "Скорее да 👍" or \
             text == "Скорее нет 👎" or text == "Нет, не верю ни слову ⛔":
         # сохранение 3 вопроса
         await poll_write(f'Usrs: {message.from_user.id}: Start_answers: tv:', message.text)
@@ -174,6 +185,7 @@ async def message_8(message: types.Message, state: FSMContext):
         await state.set_state(welcome_states.start_dialog.button_next)
     else:
         await message.answer("Неправильный ответ, вы можете выбрать вариант ответа на клавиатуре")
+
 
 @router.message((F.text.contains("Покажи варианты ✍️")), state=welcome_states.start_dialog.button_next)
 async def button(message: types.Message, state: FSMContext):
@@ -195,7 +207,8 @@ async def poll_filler(message: types.Message, bot: Bot):
 
 @router.poll_answer(state=welcome_states.start_dialog.dialogue_9)  # Сохраняю 4 вопрос
 async def poll_answer_handler_tho(poll_answer: types.PollAnswer, state=FSMContext):
-    options = ["Владимир Путин", "Дмитрий Песков", "Сергей Лавров","Владимир Соловьев", "Юрий Подоляка", "Никому из них..."]
+    options = ["Владимир Путин", "Дмитрий Песков", "Сергей Лавров", "Владимир Соловьев", "Юрий Подоляка",
+               "Никому из них..."]
     # сохранение 4 вопроса
     option = await state.get_data()
     lst_options = option["option_3"]
@@ -248,7 +261,7 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
                         [data['answer_1'], data['answer_2'], data['answer_3'], data['answer_4'], data['answer_5']])
     if data["answer_3"] != "Нет, не верю ни слову ⛔" or ({0, 1, 3, 4, 5, 6}.isdisjoint(
             set(data["answer_4"])) is False and {1, 2, 3, 4, 5}.isdisjoint(
-            set(data["answer_5"])) is False):  # Жертва пропаганды?
+        set(data["answer_5"])) is False):  # Жертва пропаганды?
         # Вот это все бы не в списки совать, потом займусь
         await redis_just_one_write(f'Usrs: {poll_answer.user.id}: INFOState:', 'Жертва пропаганды')
         print('Жертва пропаганды')
