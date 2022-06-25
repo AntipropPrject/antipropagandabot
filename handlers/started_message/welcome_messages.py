@@ -274,7 +274,7 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
     await state.set_state(propaganda_victim.start)
     if data["answer_3"] == "Нет, не верю ни слову ⛔":
         markup = ReplyKeyboardBuilder()
-        markup.row(types.KeyboardButton(text="Пропустим этот шаг"))
+        markup.row(types.KeyboardButton(text="Пропустим этот шаг 👉"))
         markup.row(types.KeyboardButton(text="Покажи ложь на ТВ -- мне интересно посмотреть! 📺"))
         text = await sql_safe_select("text", "texts", {"name": "antip_all_no_TV"})
         await bot.send_message(poll_answer.user.id, text, reply_markup=markup.as_markup(resize_keyboard=True),
