@@ -13,3 +13,4 @@ class start_dialog(StatesGroup):
     dialogue_8 = State()
     dialogue_9 = State()
     dialogue_10 = State()
+    dialogue_extrafix = State()
