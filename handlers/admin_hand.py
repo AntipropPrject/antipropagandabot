@@ -139,10 +139,8 @@ async def text_edit_text_test(message: Message, state: FSMContext):
         parse_mode="HTML", reply_markup=app_admin_keyboard())
     await state.update_data({"text": message.html_text})
     await state.set_state(admin_home.text_edit_test)
-
     test = await state.get_data()
-    dtframe = DataFrame([test.values()], columns=test.keys())
-    print(dtframe)
+
 
 
 @router.message((F.text == 'Изменить медиа'), state=admin_home.admin)

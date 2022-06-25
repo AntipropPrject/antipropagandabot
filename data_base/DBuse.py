@@ -106,7 +106,7 @@ async def sql_safe_insert(table_name, data_dict):
             with conn.cursor() as cur:
                 cur.execute(safe_query, data_dict)
         conn.close()
-        pandas_csv_add(table_name, data_dict)
+        postgresql_csv_dump(table_name)
         return True
     except psycopg2.Error as error:
         await logg.get_error(f"{error}", __file__)
@@ -132,7 +132,7 @@ async def sql_safe_update(table_name, data_dict, condition_dict):
             with conn.cursor() as cur:
                 cur.execute(safe_query, data_dict)
         conn.close()
-        pandas_csv_update(table_name, data_dict, condition_dict)
+        postgresql_csv_dump(table_name)
         return "Complete"
     except AssertionError as error:
         logg.get_info(f"{error}")
@@ -240,6 +240,7 @@ async def mongo_select_admins():
     except Exception as error:
         await logg.get_error(f"mongo_select_admins | {error}", __file__)
 
+
 async def mongo_pop_admin(tg_id):
     try:
         client = all_data().get_mongo()
@@ -253,7 +254,7 @@ async def mongo_pop_admin(tg_id):
 """^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^CSV_UPDATE^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"""
 
 
-def pandas_csv_add(table_name, new_values_dict):
+'''def pandas_csv_add(table_name, new_values_dict):
     try:
         dtframe = DataFrame([new_values_dict.values()], columns=new_values_dict.keys())
         if not os.path.isfile(f'resources/{table_name}.csv'):
@@ -261,11 +262,23 @@ def pandas_csv_add(table_name, new_values_dict):
         else:
             dtframe.to_csv(f'resources/{table_name}.csv', mode='a', header=False, index=False)
     except Exception as error:
+        logg.get_error(f"{error}", __file__)'''
+
+
+def postgresql_csv_dump(table_name):
+    conn = all_data().get_postg()
+    query = f"COPY (SELECT * FROM {table_name}) TO STDOUT WITH CSV HEADER"
+    path = f'resources/{table_name}.csv'
+    try:
+        with open(path, 'w') as file, conn.cursor() as cur:
+            cur.copy_expert(query, file)
+            conn.close()
+    except psycopg2.Error as error:
         logg.get_error(f"{error}", __file__)
 
 
 # update_csv
-def pandas_csv_update(table_name, new_values_dict, condition_dict):
+'''def pandas_csv_update(table_name, new_values_dict, condition_dict):
     try:
         data = read_csv(f'resources/{table_name}.csv', header=0)
         df = DataFrame(data)
@@ -274,7 +287,7 @@ def pandas_csv_update(table_name, new_values_dict, condition_dict):
                 df.loc[df[condition] == condition_dict[condition], value] = new_values_dict[value]
         df.to_csv(f'resources/{table_name}.csv', header=True, index=False)
     except Exception as error:
-        logg.get_error(f"{error}", __file__)
+        logg.get_error(f"{error}", __file__)'''
 
 
 """^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^DATA_REDIS^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"""
