@@ -110,7 +110,7 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FS
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Зачем они вообще сопротивлялись? Мы же им желаем добра!"))
         await bot.send_message(poll_answer.user.id, text, reply_markup=nmarkup.as_markup(resize_keyboard=True),
-                               parse_mode="HTML")
+                               parse_mode="HTML", disable_web_page_preview=True)
     elif "🏳️ Украинцам надо было просто сдаться, тогда бы столько жертв не было" in true_options:
         await state.update_data(nazi='В Украине процветает неонацизм и геноцид русскоязычного населения')
         text = await sql_safe_select('text', 'texts', {'name': 'war_beginning'})
@@ -121,7 +121,7 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FS
         nmarkup.row(types.KeyboardButton(
             text="Не согласен, в случае нападения на Россию пусть лучше солдаты сложат оружие, зато не будет жертв."))
         await bot.send_message(poll_answer.user.id, text, reply_markup=nmarkup.as_markup(resize_keyboard=True),
-                               parse_mode="HTML")
+                               parse_mode="HTML", disable_web_page_preview=True)
     elif "🎯 Это ужасно, но помимо защиты жителей Донбасса есть более весомые причины для начала войны" in true_options:
         await redis_delete_from_list(f'Usrs: {poll_answer.user.id}: Donbass_polls: First:', donbass_first_poll[7])
         text = await sql_safe_select('text', 'texts', {'name': 'reasons_here'})
@@ -133,7 +133,7 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FS
         await bot.send_message(poll_answer.user.id, text, reply_markup=filler_kb(), parse_mode="HTML")
     elif indexes == [0]:
         await bot.send_message(poll_answer.user.id, 'Ну что же, похоже мне не надо вас переубеждать. Пойдем дальше?',
-                               reply_markup=filler_kb())
+                               reply_markup=filler_kb(), disable_web_page_preview=True)
     await state.set_state(donbass_state.after_poll)
 
 

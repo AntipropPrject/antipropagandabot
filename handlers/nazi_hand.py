@@ -64,13 +64,14 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FS
         markup = ReplyKeyboardBuilder()
         markup.row(types.KeyboardButton(text="Давай 👌🏼"))
         text = await sql_safe_select("text", "texts", {"name": "nazi_word"})
-        await Bot(bata.all_data().bot_token).send_message(chat_id=poll_answer.user.id, text=text,
-                                                          reply_markup=markup.as_markup(resize_keyboard=True))
+        await bot.send_message(chat_id=poll_answer.user.id, text=text,
+                               reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     else:
         markup = ReplyKeyboardBuilder()
         markup.row(types.KeyboardButton(text="А как же неонацизм? 🤨"))
         text = await sql_safe_select("text", "texts", {"name": "nazi_negative"})
-        await bot.send_message(poll_answer.user.id, text, reply_markup=markup.as_markup(resize_keyboard=True))
+        await bot.send_message(poll_answer.user.id, text,
+                               reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     await state.set_state(NaziState.after_first_poll)
 
 
