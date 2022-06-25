@@ -6,7 +6,6 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-
 from bata import all_data
 from data_base.DBuse import poll_get, redis_just_one_read
 from data_base.DBuse import sql_safe_select, data_getter, sql_safe_update
@@ -390,11 +389,9 @@ async def show_the_news(message: types.Message, state: FSMContext):
         elif one_channel == web_prop[6]:
             tag_media = 'YANDEXNEWS_media_'
 
-        one_media = await sql_safe_select('t_id', 'assets', {'name': tag_media+"1"})  # Получаю id видео
-        one_caption = await sql_safe_select('text', 'texts', {'name': tag_media+"1"})  # Получаю описание
+        await simple_media(message, tag_media + "1", reply_markup=markup.as_markup(resize_keyboard=True))  # Получаю id видео
         await state.update_data(viewed_channel=user_answer_str[0])  # передаю канал для разоблачения
         await state.update_data(all_viwed=[user_answer_str[0]])  # записываю просмотренный источник
-        await message.answer_video(one_media, caption=one_caption, reply_markup=markup.as_markup(resize_keyboard=True))
     elif message.text != 'Хорошо, давай вернемся и посмотрим 👀':
         markup = ReplyKeyboardBuilder()
         markup.row(types.KeyboardButton(text="Новость посмотрел(а). Что с ней не так? 🤔"))
@@ -404,7 +401,8 @@ async def show_the_news(message: types.Message, state: FSMContext):
         other_channel = message.text
         if other_channel != 'Хватит, пропустим остальные источники 🙅‍♂️':
             viewed = data["all_viwed"]
-            viewed.append(other_channel)
+            print(viewed)
+            viewed.append(other_channel[:-2])
             await state.update_data(all_viwed=list(set(viewed)))  # Список просмотренных источников
 
         if other_channel[:-2] == web_prop[0]:
@@ -419,9 +417,7 @@ async def show_the_news(message: types.Message, state: FSMContext):
             tag_media = 'MINISTRY_media_'
         elif other_channel[:-2] == web_prop[6]:
             tag_media = 'YANDEXNEWS_media_'
-        media = await sql_safe_select('t_id', 'assets', {'name': tag_media+str(new_data)})  # Получаю id видео
-        caption = await sql_safe_select('text', 'texts', {'name': tag_media+str(new_data)})  # Получаю описание
-        await message.answer_video(media, caption=caption, reply_markup=markup.as_markup(resize_keyboard=True))
+        await simple_media(message, tag_media+str(new_data), reply_markup=markup.as_markup(resize_keyboard=True))
 
     elif message.text == 'Хорошо, давай вернемся и посмотрим 👀':
         markup = ReplyKeyboardBuilder()
@@ -445,11 +441,9 @@ async def show_the_news(message: types.Message, state: FSMContext):
         if other_channel != 'Хватит, пропустим остальные источники 🙅‍♂️':
             viewed = data["all_viwed"]
             viewed.append(other_channel)
+            print(viewed)
             await state.update_data(all_viwed=list(set(viewed)))  # Список просмотренных источников
-        media = await sql_safe_select('t_id', 'assets', {'name': tag_media+str(new_data)})  # Получаю id видео
-        caption = await sql_safe_select('text', 'texts',
-                                        {'name': tag_media+str(new_data)})  # Получаю описание
-        await message.answer_video(media, caption=caption, reply_markup=markup.as_markup(resize_keyboard=True))
+        await simple_media(message, tag_media + str(new_data), reply_markup=markup.as_markup(resize_keyboard=True))
     else:
         await message.answer('Неправильная команда')
         await poll_get(f'Usrs: {message.from_user.id}: Start_answers: ethernet:')
@@ -476,17 +470,13 @@ async def revealing_the_news(message: types.Message, state: FSMContext):
         tag_exposure = 'YANDEXNEWS_exposure_'
     check_end = await check_name(tag_exposure+str(count_news+1))
     if check_end is not False:  # Проверка если новости закончились
-        media_exposure = await sql_safe_select('t_id', 'assets', {'name': tag_exposure+str(count_news)})  # Получаю id видео
-        caption_exposure = await sql_safe_select('text', 'texts', {'name': tag_exposure+str(count_news)})  # Получаю описание
         markup = await keyboard_for_next_chanel(f"Покажи еще новость с {viewed_channel} 👀")
-        await message.answer_video(media_exposure, caption=caption_exposure, reply_markup=markup.as_markup(resize_keyboard=True))
+        await simple_media(message, tag_exposure+str(count_news), reply_markup=markup.as_markup(resize_keyboard=True))
     else:
         markup = ReplyKeyboardBuilder()
         markup.row(types.KeyboardButton(text="Достаточно, мне все понятно 🤚"))
-        media_exposure = await sql_safe_select('t_id', 'assets', {'name': tag_exposure+str(count_news)})  # Получаю id видео
-        caption_exposure = await sql_safe_select('text', 'texts', {'name': tag_exposure+str(count_news)})  # Получаю описание
-        await message.answer_video(media_exposure, caption=caption_exposure,
-                                   reply_markup=markup.as_markup(resize_keyboard=True))
+        await simple_media(message, tag_exposure+str(count_news), reply_markup=markup.as_markup(resize_keyboard=True))
+
 
 
 
@@ -509,11 +499,9 @@ async def show_more(message: types.Message, state: FSMContext):
         tag_media = 'MINISTRY_media_'
     elif viewed_channel == web_prop[6]:
         tag_media = 'YANDEXNEWS_media_'
-    media = await sql_safe_select('t_id', 'assets', {'name': tag_media+str(new_data)})  # Получаю id видео
-    caption = await sql_safe_select('text', 'texts', {'name': tag_media+str(new_data)})  # Получаю описание
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Новость посмотрел(а). Что с ней не так? 🤔"))
-    await message.answer_video(media, caption=caption, reply_markup=markup.as_markup(resize_keyboard=True))
+    await simple_media(message, tag_media+str(new_data), reply_markup=markup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text.contains('Достаточно, мне все понятно 🤚')))
