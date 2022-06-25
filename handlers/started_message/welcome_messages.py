@@ -106,8 +106,8 @@ async def message_5(message: types.Message, state: FSMContext):
                 text_ignore_case=True)  # Задаю первый вопрос и ставлю состояние
 async def message_6(message: types.Message, state: FSMContext):
     markup = ReplyKeyboardBuilder()
-    markup.add(types.KeyboardButton(text="Начал(а) интересоваться после 24 февраля"))
     markup.row(types.KeyboardButton(text="Скорее да 🙂"), types.KeyboardButton(text="Скорее нет 🙅‍♂"))
+    markup.row(types.KeyboardButton(text="Начал(а) интересоваться после 24 февраля"))
     text = await sql_safe_select("text", "texts", {"name": "start_do_you_love_politics"})
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
     await state.set_state(welcome_states.start_dialog.dialogue_6)
@@ -123,6 +123,7 @@ async def message_6to7(message: types.Message, state: FSMContext):
         await poll_write(f'Usrs: {message.from_user.id}: Start_answers: interest_in_politics:',
                          message.text[:-2].strip())
     await state.set_state(welcome_states.start_dialog.dialogue_extrafix)
+
 
 @router.message(welcome_states.start_dialog.dialogue_extrafix)
 @router.message(text_contains='Покажи варианты')  # Сохраняю 1 вопрос
@@ -159,9 +160,10 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, state: FSMContext):
         await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: Invasion:', lst_options[index])
     await state.update_data(answer_2=lst_answers)
     markup = ReplyKeyboardBuilder()
-    markup.row(types.KeyboardButton(text="Да, полностью доверяю ✅"))
+    markup.row(types.KeyboardButton(text="Да, полностью доверяю ✅"),
+               types.KeyboardButton(text="Нет, не верю ни слову ⛔"))
     markup.row(types.KeyboardButton(text="Скорее да 👍"), types.KeyboardButton(text="Скорее нет 👎"))
-    markup.row(types.KeyboardButton(text="Нет, не верю ни слову ⛔"))
+
     text = await sql_safe_select("text", "texts", {"name": "start_belive_TV"})
     await Bot(all_data().bot_token).send_message(chat_id=poll_answer.user.id, text=text,
                                                  reply_markup=markup.as_markup(resize_keyboard=True))
