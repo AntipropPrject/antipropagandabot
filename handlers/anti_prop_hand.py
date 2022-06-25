@@ -369,13 +369,9 @@ async def show_the_news(message: types.Message, state: FSMContext):
         markup.row(types.KeyboardButton(text="Новость посмотрел(а). Что с ней не так? 🤔"))
         # получить самый первый источник из списка выбранных каналов
         user_answer_str = data['answers_str']
-        print(channels.index(user_answer_str[0]))
         one_channel = channels[channels.index(user_answer_str[0])]  # получаю первый канал из ответа пользователя
         await state.update_data(count_news=1)  # Ставлю счетчик на 0 для первой новости
         tag_media = ''
-        print(one_channel)
-        print(one_channel[0])
-        print(11111111111111111111)
         if one_channel == web_prop[0]:
             tag_media = 'RIANEWS_media_'
         elif one_channel == web_prop[1]:
