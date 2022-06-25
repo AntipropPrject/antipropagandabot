@@ -59,7 +59,7 @@ async def reasons_king_of_info(message: Message):
         await poll_write(f'Usrs: {message.from_user.id}: Start_answers: Invasion:', thing)
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_not_so_fast'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Давай поговорим о целях"))
+    nmarkup.row(types.KeyboardButton(text="Давай поговорим о целях 👌🏼"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 

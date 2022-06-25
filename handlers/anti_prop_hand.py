@@ -42,9 +42,6 @@ async def antiprop_all_yes_start(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-
-
-
 @router.message(TVPropagandaFilter(option="Скорее нет"), (F.text == 'Поехали!'))
 async def rather_no_TV(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_rather_no_TV'})

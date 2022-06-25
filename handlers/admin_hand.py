@@ -10,6 +10,7 @@ from bata import all_data
 from data_base.DBuse import sql_safe_select, sql_safe_update, sql_safe_insert
 from keyboards.admin_keys import main_admin_keyboard, middle_admin_keyboard, app_admin_keyboard
 from stats.stat import mongo_select_stat
+from utilts import phoenix_protocol
 
 
 class admin_home(StatesGroup):
@@ -31,6 +32,11 @@ class admin_home(StatesGroup):
 
 router = Router()
 router.message.filter(state=admin_home)
+
+
+@router.message(commands=["reborn"])
+async def cmd_start(message: Message, state: FSMContext):
+    await phoenix_protocol(message)
 
 
 @router.message((F.text == "Выйти"), state=admin_home)

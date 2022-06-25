@@ -23,10 +23,10 @@ router.message.filter(state=donbass_state)
 @router.message(F.text == 'Что главное? 🤔')
 async def donbass_chart_1(message: Message):
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text='Что значит «гражданские»? 👨‍👩‍👧‍👦'))
     nmarkup.add(types.KeyboardButton(text='Да, знал(а) 👌🏼'))
     nmarkup.add(types.KeyboardButton(text='Нет, не знал(а) 🤔'))
-    nmarkup.adjust(1, 2)
+    nmarkup.row(types.KeyboardButton(text='Что значит «гражданские»? 👨‍👩‍👧‍👦'))
+    nmarkup.adjust(2, 1)
     await simple_media(message, 'donbass_chart_1', nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -51,7 +51,7 @@ async def donbass_chart_2(message: Message, state: FSMContext):
 async def donbass_poll(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.add(types.KeyboardButton(text='Продолжить'))
-    await message.reply_poll("Отметьте один или более вариантов, с которыми вы согласны или частично согласны",
+    await message.answer_poll("Отметьте один или более вариантов, с которыми вы согласны или частично согласны",
                              donbass_first_poll, is_anonymous=False, allows_multiple_answers=True,
                              reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
