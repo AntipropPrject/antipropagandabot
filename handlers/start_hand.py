@@ -22,6 +22,11 @@ async def cmd_start(message: Message, state: FSMContext):
     await true_resons_hand.reasons_denazi(message, state)
 
 
+@router.message(commands=["teststrike"])
+async def cmd_start(message: Message, state: FSMContext):
+    await true_resons_hand.prevent_strike_start(message, state)
+
+
 @router.message(commands=["donbass"])
 async def cmd_start(message: Message, state: FSMContext):
     await state.clear()

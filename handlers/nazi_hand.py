@@ -542,10 +542,16 @@ async def country_game_answer(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжаем, давай еще! 👉"))
     nmarkup.row(types.KeyboardButton(text="Достаточно, давай закончим 🙅"))
+    END = bool(data['ngamecount'] == data_getter('SELECT COUNT(id) FROM public.truthgame')[0][0])
+    if END is True:
+        nmarkup = ReplyKeyboardBuilder()
+        nmarkup.row(types.KeyboardButton(text="Спасибо 🤝"))
     await message.answer(
         f'{text}\nРезультаты других участников:\n'
         f'🇷🇺 В России: {round(100 - t_percentage * 100)}% \n🇺🇦 На Украине: {round(t_percentage * 100)}%',
         reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    if END is True:
+        await message.answer('Мы посмотрели все фото. Спасибо за игру 🤝')
 
 
 @router.message((F.text == "Достаточно, давай закончим 🙅"), state=NaziState.game)
@@ -557,7 +563,7 @@ async def putin_game2_are_you_sure(message: Message, state: FSMContext):
 
 
 @router.message(
-    ((F.text == "Мне уже хватит 👌") | (F.text == "Хорошо, давай дальше") | (F.text == "Пропустим игру 🙅‍♂️")),
+    ((F.text == "Мне уже хватит 👌") | (F.text == "Спасибо 🤝") | (F.text == "Пропустим игру 🙅‍♂️")),
     state=NaziState.game)
 async def putin_in_the_past(message: Message, state: FSMContext):
     await state.clear()

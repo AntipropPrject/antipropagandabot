@@ -2,12 +2,15 @@ from aiogram import Router, F
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.dispatcher.fsm.state import StatesGroup, State
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from data_base.DBuse import sql_safe_select
+from filters.All_filters import ManualFilters
 from handlers import true_resons_hand
 from middleware import CounterMiddleware
+from utilts import simple_media
 
 
 class PreventStrikeState(StatesGroup):
@@ -97,8 +100,8 @@ async def prevent_strike_now_you(message: Message):
 async def prevent_strike_hitler_allright(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_hitler_allright'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text='Нет, продолжим разговор ⏱'))
     nmarkup.row(types.KeyboardButton(text='Да, хочу 🙂'))
+    nmarkup.row(types.KeyboardButton(text='Нет, продолжим разговор ⏱'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
@@ -106,26 +109,22 @@ async def prevent_strike_hitler_allright(message: Message):
 async def prevent_strike_hitler_did_it(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_hitler_did_it'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text='Нет, продолжим разговор'))
     nmarkup.row(types.KeyboardButton(text='Да, хочу 🙂'))
+    nmarkup.row(types.KeyboardButton(text='Нет, продолжим разговор ⏱'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message(F.text.contains('продолжим'))
 async def prevent_strike_end_point(message: Message, state: FSMContext):
-    text = 'Договорились. У нас еще есть что обсудить.'
     await state.set_state(true_resons_hand.TruereasonsState.main)
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text='И что дальше?'))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    ManualFilters(message, state)
 
 
 @router.message(F.text == 'Да, хочу 🙂')
 async def prevent_strike_will_show(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_will_show'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Посмотрел(а) 📺'))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await simple_media(message, 'prevent_strike_will_show', nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message(F.text.in_({'Посмотрел(а) 📺', '😁', '🙂', '😕', 'Достаточно, продолжим ✋'}))
@@ -137,20 +136,27 @@ async def prevent_strike_memes(message: Message, state: FSMContext):
     try:
         count += 1
         media = await sql_safe_select('t_id', 'assets', {'name': f'prevent_strike_meme_{count}'})
+        isEND = await sql_safe_select('t_id', 'assets', {'name' : f'prevent_strike_meme_{count+1}'})
         nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(types.KeyboardButton(text='😁'))
-        nmarkup.row(types.KeyboardButton(text='🙂'))
-        nmarkup.row(types.KeyboardButton(text='😕'))
-        nmarkup.row(types.KeyboardButton(text='Достаточно, продолжим ✋'))
+        if isEND is not False:
+            nmarkup.add(types.KeyboardButton(text='😁'))
+            nmarkup.add(types.KeyboardButton(text='🙂'))
+            nmarkup.add(types.KeyboardButton(text='😕'))
+            nmarkup.row(types.KeyboardButton(text='Достаточно, продолжим ✋'))
+        else:
+            nmarkup.row(types.KeyboardButton(text='Продолжим 🙂'))
         try:
             await message.answer_photo(media, reply_markup=nmarkup.as_markup(resize_keyboard=True))
         except:
             await message.answer_video(media, reply_markup=nmarkup.as_markup(resize_keyboard=True))
         await state.update_data(lgamecount=count)
-    except:
+        if isEND is False:
+            await state.set_state(true_resons_hand.TruereasonsState.main)
+            await message.answer('Я устал шутить про Лукашенко. 😌 Продолжим?')
+    except TelegramBadRequest:    #Это бессмысленный экцепт, можно потом убрать
         nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(types.KeyboardButton(text='Да, давай продолжим'))
-        await message.answer(
-            'В моем хранилище закончились мемы по этому поводу,'
-            ' но вы можете легко найти новые в интернете.\nГотовы продолжить?',
-            reply_markup=nmarkup.as_markup(resize_keyboard=True))
+        nmarkup.row(types.KeyboardButton(text='Продолжим 🙂'))
+        await message.answer('Я устал шутить про Лукашенко. 😌 Продолжим?',
+                             reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
+
