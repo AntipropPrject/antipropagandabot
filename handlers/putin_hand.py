@@ -108,11 +108,10 @@ async def putin_game1_question(message: Message, state: FSMContext):
                                  "left outer join assets on asset_name = assets.name "
                                  "left outer join texts ON text_name = texts.name "
                                  f"where id = {count}")[0]
-        print(truth_data)
         await state.update_data(pgamecount=count, belive=truth_data[2], not_belive=truth_data[3])
         nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(types.KeyboardButton(text="Случайная ошибка / Не ложь 👍"))
-        nmarkup.row(types.KeyboardButton(text="Целенаправленная ложь 👎"))
+        nmarkup.add(types.KeyboardButton(text="Случайная ошибка / Не ложь 👍"))
+        nmarkup.add(types.KeyboardButton(text="Целенаправленная ложь 👎"))
         if truth_data[0] is not None:
             capt = ""
             if truth_data[1] is not None:
@@ -138,23 +137,27 @@ async def putin_game1_question(message: Message, state: FSMContext):
 async def putin_game1_answer(message: Message, state: FSMContext):
     data = await state.get_data()
     base_update_dict = dict()
-    print(data)
+    END = bool(data['pgamecount'] == data_getter('SELECT COUNT(id) FROM public.putin_lies')[0][0])
+    nmarkup = ReplyKeyboardBuilder()
+    if END is False:
+        nmarkup.row(types.KeyboardButton(text="Продолжаем 👉"))
+        nmarkup.row(types.KeyboardButton(text="Достаточно ✋"))
+    else:
+        nmarkup.row(types.KeyboardButton(text="Хорошо 🤔"))
     if message.text == "Случайная ошибка / Не ложь 👍":
-        print(data['belive'] + 1)
         base_update_dict.update({'belivers': (data['belive'] + 1)})
-        print(base_update_dict)
     elif message.text == "Целенаправленная ложь 👎":
         base_update_dict.update({'nonbelivers': (data['not_belive'] + 1)})
-        print(base_update_dict)
     await sql_safe_update("putin_lies", base_update_dict, {'id': data['pgamecount']})
     t_percentage = data['belive'] / (data['belive'] + data['not_belive'])
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Продолжаем 👉"))
-    nmarkup.row(types.KeyboardButton(text="Достаточно ✋"))
     await message.answer(
-        f'А вот что думают другие участники:\n👍 <b>Случайная ошибка / не ложь:</b> {round(t_percentage * 100)}%\n👎 <b>Целенаправленная ложь: </b>'
+        f'А вот что думают другие участники:\n👍 <b>Случайная ошибка / не ложь:</b> {round(t_percentage * 100)}%\n'
+        f'👎 <b>Целенаправленная ложь: </b>'
         f'{round((100 - t_percentage * 100))}%',
         reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    if END is True:
+        await message.answer('На этом давайте перейдём перейдём к другому, '
+                             'не менее важному качеству хорошего президента.')
 
 
 @router.message((F.text == "Достаточно ✋"), state=StateofPutin.game1)
@@ -162,10 +165,10 @@ async def putin_game1_are_you_sure(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Нет, давай продолжим 👉"))
     nmarkup.row(types.KeyboardButton(text="Да, хватит 🙅‍♀️"))
-    await message.answer('Вы уверены? У меня еще есть примеры', reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer('Точно?', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(((F.text == "Да, хватит 🙅‍♀️") | (F.text == "Давай")), state=StateofPutin.game1)
+@router.message(((F.text == "Да, хватит 🙅‍♀️") | (F.text == "Давай") | (F.text == "Хорошо 🤔")), state=StateofPutin.game1)
 async def putin_plenty_promises(message: Message, state: FSMContext):
     await state.clear()
     await state.set_state(StateofPutin.game2)
@@ -209,8 +212,8 @@ async def putin_game2_question(message: Message, state: FSMContext):
         print(truth_data)
         await state.update_data(pgamecount=count, belive=truth_data[2], not_belive=truth_data[3])
         nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(types.KeyboardButton(text="Виноват 👎"))
-        nmarkup.row(types.KeyboardButton(text="Не виноват 👍"))
+        nmarkup.add(types.KeyboardButton(text="Виноват 👎"))
+        nmarkup.add(types.KeyboardButton(text="Не виноват 👍"))
         if truth_data[0] != None:
             capt = ""
             if truth_data[1] != None:

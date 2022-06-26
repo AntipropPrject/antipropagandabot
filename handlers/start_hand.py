@@ -7,8 +7,9 @@ from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 import bata
 from data_base.DBuse import data_getter, mongo_select_admins, sql_safe_insert
-from handlers import true_resons_hand
+from handlers import true_resons_hand, putin_hand
 from handlers.admin_hand import admin_home
+from handlers.true_resons_hand import reasons_who_to_blame
 from keyboards.admin_keys import main_admin_keyboard
 from middleware import CounterMiddleware
 from states.donbass_states import donbass_state
@@ -16,6 +17,7 @@ from utilts import simple_media, phoenix_protocol
 
 router = Router()
 router.message.middleware(CounterMiddleware())
+
 
 @router.message(commands=["testnazi"])
 async def cmd_start(message: Message, state: FSMContext):
@@ -25,6 +27,11 @@ async def cmd_start(message: Message, state: FSMContext):
 @router.message(commands=["teststrike"])
 async def cmd_start(message: Message, state: FSMContext):
     await true_resons_hand.prevent_strike_start(message, state)
+
+
+@router.message(commands=["putest"])
+async def cmd_start(message: Message, state: FSMContext):
+    await reasons_who_to_blame(message, state)
 
 
 @router.message(commands=["donbass"])
