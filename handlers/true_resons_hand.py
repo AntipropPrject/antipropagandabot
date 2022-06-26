@@ -198,7 +198,7 @@ async def reasons_big_bad_nato(message: Message):
 async def reasons_lie_no_more_1(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_NATO_is_coming'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text='А почему бы и нет 👌'))
+    nmarkup.row(types.KeyboardButton(text='Хорошо 👌'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
