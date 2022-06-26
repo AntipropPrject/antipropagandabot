@@ -172,11 +172,11 @@ async def putin_plenty_promises(message: Message, state: FSMContext):
     await state.set_state(StateofPutin.game2)
     text = await sql_safe_select('text', 'texts', {'name': 'putin_plenty_promises'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Давай 👌🏼"))
+    nmarkup.row(types.KeyboardButton(text="Давай 👌"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(((F.text == "Давай 👌🏼")), state=StateofPutin.game2)
+@router.message(((F.text == "Давай 👌")), state=StateofPutin.game2)
 async def putin_nothing_done(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'putin_nothing_done'})
     nmarkup = ReplyKeyboardBuilder()
@@ -188,11 +188,11 @@ async def putin_nothing_done(message: Message):
 async def putin_gaming(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'putin_gaming'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Я готов(а) 👌🏼"))
+    nmarkup.row(types.KeyboardButton(text="Я готов(а) 👌"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(((F.text == "Я готов(а) 👌🏼") | (F.text == "Нет, давай продолжим 👉") | (F.text == "Продолжаем! 👉")),
+@router.message(((F.text == "Я готов(а) 👌") | (F.text == "Нет, давай продолжим 👉") | (F.text == "Продолжаем! 👉")),
                 state=StateofPutin.game2)
 async def putin_game2_question(message: Message, state: FSMContext):
     try:
@@ -278,13 +278,13 @@ async def putin_in_the_past(message: Message, state: FSMContext):
 async def putin_prove_me(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'putin_prove_me'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Давай 👌🏼"))
+    nmarkup.row(types.KeyboardButton(text="Давай 👌"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message(((F.text == "Да, я согласен(а) ✅") | (F.text == "Сейчас это военный преступник 😤") |
      (F.text == "Был хорошим президентом раньше, но сейчас - нет 🙅") |
-     (F.text == "Давай 👌🏼")), state=StateofPutin)
+     (F.text == "Давай 👌")), state=StateofPutin)
 async def stopwar_start(message: Message, state: FSMContext):
     await state.set_state(StopWarState.main)
     text = (

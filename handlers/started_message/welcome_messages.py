@@ -70,7 +70,7 @@ async def message_2(message: types.Message, state: FSMContext):
 async def message_3(message: types.Message, state: FSMContext):  # Начало опроса
     await poll_write(f'Usrs: {message.from_user.id}: Start_answers: Is_it_war:', message.text)
     markup = ReplyKeyboardBuilder()
-    markup.add(types.KeyboardButton(text="Задавай 👌🏻"))
+    markup.add(types.KeyboardButton(text="Задавай 👌"))
     markup.add(types.KeyboardButton(text="А долго будешь допрашивать? ⏱"))
     await state.update_data(answer_1=message.text)
     text = await sql_safe_select("text", "texts", {"name": "start_lets_start"})
@@ -94,7 +94,7 @@ async def message_4(message: types.Message):
                 content_types=types.ContentType.TEXT, text_ignore_case=True)
 async def message_5(message: types.Message, state: FSMContext):
     markup = ReplyKeyboardBuilder()
-    markup.row(types.KeyboardButton(text="Хорошо, задавай свои вопросы 👌🏼"))
+    markup.row(types.KeyboardButton(text="Хорошо, задавай свои вопросы 👌"))
     text = await sql_safe_select("text", "texts", {"name": "start_only_five"})
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     await state.set_state(welcome_states.start_dialog.dialogue_5)

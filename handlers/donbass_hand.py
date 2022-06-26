@@ -22,7 +22,7 @@ router.message.filter(state=donbass_state)
 @router.message(F.text == 'Что главное? 🤔')
 async def donbass_chart_1(message: Message):
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.add(types.KeyboardButton(text='Да, знал(а) 👌🏼'))
+    nmarkup.add(types.KeyboardButton(text='Да, знал(а) 👌'))
     nmarkup.add(types.KeyboardButton(text='Нет, не знал(а) 🤔'))
     nmarkup.row(types.KeyboardButton(text='Что значит «гражданские»? 👨‍👩‍👧‍👦'))
     nmarkup.adjust(2, 1)
@@ -33,7 +33,7 @@ async def donbass_chart_1(message: Message):
 async def eight_years_add(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'donbas_years_add'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.add(types.KeyboardButton(text='Да, знал(а) 👌🏼'))
+    nmarkup.add(types.KeyboardButton(text='Да, знал(а) 👌'))
     nmarkup.add(types.KeyboardButton(text='Нет, не знал(а) 🤔'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
@@ -170,7 +170,7 @@ async def donbas_reason_to_war(message: Message, state=FSMContext):
 
 
 @router.message(DonbassOptionsFilter(option='ООН врёт, не может быть таких жертв среди мирного населения'),
-                (F.text.in_({'Договорились 👌', "Хорошо 👌🏼", "Понятно 👌🏼", "Согласен(а) 👌🏼"})))
+                (F.text.in_({'Договорились 👌', "Хорошо 👌", "Понятно 👌", "Согласен(а) 👌"})))
 async def donbas_OOH(message: Message):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Donbass_polls: First:', donbass_first_poll[2])
     await simple_media(message, 'civil_casualties', filler_kb())
@@ -193,7 +193,7 @@ async def donbas_OOH(message: Message):
 
 @router.message(
     DonbassOptionsFilter(option="🏢 Это украинцы сами стреляют по своим же жителям! Мы же бьем только по военным объектам"),
-    (F.text.in_({'Договорились 👌', "Хорошо 👌🏼", "Понятно 👌🏼", "Согласен(а) 👌🏼"})))
+    (F.text.in_({'Договорились 👌', "Хорошо 👌", "Понятно 👌", "Согласен(а) 👌"})))
 async def donbas_only_war_objects(message: Message):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Donbass_polls: First:', donbass_first_poll[4])
     nmarkup = ReplyKeyboardBuilder()
@@ -231,12 +231,12 @@ async def exit_point_zero(message: Message):
 @router.message(text_contains=('укронацисты', 'легитимной'), content_types=types.ContentType.TEXT, text_ignore_case=True)
 @router.message(
     DonbassOptionsFilter(option="👨‍👩‍👧‍👦 Так они используют население, как живой щит! Поэтому погибают мирные жители"),
-    (F.text.in_({'Договорились 👌', "Хорошо 👌🏼", "Понятно 👌🏼", "Согласен(а) 👌🏼"})))
+    (F.text.in_({'Договорились 👌', "Хорошо 👌", "Понятно 👌", "Согласен(а) 👌"})))
 async def donbas_live_shield_start(message: Message):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Donbass_polls: First:', donbass_first_poll[5])
     text = await sql_safe_select('text', 'texts', {'name': 'donbas_live_shield_start'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Согласен(а) 👌🏼"))
+    nmarkup.row(types.KeyboardButton(text="Согласен(а) 👌"))
     nmarkup.row(types.KeyboardButton(text="Зачем они вообще сопротивлялись? 🤷‍♀️Мы же им желаем мира."))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
@@ -250,12 +250,12 @@ async def provocation(message: Message, state: FSMContext):
 
 
 @router.message(DonbassOptionsFilter(option="🏳️ Украинцам надо было просто сдаться, тогда бы столько жертв не было"),
-                (F.text.in_({'Договорились 👌', "Хорошо 👌🏼", "Понятно 👌🏼", "Согласен(а) 👌🏼"})))
+                (F.text.in_({'Договорились 👌', "Хорошо 👌", "Понятно 👌", "Согласен(а) 👌"})))
 async def donbas_why_not_surrender(message: Message):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Donbass_polls: First:', donbass_first_poll[6])
     text = await sql_safe_select('text', 'texts', {'name': 'donbas_why_not_surrender'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Согласен(а), я понимаю, почему украинцы начали защищаться 👌🏼"))
+    nmarkup.row(types.KeyboardButton(text="Согласен(а), я понимаю, почему украинцы начали защищаться 👌"))
     nmarkup.row(types.KeyboardButton(text="Тут другое дело, мы их освобождаем от неонацистов, захвативших власть на Украине 🙋‍♂️"))
     nmarkup.row(types.KeyboardButton(
         text="Не согласен(а), в случае нападения на Россию лучше сдаться, зато не будет жертв 🕊"))
@@ -275,7 +275,7 @@ async def donbas_putin_unleashed(message: Message, state: FSMContext):
 async def donbas_strange_world(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'donbas_strange_world'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Согласен(а), я понимаю, почему украинцы начали защищаться 👌🏼"))
+    nmarkup.row(types.KeyboardButton(text="Согласен(а), я понимаю, почему украинцы начали защищаться 👌"))
     nmarkup.row(types.KeyboardButton(text="Лучше бы просто никто ни на кого не нападал 🕊"))
     nmarkup.row(types.KeyboardButton(text="Но Россия - не агрессор. Мы не нападаем, а освобождаем страну от неонацизма 🙋‍♂️"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), parse_mode="HTML", disable_web_page_preview=True)
@@ -296,7 +296,7 @@ async def donbas_understanding(message: Message):
 
 @router.message(DonbassOptionsFilter(
     option='🎯 Это ужасно, но помимо защиты жителей Донбасса есть более весомые причины для начала войны'),
-    (F.text.in_({'Договорились 👌', "Хорошо 👌🏼", "Понятно 👌🏼", "Согласен(а) 👌🏼"})))
+    (F.text.in_({'Договорились 👌', "Хорошо 👌", "Понятно 👌", "Согласен(а) 👌"})))
 async def donbas_more_reasons(message: Message, state: FSMContext):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Donbass_polls: First:', donbass_first_poll[7])
     text = await sql_safe_select('text', 'texts', {'name': 'donbas_more_reasons'})
@@ -322,7 +322,7 @@ async def donbas_who_do_that(message: Message, state=FSMContext):
 async def donbas_long_maidan(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'short_separ_text'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Вернемся к другим причинам войны 👌🏼"))
+    nmarkup.row(types.KeyboardButton(text="Вернемся к другим причинам войны 👌"))
     nmarkup.row(types.KeyboardButton(text="Путин просто помогал, которые не хотели жить в Украине после Майдана 🤷"))
     nmarkup.row(
         types.KeyboardButton(text="Путин помог разжечь этот конфликт, чтобы помешать Украине вступить в НАТО 🛡"))
@@ -341,7 +341,7 @@ async def donbas_long_maidan(message: Message):
 @router.message((F.text == "Что случилось дальше? ⏳"))
 async def donbas_can_you_be_normal(message: Message):
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Вернемся к другим причинам войны 👌🏼"))
+    nmarkup.row(types.KeyboardButton(text="Вернемся к другим причинам войны 👌"))
     nmarkup.row(types.KeyboardButton(text="Путин просто помогал, которые не хотели жить в Украине после Майдана 🤷"))
     nmarkup.row(
         types.KeyboardButton(text="Путин помог разжечь этот конфликт, чтобы помешать Украине вступить в НАТО 🛡"))
@@ -432,12 +432,12 @@ async def donbas_hypocrisy(message: Message, state: FSMContext):
 async def donbas_untrue(message: Message, state=FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'donbas_untrue'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Хорошо 👌🏼"))
+    nmarkup.row(types.KeyboardButton(text="Хорошо 👌"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Продолжай🖱") | (F.text == 'Хорошо 👌🏼'))
-@router.message((F.text == "Вернемся к другим причинам войны 👌🏼"))
+@router.message((F.text == "Продолжай🖱") | (F.text == 'Хорошо 👌'))
+@router.message((F.text == "Вернемся к другим причинам войны 👌"))
 @router.message((F.text == "Путин просто помогал, которые не хотели жить в Украине после Майдана 🤷"))
 async def donbas_no_army_here(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()

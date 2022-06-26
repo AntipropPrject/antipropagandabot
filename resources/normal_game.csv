@@ -1,7 +1,7 @@
 id,asset_name,text_name,belivers,nonbelivers,rebuttal
-2,normal_game_2,normal_game_2,8,2,
-3,normal_game_3,normal_game_3,6,3,
-4,normal_game_4,normal_game_4,6,3,
 5,normal_game_5,normal_game_5,5,4,
 6,normal_game_6,normal_game_6,7,1,
-1,normal_game_1,normal_game_1,8,4,
+1,normal_game_1,normal_game_1,8,5,
+2,normal_game_2,normal_game_2,8,3,
+3,normal_game_3,normal_game_3,6,4,
+4,normal_game_4,normal_game_4,7,3,
