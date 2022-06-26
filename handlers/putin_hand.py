@@ -4,7 +4,6 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.dispatcher.fsm.state import StatesGroup, State
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-
 from data_base.DBuse import data_getter, sql_safe_select, sql_safe_update
 from filters.All_filters import PutinFilter
 from handlers.stopwar_hand import StopWarState
@@ -38,12 +37,12 @@ async def putin_not_love_putin(message: Message, state: FSMContext):
     await state.set_state(StateofPutin.main)
     text = "Выберите описание Владимира Путина, которое вы считаете наиболее точным:"
     nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Отличный президент ✊"))
+    nmarkup.row(types.KeyboardButton(text="Военный преступник 😤"))
     nmarkup.row(types.KeyboardButton(text="Не лучший президент, но кто, если не Путин? 🤷‍♂️"))
-    nmarkup.row(types.KeyboardButton(text="Превосходный лидер и отличный президент ✊"))
     nmarkup.row(types.KeyboardButton(text="Хороший президент, но его приказы плохо исполняют 🤷‍♀️"))
-    nmarkup.row(types.KeyboardButton(text="Сейчас это военный преступник 😤"))
     nmarkup.row(types.KeyboardButton(text="Был хорошим президентом раньше, но сейчас - нет 🙅"))
-    nmarkup.adjust(1, 1, 1, 2)
+    nmarkup.adjust(2, 1, 1, 1)
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
@@ -67,7 +66,7 @@ async def putin_only_one(message: Message):
 
 
 @router.message(
-    (F.text == "Не говори такие вещи, Путин с нами надолго! ✊") | (F.text == "Превосходный лидер и отличный президент ✊"))
+    (F.text == "Не говори такие вещи, Путин с нами надолго! ✊") | (F.text == "Отличный президент ✊"))
 async def putin_so_handsome(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'putin_so_handsome'})
     nmarkup = ReplyKeyboardBuilder()
@@ -282,7 +281,7 @@ async def putin_prove_me(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(((F.text == "Да, я согласен(а) ✅") | (F.text == "Сейчас это военный преступник 😤") |
+@router.message(((F.text == "Да, я согласен(а) ✅") | (F.text == "Военный преступник 😤") |
      (F.text == "Был хорошим президентом раньше, но сейчас - нет 🙅") |
      (F.text == "Давай 👌🏼")), state=StateofPutin)
 async def stopwar_start(message: Message, state: FSMContext):
