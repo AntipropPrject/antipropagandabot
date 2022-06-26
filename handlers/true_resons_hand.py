@@ -261,6 +261,7 @@ async def reasons_normal_game_question(message: Message, state: FSMContext):
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Это абсурд🤦🏼‍♀️"))
         nmarkup.row(types.KeyboardButton(text="Это нормально👌🏼"))
+        nmarkup.adjust(2)
         if truth_data[0] is not None:
             capt = ""
             if truth_data[1] is not None:
