@@ -24,7 +24,7 @@ router.message.middleware(CounterMiddleware())
 router.message.filter(state=PreventStrikeState)
 
 
-@router.message((F.text == 'Давай разберем 👌🏼'))
+@router.message((F.text == 'Давай разберём 👌'))
 async def prevent_strike_any_brutality(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_any_brutality'})
     nmarkup = ReplyKeyboardBuilder()
