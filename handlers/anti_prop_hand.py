@@ -636,7 +636,7 @@ async def antip_truth_game_answer(message: Message, state: FSMContext):
             reality = "Правильно! Это ложь!"
         base_update_dict = {'nonbelivers': data['not_belive'] + 1}
     t_percentage = data['belive'] / (data['belive'] + data['not_belive'])
-    text = reality + f'\n\nРезультаты других участников:\n✅ <b>Правда:</b> {round(t_percentage * 100, 1)}%\n' \
+    text = reality + f'\n\nРезультаты других участников:\n✅ <b>Правда:</b> {round(t_percentage * 100)}%\n' \
                      f'❌ <b>Ложь</b>: {round((100 - t_percentage * 100), 1)}' + '\n\nПодтверждение - ниже.'
     reb = data['rebuttal']
     await sql_safe_update("truthgame", base_update_dict, {'id': data['game_id']})

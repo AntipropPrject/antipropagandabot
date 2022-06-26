@@ -186,7 +186,7 @@ async def smi_statement_enough(message: Message, state: FSMContext):
     except IndexError as er:
         print(er)
     await message.answer(
-        f'А вот что думаютдругие мои собеседники:\nСлучайная ошибка: {round(t_percentage * 100, 1)}%\nЦеленаправленная ложь: {round((100 - t_percentage * 100), 1)}%',
+        f'А вот что думаютдругие мои собеседники:\nСлучайная ошибка: {round(t_percentage * 100)}%\nЦеленаправленная ложь: {round(100 - t_percentage * 100)}%',
         reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 

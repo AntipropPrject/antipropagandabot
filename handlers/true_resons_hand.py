@@ -296,9 +296,9 @@ async def reasons_normal_game_answer(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="Продолжаем, давай еще! 👉"))
     nmarkup.row(types.KeyboardButton(text="Достаточно, давай закончим 🙅"))
     await message.answer(
-        f'Результаты других участников:\n\n<b>Это абсурд:</b> {round((100 - t_percentage * 100), 1)}% '
+        f'Результаты других участников:\n\n<b>Это абсурд:</b> {round(100 - t_percentage * 100)}% '
         f'\n<b>Все в порядке:</b>'
-        f'{round(t_percentage * 100, 1)}%',
+        f'{round(t_percentage * 100)}%',
         reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
