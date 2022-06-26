@@ -54,3 +54,6 @@ docs/_build/
 logfile.log
 *.pyc
 bata.py
+*.mp4
+*.jpg
+*.png
