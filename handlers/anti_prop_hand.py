@@ -155,7 +155,7 @@ async def russia_tv_first_reb(message: Message, state: FSMContext):
     if await sql_safe_select('t_id', 'assets', {'name': f'tv_first_reb_{count + 1}'}) is not False:
         nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет с 1 канала 📺"))
     nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал 🔄"))
-    nmarkup.row(types.KeyboardButton(text="Хватит, мне все понятно ✋"))
+    nmarkup.row(types.KeyboardButton(text="Достаточно, мне все понятно ✋"))
     await simple_media(message, f'tv_first_reb_{count}', nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -166,7 +166,7 @@ async def tv_russia24_reb(message: Message, state: FSMContext):
     if await sql_safe_select('t_id', 'assets', {'name': f'tv_24_reb_{count + 1}'}) is not False:
         nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет c России 1 / 24 📺"))
     nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал 🔄"))
-    nmarkup.row(types.KeyboardButton(text="Хватит, мне все понятно ✋"))
+    nmarkup.row(types.KeyboardButton(text="Достаточно, мне все понятно ✋"))
     await simple_media(message, f'tv_24_reb_{count}', nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -177,7 +177,7 @@ async def tv_HTB_reb(message: Message, state: FSMContext):
     if await sql_safe_select('t_id', 'assets', {'name': f'tv_HTB_reb_{count + 1}'}) is not False:
         nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет НТВ 📺"))
     nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал 🔄"))
-    nmarkup.row(types.KeyboardButton(text="Хватит, мне все понятно ✋"))
+    nmarkup.row(types.KeyboardButton(text="Достаточно, мне все понятно ✋"))
     await simple_media(message, f'tv_HTB_reb_{count}', nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -188,11 +188,11 @@ async def tv_star_reb(message: Message, state: FSMContext):
     if await sql_safe_select('t_id', 'assets', {'name': f'tv_star_lie_{count + 1}'}) is not False:
         nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет с телеканала Звезда 📺"))
     nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал 🔄"))
-    nmarkup.row(types.KeyboardButton(text="Хватит, мне все понятно ✋"))
+    nmarkup.row(types.KeyboardButton(text="Достаточно, мне все понятно ✋"))
     await simple_media(message, f'tv_star_reb_{count}', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.contains('Хватит') & (F.text.contains('понятно'))))
+@router.message((F.text.contains('Достаточно') & (F.text.contains('понятно'))))
 async def antip_crossed_boy_1(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_crossed_boy_1'})
     vid_id = await sql_safe_select('t_id', 'assets', {'name': 'TV_rebuttal_filler'})
@@ -237,7 +237,7 @@ async def antip_another_tv(message: Message, state: FSMContext):
         nmarkup.row(types.KeyboardButton(text='Звезда 📺'))
     if await sql_safe_select('t_id', 'assets', {'name': f'tv_HTB_lie_{bigdata["HTB_tv_count"] + 1}'}) is not False:
         nmarkup.row(types.KeyboardButton(text='НТВ 📺'))
-    nmarkup.row(types.KeyboardButton(text="Хватит, мне все понятно ✋"))
+    nmarkup.row(types.KeyboardButton(text="Достаточно, мне все понятно ✋"))
     nmarkup.adjust(2, 2, 1)
     await message.answer('Я собрал для вас большую базу лжи на федеральных каналах.'
                          ' Выбирайте любой -- и убедитесь сами!', reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
@@ -397,7 +397,6 @@ async def show_the_news(message: types.Message, state: FSMContext):
         other_channel = message.text
         if other_channel != 'Хватит, пропустим остальные источники 🙅‍♂️':
             viewed = data["all_viwed"]
-            print(viewed)
             viewed.append(other_channel[:-2])
             await state.update_data(all_viwed=list(set(viewed)))  # Список просмотренных источников
 
@@ -637,7 +636,7 @@ async def antip_truth_game_answer(message: Message, state: FSMContext):
             reality = "Правильно! Это ложь!"
         base_update_dict = {'nonbelivers': data['not_belive'] + 1}
     t_percentage = data['belive'] / (data['belive'] + data['not_belive'])
-    text = reality + f'\n\nРезультаты других участников:\n✅ <b>Правда:</b> {round(t_percentage * 100, 1)}%\n' \
+    text = reality + f'\n\nРезультаты других участников:\n✅ <b>Правда:</b> {round(t_percentage * 100)}%\n' \
                      f'❌ <b>Ложь</b>: {round((100 - t_percentage * 100), 1)}' + '\n\nПодтверждение - ниже.'
     reb = data['rebuttal']
     await sql_safe_update("truthgame", base_update_dict, {'id': data['game_id']})

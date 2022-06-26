@@ -139,7 +139,7 @@ async def prevent_strike_start(message: Message, state: FSMContext):
     await state.set_state(PreventStrikeState.main)
     text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_start'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text='Давай разберем 👌🏼'))
+    nmarkup.row(types.KeyboardButton(text='Давай разберём 👌'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
@@ -296,9 +296,9 @@ async def reasons_normal_game_answer(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="Продолжаем, давай еще! 👉"))
     nmarkup.row(types.KeyboardButton(text="Достаточно, давай закончим 🙅"))
     await message.answer(
-        f'Результаты других участников:\n\n<b>Это абсурд:</b> {round((100 - t_percentage * 100), 1)}% '
+        f'Результаты других участников:\n\n<b>Это абсурд:</b> {round(100 - t_percentage * 100)}% '
         f'\n<b>Все в порядке:</b>'
-        f'{round(t_percentage * 100, 1)}%',
+        f'{round(t_percentage * 100)}%',
         reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
