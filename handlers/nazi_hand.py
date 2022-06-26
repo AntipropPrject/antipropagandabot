@@ -297,7 +297,7 @@ async def nazi_76_percent(poll_answer: types.PollAnswer, bot: Bot, state: FSMCon
     except TelegramBadRequest:
         await bot.send_video(poll_answer.user.id, photo, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
-@router.message((F.text.contains('другие цифры')))
+@router.message((F.text.contains('А я слышал(а) другие цифры')))
 async def nazi_manipulation(message: Message, state: FSMContext):
     await state.set_state(NaziState.third_part)
     nmarkup = ReplyKeyboardBuilder()
