@@ -4,7 +4,6 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-
 from data_base.DBuse import poll_write, sql_safe_select, poll_get, redis_delete_from_list
 from filters.All_filters import DonbassOptionsFilter
 from handlers.true_resons_hand import TruereasonsState
@@ -48,7 +47,7 @@ async def donbass_chart_2(message: Message, state: FSMContext):
 
 
 @router.message(donbass_state.eight_years_selection, (F.text.contains('Покажи варианты ✍️')))
-async def donbass_poll(message: Message, state: FSMContext):
+async def donbass_poll(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.add(types.KeyboardButton(text='Продолжить'))
     await message.answer_poll("Отметьте один или более вариантов, с которыми вы согласны или частично согласны",
@@ -171,7 +170,7 @@ async def donbas_reason_to_war(message: Message, state=FSMContext):
 
 
 @router.message(DonbassOptionsFilter(option='ООН врёт, не может быть таких жертв среди мирного населения'),
-                (F.text.in_({'Договорились 👌🏼', "Хорошо 👌🏼", "Понятно 👌🏼", "Согласен(а) 👌🏼"})))
+                (F.text.in_({'Договорились 👌', "Хорошо 👌🏼", "Понятно 👌🏼", "Согласен(а) 👌🏼"})))
 async def donbas_OOH(message: Message):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Donbass_polls: First:', donbass_first_poll[2])
     await simple_media(message, 'civil_casualties', filler_kb())
@@ -194,7 +193,7 @@ async def donbas_OOH(message: Message):
 
 @router.message(
     DonbassOptionsFilter(option="🏢 Это украинцы сами стреляют по своим же жителям! Мы же бьем только по военным объектам"),
-    (F.text.in_({'Договорились 👌🏼', "Хорошо 👌🏼", "Понятно 👌🏼", "Согласен(а) 👌🏼"})))
+    (F.text.in_({'Договорились 👌', "Хорошо 👌🏼", "Понятно 👌🏼", "Согласен(а) 👌🏼"})))
 async def donbas_only_war_objects(message: Message):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Donbass_polls: First:', donbass_first_poll[4])
     nmarkup = ReplyKeyboardBuilder()
@@ -232,7 +231,7 @@ async def exit_point_zero(message: Message):
 @router.message(text_contains=('укронацисты', 'легитимной'), content_types=types.ContentType.TEXT, text_ignore_case=True)
 @router.message(
     DonbassOptionsFilter(option="👨‍👩‍👧‍👦 Так они используют население, как живой щит! Поэтому погибают мирные жители"),
-    (F.text.in_({'Договорились 👌🏼', "Хорошо 👌🏼", "Понятно 👌🏼", "Согласен(а) 👌🏼"})))
+    (F.text.in_({'Договорились 👌', "Хорошо 👌🏼", "Понятно 👌🏼", "Согласен(а) 👌🏼"})))
 async def donbas_live_shield_start(message: Message):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Donbass_polls: First:', donbass_first_poll[5])
     text = await sql_safe_select('text', 'texts', {'name': 'donbas_live_shield_start'})
@@ -251,7 +250,7 @@ async def provocation(message: Message, state: FSMContext):
 
 
 @router.message(DonbassOptionsFilter(option="🏳️ Украинцам надо было просто сдаться, тогда бы столько жертв не было"),
-                (F.text.in_({'Договорились 👌🏼', "Хорошо 👌🏼", "Понятно 👌🏼", "Согласен(а) 👌🏼"})))
+                (F.text.in_({'Договорились 👌', "Хорошо 👌🏼", "Понятно 👌🏼", "Согласен(а) 👌🏼"})))
 async def donbas_why_not_surrender(message: Message):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Donbass_polls: First:', donbass_first_poll[6])
     text = await sql_safe_select('text', 'texts', {'name': 'donbas_why_not_surrender'})
@@ -297,7 +296,7 @@ async def donbas_understanding(message: Message):
 
 @router.message(DonbassOptionsFilter(
     option='🎯 Это ужасно, но помимо защиты жителей Донбасса есть более весомые причины для начала войны'),
-    (F.text.in_({'Договорились 👌🏼', "Хорошо 👌🏼", "Понятно 👌🏼", "Согласен(а) 👌🏼"})))
+    (F.text.in_({'Договорились 👌', "Хорошо 👌🏼", "Понятно 👌🏼", "Согласен(а) 👌🏼"})))
 async def donbas_more_reasons(message: Message, state: FSMContext):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Donbass_polls: First:', donbass_first_poll[7])
     text = await sql_safe_select('text', 'texts', {'name': 'donbas_more_reasons'})
