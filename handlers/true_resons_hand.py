@@ -188,9 +188,7 @@ async def reasons_lie_no_more_3(message: Message):
 
 @router.message(WarReason(answer="💂 Предотвратить размещение военных баз НАТО в Украине"))
 async def reasons_big_bad_nato(message: Message):
-    await redis_delete_from_list(f'Usrs: {message.from_user.id}: Start_answers: Invasion:',
-                                 "💂 Предотвратить размещение военных баз НАТО в Украине")
-    text = await sql_safe_select('text', 'texts', {'name': 'reasons_big_bad_NATO'})
+    text = await simple_media(message, 'reasons_big_bad_NATO')
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Давай 👌🏼'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
