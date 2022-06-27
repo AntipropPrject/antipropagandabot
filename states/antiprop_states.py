@@ -2,7 +2,9 @@ from aiogram.dispatcher.fsm.state import State, StatesGroup
 
 
 class propaganda_victim(StatesGroup):
+
     start = State()
+    options = State()
     tv_first = State()
     tv_russia24 = State()
     tv_russia1 = State()
@@ -11,4 +13,5 @@ class propaganda_victim(StatesGroup):
     tv_ren = State()
     dialogue_start_over = State()
     ppl_propaganda = State()
+
     final = State()

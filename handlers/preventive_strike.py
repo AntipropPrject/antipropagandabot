@@ -89,14 +89,14 @@ async def prevent_strike_q4(message: Message, state: FSMContext):
 async def prevent_strike_now_you(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_now_you'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text='Да, превентивный удар - лишь повод 👌🏼'))
+    nmarkup.row(types.KeyboardButton(text='Да, превентивный удар - лишь повод 👌'))
     nmarkup.row(types.KeyboardButton(text='Я и так не верил(а) в то, что Украина готовит нападение 🤷‍♂️'))
     nmarkup.row(types.KeyboardButton(text='Нет, это настоящая причина начала военных действий ☝️'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message(
-        F.text.in_({'Да, превентивный удар - лишь повод 👌🏼', 'Я и так не верил(а) в то, что Украина готовит нападение 🤷‍♂️'}))
+        F.text.in_({'Да, превентивный удар - лишь повод 👌', 'Я и так не верил(а) в то, что Украина готовит нападение 🤷‍♂️'}))
 async def prevent_strike_hitler_allright(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_hitler_allright'})
     nmarkup = ReplyKeyboardBuilder()

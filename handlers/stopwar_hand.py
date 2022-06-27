@@ -21,7 +21,7 @@ async def stopwar_rather_yes(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_rather_yes'})
     photo = await sql_safe_select('t_id', 'assets', {'name': 'stopwar_rather_yes'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Согласен(а) 👌🏼"))
+    nmarkup.row(types.KeyboardButton(text="Согласен(а) 👌"))
     nmarkup.row(types.KeyboardButton(text="Не согласен(а) 🙅"))
     try:
         await message.answer_photo(photo, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
@@ -34,7 +34,7 @@ async def stopwar_idk(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_idk'})
     photo = await sql_safe_select('t_id', 'assets', {'name': 'stopwar_idk'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Согласен(а) 👌🏼"))
+    nmarkup.row(types.KeyboardButton(text="Согласен(а) 👌"))
     nmarkup.row(types.KeyboardButton(text="Не согласен(а) 🙅"))
     try:
         await message.answer_photo(photo, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
@@ -45,11 +45,11 @@ async def stopwar_idk(message: Message):
 async def stopwar_rather_no(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_rather_no'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Продолжим 👌🏼"))
+    nmarkup.row(types.KeyboardButton(text="Продолжим 👌"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Не согласен(а) 🙅") | (F.text == "Согласен(а) 👌🏼") | (F.text == "Продолжим 👌🏼"))
+@router.message((F.text == "Не согласен(а) 🙅") | (F.text == "Согласен(а) 👌") | (F.text == "Продолжим 👌"))
 async def stopwar_will_it_stop(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_will_it_stop'})
     nmarkup = ReplyKeyboardBuilder()
@@ -63,7 +63,7 @@ async def stopwar_will_it_stop(message: Message):
 async def stopwar_ofc(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_ofc'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Продолжим👌🏼"))
+    nmarkup.row(types.KeyboardButton(text="Продолжим👌"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
@@ -79,11 +79,11 @@ async def stopwar_war_eternal(message: Message):
 async def stopwar_isolation(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_isolation'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Продолжим👌🏼"))
+    nmarkup.row(types.KeyboardButton(text="Продолжим👌"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Продолжим👌🏼"))
+@router.message((F.text == "Продолжим👌"))
 async def stopwar_stop_putin(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_stop_putin'})
     nmarkup = ReplyKeyboardBuilder()
