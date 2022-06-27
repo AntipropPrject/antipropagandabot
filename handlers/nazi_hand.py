@@ -232,7 +232,6 @@ async def nazi_many_forms(message: Message):
 @router.message(((F.text.contains("можно")) | (F.text == "Я не в праве давать такие оценки 🤷")),
                 state=NaziState.genocide)
 async def nazi_eight_years(message: Message, state: FSMContext):
-    await state.set_state(NaziState.third_part)
     if message.text == "Я не в праве давать такие оценки 🤷":
         text = 'Понимаю, поэтому пусть оценку дадут факты. Задайте себе вопрос:'
     else:
@@ -273,7 +272,7 @@ async def nazi_genocide_exit_1(message: Message, state: FSMContext):
     await nazi_second_poll(message, state)
 
 
-@router.message((F.text == "Нет, это геноцид 💀"), state=NaziState.genocide)
+@router.message((F.text == "Нет, это геноцид 💀"), state=NaziState.third_part)
 async def nazi_bounds(message: Message, state: FSMContext):
     text = await sql_safe_select("text", "texts", {"name": "nazi_bounds"})
     markup = ReplyKeyboardBuilder()
