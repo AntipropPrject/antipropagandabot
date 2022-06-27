@@ -206,7 +206,7 @@ async def antip_crossed_boy_2(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_crossed_boy_2'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжай... ⏳"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await simple_media(message, 'antip_crossed_boy_2', nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text == 'Продолжай... ⏳'))
@@ -274,7 +274,7 @@ async def antip_conspirasy(message: Message, state: FSMContext):
 async def antip_not_only_TV(message: Message, web_lies_list: List[str], state: FSMContext):
     answer_id_str = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: ethernet_id:')
     markup = ReplyKeyboardBuilder()
-    markup.row(types.KeyboardButton(text="Показывай"))
+    markup.row(types.KeyboardButton(text="Покажи новость 👀"))
     lies_list = web_lies_list
     answer_id_int = []
     all_answers = web_prop
@@ -360,7 +360,7 @@ async def check_name(tag):
         return False
 
 
-@router.message(((F.text.contains('Показывай')) | (F.text.contains('РИА Новости 👀')) | (
+@router.message(((F.text.contains('Покажи новость 👀')) | (F.text.contains('РИА Новости 👀')) | (
         F.text.contains('Russia Today 👀')) | (
                          F.text.contains('Министерство обороны РФ 👀')) | (
                          F.text.contains('Телеграм-канал: Война с фейками 👀')) | (F.text.contains('РБК 👀')) | (
@@ -369,7 +369,7 @@ async def check_name(tag):
 F.text.contains('еще')))  # вход в цикл
 async def show_the_news(message: types.Message, state: FSMContext):
     data = await state.get_data()
-    if message.text == 'Показывай':
+    if message.text == 'Покажи новость 👀':
         markup = ReplyKeyboardBuilder()
         markup.row(types.KeyboardButton(text="Новость посмотрел(а). Что с ней не так? 🤔"))
         # получить самый первый источник из списка выбранных каналов
@@ -543,8 +543,8 @@ async def skip_web(message: Message, state: FSMContext):
     not_viewed = list(set(answer_channel) - set(all_viwed))
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text='Хорошо, давай вернемся и посмотрим 👀'))
-    markup.row(types.KeyboardButton(text='Не надо, я и так знаю, что они врут'))
-    markup.row(types.KeyboardButton(text='Не надо, я все равно буду доверять им'))
+    markup.row(types.KeyboardButton(text='Не надо, я и так знаю, что они врут 😒'))
+    markup.row(types.KeyboardButton(text='Не надо, я всё равно буду доверять им 👍'))
     lst_web_answers = str(', '.join(not_viewed))
     next_channel = str(not_viewed[0])
     await state.update_data(not_viewed_chanel=not_viewed[0])
