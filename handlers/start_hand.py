@@ -1,19 +1,20 @@
 import csv
+
 from aiogram import Router, F
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.dispatcher.fsm.state import StatesGroup, State
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
+
 import bata
-from data_base.DBuse import data_getter, mongo_select_admins, sql_safe_insert
-from handlers import true_resons_hand, putin_hand
+from data_base.DBuse import mongo_select_admins
+from handlers import true_resons_hand
 from handlers.admin_hand import admin_home
 from handlers.true_resons_hand import reasons_who_to_blame
 from keyboards.admin_keys import main_admin_keyboard
 from middleware import CounterMiddleware
 from states.donbass_states import donbass_state
-from utilts import simple_media, phoenix_protocol
 
 router = Router()
 router.message.middleware(CounterMiddleware())
@@ -85,4 +86,3 @@ async def csv_dump(message: Message, state: FSMContext):
     except:
         await message.answer_video(ph_id, caption=capt)
         await state.clear()
-
