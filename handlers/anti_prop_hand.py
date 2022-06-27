@@ -60,7 +60,7 @@ async def antip_all_no_TV(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)"""
 
 
-@router.message(TVPropagandaFilter(option="Да, полностью доверяю"), (F.text == 'Продолжай 📺'))
+@router.message(TVPropagandaFilter(option="Да, полностью доверяю"), (F.text == 'Продолжай ⏳'))
 async def antiprop_all_yes_second(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_all_yes_TV_2'})
     nmarkup = ReplyKeyboardBuilder()
@@ -399,7 +399,7 @@ async def show_the_news(message: types.Message, state: FSMContext):
             viewed = data["all_viwed"]
             viewed.append(other_channel[:-2])
             await state.update_data(all_viwed=list(set(viewed)))  # Список просмотренных источников
-
+        tag_media = ''
         if other_channel[:-2] == web_prop[0]:
             tag_media = 'RIANEWS_media_'
         elif other_channel[:-2] == web_prop[1]:
@@ -420,6 +420,7 @@ async def show_the_news(message: types.Message, state: FSMContext):
         await state.update_data(count_news=1)
         new_data = 1
         other_channel = data['not_viewed_chanel']
+        tag_media = ''
         if other_channel == web_prop[0]:
             tag_media = 'RIANEWS_media_'
         elif other_channel == web_prop[1]:
@@ -436,7 +437,6 @@ async def show_the_news(message: types.Message, state: FSMContext):
         if other_channel != 'Хватит, пропустим остальные источники 🙅‍♂️':
             viewed = data["all_viwed"]
             viewed.append(other_channel)
-            print(viewed)
             await state.update_data(all_viwed=list(set(viewed)))  # Список просмотренных источников
         await simple_media(message, tag_media + str(new_data), reply_markup=markup.as_markup(resize_keyboard=True))
     else:
@@ -482,6 +482,7 @@ async def show_more(message: types.Message, state: FSMContext):
     new_data = data['count_news'] + 1
     await state.update_data(count_news=new_data)  # обновление счетчика
     viewed_channel = data['viewed_channel']  # Просматриваемый канал
+    tag_media = ''
     if viewed_channel == web_prop[0]:
         tag_media = 'RIANEWS_media_'
     elif viewed_channel == web_prop[1]:
