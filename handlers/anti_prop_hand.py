@@ -192,7 +192,7 @@ async def tv_star_reb(message: Message, state: FSMContext):
     await simple_media(message, f'tv_star_reb_{count}', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.contains('Достаточно') & (F.text.contains('понятно'))))
+@router.message((F.text.contains('Достаточно') & (F.text.contains('понятно ✋'))))
 async def antip_crossed_boy_1(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_crossed_boy_1'})
     vid_id = await sql_safe_select('t_id', 'assets', {'name': 'TV_rebuttal_filler'})
@@ -301,7 +301,6 @@ async def antip_not_only_TV(message: Message, web_lies_list: List[str], state: F
 
     await state.update_data(all_answers=all_answers)  # Все ответы опроса
     await state.update_data(answers_int=answer_id_int)  # Все ответы пользователя индексы
-    print(lies_list)
     await state.update_data(answers_str=lies_list)  # Все ответы пользователя строки
     channel = lies_list[0]
     text = 'Но пропаганда в России не заканчивается ' \
@@ -337,6 +336,7 @@ async def keyboard_for_all_chanel(lst_kb):
     markup = ReplyKeyboardBuilder()
     for button in lst_kb:
         markup.row(types.KeyboardButton(text=button+' 👀'))
+        markup.adjust(2)
     markup.row(types.KeyboardButton(text='Хватит, пропустим остальные источники 🙅‍♂️'))
     return markup
 
