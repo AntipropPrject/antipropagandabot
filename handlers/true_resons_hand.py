@@ -73,7 +73,6 @@ async def reasons_now_you_nothing(message: Message, state: FSMContext):
 @router.message((F.text == "Давай попробуем 👌"))
 async def reasons_now_you_fucked(message: Message, state: FSMContext):
     await redis_just_one_write(f'Usrs: {message.from_user.id}: Politics:', 'Сторонник войны')
-
     await anti_prop_hand.war_point_now(message, state)
 
 
