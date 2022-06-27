@@ -158,7 +158,7 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FS
         answer = nazizm_pr[index]
         first_poll_answers = await poll_get(f'Usrs: {poll_answer.user.id}: Nazi_answers: first_poll:')
         await poll_write(f'Usrs: {poll_answer.user.id}: Nazi_answers: small_poll:', answer)
-        if answer == "📊 Менее 5%" and 'Многие украинцы ненавидят русских только за то, что они русские' not in first_poll_answers:
+        if answer == "📊 Менее 5%" and nazizm[0] not in first_poll_answers:
             markup = ReplyKeyboardBuilder()
             markup.row(types.KeyboardButton(text="Продолжай ⏳"))
             text = await sql_safe_select("text", "texts", {"name": "nazi_piechart"})
@@ -177,7 +177,7 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FS
 async def nazi_canny(message: Message):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Посмотрел(а) 📺"))
-    await simple_media(message, "nazi_canny", markup.as_markup())
+    await simple_media(message, "nazi_canny", markup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text.contains('Посмотрел(а) 📺')), state=NaziState.after_small_poll)
