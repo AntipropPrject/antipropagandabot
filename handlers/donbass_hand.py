@@ -221,11 +221,11 @@ async def provocation(message: Message):
 @router.message(text_contains=('среди', 'населения', 'важных'), content_types=types.ContentType.TEXT,
                 text_ignore_case=True)
 async def exit_point_two(message: Message, state: FSMContext):
+    text = await sql_safe_select('text', 'texts', {'name': 'donbas_return_to_donbass'})
     answers = await poll_get(f'Usrs: {message.from_user.id}: Donbass_polls: First:')
     await poll_write(f'Usrs: {message.from_user.id}: Donbass_polls: First:', donbass_first_poll[7])
     await state.update_data(big_game='Помимо защиты жителей Донбасса есть более весомые причины для начала войны.')
-    await message.answer('Возможно вы правы. Обязательно обсудим все причины\nА пока вернемся к теме Донбасса',
-                         reply_markup=filler_kb(), parse_mode="HTML")
+    await message.answer(text, reply_markup=filler_kb(), parse_mode="HTML")
 
 
 @router.message(text_contains=('ужас', 'следующей', 'теме'), content_types=types.ContentType.TEXT,
