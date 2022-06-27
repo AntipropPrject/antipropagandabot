@@ -414,15 +414,13 @@ async def show_the_news(message: types.Message, state: FSMContext):
         elif other_channel == web_prop[1]:
             tag_media = 'RUSSIATODAY_media_'
         elif other_channel == web_prop[2]:
-            print(other_channel + "1123")
             tag_media = 'TCHANEL_WAR_media_'
-            print(tag_media)
         elif other_channel == web_prop[3]:
             tag_media = 'TACC_media_'
         elif other_channel == web_prop[4]:
             tag_media = 'MINISTRY_media_'
         elif other_channel == web_prop[5]:
-            tag_media = 'TCHANEL_WAR_media_'
+            tag_media = 'YANDEXNEWS_media_'
         print(tag_media)
         await simple_media(message, tag_media+str(new_data), reply_markup=markup.as_markup(resize_keyboard=True))
 
