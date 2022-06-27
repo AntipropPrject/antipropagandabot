@@ -248,7 +248,9 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
     for index in lst_answers:
         lst.append(lst_options[index])
         await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust:', lst_options[index])
-        await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:', lst_options[index])
+        if lst_options[index]!="Владимир Путин":
+            if lst_options[index]!="Никому из них...":
+                await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:', lst_options[index])
     await state.update_data(answer_5=poll_answer.option_ids)
     text = await sql_safe_select("text", "texts", {"name": "start_thank_you"})
     await bot.send_message(poll_answer.user.id, text)
