@@ -4,8 +4,8 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.dispatcher.fsm.state import State, StatesGroup
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message
-from pandas import DataFrame
 from psycopg2 import sql
+
 from bata import all_data
 from data_base.DBuse import sql_safe_select, sql_safe_update, sql_safe_insert
 from keyboards.admin_keys import main_admin_keyboard, middle_admin_keyboard, app_admin_keyboard
@@ -87,9 +87,11 @@ async def text_hello(message: types.Message, state: FSMContext):
                                   ' подписав его удобным тегом подобного формата: some_unique_tag',
                              reply_markup=middle_admin_keyboard())
     except TelegramBadRequest:
-        await message.answer('Похоже, что картинка, которую показывает бот в качестве примера, для вашего бота не работает.\n'
-                             'Вы можете заменить ее на свою, воспользовавшись опцией "Изменить медиа" в главном меню, '
-                             'и указав таг <b>test_photo_tag</b>')
+        await message.answer(
+            'Похоже, что картинка, которую показывает бот в качестве примера, для вашего бота не работает.\n'
+            'Вы можете заменить ее на свою, воспользовавшись опцией "Изменить медиа" в главном меню, '
+            'и указав таг <b>test_photo_tag</b>')
+
 
 @router.message(content_types='photo', state=admin_home.add_media)
 async def get_photo(message: Message, state: FSMContext):
@@ -146,7 +148,6 @@ async def text_edit_text_test(message: Message, state: FSMContext):
     await state.update_data({"text": message.html_text})
     await state.set_state(admin_home.text_edit_test)
     test = await state.get_data()
-
 
 
 @router.message((F.text == 'Изменить медиа'), state=admin_home.admin)
@@ -239,6 +240,7 @@ async def approve_text(message: Message, state: FSMContext):
     data = await state.get_data()
     r = await sql_safe_insert('texts', data)
     if r != False:
+        await state.clear()
         await state.set_state(admin_home.admin)
         await message.answer('Текст добавлен. Еще разок?', reply_markup=main_admin_keyboard())
     else:
@@ -246,7 +248,7 @@ async def approve_text(message: Message, state: FSMContext):
 
 
 @router.message((F.text == 'Отменить'), state=(
-admin_home.testing_text, admin_home.testing_media, admin_home.text_edit_test, admin_home.media_edit_test))
+        admin_home.testing_text, admin_home.testing_media, admin_home.text_edit_test, admin_home.media_edit_test))
 async def reset(message: Message, state: FSMContext):
     stt = await state.get_state()
     if stt == 'admin_home:testing_text':
@@ -315,5 +317,4 @@ async def statistics(message: Message):
                          f'Прошли Антипропаганду: {count_antiprop} ({round(count_antiprop / count_come * 100, 1)}%)\n'
                          f'Прошли Донбасс: {count_donbass} ({round(count_donbass / count_come * 100, 1)}%)\n'
                          f'Прошли Цели войны: {count_war_aims} ({round(count_war_aims / count_come * 100, 1)}%)\n'
-                        )
-
+                         )
