@@ -542,7 +542,7 @@ async def country_game_answer(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжаем, давай еще! 👉"))
     nmarkup.row(types.KeyboardButton(text="Достаточно, давай закончим 🙅"))
-    END = bool(data['ngamecount'] == data_getter('SELECT COUNT(id) FROM public.truthgame')[0][0])
+    END = bool(data['ngamecount'] == data_getter('SELECT COUNT(id) FROM public.ucraine_or_not_game')[0][0])
     if END is True:
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Спасибо 🤝"))
