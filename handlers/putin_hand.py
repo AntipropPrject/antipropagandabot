@@ -238,7 +238,7 @@ async def putin_game2_question(message: Message, state: FSMContext):
 async def putin_game2_answer(message: Message, state: FSMContext):
     data = await state.get_data()
     base_update_dict = dict()
-    END = bool(data['pgamecount'] == data_getter('SELECT COUNT(id) FROM public.putin_lies')[0][0])
+    END = bool(data['pgamecount'] == data_getter('SELECT COUNT(id) FROM public.putin_old_lies')[0][0])
     nmarkup = ReplyKeyboardBuilder()
     if END is False:
         nmarkup.row(types.KeyboardButton(text="Продолжаем! 👉"))
