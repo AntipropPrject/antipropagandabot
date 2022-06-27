@@ -293,6 +293,12 @@ async def antip_not_only_TV(message: Message, web_lies_list: List[str], state: F
     except:
         pass
     try:
+        answer_id_int.remove(6)
+        lies_list.remove('Яндекс.Новости')
+        all_answers.remove("Яндекс.Новости")
+    except:
+        pass
+    try:
         answer_id_int.remove(8)
         lies_list.remove('Никому из них...')
         all_answers.remove("Никому из них...")
@@ -358,9 +364,8 @@ async def check_name(tag):
         F.text.contains('Russia Today 👀')) | (
                          F.text.contains('Министерство обороны РФ 👀')) | (
                          F.text.contains('Телеграм-канал: Война с фейками 👀')) | (F.text.contains('РБК 👀')) | (
-                         F.text.contains('ТАСС / Комсомольская правда / Коммерсантъ / Lenta.ru / Известия 👀')) | (
-                         F.text.contains('Яндекс.Новости 👀')) | (
-                         F.text.contains('Хорошо, давай вернемся и посмотрим 👀'))) & ~(
+                         F.text.contains('ТАСС / Комсомольская правда / Коммерсантъ / Lenta.ru / Известия 👀')) |
+                        (F.text.contains('Хорошо, давай вернемся и посмотрим 👀'))) & ~(
 F.text.contains('еще')))  # вход в цикл
 async def show_the_news(message: types.Message, state: FSMContext):
     data = await state.get_data()
@@ -371,47 +376,54 @@ async def show_the_news(message: types.Message, state: FSMContext):
         user_answer_str = data['answers_str']
         one_channel = channels[channels.index(user_answer_str[0])]  # получаю первый канал из ответа пользователя
         await state.update_data(count_news=1)  # Ставлю счетчик на 0 для первой новости
+
         tag_media = ''
         if one_channel == web_prop[0]:
             tag_media = 'RIANEWS_media_'
         elif one_channel == web_prop[1]:
             tag_media = 'RUSSIATODAY_media_'
-        elif one_channel == web_prop[3]:
+        elif one_channel == web_prop[2]:
             tag_media = 'TCHANEL_WAR_media_'
-        elif one_channel == web_prop[4]:
+        elif one_channel == web_prop[3]:
             tag_media = 'TACC_media_'
-        elif one_channel == web_prop[5]:
+        elif one_channel == web_prop[4]:
             tag_media = 'MINISTRY_media_'
-        elif one_channel == web_prop[6]:
+        elif one_channel == web_prop[5]:
             tag_media = 'YANDEXNEWS_media_'
 
         await simple_media(message, tag_media + "1", reply_markup=markup.as_markup(resize_keyboard=True))  # Получаю id видео
         await state.update_data(viewed_channel=user_answer_str[0])  # передаю канал для разоблачения
         await state.update_data(all_viwed=[user_answer_str[0]])  # записываю просмотренный источник
     elif message.text != 'Хорошо, давай вернемся и посмотрим 👀':
+        print(message.text)
         markup = ReplyKeyboardBuilder()
         markup.row(types.KeyboardButton(text="Новость посмотрел(а). Что с ней не так? 🤔"))
         await state.update_data(count_news=1)
         await state.update_data(viewed_channel=message.text[:-2])
         new_data = 1
-        other_channel = message.text
+        other_channel = message.text[:-2]
         if other_channel != 'Хватит, пропустим остальные источники 🙅‍♂️':
             viewed = data["all_viwed"]
             viewed.append(other_channel[:-2])
             await state.update_data(all_viwed=list(set(viewed)))  # Список просмотренных источников
+        tag_media = ''
 
-        if other_channel[:-2] == web_prop[0]:
+
+        if other_channel == web_prop[0]:
             tag_media = 'RIANEWS_media_'
-        elif other_channel[:-2] == web_prop[1]:
+        elif other_channel == web_prop[1]:
             tag_media = 'RUSSIATODAY_media_'
-        elif other_channel[:-2] == web_prop[3]:
+        elif other_channel == web_prop[2]:
+            print(other_channel + "1123")
             tag_media = 'TCHANEL_WAR_media_'
-        elif other_channel[:-2] == web_prop[4]:
+            print(tag_media)
+        elif other_channel == web_prop[3]:
             tag_media = 'TACC_media_'
-        elif other_channel[:-2] == web_prop[5]:
+        elif other_channel == web_prop[4]:
             tag_media = 'MINISTRY_media_'
-        elif other_channel[:-2] == web_prop[6]:
-            tag_media = 'YANDEXNEWS_media_'
+        elif other_channel == web_prop[5]:
+            tag_media = 'TCHANEL_WAR_media_'
+        print(tag_media)
         await simple_media(message, tag_media+str(new_data), reply_markup=markup.as_markup(resize_keyboard=True))
 
     elif message.text == 'Хорошо, давай вернемся и посмотрим 👀':
@@ -420,23 +432,24 @@ async def show_the_news(message: types.Message, state: FSMContext):
         await state.update_data(count_news=1)
         new_data = 1
         other_channel = data['not_viewed_chanel']
+        tag_media = ''
         if other_channel == web_prop[0]:
             tag_media = 'RIANEWS_media_'
         elif other_channel == web_prop[1]:
             tag_media = 'RUSSIATODAY_media_'
-        elif other_channel == web_prop[3]:
+        elif other_channel == web_prop[2]:
             tag_media = 'TCHANEL_WAR_media_'
-        elif other_channel == web_prop[4]:
+        elif other_channel == web_prop[3]:
             tag_media = 'TACC_media_'
-        elif other_channel == web_prop[5]:
+        elif other_channel == web_prop[4]:
             tag_media = 'MINISTRY_media_'
-        elif other_channel == web_prop[6]:
+        elif other_channel == web_prop[5]:
             tag_media = 'YANDEXNEWS_media_'
+        print(tag_media)
         await state.update_data(viewed_channel=other_channel)
         if other_channel != 'Хватит, пропустим остальные источники 🙅‍♂️':
             viewed = data["all_viwed"]
             viewed.append(other_channel)
-            print(viewed)
             await state.update_data(all_viwed=list(set(viewed)))  # Список просмотренных источников
         await simple_media(message, tag_media + str(new_data), reply_markup=markup.as_markup(resize_keyboard=True))
     else:
@@ -455,14 +468,15 @@ async def revealing_the_news(message: types.Message, state: FSMContext):
         tag_exposure = 'RIANEWS_exposure_'
     elif viewed_channel == web_prop[1]:
         tag_exposure = 'RUSSIATODAY_exposure_'
-    elif viewed_channel == web_prop[3]:
+    elif viewed_channel == web_prop[2]:
         tag_exposure = 'TCHANEL_WAR_exposure_'
-    elif viewed_channel == web_prop[4]:
+    elif viewed_channel == web_prop[3]:
         tag_exposure = 'TACC_exposure_'
-    elif viewed_channel == web_prop[5]:
+    elif viewed_channel == web_prop[4]:
         tag_exposure = 'MINISTRY_exposure_'
-    elif viewed_channel == web_prop[6]:
+    elif viewed_channel == web_prop[5]:
         tag_exposure = 'YANDEXNEWS_exposure_'
+    print(tag_exposure)
     check_end = await check_name(tag_exposure+str(count_news+1))
     if check_end is not False:  # Проверка если новости закончились
         markup = await keyboard_for_next_chanel(f"Покажи еще новость с {viewed_channel} 👀")
@@ -482,18 +496,20 @@ async def show_more(message: types.Message, state: FSMContext):
     new_data = data['count_news'] + 1
     await state.update_data(count_news=new_data)  # обновление счетчика
     viewed_channel = data['viewed_channel']  # Просматриваемый канал
+    tag_media = ''
     if viewed_channel == web_prop[0]:
         tag_media = 'RIANEWS_media_'
     elif viewed_channel == web_prop[1]:
         tag_media = 'RUSSIATODAY_media_'
-    elif viewed_channel == web_prop[3]:
+    elif viewed_channel == web_prop[2]:
         tag_media = 'TCHANEL_WAR_media_'
-    elif viewed_channel == web_prop[4]:
+    elif viewed_channel == web_prop[3]:
         tag_media = 'TACC_media_'
-    elif viewed_channel == web_prop[5]:
+    elif viewed_channel == web_prop[4]:
         tag_media = 'MINISTRY_media_'
-    elif viewed_channel == web_prop[6]:
+    elif viewed_channel == web_prop[5]:
         tag_media = 'YANDEXNEWS_media_'
+    print(tag_media)
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Новость посмотрел(а). Что с ней не так? 🤔"))
     await simple_media(message, tag_media+str(new_data), reply_markup=markup.as_markup(resize_keyboard=True))
