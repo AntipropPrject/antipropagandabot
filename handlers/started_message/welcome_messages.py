@@ -130,7 +130,7 @@ async def message_7(message: types.Message, state: FSMContext):
     # Сохранить 1 вопрос в базу
     text = message.text
     options = welc_message_one
-    # Сохранение 1 вопроса в дату
+    # Сохранение 1 вопроса в дату   
     await state.update_data(option_1=options)
     markup = ReplyKeyboardBuilder()
     markup.add(types.KeyboardButton(text="Продолжай"))
@@ -207,7 +207,7 @@ async def poll_filler(message: types.Message, bot: Bot):
 
 @router.poll_answer(state=welcome_states.start_dialog.dialogue_9)  # Сохраняю 4 вопрос
 async def poll_answer_handler_tho(poll_answer: types.PollAnswer, state=FSMContext):
-    options = ["Владимир Путин", "Дмитрий Песков", "Сергей Лавров", "Владимир Соловьев", "Юрий Подоляка",
+    options = ["Владимир Путин", "Дмитрий Песков", "Сергей Лавров", "Владимир Соловьев","Никита Михалков", "Юрий Подоляка",
                "Никому из них..."]
     # сохранение 4 вопроса
     option = await state.get_data()
