@@ -673,7 +673,7 @@ async def antip_truth_game_answer(message: Message, state: FSMContext):
 
 
 @router.message((F.text == "Пропустим игру 🙅‍♀️") | (F.text == '🤝 Продолжим') | (F.text == 'Достаточно, двигаемся дальше  🙅‍♀️'))
-async def antip_ok(message: Message):
+async def antip_ok(message: Message, state: FSMContext):
     await message.answer("Хорошо", reply_markup=ReplyKeyboardRemove())
     if await redis_just_one_read(f'Usrs: {message.from_user.id}: INFOState:') == 'Жертва пропаганды':
         await asyncio.sleep(2)
@@ -683,11 +683,14 @@ async def antip_ok(message: Message):
         await asyncio.sleep(1)
         await message.answer("Хотите послушать?", reply_markup=nmarkup.as_markup(resize_keyboard=True))
     else:
+        polistate = await redis_just_one_read(f'Usrs: {message.from_user.id}: Politics:')
         await asyncio.sleep(1)
-        nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(types.KeyboardButton(text="Давай поговорим про военные действия в Украине 🇷🇺🇺🇦"))
-        await message.answer("Похоже, что пропаганда до вас не добралась. Тогда давай поговорим о главном...",
-                             reply_markup=nmarkup.as_markup(resize_keyboard=True))
+        if polistate == 'Аполитичный':
+            await reasons_lets_figure(message, state)
+        elif polistate == 'Сторонник войны':
+            await war_point_now(message, state)
+        elif polistate == 'Оппозиционер':
+            await reasons_king_of_info(message, state)
 
 
 @router.message((F.text == 'Давай'))
@@ -788,7 +791,7 @@ async def reasons_lets_figure(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="Давай попробуем 👌"))
     nmarkup.row(types.KeyboardButton(text="Я не интересуюсь политикой 😐"))
     nmarkup.row(types.KeyboardButton(text="Незачем, ведь эти цели - бессмысленны 🤬"))
-    nmarkup.adjust(2,1)
+    nmarkup.adjust(2, 1)
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
