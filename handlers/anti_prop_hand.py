@@ -760,7 +760,8 @@ async def antip_big_love_propaganda(message: Message):
 @router.message((F.text.contains('правда. Откуда ты знаешь')))
 async def antip_reputation_matters(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_reputation_matters'})
-    await message.answer(text, antip_why_kb(), disable_web_page_preview=True)
+    print(text)
+    await message.answer(text, reply_markup=antip_why_kb(), disable_web_page_preview=True)
 
 
 # По хорошему, это уже начало войны
