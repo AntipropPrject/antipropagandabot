@@ -351,8 +351,8 @@ async def reasons_usa_gegemony(message: Message):
 async def reasons_europe_cold(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_Europe_cold'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Да, именно в этом 👍"))
     nmarkup.row(types.KeyboardButton(text="Нет, цель не в этом 🙅‍♂️"))
+    nmarkup.row(types.KeyboardButton(text="Да, именно в этом 👍"))
     nmarkup.adjust(2)
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
@@ -462,6 +462,7 @@ async def reasons_pause(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="Я не знаю... 😰"))
     nmarkup.row(types.KeyboardButton(text="Да, я готов(а) поддержать войну / спецоперацию 💥"))
     nmarkup.row(types.KeyboardButton(text="Столько парней погибло, теперь мы не имеем права проиграть... 😔"))
+    nmarkup.adjust(2, 1, 1)
     await simple_media(message, 'reasons_pause', nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -474,6 +475,7 @@ async def reasons_why_support_war(message: Message):
     nmarkup.row(types.KeyboardButton(text="Я не знаю... 😰"))
     nmarkup.row(types.KeyboardButton(text="Да, я готов(а) поддержать войну / спецоперацию 💥"))
     nmarkup.row(types.KeyboardButton(text="Давай закончим этот разговор! 🖕"))
+    nmarkup.adjust(2, 1, 1)
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 

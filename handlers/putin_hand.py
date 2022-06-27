@@ -22,7 +22,7 @@ router.message.middleware(CounterMiddleware())
 router.message.filter(state=(StateofPutin))
 
 
-@router.message(PutinFilter(), (F.text.in_({"Давай 🤝"})))
+@router.message(PutinFilter(), (F.text.in_({"Давай 🤝"})), state=StateofPutin.main)
 async def putin_love_putin(message: Message, state: FSMContext):
     await state.set_state(StateofPutin.main)
     text = await sql_safe_select('text', 'texts', {'name': 'putin_love_putin'})
@@ -32,7 +32,7 @@ async def putin_love_putin(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.in_({"Давай 🤝"})))
+@router.message((F.text.in_({"Давай 🤝"})), state=StateofPutin.main)
 async def putin_not_love_putin(message: Message, state: FSMContext):
     await state.set_state(StateofPutin.main)
     text = "Выберите описание Владимира Путина, которое вы считаете наиболее точным:"
@@ -202,7 +202,6 @@ async def putin_game2_question(message: Message, state: FSMContext):
     except:
         count = 0
     how_many_rounds = data_getter("SELECT COUNT (*) FROM public.putin_old_lies")[0][0]
-    print(f"В таблице {how_many_rounds} записей, а вот счетчик сейчас {count}")
     if count < how_many_rounds:
         count += 1
         truth_data = data_getter("SELECT t_id, text, belivers, nonbelivers, rebuttal FROM public.putin_old_lies "
@@ -238,8 +237,14 @@ async def putin_game2_question(message: Message, state: FSMContext):
 @router.message(((F.text == "Не виноват 👍") | (F.text == "Виноват 👎")), state=StateofPutin.game2)
 async def putin_game2_answer(message: Message, state: FSMContext):
     data = await state.get_data()
-    print(data)
     base_update_dict = dict()
+    END = bool(data['pgamecount'] == data_getter('SELECT COUNT(id) FROM public.putin_old_lies')[0][0])
+    nmarkup = ReplyKeyboardBuilder()
+    if END is False:
+        nmarkup.row(types.KeyboardButton(text="Продолжаем! 👉"))
+        nmarkup.row(types.KeyboardButton(text="Достаточно ✋"))
+    else:
+        nmarkup.row(types.KeyboardButton(text="Давай 🤝"))
     if message.text == "Не виноват 👍":
         print(data['belive'] + 1)
         base_update_dict.update({'belivers': (data['belive'] + 1)})
@@ -247,13 +252,12 @@ async def putin_game2_answer(message: Message, state: FSMContext):
         base_update_dict.update({'nonbelivers': (data['not_belive'] + 1)})
     await sql_safe_update("putin_old_lies", base_update_dict, {'id': data['pgamecount']})
     t_percentage = data['belive'] / (data['belive'] + data['not_belive'])
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Продолжаем! 👉"))
-    nmarkup.row(types.KeyboardButton(text="Достаточно ✋"))
     await message.answer(
         f'А вот что думают другие участники:\n\n'
         f'👎 <b>Виноват</b>: {round((100 - t_percentage * 100))}% \n👍 <b>Не виноват</b>: {round(t_percentage * 100)}%',
         reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    if END is True:
+        await message.answer('Спасибо за игру 🤝 Давайте подведем итоги.')
 
 
 @router.message(((F.text == "Достаточно ✋")), state=StateofPutin.game2)
@@ -264,7 +268,8 @@ async def putin_game2_are_you_sure(message: Message):
     await message.answer('Вы уверены? У меня еще есть примеры', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(((F.text == "Да, достаточно 🤷‍♀️") | (F.text == "Хорошо, давай дальше")), state=StateofPutin.game2)
+@router.message(((F.text == "Да, достаточно 🤷‍♀️") | (F.text == "Хорошо, давай дальше") |
+                 (F.text == "Давай 🤝")), state=StateofPutin.game2)
 async def putin_in_the_past(message: Message, state: FSMContext):
     await state.clear()
     await state.set_state(StateofPutin.final)
@@ -273,6 +278,7 @@ async def putin_in_the_past(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="Да, я согласен(а) ✅"))
     nmarkup.row(types.KeyboardButton(text="Нет, я не согласен(а) ❌"))
     nmarkup.row(types.KeyboardButton(text="Докажи 🤔"))
+    nmarkup.adjust(2,1)
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 

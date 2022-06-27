@@ -149,7 +149,6 @@ async def sme_statement_start_over(message: Message, state: FSMContext):
 
 @router.message(state=propaganda_victim.options)
 async def smi_statement_poll(message: Message, state: FSMContext):
-    await message.answer("OK")
     options = await state.get_data()
     redis = all_data().get_data_red()
     lst_options = options["options_start_over"]
