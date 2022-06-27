@@ -4,7 +4,7 @@ from aiogram.types import Message
 from typing import Union, Dict, Any
 from data_base.DBuse import poll_get, redis_just_one_read
 from handlers import true_resons_hand
-from resources.all_polls import welc_message_one
+from resources.all_polls import welc_message_one, nazizm
 
 
 class DonbassOptionsFilter(BaseFilter):
@@ -131,7 +131,7 @@ class NaziFilter(BaseFilter):
 
 class RusHate_pr(BaseFilter):
     async def __call__(self, message: Message):
-        if "Менее 5%" in await poll_get(f'Usrs: {message.from_user.id}: Nazi_answers: small_poll:'):
+        if "📊 Менее 5%" in await poll_get(f'Usrs: {message.from_user.id}: Nazi_answers: small_poll:'):
             return True
         else:
             return False
