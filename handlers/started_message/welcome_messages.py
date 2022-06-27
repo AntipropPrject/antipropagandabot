@@ -294,7 +294,7 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
     elif data["answer_3"] == "Да, полностью доверяю ✅":
         text = await sql_safe_select('text', 'texts', {'name': 'antip_all_yes_TV'})
         nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(types.KeyboardButton(text="Продолжай 📺"))
+        nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
         await bot.send_message(poll_answer.user.id, text, reply_markup=nmarkup.as_markup(resize_keyboard=True),
                                disable_web_page_preview=True)
     elif data["answer_3"] == "Скорее нет 👎":
