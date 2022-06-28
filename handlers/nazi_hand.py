@@ -573,4 +573,4 @@ async def putin_in_the_past(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'nazi_finish'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжим 👌"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await simple_media(message, 'nazi_finish', nmarkup.as_markup(resize_keyboard=True))
