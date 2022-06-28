@@ -249,14 +249,14 @@ async def reasons_normal_game_question(message: Message, state: FSMContext):
         count = (await state.get_data())['ngamecount']
     except:
         count = 0
-    how_many_rounds = data_getter("SELECT COUNT (*) FROM public.normal_game")[0][0]
+    how_many_rounds = (await data_getter("SELECT COUNT (*) FROM public.normal_game"))[0][0]
     print(f"В таблице {how_many_rounds} записей, а вот счетчик сейчас {count}")
     if count < how_many_rounds:
         count += 1
-        truth_data = data_getter("SELECT t_id, text, belivers, nonbelivers, rebuttal FROM public.normal_game "
+        truth_data = (await data_getter("SELECT t_id, text, belivers, nonbelivers, rebuttal FROM public.normal_game "
                                  "left outer join assets on asset_name = assets.name "
                                  "left outer join texts ON text_name = texts.name "
-                                 f"where id = {count}")[0]
+                                 f"where id = {count}"))[0]
         await state.update_data(ngamecount=count, belive=truth_data[2], not_belive=truth_data[3])
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Это абсурд🤦🏼‍♀️"))
@@ -285,7 +285,7 @@ async def reasons_normal_game_question(message: Message, state: FSMContext):
 @router.message(((F.text == "Это абсурд🤦🏼‍♀️") | (F.text == "Это нормально👌")), state=TruereasonsState.game)
 async def reasons_normal_game_answer(message: Message, state: FSMContext):
     data = await state.get_data()
-    END = bool(data['ngamecount'] == data_getter('SELECT COUNT(id) FROM public.normal_game')[0][0])
+    END = bool(data['ngamecount'] == (await data_getter('SELECT COUNT(id) FROM public.normal_game'))[0][0])
     nmarkup = ReplyKeyboardBuilder()
     if END is False:
         nmarkup.row(types.KeyboardButton(text="Продолжаем, давай еще! 👉"))
@@ -453,7 +453,7 @@ async def reasons_open_eyes(message: Message, state: FSMContext):
     await state.set_state(TruereasonsState.final)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Нет, мне не нужна эта война... 🙅‍♂️"))
-    nmarkup.row(types.KeyboardButton(text="Я не знаю... 😰"))
+    nmarkup.row(types.KeyboardButton(text="Я не знаю...😨"))
     nmarkup.row(types.KeyboardButton(text="Да, я готов(а) поддержать войну / спецоперацию 💥"))
     nmarkup.row(types.KeyboardButton(text="Столько парней погибло, теперь мы не имеем права проиграть... 😔"))
     nmarkup.row(types.KeyboardButton(text="Я хочу подумать, давай сделаем паузу... ⏱"))
@@ -467,7 +467,7 @@ async def reasons_pause(message: Message, state: FSMContext):
     await state.set_state(TruereasonsState.final)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Нет, мне не нужна эта война... 🙅‍♂️"))
-    nmarkup.row(types.KeyboardButton(text="Я не знаю... 😰"))
+    nmarkup.row(types.KeyboardButton(text="Я не знаю...😨"))
     nmarkup.row(types.KeyboardButton(text="Да, я готов(а) поддержать войну / спецоперацию 💥"))
     nmarkup.row(types.KeyboardButton(text="Столько парней погибло, теперь мы не имеем права проиграть... 😔"))
     nmarkup.adjust(2, 1, 1)
@@ -480,7 +480,7 @@ async def reasons_why_support_war(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_why_support_war'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Нет, мне не нужна эта война... 🙅‍♂️"))
-    nmarkup.row(types.KeyboardButton(text="Я не знаю... 😰"))
+    nmarkup.row(types.KeyboardButton(text="Я не знаю...😨"))
     nmarkup.row(types.KeyboardButton(text="Да, я готов(а) поддержать войну / спецоперацию 💥"))
     nmarkup.row(types.KeyboardButton(text="Давай закончим этот разговор! 🖕"))
     nmarkup.adjust(2, 1, 1)

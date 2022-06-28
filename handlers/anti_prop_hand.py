@@ -591,16 +591,16 @@ async def antip_truth_game_start_question(message: Message, state: FSMContext):
         count = (await state.get_data())['gamecount']
     except:
         count = 0
-    how_many_rounds = data_getter("SELECT COUNT (*) FROM public.truthgame")[0][0]
+    how_many_rounds = (await data_getter("SELECT COUNT (*) FROM public.truthgame"))[0][0]
     print(f"В таблице {how_many_rounds} записей, а вот счетчик сейчас {count}")
     if count < how_many_rounds:
         count += 1
-        truth_data = data_getter(f"""SELECT * FROM ( SELECT truth, t_id, text, belivers, nonbelivers,
+        truth_data = (await data_getter(f"""SELECT * FROM ( SELECT truth, t_id, text, belivers, nonbelivers,
                                          rebuttal, reb_asset_name,
                                          ROW_NUMBER () OVER (ORDER BY id), id FROM public.truthgame
                                          left outer join assets on asset_name = assets.name
                                          left outer join texts ON text_name = texts.name)
-                                         AS sub WHERE row_number = {count}""")[0]
+                                         AS sub WHERE row_number = {count}"""))[0]
         await state.update_data(gamecount=count, truth=truth_data[0], rebuttal=truth_data[5], belive=truth_data[3],
                                 not_belive=truth_data[4], reb_media_tag=truth_data[6], game_id=truth_data[8])
         nmarkup = ReplyKeyboardBuilder()
@@ -629,7 +629,7 @@ async def antip_truth_game_start_question(message: Message, state: FSMContext):
 @router.message((F.text == "Это правда ✅") | (F.text == "Это ложь ❌"))
 async def antip_truth_game_answer(message: Message, state: FSMContext):
     data = await state.get_data()
-    END = bool(data['gamecount'] == data_getter('SELECT COUNT(id) FROM public.truthgame')[0][0])
+    END = bool(data['gamecount'] == (await data_getter('SELECT COUNT(id) FROM public.truthgame'))[0][0])
     nmarkup = ReplyKeyboardBuilder()
     if END is False:
         nmarkup.row(types.KeyboardButton(text="Продолжаем, давай еще! 👉"))
