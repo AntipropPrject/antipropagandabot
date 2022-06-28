@@ -86,15 +86,15 @@ def tables_god():
                         CONSTRAINT mistakeorlie_pk PRIMARY KEY (id)
                        );''')
 
-        cur.execute('''ALTER TABLE public.mistakeOrLie
-                 ADD CONSTRAINT mistakeOrLie_fk
+        cur.execute('''ALTER TABLE public.mistakeorlie
+                 ADD CONSTRAINT mistakeorlie_fk
                   FOREIGN KEY (asset_name)
                    REFERENCES public.assets("name");''')
-        cur.execute('''ALTER TABLE public.mistakeOrLie
-                 ADD CONSTRAINT mistakeOrLie_fk_1
+        cur.execute('''ALTER TABLE public.mistakeorlie
+                 ADD CONSTRAINT mistakeorlie_fk_1
                   FOREIGN KEY (text_name)
                    REFERENCES public.texts("name");''')
-        logg.get_info("mistakeOrLie table is created".upper())
+        logg.get_info("mistakeorlie table is created".upper())
 
         cur.execute('''CREATE TABLE public.putin_lies (
                             id int4 NOT NULL,
