@@ -2,10 +2,10 @@ id,asset_name,text_name,belivers,nonbelivers,rebuttal,truth
 8,country_game_8,hello,2,1,,f
 9,country_game_9,hello,2,1,,t
 10,country_game_10,hello,2,1,,f
-1,country_game_1,hello,11,9,,t
 2,country_game_2,hello,13,6,,f
 3,country_game_3,hello,9,7,,f
 4,country_game_4,hello,10,5,,t
 5,country_game_5,hello,8,6,,t
 6,country_game_6,hello,6,3,,t
 7,country_game_7,hello,3,1,,f
+1,country_game_1,hello,12,9,,t

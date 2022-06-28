@@ -1,9 +1,9 @@
-from itertools import groupby
-from aiogram import Router, F, Bot
+from aiogram import Router, F
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
+
 from data_base.DBuse import *
 from handlers.anti_prop_hand import antip_truth_game_start
 from middleware import CounterMiddleware
@@ -157,7 +157,7 @@ async def smi_statement_poll(message: Message, state: FSMContext):
     print(list_to_customize)
     try:
         message_text = message.text
-        trimed =  message_text.rstrip(message_text[-1])
+        trimed = message_text.rstrip(message_text[-1])
         list_to_customize.remove(trimed)
     except:
         print('дубликатов нет')
@@ -169,7 +169,7 @@ async def smi_statement_poll(message: Message, state: FSMContext):
         await poll_write(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:', person)
 
     if message.text != "Хватит, не будем слушать остальных 🙅‍♂️":
-        await smi_statement(message,state)
+        await smi_statement(message, state)
     else:
         await sme_statement_skip(message, state)
 

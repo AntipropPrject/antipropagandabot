@@ -4,6 +4,7 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.dispatcher.fsm.state import StatesGroup, State
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
+
 from data_base.DBuse import data_getter, sql_safe_select, sql_safe_update
 from filters.All_filters import PutinFilter
 from handlers.stopwar_hand import StopWarState
@@ -46,7 +47,8 @@ async def putin_not_love_putin(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.in_({"Нет, не согласен 🙅‍♂️", "Может и есть, но пока их не видно 🤷‍♂️", "Конечно такие люди есть 🙂"})))
+@router.message(
+    (F.text.in_({"Нет, не согласен 🙅‍♂️", "Может и есть, но пока их не видно 🤷‍♂️", "Конечно такие люди есть 🙂"})))
 async def putin_big_love_putin(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'putin_big_love_putin'})
     nmarkup = ReplyKeyboardBuilder()
@@ -55,7 +57,8 @@ async def putin_big_love_putin(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Согласен, кто, если не Путин? 🤷‍♂️") | (F.text == "Не лучший президент, но кто, если не Путин? 🤷‍♂️"))
+@router.message(
+    (F.text == "Согласен, кто, если не Путин? 🤷‍♂️") | (F.text == "Не лучший президент, но кто, если не Путин? 🤷‍♂️"))
 async def putin_only_one(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'putin_only_one'})
     nmarkup = ReplyKeyboardBuilder()
@@ -133,7 +136,8 @@ async def putin_game1_question(message: Message, state: FSMContext):
             reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(((F.text == "Случайная ошибка / Не ложь 👍") | (F.text == "Целенаправленная ложь 👎")), state=StateofPutin.game1)
+@router.message(((F.text == "Случайная ошибка / Не ложь 👍") | (F.text == "Целенаправленная ложь 👎")),
+                state=StateofPutin.game1)
 async def putin_game1_answer(message: Message, state: FSMContext):
     data = await state.get_data()
     base_update_dict = dict()
@@ -168,7 +172,8 @@ async def putin_game1_are_you_sure(message: Message):
     await message.answer('Точно?', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(((F.text == "Да, хватит 🙅‍♀️") | (F.text == "Давай") | (F.text == "Хорошо 🤔")), state=StateofPutin.game1)
+@router.message(((F.text == "Да, хватит 🙅‍♀️") | (F.text == "Давай") | (F.text == "Хорошо 🤔")),
+                state=StateofPutin.game1)
 async def putin_plenty_promises(message: Message, state: FSMContext):
     await state.clear()
     await state.set_state(StateofPutin.game2)
@@ -278,7 +283,7 @@ async def putin_in_the_past(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="Да, я согласен(а) ✅"))
     nmarkup.row(types.KeyboardButton(text="Нет, я не согласен(а) ❌"))
     nmarkup.row(types.KeyboardButton(text="Докажи 🤔"))
-    nmarkup.adjust(2,1)
+    nmarkup.adjust(2, 1)
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
@@ -291,13 +296,11 @@ async def putin_prove_me(message: Message, state: FSMContext):
 
 
 @router.message(((F.text == "Да, я согласен(а) ✅") | (F.text == "Военный преступник 😤") |
-     (F.text == "Был хорошим президентом раньше, но сейчас - нет 🙅") |
-     (F.text == "Давай 👌")), state=StateofPutin)
+                 (F.text == "Был хорошим президентом раньше, но сейчас - нет 🙅") |
+                 (F.text == "Давай 👌")), state=StateofPutin)
 async def stopwar_start(message: Message, state: FSMContext):
     await state.set_state(StopWarState.main)
-    text = (
-        'Давайте поговорим о том, как закончить войну\n\n'
-        'Как считаете, Путин готов закончить эту войну в ближайшие месяцы?')
+    text = await sql_safe_select('text', 'texts', {'name': 'stopwar_p_start'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Скорее да ✅"))
     nmarkup.row(types.KeyboardButton(text="Не знаю 🤷‍♂️"))
