@@ -57,7 +57,7 @@ async def message_2(message: types.Message, state: FSMContext):
     markup = ReplyKeyboardBuilder()
 
     markup.row(types.KeyboardButton(text="1️⃣ Специальная военная операция (СВО)"))
-    markup.row(types.KeyboardButton(text="2️⃣ Война / Вторжение в Украину"))
+    markup.row(types.KeyboardButton(text="2️⃣ Война"))
     markup.row(types.KeyboardButton(text="Сейчас даже такое мнение "
                                          "выражать незаконно. Вдруг вы из ФСБ? 🤐"))
     text = await sql_safe_select("text", "texts", {"name": "start_what_about_you"})
@@ -80,7 +80,7 @@ async def message_3(message: types.Message, state: FSMContext):  # Начало 
     await state.set_state(welcome_states.start_dialog.dialogue_5)
 
 
-@router.message(welcome_states.start_dialog.dialogue_4, (F.text == '2️⃣ Война / Вторжение в Украину'))
+@router.message(welcome_states.start_dialog.dialogue_4, (F.text == "2️⃣ Война"))
 async def start_lets_start_2(message: types.Message, state: FSMContext):  # Начало опроса
     await poll_write(f'Usrs: {message.from_user.id}: Start_answers: Is_it_war:', message.text)
     markup = ReplyKeyboardBuilder()
@@ -108,7 +108,7 @@ async def start_lets_start_2(message: types.Message, state: FSMContext):
 async def message_4(message: types.Message):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="1️⃣ Специальная военная операция (СВО)"))
-    markup.row(types.KeyboardButton(text="2️⃣ Война / Вторжение в Украину"))
+    markup.row(types.KeyboardButton(text="2️⃣ Война"))
     text = await sql_safe_select("text", "texts", {"name": "start_afraid"})
     # if на ты
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)

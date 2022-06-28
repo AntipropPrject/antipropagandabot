@@ -236,6 +236,7 @@ async def nazi_eight_years(message: Message, state: FSMContext):
         text = 'Понимаю, поэтому пусть оценку дадут факты. Задайте себе вопрос:'
     else:
         text = "В таком случае, если это так, у меня есть к вам большой вопрос:"
+    await state.set_state(NaziState.third_part)
     await message.answer(text, reply_markup=ReplyKeyboardRemove(), disable_web_page_preview=True)
     await asyncio.sleep(3)
     markup = ReplyKeyboardBuilder()

@@ -303,6 +303,7 @@ async def stopwar_start(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_p_start'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Скорее да ✅"))
-    nmarkup.row(types.KeyboardButton(text="Не знаю 🤷‍♂️"))
     nmarkup.row(types.KeyboardButton(text="Скорее нет ❌"))
+    nmarkup.row(types.KeyboardButton(text="Не знаю 🤷‍♂️"))
+    nmarkup.adjust(2, 1)
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
