@@ -507,7 +507,7 @@ async def reasons_generation_z(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Я передумал(а), мне не нужна эта война..."))
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_generation_Z_1'})
-    await message.answer(text, reply_markup=nmarkup.as_markup(), disable_web_page_preview=True)
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text == "Скорее да 😔"), state=TruereasonsState.final)
