@@ -69,8 +69,7 @@ async def smi_statement(message: Message, state: FSMContext):
                 capt = truth_data[5]
             try:
                 await message.answer_video(truth_data[1], caption=capt,
-                                           reply_markup=nmarkup.as_markup(resize_keyboard=True), parse_mode="HTML",
-                                           disable_web_page_preview=True
+                                           reply_markup=nmarkup.as_markup(resize_keyboard=True), parse_mode="HTML"
                                            )
             except:
                 await message.answer_photo(truth_data[1], caption=capt,
