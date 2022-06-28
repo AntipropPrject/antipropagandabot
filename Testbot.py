@@ -3,9 +3,8 @@ from aiogram import Dispatcher
 from aiogram.dispatcher.fsm.storage.redis import RedisStorage
 from bata import all_data
 from handlers import start_hand, anti_prop_hand, smi_hand, donbass_hand, true_resons_hand, putin_hand, \
-    stopwar_hand, nazi_hand, preventive_strike, new_admin_hand
+    stopwar_hand, nazi_hand, preventive_strike, new_admin_hand, welcome_messages
 from export_to_csv import pg_mg
-from handlers.started_message import welcome_messages
 from handlers.other import other_file
 from data_base import TablesCreator
 

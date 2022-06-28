@@ -6,7 +6,7 @@ from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from data_base.DBuse import data_getter, sql_safe_select, sql_safe_update
-from filters.All_filters import PutinFilter
+from filters.MapFilters import PutinFilter
 from handlers.stopwar_hand import StopWarState
 from middleware import CounterMiddleware
 
@@ -36,7 +36,7 @@ async def putin_love_putin(message: Message, state: FSMContext):
 @router.message((F.text.in_({"Давай 🤝"})), state=StateofPutin.main)
 async def putin_not_love_putin(message: Message, state: FSMContext):
     await state.set_state(StateofPutin.main)
-    text = "Выберите описание Владимира Путина, которое вы считаете наиболее точным:"
+    text = await sql_safe_select('text', 'texts', {'name': 'putin_lets_speak_about'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Отличный президент ✊"))
     nmarkup.row(types.KeyboardButton(text="Военный преступник 😤"))

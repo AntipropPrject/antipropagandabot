@@ -6,7 +6,7 @@ from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from data_base.DBuse import poll_write, sql_safe_select, poll_get, redis_delete_from_list
-from filters.All_filters import DonbassOptionsFilter
+from filters.MapFilters import DonbassOptionsFilter
 from handlers.true_resons_hand import TruereasonsState
 from keyboards.main_keys import filler_kb
 from middleware import CounterMiddleware

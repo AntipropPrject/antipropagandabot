@@ -9,7 +9,7 @@ from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from data_base.DBuse import data_getter, poll_write, sql_safe_select, sql_safe_update, redis_delete_from_list, poll_get
-from filters.All_filters import NaziFilter, RusHate_pr, NotNaziFilter, ManualFilters
+from filters.MapFilters import NaziFilter, RusHate_pr, NotNaziFilter, ManualFilters
 from handlers import true_resons_hand
 from middleware import CounterMiddleware
 from resources.all_polls import nazizm, nazizm_pr
@@ -573,4 +573,4 @@ async def putin_in_the_past(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'nazi_finish'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжим 👌"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await simple_media(message, 'nazi_finish', nmarkup.as_markup(resize_keyboard=True))
