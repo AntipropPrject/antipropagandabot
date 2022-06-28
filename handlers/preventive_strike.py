@@ -158,5 +158,5 @@ async def prevent_strike_memes(message: Message, state: FSMContext):
     except TelegramBadRequest:  # Это бессмысленный экцепт, можно потом убрать
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text='Продолжим 🙂'))
-        await message.answer('Я устал шутить про Лукашенко. 😌 Продолжим?',
+        await message.answer('Я устал шутить про Лукашенко 😌 Продолжим?',
                              reply_markup=nmarkup.as_markup(resize_keyboard=True))
