@@ -5,8 +5,6 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from bata import all_data
 
-technical_mode = False
-
 
 def main_admin_keyboard(t_id=None):
     usless_list = ['Пожалуйста, не редактируйте текст напрямую в базе данных',
@@ -16,19 +14,23 @@ def main_admin_keyboard(t_id=None):
     nmarkup.row(types.KeyboardButton(text="Изменить текст"))
     nmarkup.row(types.KeyboardButton(text="Изменить игры"))
     if t_id in all_data().super_admins:
-        nmarkup.row(types.KeyboardButton(text="Управление ботом"))
+        nmarkup.row(types.KeyboardButton(text="Аналитика"))
+        nmarkup.row(types.KeyboardButton(text="Добавить/Удалить редактора"))
+    nmarkup.row(types.KeyboardButton(text="Отредактировать блок текста"))
     nmarkup.row(types.KeyboardButton(text="Выйти"))
-    nmarkup.adjust(2)
+    nmarkup.adjust(2, 2, 1)
     return nmarkup.as_markup(resize_keyboard=True, input_field_placeholder=random.choice(usless_list))
 
-
-def redct_editors():
+def redc_editors():
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text='Посмотреть редакторов'))
-    markup.row(types.KeyboardButton(text='Добавить редактора'))
     markup.row(types.KeyboardButton(text='Удалить редактора'))
+    markup.row(types.KeyboardButton(text='Список редакторов'))
     markup.row(types.KeyboardButton(text='Назад'))
-    return markup.as_markup(resize_keyboard=True)
+
+
+
+
 
 
 def redct_media():
@@ -37,7 +39,6 @@ def redct_media():
     nmarkup.row(types.KeyboardButton(text="Редактировать медиа"))
     nmarkup.row(types.KeyboardButton(text="Удалить медиа"))
     nmarkup.row(types.KeyboardButton(text="Возврат в главное меню"))
-    return nmarkup.as_markup(resize_keyboard=True)
 
 
 def redct_text():
@@ -46,39 +47,22 @@ def redct_text():
     nmarkup.row(types.KeyboardButton(text="Редактировать текст"))
     nmarkup.row(types.KeyboardButton(text="Удалить текст"))
     nmarkup.row(types.KeyboardButton(text="Возврат в главное меню"))
-    return nmarkup.as_markup(resize_keyboard=True)
-
 
 def redct_games():
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Нужно придумать кнопки"))
     nmarkup.row(types.KeyboardButton(text="Возврат в главное меню"))
-    return nmarkup.as_markup(resize_keyboard=True)
 
-
-def settings_bot():
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Редакторы бота"))
-    nmarkup.row(types.KeyboardButton(text="Экспорт"))
-    nmarkup.row(types.KeyboardButton(text="Импорт"))
-    nmarkup.row(types.KeyboardButton(text="Статистика бота"))
-    nmarkup.row(types.KeyboardButton(text="Возврат в главное меню"))
-    nmarkup.adjust(1, 2)
-    return nmarkup.as_markup(resize_keyboard=True)
 
 
 def middle_admin_keyboard():
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Назад"))
+    nmarkup.row(types.KeyboardButton(text="Вернуться в меню"))
     return nmarkup.as_markup(resize_keyboard=True)
 
 def app_admin_keyboard():
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Отменить изменения"))
+    nmarkup.row(types.KeyboardButton(text="Отменить"))
     nmarkup.row(types.KeyboardButton(text="Подтвердить"))
     nmarkup.adjust(1, 1)
     return nmarkup.as_markup(resize_keyboard=True)
-
-
-
-

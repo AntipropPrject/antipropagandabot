@@ -8,7 +8,6 @@ from log import logg
 
 """^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^PostgreSQL^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"""
 
-
 def data_getter(query):
     try:
         conn = all_data().get_postg()
@@ -34,6 +33,22 @@ def safe_data_getter(safe_query, values_dict):
         return data
     except psycopg2.Error as error:
         logg.get_error(f"{error}", __file__)
+        return False
+
+async def sql_delete(table_name, condition_dict):
+    try:
+
+
+        safe_query = sql.SQL("DELETE from {} WHERE {} = {};").format(sql.Identifier(table_name),
+                                                                     sql.SQL(', ').join(map(sql.Identifier,
+                                                                                            condition_dict)), sql.SQL(", ").join(map(sql.Placeholder, condition_dict)))
+        conn = all_data().get_postg()
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute(safe_query, condition_dict)
+        conn.close()
+    except (psycopg2.Error, IndexError) as error:
+        await logg.get_error(f"{error}", __file__)
         return False
 
 

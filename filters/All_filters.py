@@ -167,3 +167,5 @@ class ManualFilters:
             await true_resons_hand.reasons_demilitarism(self.message, self.state)
         elif welc_message_one[5] in war_answers:
             await true_resons_hand.reasons_biopigeons(self.message, self.state)
+
+
