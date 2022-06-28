@@ -121,7 +121,7 @@ async def sql_safe_insert(table_name, data_dict):
             with conn.cursor() as cur:
                 cur.execute(safe_query, data_dict)
         conn.close()
-        postgresql_csv_dump(table_name)
+        #postgresql_csv_dump(table_name)
         return True
     except psycopg2.Error as error:
         await logg.get_error(f"{error}", __file__)
@@ -147,7 +147,7 @@ async def sql_safe_update(table_name, data_dict, condition_dict):
             with conn.cursor() as cur:
                 cur.execute(safe_query, data_dict)
         conn.close()
-        postgresql_csv_dump(table_name)
+        #postgresql_csv_dump(table_name)
         return "Complete"
     except AssertionError as error:
         logg.get_info(f"{error}")

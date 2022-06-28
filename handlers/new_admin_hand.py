@@ -331,7 +331,7 @@ async def delete_text(message: Message, state: FSMContext):
     for tag in data['tag_lists']:
             await sql_delete('texts', {'name': tag})
 
-    postgresql_csv_dump('texts')
+    #postgresql_csv_dump('texts')
     await message.answer("Все выбранные теги были удалены!")
 
 
@@ -477,7 +477,7 @@ async def delete_text(message: Message, state: FSMContext):
     for tag in data['tag_lists']:
             await sql_delete('assets', {'name': tag})
 
-    postgresql_csv_dump('assets')
+    #postgresql_csv_dump('assets')
     await message.answer("Все выбранные теги были удалены!")
 """***************************************CONFIRM************************************************"""
 
