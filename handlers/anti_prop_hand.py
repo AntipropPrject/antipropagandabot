@@ -277,7 +277,8 @@ async def antip_not_only_TV(message: Message, web_lies_list: List[str], state: F
     markup.row(types.KeyboardButton(text="Покажи новость 👀"))
     lies_list = web_lies_list
     answer_id_int = []
-    all_answers = web_prop
+
+    all_answers = web_prop.copy()
     for i in answer_id_str:
         answer_id_int.append(int(i))  # числа ответов пользователя
     try:
@@ -382,14 +383,12 @@ async def show_the_news(message: types.Message, state: FSMContext):
             tag_media = 'RIANEWS_media_'
         elif one_channel == web_prop[1]:
             tag_media = 'RUSSIATODAY_media_'
-        elif one_channel == web_prop[2]:
-            tag_media = 'TCHANEL_WAR_media_'
         elif one_channel == web_prop[3]:
-            tag_media = 'TACC_media_'
+            tag_media = 'TCHANEL_WAR_media_'
         elif one_channel == web_prop[4]:
-            tag_media = 'MINISTRY_media_'
+            tag_media = 'TACC_media_'
         elif one_channel == web_prop[5]:
-            tag_media = 'YANDEXNEWS_media_'
+            tag_media = 'MINISTRY_media_'
 
         await simple_media(message, tag_media + "1", reply_markup=markup.as_markup(resize_keyboard=True))  # Получаю id видео
         await state.update_data(viewed_channel=user_answer_str[0])  # передаю канал для разоблачения
@@ -408,19 +407,18 @@ async def show_the_news(message: types.Message, state: FSMContext):
             await state.update_data(all_viwed=list(set(viewed)))  # Список просмотренных источников
         tag_media = ''
 
-
+        print(other_channel)
+        print(web_prop)
         if other_channel == web_prop[0]:
             tag_media = 'RIANEWS_media_'
         elif other_channel == web_prop[1]:
             tag_media = 'RUSSIATODAY_media_'
-        elif other_channel == web_prop[2]:
-            tag_media = 'TCHANEL_WAR_media_'
         elif other_channel == web_prop[3]:
-            tag_media = 'TACC_media_'
+            tag_media = 'TCHANEL_WAR_media_'
         elif other_channel == web_prop[4]:
-            tag_media = 'MINISTRY_media_'
+            tag_media = 'TACC_media_'
         elif other_channel == web_prop[5]:
-            tag_media = 'YANDEXNEWS_media_'
+            tag_media = 'MINISTRY_media_'
         print(tag_media)
         await simple_media(message, tag_media+str(new_data), reply_markup=markup.as_markup(resize_keyboard=True))
 
@@ -435,14 +433,12 @@ async def show_the_news(message: types.Message, state: FSMContext):
             tag_media = 'RIANEWS_media_'
         elif other_channel == web_prop[1]:
             tag_media = 'RUSSIATODAY_media_'
-        elif other_channel == web_prop[2]:
-            tag_media = 'TCHANEL_WAR_media_'
         elif other_channel == web_prop[3]:
-            tag_media = 'TACC_media_'
+            tag_media = 'TCHANEL_WAR_media_'
         elif other_channel == web_prop[4]:
-            tag_media = 'MINISTRY_media_'
+            tag_media = 'TACC_media_'
         elif other_channel == web_prop[5]:
-            tag_media = 'YANDEXNEWS_media_'
+            tag_media = 'MINISTRY_media_'
         print(tag_media)
         await state.update_data(viewed_channel=other_channel)
         if other_channel != 'Хватит, пропустим остальные источники 🙅‍♂️':
@@ -466,14 +462,12 @@ async def revealing_the_news(message: types.Message, state: FSMContext):
         tag_exposure = 'RIANEWS_exposure_'
     elif viewed_channel == web_prop[1]:
         tag_exposure = 'RUSSIATODAY_exposure_'
-    elif viewed_channel == web_prop[2]:
-        tag_exposure = 'TCHANEL_WAR_exposure_'
     elif viewed_channel == web_prop[3]:
-        tag_exposure = 'TACC_exposure_'
+        tag_exposure = 'TCHANEL_WAR_exposure_'
     elif viewed_channel == web_prop[4]:
-        tag_exposure = 'MINISTRY_exposure_'
+        tag_exposure = 'TACC_exposure_'
     elif viewed_channel == web_prop[5]:
-        tag_exposure = 'YANDEXNEWS_exposure_'
+        tag_exposure = 'MINISTRY_exposure_'
     print(tag_exposure)
     check_end = await check_name(tag_exposure+str(count_news+1))
     if check_end is not False:  # Проверка если новости закончились
@@ -499,14 +493,13 @@ async def show_more(message: types.Message, state: FSMContext):
         tag_media = 'RIANEWS_media_'
     elif viewed_channel == web_prop[1]:
         tag_media = 'RUSSIATODAY_media_'
-    elif viewed_channel == web_prop[2]:
-        tag_media = 'TCHANEL_WAR_media_'
     elif viewed_channel == web_prop[3]:
-        tag_media = 'TACC_media_'
+        tag_media = 'TCHANEL_WAR_media_'
     elif viewed_channel == web_prop[4]:
-        tag_media = 'MINISTRY_media_'
+        tag_media = 'TACC_media_'
     elif viewed_channel == web_prop[5]:
-        tag_media = 'YANDEXNEWS_media_'
+        tag_media = 'MINISTRY_media_'
+
     print(tag_media)
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Новость посмотрел(а). Что с ней не так? 🤔"))

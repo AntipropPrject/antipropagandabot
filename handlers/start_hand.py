@@ -1,20 +1,18 @@
 import csv
-
 from aiogram import Router, F
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.dispatcher.fsm.state import StatesGroup, State
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-
 import bata
-from data_base.DBuse import mongo_select_admins
-from handlers import true_resons_hand
-from handlers.admin_hand import admin_home
+from data_base.DBuse import data_getter, mongo_select_admins, sql_safe_insert
+from handlers import true_resons_hand, putin_hand
 from handlers.true_resons_hand import reasons_who_to_blame
 from keyboards.admin_keys import main_admin_keyboard
 from middleware import CounterMiddleware
 from states.donbass_states import donbass_state
+from utilts import simple_media, phoenix_protocol
 
 router = Router()
 router.message.middleware(CounterMiddleware())
@@ -45,18 +43,6 @@ async def cmd_start(message: Message, state: FSMContext):
     await message.answer('Вход в донбасс', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == 'Вернуться в меню'))
-@router.message(commands=["admin"])
-async def admin_hi(message: Message, state: FSMContext) -> None:
-    admins_list = await mongo_select_admins()
-    admins = bata.all_data().super_admins
-    for admin in admins_list:
-        admins.append(int(admin["_id"]))
-    if int(message.from_user.id) in admins:
-        await state.clear()
-        await state.set_state(admin_home.admin)
-        await message.answer("Добро пожаловать в режим администрации. Что вам угодно сегодня?",
-                             reply_markup=main_admin_keyboard(message.from_user.id))
 
 
 class add_id(StatesGroup):
@@ -86,3 +72,4 @@ async def csv_dump(message: Message, state: FSMContext):
     except:
         await message.answer_video(ph_id, caption=capt)
         await state.clear()
+
