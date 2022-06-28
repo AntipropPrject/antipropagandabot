@@ -11,7 +11,7 @@ class all_data():
         self.mongodb_data = 'mongodb://localhost:27017'
         self.bot_token = '5412250973:AAHYn2A77HmZ-1-L1f0XyqcsK37aq-GQSSg'
         self.super_admins = [5306348087, 5177494340, 5581082758, 5316104187]
-        self.THROTTLE_TIME = 0.5
+        self.THROTTLE_TIME = 1.2
 
 # фывфывфдв
     def get_bot(self):
