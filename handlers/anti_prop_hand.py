@@ -653,7 +653,7 @@ async def antip_truth_game_answer(message: Message, state: FSMContext):
     media = await sql_safe_select('t_id', 'assets', {'name': data['reb_media_tag']})
     if media is False:
         await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
-        await message.answer(reb)
+        await message.answer(reb, disable_web_page_preview=True)
     else:
         try:
             await message.answer_video(media, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
