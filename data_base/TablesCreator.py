@@ -16,7 +16,7 @@ def tables_god():
         record = cur.fetchone()
         logg.get_info(f"You connect to - {record}, \n")
 
-        # Удаление игровых таблиц
+        """# Удаление игровых таблиц
         cur.execute("DROP TABLE IF EXISTS ucraine_or_not_game")
         logg.get_info("Table ucraine_or_not_game has been deleted".upper())
         cur.execute("DROP TABLE IF EXISTS normal_game")
@@ -234,7 +234,7 @@ def tables_god():
             sql = "COPY ucraine_or_not_game FROM STDIN DELIMITER ',' CSV HEADER"
             cur.copy_expert(sql, open(csv_file_name, "r"))
         except Exception as error:
-            logg.get_error(f"{error}", __file__)
+            logg.get_error(f"{error}", __file__)"""
 
         con.close()
         cur.close()
