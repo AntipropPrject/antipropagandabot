@@ -285,6 +285,13 @@ async def reasons_normal_game_question(message: Message, state: FSMContext):
 @router.message(((F.text == "Это абсурд🤦🏼‍♀️") | (F.text == "Это нормально👌")), state=TruereasonsState.game)
 async def reasons_normal_game_answer(message: Message, state: FSMContext):
     data = await state.get_data()
+    END = bool(data['ngamecount'] == data_getter('SELECT COUNT(id) FROM public.normal_game')[0][0])
+    nmarkup = ReplyKeyboardBuilder()
+    if END is False:
+        nmarkup.row(types.KeyboardButton(text="Продолжаем, давай еще! 👉"))
+        nmarkup.row(types.KeyboardButton(text="Достаточно, давай закончим 🙅"))
+    else:
+        nmarkup.row(types.KeyboardButton(text="Продолжим 🤝"))
     base_update_dict = dict()
     if message.text == "Это абсурд🤦🏼‍♀️":
         base_update_dict.update({'belivers': (data['belive'] + 1)})
@@ -292,13 +299,13 @@ async def reasons_normal_game_answer(message: Message, state: FSMContext):
         base_update_dict.update({'nonbelivers': (data['not_belive'] + 1)})
     await sql_safe_update("normal_game", base_update_dict, {'id': data['ngamecount']})
     t_percentage = data['belive'] / (data['belive'] + data['not_belive'])
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Продолжаем, давай еще! 👉"))
-    nmarkup.row(types.KeyboardButton(text="Достаточно, давай закончим 🙅"))
     await message.answer(
         f'Результаты других участников:\n🤦‍♂️ Это абсурд: {round(100 - t_percentage * 100)}%'
         f'\n👌 Это нормально: {round(t_percentage * 100)}%',
         reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    if END is True:
+        await message.answer("У меня закончились новости. Спасибо за игру 🤝",
+                             reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message(((F.text.contains("Достаточно,")) | (F.text == "Продолжим 🤝") | (F.text == 'Пропустим игру 🙅‍♀️')),
