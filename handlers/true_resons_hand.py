@@ -10,7 +10,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from data_base.DBuse import data_getter, sql_safe_select, sql_safe_update, redis_just_one_write, poll_write
 from data_base.DBuse import redis_delete_from_list
-from filters.All_filters import OperationWar, WarReason
+from filters.MapFilters import OperationWar, WarReason
 from handlers import anti_prop_hand
 from handlers.nazi_hand import NaziState
 from handlers.preventive_strike import PreventStrikeState

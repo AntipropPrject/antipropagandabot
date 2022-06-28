@@ -9,7 +9,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from bata import all_data
 from data_base.DBuse import poll_get, redis_just_one_read
 from data_base.DBuse import sql_safe_select, data_getter, sql_safe_update
-from filters.All_filters import WebPropagandaFilter, TVPropagandaFilter, PplPropagandaFilter, PoliticsFilter
+from filters.MapFilters import WebPropagandaFilter, TVPropagandaFilter, PplPropagandaFilter, PoliticsFilter
 from handlers import true_resons_hand
 from keyboards.map_keys import antip_why_kb, antip_killme_kb
 from middleware import CounterMiddleware

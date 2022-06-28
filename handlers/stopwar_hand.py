@@ -129,7 +129,7 @@ async def stopwar_lets_fight(message: Message):
 
 @router.message((F.text == "Спасибо 🤝"))
 async def stopwar_lets_fight(message: Message):
-    text2 = await sql_safe_select('text', 'texts', {'name': 'stopwar_hello_world'})
+    text = await sql_safe_select('text', 'texts', {'name': 'stopwar_hello_world'})
     text2 = await sql_safe_select('text', 'texts', {'name': 'stopwar_send_me'})
     await message.answer(text, reply_markup=ReplyKeyboardRemove(), disable_web_page_preview=True)
     await message.answer(text2, disable_web_page_preview=True)
