@@ -629,6 +629,13 @@ async def antip_truth_game_start_question(message: Message, state: FSMContext):
 @router.message((F.text == "Это правда ✅") | (F.text == "Это ложь ❌"))
 async def antip_truth_game_answer(message: Message, state: FSMContext):
     data = await state.get_data()
+    END = bool(data['gamecount'] == data_getter('SELECT COUNT(id) FROM public.truthgame')[0][0])
+    nmarkup = ReplyKeyboardBuilder()
+    if END is False:
+        nmarkup.row(types.KeyboardButton(text="Продолжаем, давай еще! 👉"))
+        nmarkup.row(types.KeyboardButton(text="Достаточно, двигаемся дальше  🙅‍♀️"))
+    else:
+        nmarkup.row(types.KeyboardButton(text="🤝 Продолжим"))
     base_update_dict, reality = dict(), str()
     if message.text == "Это правда ✅":
         if data['truth'] == True:
@@ -647,9 +654,6 @@ async def antip_truth_game_answer(message: Message, state: FSMContext):
                      f'❌ <b>Ложь</b>: {round((100 - t_percentage * 100), 1)}' + '\n\nПодтверждение - ниже.'
     reb = data['rebuttal']
     await sql_safe_update("truthgame", base_update_dict, {'id': data['game_id']})
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Продолжаем, давай еще! 👉"))
-    nmarkup.row(types.KeyboardButton(text="Достаточно, двигаемся дальше  🙅‍♀️"))
     media = await sql_safe_select('t_id', 'assets', {'name': data['reb_media_tag']})
     if media is False:
         await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
@@ -657,10 +661,12 @@ async def antip_truth_game_answer(message: Message, state: FSMContext):
     else:
         try:
             await message.answer_video(media, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
-            await message.answer(reb)
+            await message.answer(reb, disable_web_page_preview=True)
         except TelegramBadRequest:
             await message.answer_photo(media, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
-            await message.answer(reb)
+            await message.answer(reb, disable_web_page_preview=True)
+    if END is True:
+        await message.answer('У меня закончились сюжеты. Спасибо за игру🤝')
 
 
 @router.message((F.text == "Пропустим игру 🙅‍♀️") | (F.text == '🤝 Продолжим') | (F.text == 'Достаточно, двигаемся дальше  🙅‍♀️'))
