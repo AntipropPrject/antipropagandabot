@@ -5,8 +5,10 @@ import psycopg2
 from aiogram.types import FSInputFile
 from bata import all_data
 import pandas
-from aiogram import Router
+from aiogram import Router, F
 from aiogram import types
+
+from filters.isAdmin import IsSudo
 from log import logg
 from middleware import CounterMiddleware
 
@@ -14,7 +16,7 @@ router = Router()
 router.message.middleware(CounterMiddleware())
 
 
-@router.message(commands=["export"])
+@router.message(IsSudo(), F.text.contains('Экспорт'))
 async def mongo_export_to_file(message: types.Message):
     today = datetime.today()
     today = today.strftime("%d-%m-%Y")
@@ -46,12 +48,12 @@ async def mongo_export_to_file(message: types.Message):
                 with open(t_path_n_texts, 'w') as f_output:
                     cur.copy_expert(SQL_texts, f_output)
             except psycopg2.Error as er:
-                logg.get_error(er)
+                await logg.get_error(er)
             try:
                 with open(t_path_n_assets, 'w') as f_output:
                     cur.copy_expert(SQL_assets, f_output)
             except psycopg2.Error as er:
-                logg.get_error(er)
+                await logg.get_error(er)
 
     await message.answer_document(FSInputFile(f"export_to_csv/backups/MongoDB/Mongo_user-{today}.csv"), caption="MongoDB info")
     await asyncio.sleep(0.2)

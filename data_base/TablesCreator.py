@@ -27,8 +27,8 @@ def tables_god():
         logg.get_info("Table putin_lies has been deleted".upper())
         cur.execute("DROP TABLE IF EXISTS truthgame")
         logg.get_info("Table truthgame has been deleted".upper())
-        cur.execute("DROP TABLE IF EXISTS mistakeOrLie")
-        logg.get_info("Table mistakeOrLie has been deleted".upper())
+        cur.execute("DROP TABLE IF EXISTS mistakeorlie")
+        logg.get_info("Table mistakeorlie has been deleted".upper())
 
         # Удаление основных таблиц
         cur.execute("DROP TABLE IF EXISTS texts")
@@ -75,7 +75,7 @@ def tables_god():
            REFERENCES public.assets("name");''')
         logg.get_info("table Truthgame is created".upper())
 
-        cur.execute('''CREATE TABLE public.mistakeOrLie(
+        cur.execute('''CREATE TABLE public.mistakeorlie(
                         "id" int4 NOT NULL,
                         truth bool NOT NULL,
                         asset_name varchar NULL,
@@ -83,18 +83,18 @@ def tables_god():
                         belivers int4 NOT NULL,
                         nonbelivers int4 NOT NULL,
                         rebuttal varchar NULL,
-                        CONSTRAINT mistakeOrLie_pk PRIMARY KEY (id)
+                        CONSTRAINT mistakeorlie_pk PRIMARY KEY (id)
                        );''')
 
-        cur.execute('''ALTER TABLE public.mistakeOrLie
-                 ADD CONSTRAINT mistakeOrLie_fk
+        cur.execute('''ALTER TABLE public.mistakeorlie
+                 ADD CONSTRAINT mistakeorlie_fk
                   FOREIGN KEY (asset_name)
                    REFERENCES public.assets("name");''')
-        cur.execute('''ALTER TABLE public.mistakeOrLie
-                 ADD CONSTRAINT mistakeOrLie_fk_1
+        cur.execute('''ALTER TABLE public.mistakeorlie
+                 ADD CONSTRAINT mistakeorlie_fk_1
                   FOREIGN KEY (text_name)
                    REFERENCES public.texts("name");''')
-        logg.get_info("mistakeOrLie table is created".upper())
+        logg.get_info("mistakeorlie table is created".upper())
 
         cur.execute('''CREATE TABLE public.putin_lies (
                             id int4 NOT NULL,
@@ -211,8 +211,8 @@ def tables_god():
             logg.get_error(f"{error}", __file__)
 
         try:
-            csv_file_name = 'resources/mistakeOrLie.csv'
-            sql = "COPY mistakeOrLie FROM STDIN DELIMITER ',' CSV HEADER"
+            csv_file_name = 'resources/mistakeorlie.csv'
+            sql = "COPY mistakeorlie FROM STDIN DELIMITER ',' CSV HEADER"
             cur.copy_expert(sql, open(csv_file_name, "r"))
         except Exception as error:
             logg.get_error(f"{error}", __file__)
