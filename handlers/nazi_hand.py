@@ -43,7 +43,7 @@ async def denanazification(message, state):
 
 
 router = Router()
-router.message.middleware(CounterMiddleware())
+
 
 router.message.filter(state=NaziState)
 

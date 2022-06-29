@@ -28,7 +28,7 @@ class TruereasonsState(StatesGroup):
 
 
 router = Router()
-router.message.middleware(CounterMiddleware())
+
 router.message.filter(state=TruereasonsState)
 
 

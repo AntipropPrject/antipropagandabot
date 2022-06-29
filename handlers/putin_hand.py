@@ -19,7 +19,7 @@ class StateofPutin(StatesGroup):
 
 
 router = Router()
-router.message.middleware(CounterMiddleware())
+
 router.message.filter(state=(StateofPutin))
 
 
