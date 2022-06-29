@@ -29,7 +29,7 @@ services:
     command: --port 2342
 
   web:
-    image: kamaga777/kamaga
+    build: .
     container_name: antiprop_Aiogrammwebhook
     ports:
       - "8080:8080"
