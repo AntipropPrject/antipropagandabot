@@ -213,12 +213,12 @@ async def antip_crossed_boy_2(message: Message):
 async def antip_crossed_boy_3(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_crossed_boy_3'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Какой ужас😱"))
-    nmarkup.row(types.KeyboardButton(text="Давай продолжим😕"))
+    nmarkup.row(types.KeyboardButton(text="Какой ужас 😱"))
+    nmarkup.row(types.KeyboardButton(text="Давай продолжим 😕"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Какой ужас😱") | (F.text == "Давай продолжим😕"))
+@router.message((F.text == "Какой ужас 😱") | (F.text == "Давай продолжим 😕"))
 async def antip_crossed_boy_3(message: Message):
     text2 = await sql_safe_select('text', 'texts', {'name': 'antip_be_honest'})
     await message.answer(text2, reply_markup=antip_killme_kb(), disable_web_page_preview=True)
@@ -550,13 +550,14 @@ async def skip_web(message: Message, state: FSMContext):
 
 @router.message((F.text.contains('Не надо')))
 async def antip_web_exit_1(message: Message, state: FSMContext):
-    text = 'Хорошо, это ваше право. Тогда предлагаю продолжить -- мне столько нужно вам показать!'
     redis = all_data().get_data_red()
     for key in redis.scan_iter(f"Usrs: {message.from_user.id}: Start_answers: ethernet:"):
         redis.delete(key)
-    markup = ReplyKeyboardBuilder()
-    markup.row(types.KeyboardButton(text='Ну давай'))
-    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    if set(await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:')).isdisjoint(("Дмитрий Песков", "Сергей Лавров",
+                        "Юрий Подоляка", "Владимир Соловьев", "Никита Михалков")) is True:
+        await antip_bad_people_lies(message, state)
+    else:
+        await antip_truth_game_start(message, state)
 
 
 @router.message(PplPropagandaFilter(),
@@ -659,12 +660,11 @@ async def antip_truth_game_answer(message: Message, state: FSMContext):
         await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
         await message.answer(reb, disable_web_page_preview=True)
     else:
+        await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
         try:
-            await message.answer_video(media, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
-            await message.answer(reb, disable_web_page_preview=True)
+            await message.answer_video(media, caption=reb)
         except TelegramBadRequest:
-            await message.answer_photo(media, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
-            await message.answer(reb, disable_web_page_preview=True)
+            await message.answer_photo(media, caption=reb)
     if END is True:
         await message.answer('У меня закончились сюжеты. Спасибо за игру🤝')
 
@@ -673,12 +673,10 @@ async def antip_truth_game_answer(message: Message, state: FSMContext):
 async def antip_ok(message: Message, state: FSMContext):
     await message.answer("Хорошо", reply_markup=ReplyKeyboardRemove())
     if await redis_just_one_read(f'Usrs: {message.from_user.id}: INFOState:') == 'Жертва пропаганды':
-        await asyncio.sleep(2)
+        await asyncio.sleep(1)
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Давай"))
-        await message.answer("У меня есть анекдот")
-        await asyncio.sleep(1)
-        await message.answer("Хотите послушать?", reply_markup=nmarkup.as_markup(resize_keyboard=True))
+        await message.answer("У меня есть анекдот", reply_markup=nmarkup.as_markup(resize_keyboard=True))
     else:
         polistate = await redis_just_one_read(f'Usrs: {message.from_user.id}: Politics:')
         await asyncio.sleep(1)
@@ -757,11 +755,12 @@ async def antip_big_love_propaganda(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.contains('правда. Откуда ты знаешь')))
+@router.message((F.text.contains('Откуда ты знаешь')))
 async def antip_reputation_matters(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_reputation_matters'})
-    print(text)
-    await message.answer(text, reply_markup=antip_why_kb(), disable_web_page_preview=True)
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text='Продолжим 🇷🇺🇺🇦'))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 # По хорошему, это уже начало войны
