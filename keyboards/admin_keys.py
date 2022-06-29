@@ -64,7 +64,7 @@ async def settings_bot():
     nmarkup.row(types.KeyboardButton(text="Экспорт"))
     nmarkup.row(types.KeyboardButton(text="Импорт"))
     nmarkup.row(types.KeyboardButton(text="Статистика бота"))
-    if '1' in status:
+    if 1 in status:
         nmarkup.row(types.KeyboardButton(text="Выключить тех. режим 🟢"))
     else:
         nmarkup.row(types.KeyboardButton(text="Включить тех. режим 🔴"))
