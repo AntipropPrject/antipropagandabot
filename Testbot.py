@@ -32,7 +32,7 @@ async def on_startup(dispatcher: Dispatcher) -> None:
 
     webhook = await bot.get_webhook_info()
 
-    await bot.set_webhook("https://ec2-13-53-192-218.eu-north-1.compute.amazonaws.com")
+    await bot.set_webhook("ec2-13-53-192-218.eu-north-1.compute.amazonaws.com")
 
     logging.info("🚀 Bot launched as Hoook!")
     logging.info(f"webhook: https://ec2-13-53-192-218.eu-north-1.compute.amazonaws.com")
