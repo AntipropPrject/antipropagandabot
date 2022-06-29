@@ -72,7 +72,7 @@ async def settings_bot():
             nmarkup.row(types.KeyboardButton(text="Выключить тех. режим 🟢"))
         else:
             nmarkup.row(types.KeyboardButton(text="Включить тех. режим 🔴"))
-    except TypeError:
+    except:
         nmarkup.row(types.KeyboardButton(text="Включить тех. режим 🔴"))
     nmarkup.row(types.KeyboardButton(text="Возврат в главное меню"))
     nmarkup.adjust(1, 2, 1, 1, 1)
