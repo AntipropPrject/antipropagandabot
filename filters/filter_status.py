@@ -15,5 +15,5 @@ class Status(BaseFilter):
 
             else:
                 return False
-        except TypeError:
+        except:
             return False
