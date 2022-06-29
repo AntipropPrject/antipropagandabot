@@ -63,55 +63,64 @@ async def mongo_export_to_file(message: types.Message):
             try:
                 with open(t_path_n_texts, 'w') as f_output:
                     cur.copy_expert(SQL_texts, f_output)
-                    export_zip.write(t_path_n_texts)
+
             except psycopg2.Error as er:
                 await logg.get_error(er)
             try:
                 with open(t_path_n_assets, 'w') as f_output:
                     cur.copy_expert(SQL_assets, f_output)
-                    export_zip.write(t_path_n_assets)
+
             except psycopg2.Error as er:
                 await logg.get_error(er)
             try:
                 with open(t_path_n_mistakeorlie, 'w') as f_output:
                     cur.copy_expert(SQL_mistakeorlie, f_output)
-                    export_zip.write(t_path_n_mistakeorlie)
+
             except psycopg2.Error as er:
                 await logg.get_error(er)
             try:
                 with open(t_path_n_putin_lies, 'w') as f_output:
                     cur.copy_expert(SQL_putin_lies, f_output)
-                    export_zip.write(t_path_n_putin_lies)
+
             except psycopg2.Error as er:
                 await logg.get_error(er)
             try:
                 with open(t_path_n_putin_old_lies, 'w') as f_output:
                     cur.copy_expert(SQL_putin_old_lies, f_output)
-                    export_zip.write(t_path_n_putin_old_lies)
+
             except psycopg2.Error as er:
                 await logg.get_error(er)
             try:
                 with open(t_path_n_truthgame, 'w') as f_output:
                     cur.copy_expert(SQL_truthgame, f_output)
-                    export_zip.write(t_path_n_truthgame)
+
             except psycopg2.Error as er:
                 await logg.get_error(er)
             try:
                 with open(t_path_n_ucraine_or_not_game, 'w') as f_output:
                     cur.copy_expert(SQL_ucraine_or_not_game, f_output)
-                    export_zip.write(t_path_n_ucraine_or_not_game)
             except psycopg2.Error as er:
                 await logg.get_error(er)
     print(1)
+    try:
+        export_zip.write(t_path_n_texts)
+        export_zip.write(t_path_n_assets)
+        export_zip.write(t_path_n_mistakeorlie)
+        export_zip.write(t_path_n_putin_lies)
+        export_zip.write(t_path_n_putin_old_lies)
+        export_zip.write(t_path_n_truthgame)
+        export_zip.write(t_path_n_ucraine_or_not_game)
+    except:
+        pass
     export_zip.close()
+
     try:
         await message.answer_document(FSInputFile(f"export_to_csv/backups/backup-{today}-{ch}-{mn}.zip"), caption=f"Type: backup base\n\n"
                                                                                                     f"Date: {today}\n"
                                                                                                     f"Time: {ch}:{mn} (UTC)")
     except:
         await message.answer("Файл не успел отправиться, возможно стоит доработать эту функцию")
-
-    await asyncio.sleep(0.2)
+    await asyncio.sleep(0.1)
     await message.answer_document(FSInputFile(f'log/logs/Log-{today}.log'), caption=f"Type: logs\n\n"
                                                                                     f"Date: {today}\n"
                                                                                     f"Time: {ch}:{mn} (UTC)")
