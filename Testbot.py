@@ -69,7 +69,7 @@ def bot_register():
     # Роутер для неподошедшего
     dp.include_router(other_file.router)
 
-    await executor.start_webhook(
+    bot.start_webhook(
         dispatcher=dp,
         webhook_path=WEBHOOK_PATH,
         on_startup=on_startup,
@@ -78,6 +78,7 @@ def bot_register():
         host="0.0.0.0",
         port="8080",
     )
+
     # await bot.delete_webhook(drop_pending_updates=True)
     # await dp.start_polling(bot)
 
