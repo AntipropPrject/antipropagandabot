@@ -252,9 +252,7 @@ async def donbas_live_shield_start(message: Message):
 @router.message(text_contains=('сопротивлялись', 'мира'), content_types=types.ContentType.TEXT, text_ignore_case=True)
 async def provocation(message: Message, state: FSMContext):
     await state.update_data(surrender='Украинцам нужно было просто сдаться, тогда не было бы стольких жертв')
-    await poll_write(f'Usrs: {message.from_user.id}: Donbass_polls: First:', donbass_first_poll[6])
-    await message.answer('Об этом чуть позже, но не волнуйтесь: до всего дойдет свой черед.', reply_markup=filler_kb(),
-                         parse_mode="HTML")
+    await donbas_why_not_surrender(message)
 
 
 @router.message(DonbassOptionsFilter(option="🏳️ Украинцам надо было просто сдаться, тогда бы столько жертв не было"),
