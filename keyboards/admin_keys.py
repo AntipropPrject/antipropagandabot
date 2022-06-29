@@ -4,8 +4,7 @@ from aiogram import types
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from bata import all_data
-
-technical_mode = False
+from data_base.DBuse import poll_get, redis_just_one_read
 
 
 def main_admin_keyboard(t_id=None):
@@ -56,14 +55,21 @@ def redct_games():
     return nmarkup.as_markup(resize_keyboard=True)
 
 
-def settings_bot():
+
+async def settings_bot():
+    status = await redis_just_one_read('Usrs: admins: state: status:')
+    print(status)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Редакторы бота"))
     nmarkup.row(types.KeyboardButton(text="Экспорт"))
     nmarkup.row(types.KeyboardButton(text="Импорт"))
     nmarkup.row(types.KeyboardButton(text="Статистика бота"))
+    if '1' in status:
+        nmarkup.row(types.KeyboardButton(text="Выключить тех. режим 🟢"))
+    else:
+        nmarkup.row(types.KeyboardButton(text="Включить тех. режим 🔴"))
     nmarkup.row(types.KeyboardButton(text="Возврат в главное меню"))
-    nmarkup.adjust(1, 2)
+    nmarkup.adjust(1, 2, 1, 1, 1)
     return nmarkup.as_markup(resize_keyboard=True)
 
 
