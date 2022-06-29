@@ -65,6 +65,7 @@ async def nazi_poll_filler(message: Message):
 
 @router.poll_answer(state=NaziState.first_poll)
 async def npoll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FSMContext):
+    await state.set_state(NaziState.after_first_poll)
     nazizm_answers = poll_answer.option_ids
     await state.update_data(nazizm_answers=nazizm_answers)
     for index in nazizm_answers:
@@ -76,15 +77,20 @@ async def npoll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: F
         markup = ReplyKeyboardBuilder()
         markup.row(types.KeyboardButton(text="Давай 👌"))
         text = await sql_safe_select("text", "texts", {"name": "nazi_word"})
-        await bot.send_message(chat_id=poll_answer.user.id, text=text, parse_mode="HTML",
-                               reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+        media = await sql_safe_select('t_id', 'assets', {"name": "nazi_word"})
+        try:
+            await bot.send_video(poll_answer.user.id, video=media, caption=text, reply_markup=markup.as_markup(resize_keyboard=True))
+        except TelegramBadRequest:
+            await bot.send_photo(poll_answer.user.id, photo=media, caption=text, reply_markup=markup.as_markup(resize_keyboard=True))
     else:
         markup = ReplyKeyboardBuilder()
         markup.row(types.KeyboardButton(text="А как же неонацизм? 🤨"))
         text = await sql_safe_select("text", "texts", {"name": "nazi_negative"})
-        await bot.send_message(poll_answer.user.id, text, parse_mode="HTML",
-                               reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
-    await state.set_state(NaziState.after_first_poll)
+        media = await sql_safe_select('t_id', 'assets', {"name": "nazi_negative"})
+        try:
+            await bot.send_video(poll_answer.user.id, video=media, caption=text, reply_markup=markup.as_markup(resize_keyboard=True))
+        except TelegramBadRequest:
+            await bot.send_photo(poll_answer.user.id, photo=media, caption=text, reply_markup=markup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text.contains('Давай 👌')), state=NaziState.after_first_poll)
