@@ -31,6 +31,8 @@ services:
   web:
     build: .
     container_name: antiprop_Aiogrammwebhook
+    ports:
+      - "80:80"
     command: bash -c 'python Testbot.py'
     volumes:
       - .:/code
