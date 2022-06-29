@@ -33,7 +33,7 @@ services:
     container_name: antiprop_Aiogrammwebhook
     ports:
       - "8080:8080"
-    command: bash -c 'python -m api.bot'
+    command: bash -c 'python -m Testbot.py'
     volumes:
       - .:/code
     depends_on:
