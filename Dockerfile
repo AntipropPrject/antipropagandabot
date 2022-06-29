@@ -10,4 +10,4 @@ RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
 COPY . /code/
-CMD ["Testbot.py"]
+CMD ["-m api.bot"]

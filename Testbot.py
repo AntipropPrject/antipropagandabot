@@ -47,17 +47,6 @@ async def on_shutdown(dispatcher: Dispatcher) -> None:
 
 def bot_register():
 
-    executor.start_webhook(
-        dispatcher=dp,
-        webhook_path=WEBHOOK_PATH,
-        on_startup=on_startup,
-        on_shutdown=on_shutdown,
-        skip_updates=True,
-        host="0.0.0.0",
-        port="8080",
-    )
-
-
     # Технические роутеры
 
     dp.include_router(pg_mg.router)
@@ -80,6 +69,15 @@ def bot_register():
     # Роутер для неподошедшего
     dp.include_router(other_file.router)
 
+    await executor.start_webhook(
+        dispatcher=dp,
+        webhook_path=WEBHOOK_PATH,
+        on_startup=on_startup,
+        on_shutdown=on_shutdown,
+        skip_updates=True,
+        host="0.0.0.0",
+        port="8080",
+    )
     # await bot.delete_webhook(drop_pending_updates=True)
     # await dp.start_polling(bot)
 
