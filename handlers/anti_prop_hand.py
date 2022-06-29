@@ -729,7 +729,7 @@ async def antip_why_they_belive(message: Message):
     await simple_media(message, 'antip_why_they_belive', antip_why_kb())
 
 
-@router.message((F.text.contains('Возможно') | (F.text.contains('полностью')) | (F.text.contains('Скорее'))))
+@router.message((F.text.contains('Возможно') | (F.text.contains('полностью')) | (F.text.contains('Скорее')) | (F.text.contains('Допускаю'))))
 async def antip_to_the_main(message: Message):
     await simple_media(message, 'antip_to_the_main', antip_why_kb())
 
@@ -753,7 +753,7 @@ async def antip_love_propaganda(message: Message):
 async def antip_big_love_propaganda(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_big_love_propaganda'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Продолжим 🇷🇺🇺🇦"))
+    nmarkup.row(types.KeyboardButton(text="Я передумал(а). Допускаю, что ТВ и гос. СМИ не ставят целью донести до людей правду 😔"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
