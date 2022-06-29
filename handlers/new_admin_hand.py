@@ -1,4 +1,7 @@
 import csv
+import os
+import shutil
+import zipfile
 
 from aiogram import Router, F
 from aiogram import types
@@ -6,48 +9,24 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.dispatcher.fsm.state import State, StatesGroup
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message
-from aiogram.utils.keyboard import ReplyKeyboardBuilder
+from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 from Testbot import bot
 from bata import all_data
 from data_base.DBuse import sql_safe_select, sql_safe_update, sql_safe_insert, mongo_select_info, mongo_add_admin, \
-    mongo_pop_admin, mongo_select_admins, sql_delete, poll_write, redis_just_one_write
+    mongo_pop_admin, mongo_select_admins, sql_delete, poll_write, redis_just_one_write, redis_just_one_read
+from export_to_csv.pg_mg import backin
 from filters.filter_status import Status
 from filters.isAdmin import IsAdmin, IsSudo
 from keyboards.admin_keys import main_admin_keyboard, middle_admin_keyboard, app_admin_keyboard, redct_text, \
     redct_media, redct_games, settings_bot, redct_editors
 from log import logg
+from states.admin_states import admin
 from stats.stat import mongo_select_stat
 from utilts import phoenix_protocol, simple_media
 
 router = Router()
 
-class admin(StatesGroup):
-    home = State()
-    menu = State()
-    add = State()
-    pop = State()
-    editors_menu = State()
-    edit_context = State()
-    add_text = State()
-    edit_text = State()
-    edit_text_test = State()
-    add_media = State()
-    edit_media_test = State()
-    edit_media = State()
-    confirm_add_text = State()
-    confirm_edit_text = State()
-    confirm_add_media = State()
-    confirm_edit_media = State()
-    repeat_add_text = State()
-    repeat_edit_text = State()
-    repeat_add_media = State()
-    repeat_edit_media = State()
-    delete_text_test = State()
-    delete_text = State()
-    delete_media_test = State()
-    delete_media = State()
-    import_csv = State()
 
 @router.message(IsAdmin(), commands=["admin"])
 async def admin_home(message: types.Message, state: FSMContext):
@@ -113,8 +92,14 @@ async def reset(message: Message, state: FSMContext):
         await message.answer("Выберите интересующий вас пункт меню", reply_markup=await settings_bot())
         await state.set_state(admin.edit_context)
     elif 'admin:editors_menu' in str(stt):
-        await message.answer("Выберите интересующий вас пункт меню", reply_markup=await settings_bot())
         await state.set_state(admin.edit_context)
+        await message.answer("Выберите интересующий вас пункт меню", reply_markup=await settings_bot())
+    elif 'admin:import_menu' in str(stt):
+        await state.set_state(admin.edit_context)
+        await message.answer("Выберите интересующий вас пункт меню", reply_markup=await settings_bot())
+    elif 'admin:import_csv' in str(stt):
+        await state.set_state(admin.edit_context)
+        await message.answer("Выберите интересующий вас пункт меню", reply_markup=await settings_bot())
     else:
         await state.set_state(admin.home)
         await message.answer('Хорошо, вернемся в меню', reply_markup=main_admin_keyboard(message.from_user.id))
@@ -538,48 +523,118 @@ async def approve_text(message: Message, state: FSMContext):
 @router.message(IsSudo(), (F.text.contains('Включить тех.')), state="*")
 async def send_bot_to_work(message: types.Message, state: FSMContext):
     await state.clear()
-    await redis_just_one_write(f'Usrs: admins: state: status:', 1)
+    await state.set_state(admin.edit_context)
+    await redis_just_one_write(f'Usrs: admins: state: status:', '1')
     await message.answer("<b>🔴 Бот был отправлен на технические работы.</b>",
                          reply_markup=await settings_bot())
 
 @router.message(IsSudo(), (F.text.contains('Выключить тех.')), state="*")
 async def return_bot_from_work(message: types.Message, state: FSMContext):
     await state.clear()
-    await redis_just_one_write(f'Usrs: admins: state: status:', 0)
+    await state.set_state(admin.edit_context)
+    await redis_just_one_write(f'Usrs: admins: state: status:', '0')
     await message.answer("<b>🟢 Бот был выведен из технических работ.</b>",
                          reply_markup=await settings_bot())
 
 
+
+
 @router.message(IsSudo(), (F.text.contains('Импорт')), state=admin.edit_context)
 async def import_csv(message: types.Message, state: FSMContext):
+    status = await redis_just_one_read('Usrs: admins: state: status:')
+    if '1' in status:
+        await state.set_state(admin.import_menu)
+        nmarkup = ReplyKeyboardBuilder()
+        nmarkup.row(types.KeyboardButton(text="Выбрать существующий"))
+        nmarkup.row(types.KeyboardButton(text="Загрузить файл"))
+        nmarkup.row(types.KeyboardButton(text="Назад"))
+        await message.answer("Вы можете сделать backup прямо с сервера"
+                             " или загрузить файл восстановления самостоятельно", reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    elif "0" in status:
+        await message.answer("Вы должны включить технический режим 🔴'")
+
+
+
+
+@router.message(IsSudo(), (F.text.contains('Выбрать существующий')), state=admin.import_menu)
+async def import_csv(message: types.Message, state: FSMContext):
+    status = await redis_just_one_read('Usrs: admins: state: status:')
+    if '1' in status:
+        await state.set_state(admin.import_csv_from_local)
+        nmarkup = ReplyKeyboardBuilder()
+        nmarkup.row(types.KeyboardButton(text="Назад"))
+        await message.answer("Напишите дату бэкапа в формате: day:month:year", reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    elif "0" in status:
+        await message.answer("Вы должны включить технический режим 🔴'")
+
+@router.message(state=admin.import_csv_from_local)
+async def import_csv(message: types.Message, state: FSMContext):
+    path = "export_to_csv/backups"
+    # we shall store all the file names in this list
+    test_list = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':')
+    switch = True
+    for i in message.text:
+        if i not in test_list:
+            switch = False
+    if switch == True:
+        backlist = []
+        date = message.text.replace(':',"-")
+        print(date)
+        for root, dirs, files in os.walk(path):
+            for file in files:
+                if date in str(file) and '.zip' in str(file):
+                    print(file)
+                    # append the file name to the list
+                    backlist.append(os.path.join(file))
+        if len(backlist) != 0:
+            await message.answer(f"Все ваши бэкапы за {message.text}")
+        else:
+            await message.answer(f"За выбранную дату бэкапы отсутствуют")
+        for backup in backlist:
+            nmarkup = InlineKeyboardBuilder()
+            nmarkup.button(text='Восстановить', callback_data=backup)
+            await message.answer(str(backup), reply_markup=nmarkup.as_markup())
+    else:
+        await message.answer("Вы неправильно ввели дату, повторите попытку")
+
+@router.message(IsSudo(), (F.text.contains('Загрузить файл')), state=admin.import_menu)
+async def import_csv(message: types.Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Экспорт"))
-    nmarkup.row(types.KeyboardButton(text="Отмена"))
-    nmarkup.as_markup(resize_keyboard=True)
-    await message.answer("Отправьте мне csv файл, который хотите обновить\n\n"
-                         "Внимание, база будет полностью обновлена, хотите сделать экспорт текущей базы??")
+    nmarkup.row(types.KeyboardButton(text="Создать копию"))
+    nmarkup.row(types.KeyboardButton(text="Назад"))
+
+    await message.answer("Отправьте мне backup архив для восстановления базы\n\n"
+                         "Внимание, база будет полностью обновлена, хотите сделать копию текущей базы??", reply_markup=nmarkup.as_markup(resize_keyboard=True))
     await state.set_state(admin.import_csv)
 
 
 @router.message(state=admin.import_csv)
 async def import_csv(message: types.Message, state: FSMContext):
-    con = all_data().get_postg()
-    # Курсор для выполнения операций с базой данных
-    cur = con.cursor()
-    con.autocommit = True
-
     csv_id = message.document
     file_name = csv_id.file_name
     file = await bot.get_file(csv_id.file_id)
     file_path = file.file_path
-    await bot.download_file(file_path, f"resources/{file_name}")
+    await bot.download_file(file_path, f"export_to_csv/backin/backin.zip")
+    with zipfile.ZipFile("export_to_csv/backin/backin.zip", 'r') as zip_file:
+        zip_file.extractall("export_to_csv/backin")
 
-    if 'texts' in file_name.lower():
-        cur.execute("DELETE FROM texts")
-        logg.get_info("Table texts has been deleted".upper())
-        try:
-            csv_file_name = f'resources/{file_name}'
-            sql = "COPY texts FROM STDIN DELIMITER ',' CSV HEADER"
-            cur.copy_expert(sql, open(csv_file_name, "r"))
-        except Exception as error:
-            await logg.get_error(f"{error}", __file__)
+
+    if 'backup' in file_name.lower():
+        await backin()
+        await state.set_state(admin.edit_context)
+        await message.answer("Импорт завершен успешно", reply_markup=await settings_bot())
+    else:
+        await message.answer("Неправильное название архива")
+
+@router.callback_query()
+async def import_csv(query: types.CallbackQuery, state: FSMContext):
+    file = query.data
+    with zipfile.ZipFile(f"export_to_csv/backups/{file}", 'r') as zip_file:
+        zip_file.extractall("export_to_csv/backin")
+    await backin()
+    try:
+        shutil.rmtree('export_to_csv/backin/export_to_csv')
+    except:
+        pass
+    await state.set_state(admin.edit_context)
+    await query.message.answer("Импорт завершен успешно", reply_markup=await settings_bot())
