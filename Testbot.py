@@ -2,11 +2,10 @@ import asyncio
 from aiogram import Dispatcher, __all__
 from aiogram.dispatcher.fsm.storage.redis import RedisStorage
 from aiohttp import web
-
+from aiogram.dispatcher.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 import logging
 from urllib.parse import urljoin
 
-from aiogram import Bot, Dispatcher, executor, types
 
 
 from bata import all_data
@@ -16,8 +15,8 @@ from export_to_csv import pg_mg
 from handlers.other import other_file
 from data_base import TablesCreator
 
-WEBHOOK_HOST = "https://ec2-16-170-206-95.eu-north-1.compute.amazonaws.com/"
-WEBHOOK_PATH = "Testbot.py"
+WEBHOOK_HOST = "https://ec2-16-170-206-95.eu-north-1.compute.amazonaws.com"
+WEBHOOK_PATH = "/api/bot"
 WEBHOOK_URL = urljoin(WEBHOOK_HOST, WEBHOOK_PATH)
 
 TablesCreator.tables_god()
@@ -44,8 +43,13 @@ async def on_shutdown(dispatcher: Dispatcher) -> None:
     await bot.delete_webhook()
     await dispatcher.storage.close()
 
+def configure_app(dp, bot) -> web.Application:
+    app = web.Application()
+    SimpleRequestHandler(dispatcher=dp, bot=bot).register(app, path=WEBHOOK_PATH)
+    setup_application(app, dp, bot=bot)
+    return app
 
-def bot_register():
+def main():
 
     # Технические роутеры
 
@@ -69,18 +73,13 @@ def bot_register():
     # Роутер для неподошедшего
     dp.include_router(other_file.router)
 
-    bot.start_webhook(
-        dispatcher=dp,
-        webhook_path=WEBHOOK_PATH,
-        on_startup=on_startup,
-        on_shutdown=on_shutdown,
-        skip_updates=True,
-        host="0.0.0.0",
-        port="8080",
-    )
-
+    dp.startup.register(on_startup)
+    dp.shutdown.register(on_shutdown)
+    app = configure_app(dp, bot)
+    web.run_app(app, host="0.0.0.0", port=8080)
     # await bot.delete_webhook(drop_pending_updates=True)
     # await dp.start_polling(bot)
 
-
+if __name__ == '__main__':
+    main()
 
