@@ -13,7 +13,7 @@ class StopWarState(StatesGroup):
 
 
 router = Router()
-router.message.middleware(CounterMiddleware())
+
 router.message.filter(state=StopWarState)
 
 

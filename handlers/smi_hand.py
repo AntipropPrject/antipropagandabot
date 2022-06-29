@@ -10,7 +10,7 @@ from middleware import CounterMiddleware
 from states.antiprop_states import propaganda_victim
 
 router = Router()
-router.message.middleware(CounterMiddleware())
+
 router.message.filter(state=propaganda_victim)
 messageDict = dict()
 

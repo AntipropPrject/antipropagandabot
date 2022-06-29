@@ -15,7 +15,6 @@ from states.donbass_states import donbass_state
 from utilts import simple_media
 
 router = Router()
-router.message.middleware(CounterMiddleware())
 
 router.message.filter(state=donbass_state)
 

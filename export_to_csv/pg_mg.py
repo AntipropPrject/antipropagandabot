@@ -7,7 +7,7 @@ from bata import all_data
 import pandas
 from aiogram import Router, F
 from aiogram import types
-
+import zipfile
 from filters.isAdmin import IsSudo
 from log import logg
 from middleware import CounterMiddleware
@@ -20,6 +20,9 @@ router.message.middleware(CounterMiddleware())
 async def mongo_export_to_file(message: types.Message):
     today = datetime.today()
     today = today.strftime("%d-%m-%Y")
+    current_datetime = datetime.now()
+    ch = current_datetime.hour
+    mn = current_datetime.minute
     client = all_data().get_mongo()
     database = client['database']
     collection = database['userinfo']
@@ -28,11 +31,14 @@ async def mongo_export_to_file(message: types.Message):
 
     # Convert the mongo docs to a DataFrame
     docs = pandas.DataFrame(mongo_docs)
-
+    try:
+        export_zip = zipfile.ZipFile(rf'export_to_csv/backups/backup-{today}-{ch}-{mn}.zip', 'w')
+    except Exception as er:
+        await logg.get_error(er)
     # compute the output file directory and name
     output_dir_mongo = os.path.join('export_to_csv', 'backups', 'MongoDB')
     output_file = os.path.join(output_dir_mongo, 'Mongo_user-' + today + '.csv')
-
+    export_zip.write(output_file)
     docs.to_csv(output_file, ",", index=False)  # CSV delimited by commas
 
     conn = all_data().get_postg()
@@ -46,65 +52,67 @@ async def mongo_export_to_file(message: types.Message):
             SQL_mistakeorlie = "COPY (SELECT * FROM mistakeorlie) TO STDOUT WITH CSV HEADER"
             SQL_ucraine_or_not_game = "COPY (SELECT * FROM ucraine_or_not_game) TO STDOUT WITH CSV HEADER"
             # Set up a variable to store our file path and name.
-            t_path_n_texts = f"export_to_csv/backups/PostgreSQL/Texts-{today}.csv"
-            t_path_n_assets = f"export_to_csv/backups/PostgreSQL/Assets-{today}.csv"
-            t_path_n_mistakeorlie = f"export_to_csv/backups/games/Mistakeorlie-{today}.csv"
-            t_path_n_putin_lies = f"export_to_csv/backups/games/Putin_lies-{today}.csv"
-            t_path_n_putin_old_lies = f"export_to_csv/backups/games/Putin_old_lies-{today}.csv"
-            t_path_n_truthgame = f"export_to_csv/backups/games/Truthgame-{today}.csv"
-            t_path_n_ucraine_or_not_game = f"export_to_csv/backups/games/Ucraine_or_not_game-{today}.csv"
+            t_path_n_texts = rf"export_to_csv/backups/PostgreSQL/Texts-{today}.csv"
+            t_path_n_assets = rf"export_to_csv/backups/PostgreSQL/Assets-{today}.csv"
+            t_path_n_mistakeorlie = rf"export_to_csv/backups/games/Mistakeorlie-{today}.csv"
+            t_path_n_putin_lies = rf"export_to_csv/backups/games/Putin_lies-{today}.csv"
+            t_path_n_putin_old_lies = rf"export_to_csv/backups/games/Putin_old_lies-{today}.csv"
+            t_path_n_truthgame = rf"export_to_csv/backups/games/Truthgame-{today}.csv"
+            t_path_n_ucraine_or_not_game = rf"export_to_csv/backups/games/Ucraine_or_not_game-{today}.csv"
             # Trap errors for opening the file
             try:
                 with open(t_path_n_texts, 'w') as f_output:
                     cur.copy_expert(SQL_texts, f_output)
+                    export_zip.write(t_path_n_texts)
             except psycopg2.Error as er:
                 await logg.get_error(er)
             try:
                 with open(t_path_n_assets, 'w') as f_output:
                     cur.copy_expert(SQL_assets, f_output)
+                    export_zip.write(t_path_n_assets)
             except psycopg2.Error as er:
                 await logg.get_error(er)
             try:
                 with open(t_path_n_mistakeorlie, 'w') as f_output:
                     cur.copy_expert(SQL_mistakeorlie, f_output)
+                    export_zip.write(t_path_n_mistakeorlie)
             except psycopg2.Error as er:
                 await logg.get_error(er)
             try:
                 with open(t_path_n_putin_lies, 'w') as f_output:
                     cur.copy_expert(SQL_putin_lies, f_output)
+                    export_zip.write(t_path_n_putin_lies)
             except psycopg2.Error as er:
                 await logg.get_error(er)
             try:
                 with open(t_path_n_putin_old_lies, 'w') as f_output:
                     cur.copy_expert(SQL_putin_old_lies, f_output)
+                    export_zip.write(t_path_n_putin_old_lies)
             except psycopg2.Error as er:
                 await logg.get_error(er)
             try:
                 with open(t_path_n_truthgame, 'w') as f_output:
                     cur.copy_expert(SQL_truthgame, f_output)
+                    export_zip.write(t_path_n_truthgame)
             except psycopg2.Error as er:
                 await logg.get_error(er)
             try:
                 with open(t_path_n_ucraine_or_not_game, 'w') as f_output:
                     cur.copy_expert(SQL_ucraine_or_not_game, f_output)
+                    export_zip.write(t_path_n_ucraine_or_not_game)
             except psycopg2.Error as er:
                 await logg.get_error(er)
+    print(1)
+    export_zip.close()
+    try:
+        await message.answer_document(FSInputFile(f"export_to_csv/backups/backup-{today}-{ch}-{mn}.zip"), caption=f"Type: backup base\n\n"
+                                                                                                    f"Date: {today}\n"
+                                                                                                    f"Time: {ch}:{mn} (UTC)")
+    except:
+        await message.answer("Файл не успел отправиться, возможно стоит доработать эту функцию")
 
-    await message.answer_document(FSInputFile(f"export_to_csv/backups/MongoDB/Mongo_user-{today}.csv"), caption="MongoDB info")
     await asyncio.sleep(0.2)
-    await message.answer_document(FSInputFile(f"export_to_csv/backups/PostgreSQL/Texts-{today}.csv"), caption="Texts")
-    await asyncio.sleep(0.2)
-    await message.answer_document(FSInputFile(f"export_to_csv/backups/PostgreSQL/Assets-{today}.csv"), caption="Assets")
-    await asyncio.sleep(0.2)
-    await message.answer_document(FSInputFile(f"export_to_csv/backups/games/Mistakeorlie-{today}.csv"), caption="Mistakeorlie")
-    await asyncio.sleep(0.2)
-    await message.answer_document(FSInputFile(f"export_to_csv/backups/games/Putin_lies-{today}.csv"), caption="Putin_lies")
-    await asyncio.sleep(0.2)
-    await message.answer_document(FSInputFile(f"export_to_csv/backups/games/Putin_old_lies-{today}.csv"), caption="Putin_old_lies")
-    await asyncio.sleep(0.2)
-    await message.answer_document(FSInputFile(f"export_to_csv/backups/games/Truthgame-{today}.csv"), caption="Truthgame")
-    await asyncio.sleep(0.2)
-    await message.answer_document(FSInputFile(f"export_to_csv/backups/games/Ucraine_or_not_game-{today}.csv"), caption="Ucraine_or_not_game")
-    await asyncio.sleep(0.2)
-    await message.answer_document(FSInputFile(f'log/logs/Log-{today}.log'), caption="Logs")
+    await message.answer_document(FSInputFile(f'log/logs/Log-{today}.log'), caption=f"Type: logs\n\n"
+                                                                                    f"Date: {today}\n"
+                                                                                    f"Time: {ch}:{mn} (UTC)")
 

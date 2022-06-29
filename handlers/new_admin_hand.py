@@ -7,15 +7,16 @@ from aiogram.dispatcher.fsm.state import State, StatesGroup
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-from psycopg2 import sql
 
-import bata
+from Testbot import bot
 from bata import all_data
 from data_base.DBuse import sql_safe_select, sql_safe_update, sql_safe_insert, mongo_select_info, mongo_add_admin, \
-    mongo_pop_admin, mongo_select_admins, sql_delete, postgresql_csv_dump
+    mongo_pop_admin, mongo_select_admins, sql_delete, poll_write, redis_just_one_write
+from filters.filter_status import Status
 from filters.isAdmin import IsAdmin, IsSudo
 from keyboards.admin_keys import main_admin_keyboard, middle_admin_keyboard, app_admin_keyboard, redct_text, \
     redct_media, redct_games, settings_bot, redct_editors
+from log import logg
 from stats.stat import mongo_select_stat
 from utilts import phoenix_protocol, simple_media
 
@@ -46,7 +47,7 @@ class admin(StatesGroup):
     delete_text = State()
     delete_media_test = State()
     delete_media = State()
-
+    import_csv = State()
 
 @router.message(IsAdmin(), commands=["admin"])
 async def admin_home(message: types.Message, state: FSMContext):
@@ -109,10 +110,10 @@ async def reset(message: Message, state: FSMContext):
         await message.answer("Это меню еще не готово", reply_markup=redct_games())
         await state.set_state(admin.edit_context)
     elif 'bot' in str(stt):
-        await message.answer("Выберите интересующий вас пункт меню", reply_markup=settings_bot())
+        await message.answer("Выберите интересующий вас пункт меню", reply_markup=await settings_bot())
         await state.set_state(admin.edit_context)
     elif 'admin:editors_menu' in str(stt):
-        await message.answer("Выберите интересующий вас пункт меню", reply_markup=settings_bot())
+        await message.answer("Выберите интересующий вас пункт меню", reply_markup=await settings_bot())
         await state.set_state(admin.edit_context)
     else:
         await state.set_state(admin.home)
@@ -148,7 +149,7 @@ async def select_text(message: types.Message, state: FSMContext):
 
 @router.message(IsSudo(), ((F.text.contains('ботом'))), state=admin.menu)
 async def select_text(message: types.Message, state: FSMContext):
-    await message.answer("Выберите интересующий вас пункт меню", reply_markup=settings_bot())
+    await message.answer("Выберите интересующий вас пункт меню", reply_markup=await settings_bot())
     await state.set_state(admin.edit_context)
 
 """***************************************EDITORS************************************************"""
@@ -479,6 +480,8 @@ async def delete_text(message: Message, state: FSMContext):
 
     #postgresql_csv_dump('assets')
     await message.answer("Все выбранные теги были удалены!")
+
+
 """***************************************CONFIRM************************************************"""
 
 
@@ -531,8 +534,52 @@ async def approve_text(message: Message, state: FSMContext):
 
 """***************************************IMPORT************************************************"""
 
-@router.message((F.text == 'Импорт'), state=admin.edit_context)
-async def import_csv_start(message: Message, state: FSMContext):
-    await message.answer("Пришлите")
+
+@router.message(IsSudo(), (F.text.contains('Включить тех.')), state="*")
+async def send_bot_to_work(message: types.Message, state: FSMContext):
+    await state.clear()
+    await redis_just_one_write(f'Usrs: admins: state: status:', 1)
+    await message.answer("<b>🔴 Бот был отправлен на технические работы.</b>",
+                         reply_markup=await settings_bot())
+
+@router.message(IsSudo(), (F.text.contains('Выключить тех.')), state="*")
+async def return_bot_from_work(message: types.Message, state: FSMContext):
+    await state.clear()
+    await redis_just_one_write(f'Usrs: admins: state: status:', 0)
+    await message.answer("<b>🟢 Бот был выведен из технических работ.</b>",
+                         reply_markup=await settings_bot())
 
 
+@router.message(IsSudo(), (F.text.contains('Импорт')), state=admin.edit_context)
+async def import_csv(message: types.Message, state: FSMContext):
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Экспорт"))
+    nmarkup.row(types.KeyboardButton(text="Отмена"))
+    nmarkup.as_markup(resize_keyboard=True)
+    await message.answer("Отправьте мне csv файл, который хотите обновить\n\n"
+                         "Внимание, база будет полностью обновлена, хотите сделать экспорт текущей базы??")
+    await state.set_state(admin.import_csv)
+
+
+@router.message(state=admin.import_csv)
+async def import_csv(message: types.Message, state: FSMContext):
+    con = all_data().get_postg()
+    # Курсор для выполнения операций с базой данных
+    cur = con.cursor()
+    con.autocommit = True
+
+    csv_id = message.document
+    file_name = csv_id.file_name
+    file = await bot.get_file(csv_id.file_id)
+    file_path = file.file_path
+    await bot.download_file(file_path, f"resources/{file_name}")
+
+    if 'texts' in file_name.lower():
+        cur.execute("DELETE FROM texts")
+        logg.get_info("Table texts has been deleted".upper())
+        try:
+            csv_file_name = f'resources/{file_name}'
+            sql = "COPY texts FROM STDIN DELIMITER ',' CSV HEADER"
+            cur.copy_expert(sql, open(csv_file_name, "r"))
+        except Exception as error:
+            await logg.get_error(f"{error}", __file__)

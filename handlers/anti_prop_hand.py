@@ -20,7 +20,7 @@ from stats.stat import mongo_update_stat
 from utilts import simple_media
 
 router = Router()
-router.message.middleware(CounterMiddleware())
+
 
 router.message.filter(state=propaganda_victim)
 

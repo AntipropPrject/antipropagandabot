@@ -28,7 +28,7 @@ class TruereasonsState(StatesGroup):
 
 
 router = Router()
-router.message.middleware(CounterMiddleware())
+
 router.message.filter(state=TruereasonsState)
 
 
@@ -89,7 +89,7 @@ async def reasons_operation(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Хорошо - война 🗡'))
     nmarkup.row(types.KeyboardButton(text='Нет - спецоперация 🛡'))
-    await message.answer(text,disable_web_page_preview=True, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text.contains('спецоперация')))

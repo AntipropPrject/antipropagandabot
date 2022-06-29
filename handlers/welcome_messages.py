@@ -15,7 +15,7 @@ from states.antiprop_states import propaganda_victim
 from stats.stat import mongo_stat, mongo_update_stat
 
 router = Router()
-router.message.middleware(CounterMiddleware())
+
 
 
 @router.message(commands=['start', 'help'], state="*")
