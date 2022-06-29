@@ -110,7 +110,7 @@ async def putin_game1_question(message: Message, state: FSMContext):
         truth_data = (await data_getter("SELECT t_id, text, belivers, nonbelivers, rebuttal FROM public.putin_lies "
                                  "left outer join assets on asset_name = assets.name "
                                  "left outer join texts ON text_name = texts.name "
-                                 f"where id = {count}"))[0]
+                                 f"where id = {count}"))    [0]
         await state.update_data(pgamecount=count, belive=truth_data[2], not_belive=truth_data[3])
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.add(types.KeyboardButton(text="Случайная ошибка / Не ложь 👍"))
