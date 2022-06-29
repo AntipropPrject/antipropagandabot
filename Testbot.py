@@ -32,7 +32,7 @@ async def on_startup(dispatcher: Dispatcher) -> None:
 
     webhook = await bot.get_webhook_info()
 
-    await bot.set_webhook("13.53.192.218")
+    await bot.set_webhook("https://ec2-13-53-192-218.eu-north-1.compute.amazonaws.com" , certificate="antikey.pem")
 
     logging.info("🚀 Bot launched as Hoook!")
     logging.info(f"webhook: https://ec2-13-53-192-218.eu-north-1.compute.amazonaws.com")
@@ -76,7 +76,7 @@ def main():
     dp.startup.register(on_startup)
     dp.shutdown.register(on_shutdown)
     app = configure_app(dp, bot)
-    web.run_app(app, host="0.0.0.0", port=443)
+    web.run_app(app, host="0.0.0.0", port=80)
     # await bot.delete_webhook(drop_pending_updates=True)
     # await dp.start_polling(bot)
 
