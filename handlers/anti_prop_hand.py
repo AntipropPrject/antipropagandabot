@@ -9,7 +9,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from bata import all_data
 from data_base.DBuse import poll_get, redis_just_one_read
 from data_base.DBuse import sql_safe_select, data_getter, sql_safe_update
-from filters.All_filters import WebPropagandaFilter, TVPropagandaFilter, PplPropagandaFilter, PoliticsFilter
+from filters.MapFilters import WebPropagandaFilter, TVPropagandaFilter, PplPropagandaFilter, PoliticsFilter
 from handlers import true_resons_hand
 from keyboards.map_keys import antip_why_kb, antip_killme_kb
 from middleware import CounterMiddleware
@@ -591,16 +591,16 @@ async def antip_truth_game_start_question(message: Message, state: FSMContext):
         count = (await state.get_data())['gamecount']
     except:
         count = 0
-    how_many_rounds = data_getter("SELECT COUNT (*) FROM public.truthgame")[0][0]
+    how_many_rounds = (await data_getter("SELECT COUNT (*) FROM public.truthgame"))[0][0]
     print(f"В таблице {how_many_rounds} записей, а вот счетчик сейчас {count}")
     if count < how_many_rounds:
         count += 1
-        truth_data = data_getter(f"""SELECT * FROM ( SELECT truth, t_id, text, belivers, nonbelivers,
+        truth_data = (await data_getter(f"""SELECT * FROM ( SELECT truth, t_id, text, belivers, nonbelivers,
                                          rebuttal, reb_asset_name,
                                          ROW_NUMBER () OVER (ORDER BY id), id FROM public.truthgame
                                          left outer join assets on asset_name = assets.name
                                          left outer join texts ON text_name = texts.name)
-                                         AS sub WHERE row_number = {count}""")[0]
+                                         AS sub WHERE row_number = {count}"""))[0]
         await state.update_data(gamecount=count, truth=truth_data[0], rebuttal=truth_data[5], belive=truth_data[3],
                                 not_belive=truth_data[4], reb_media_tag=truth_data[6], game_id=truth_data[8])
         nmarkup = ReplyKeyboardBuilder()
@@ -629,6 +629,13 @@ async def antip_truth_game_start_question(message: Message, state: FSMContext):
 @router.message((F.text == "Это правда ✅") | (F.text == "Это ложь ❌"))
 async def antip_truth_game_answer(message: Message, state: FSMContext):
     data = await state.get_data()
+    END = bool(data['gamecount'] == (await data_getter('SELECT COUNT(id) FROM public.truthgame'))[0][0])
+    nmarkup = ReplyKeyboardBuilder()
+    if END is False:
+        nmarkup.row(types.KeyboardButton(text="Продолжаем, давай еще! 👉"))
+        nmarkup.row(types.KeyboardButton(text="Достаточно, двигаемся дальше  🙅‍♀️"))
+    else:
+        nmarkup.row(types.KeyboardButton(text="🤝 Продолжим"))
     base_update_dict, reality = dict(), str()
     if message.text == "Это правда ✅":
         if data['truth'] == True:
@@ -644,12 +651,9 @@ async def antip_truth_game_answer(message: Message, state: FSMContext):
         base_update_dict = {'nonbelivers': data['not_belive'] + 1}
     t_percentage = data['belive'] / (data['belive'] + data['not_belive'])
     text = reality + f'\n\nРезультаты других участников:\n✅ <b>Правда:</b> {round(t_percentage * 100)}%\n' \
-                     f'❌ <b>Ложь</b>: {round((100 - t_percentage * 100), 1)}' + '\n\nПодтверждение - ниже.'
+                     f'❌ <b>Ложь</b>: {round((100 - t_percentage * 100))}%' + '\n\nПодтверждение - ниже.'
     reb = data['rebuttal']
     await sql_safe_update("truthgame", base_update_dict, {'id': data['game_id']})
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Продолжаем, давай еще! 👉"))
-    nmarkup.row(types.KeyboardButton(text="Достаточно, двигаемся дальше  🙅‍♀️"))
     media = await sql_safe_select('t_id', 'assets', {'name': data['reb_media_tag']})
     if media is False:
         await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
@@ -657,10 +661,12 @@ async def antip_truth_game_answer(message: Message, state: FSMContext):
     else:
         try:
             await message.answer_video(media, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
-            await message.answer(reb)
+            await message.answer(reb, disable_web_page_preview=True)
         except TelegramBadRequest:
             await message.answer_photo(media, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
-            await message.answer(reb)
+            await message.answer(reb, disable_web_page_preview=True)
+    if END is True:
+        await message.answer('У меня закончились сюжеты. Спасибо за игру🤝')
 
 
 @router.message((F.text == "Пропустим игру 🙅‍♀️") | (F.text == '🤝 Продолжим') | (F.text == 'Достаточно, двигаемся дальше  🙅‍♀️'))

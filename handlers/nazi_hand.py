@@ -9,7 +9,7 @@ from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from data_base.DBuse import data_getter, poll_write, sql_safe_select, sql_safe_update, redis_delete_from_list, poll_get
-from filters.All_filters import NaziFilter, RusHate_pr, NotNaziFilter, ManualFilters
+from filters.MapFilters import NaziFilter, RusHate_pr, NotNaziFilter, ManualFilters
 from handlers import true_resons_hand
 from middleware import CounterMiddleware
 from resources.all_polls import nazizm, nazizm_pr
@@ -236,6 +236,7 @@ async def nazi_eight_years(message: Message, state: FSMContext):
         text = 'Понимаю, поэтому пусть оценку дадут факты. Задайте себе вопрос:'
     else:
         text = "В таком случае, если это так, у меня есть к вам большой вопрос:"
+    await state.set_state(NaziState.third_part)
     await message.answer(text, reply_markup=ReplyKeyboardRemove(), disable_web_page_preview=True)
     await asyncio.sleep(3)
     markup = ReplyKeyboardBuilder()
@@ -485,15 +486,15 @@ async def country_game_question(message: Message, state: FSMContext):
         count = (await state.get_data())['ngamecount']
     except:
         count = 0
-    how_many_rounds = data_getter("SELECT COUNT (*) FROM public.ucraine_or_not_game")[0][0]
+    how_many_rounds = (await data_getter("SELECT COUNT (*) FROM public.ucraine_or_not_game"))[0][0]
     print(f"В таблице {how_many_rounds} записей, а вот счетчик сейчас {count}")
     if count < how_many_rounds:
         count += 1
         truth_data = \
-            data_getter("SELECT t_id, text, belivers, nonbelivers, rebuttal, truth FROM public.ucraine_or_not_game "
+            (await data_getter("SELECT t_id, text, belivers, nonbelivers, rebuttal, truth FROM public.ucraine_or_not_game "
                         "left outer join assets on asset_name = assets.name "
                         "left outer join texts ON text_name = texts.name "
-                        f"where id = {count}")[0]
+                        f"where id = {count}"))[0]
         print(truth_data)
         await state.update_data(ngamecount=count, belive=truth_data[2], not_belive=truth_data[3], rebutt=truth_data[4],
                                 truth=truth_data[5])
@@ -544,7 +545,7 @@ async def country_game_answer(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжаем, давай еще! 👉"))
     nmarkup.row(types.KeyboardButton(text="Достаточно, давай закончим 🙅"))
-    END = bool(data['ngamecount'] == data_getter('SELECT COUNT(id) FROM public.ucraine_or_not_game')[0][0])
+    END = bool(data['ngamecount'] == (await data_getter('SELECT COUNT(id) FROM public.ucraine_or_not_game'))[0][0])
     if END is True:
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Спасибо 🤝"))
@@ -573,4 +574,4 @@ async def putin_in_the_past(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'nazi_finish'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжим 👌"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await simple_media(message, 'nazi_finish', nmarkup.as_markup(resize_keyboard=True))

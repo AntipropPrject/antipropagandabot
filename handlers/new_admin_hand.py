@@ -487,9 +487,9 @@ async def approve_media_edit(message: Message, state: FSMContext):
     data = await state.get_data()
     text = await sql_safe_update('assets', {"t_id": data["t_id"]}, {'name': data['name']})
     if text is not False:
-        await message.answer('Все готово', reply_markup=main_admin_keyboard())
+        await message.answer('Все готово', reply_markup=redct_media())
         await state.clear()
-        await state.set_state(admin.repeat_edit_media)
+        await state.set_state(admin.edit_context)
     else:
         await message.answer('Что-то пошло не так. Вы указали тэг?')
 
@@ -499,9 +499,9 @@ async def approve_edit_text(message: Message, state: FSMContext):
     data = await state.get_data()
     text = await sql_safe_update('texts', {"text": data["text"]}, {'name': data['name']})
     if text is not False:
-        await message.answer('Все готово', reply_markup=main_admin_keyboard())
+        await message.answer('Все готово', reply_markup=redct_text())
         await state.clear()
-        await state.set_state(admin.repeat_edit_text)
+        await state.set_state(admin.edit_context)
     else:
         await message.answer('Что-то пошло не так. Вы не ошиблись в разметке?')
 
@@ -512,8 +512,9 @@ async def approve_media(message: Message, state: FSMContext):
     text = await sql_safe_insert('assets', data)
     if text is not False:
         await state.clear()
-        await state.set_state(admin.repeat_add_media)
-        await message.answer('Медиа добавлено. Еще разок?', reply_markup=main_admin_keyboard())
+
+        await state.set_state(admin.edit_context)
+        await message.answer('Медиа добавлено. Еще разок?', reply_markup=redct_media())
     else:
         await message.answer('Не получилось. Может быть, вы указали существующий таг?')
 
@@ -523,8 +524,8 @@ async def approve_text(message: Message, state: FSMContext):
     data = await state.get_data()
     r = await sql_safe_insert('texts', data)
     if r != False:
-        await state.set_state(admin.repeat_add_text)
-        await message.answer('Текст добавлен. Еще разок?', reply_markup=main_admin_keyboard())
+        await state.set_state(admin.edit_context)
+        await message.answer('Текст добавлен. Еще разок?', reply_markup=redct_text())
     else:
         await message.answer('Увы, ошибка. Скорее всего, этот таг сущесвует.')
 

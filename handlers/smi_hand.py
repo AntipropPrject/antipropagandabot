@@ -30,9 +30,8 @@ async def smi_statement(message: Message, state: FSMContext):
         count = 0
 
     try:
-        how_many_rounds = data_getter(
-            f"SELECT COUNT (*) FROM public.mistakeorlie where asset_name like '%{str(person_list[0])[-5:-1].strip()}%'")[
-            0][0]
+        how_many_rounds = (await data_getter(
+            f"SELECT COUNT (*) FROM public.mistakeorlie where asset_name like '%{str(person_list[0])[-5:-1].strip()}%'"))[0][0]
     except:
         errmarkup = ReplyKeyboardBuilder()
         errmarkup.rows(types.KeyboardButton(text="Переход к игре в правду"))
@@ -44,11 +43,11 @@ async def smi_statement(message: Message, state: FSMContext):
     if count < how_many_rounds:
         count += 1
         try:
-            truth_data = data_getter(
+            truth_data = (await data_getter(
                 "SELECT truth, t_id, text, belivers, nonbelivers, rebuttal, asset_name FROM public.mistakeorlie "
                 "left outer join assets on asset_name = assets.name "
                 "left outer join texts ON text_name = texts.name "
-                f"where asset_name like '%{str(person_list[0])[-5:-1].strip()}%' and asset_name like '%{str(count)}%'")[
+                f"where asset_name like '%{str(person_list[0])[-5:-1].strip()}%' and asset_name like '%{str(count)}%'"))[
                 0]
 
             print('aaaaaa', truth_data)

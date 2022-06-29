@@ -8,7 +8,8 @@ from log import logg
 
 """^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^PostgreSQL^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"""
 
-def data_getter(query):
+
+async def data_getter(query):
     try:
         conn = all_data().get_postg()
         with conn:
@@ -18,11 +19,10 @@ def data_getter(query):
         conn.close()
         return data
     except psycopg2.Error as error:
-        logg.get_error(f"{error}", __file__)
         return error
 
 
-def safe_data_getter(safe_query, values_dict):
+async def safe_data_getter(safe_query, values_dict):
     try:
         conn = all_data().get_postg()
         with conn:
@@ -32,7 +32,6 @@ def safe_data_getter(safe_query, values_dict):
         conn.close()
         return data
     except psycopg2.Error as error:
-        logg.get_error(f"{error}", __file__)
         return False
 
 async def sql_delete(table_name, condition_dict):

@@ -40,10 +40,10 @@ async def mongo_export_to_file(message: types.Message):
         with conn.cursor() as cur:
             SQL_texts = "COPY (SELECT * FROM texts) TO STDOUT WITH CSV HEADER"
             SQL_assets = "COPY (SELECT * FROM assets) TO STDOUT WITH CSV HEADER"
-            SQL_mistakeorlie = "COPY (SELECT * FROM mistakeorlie) TO STDOUT WITH CSV HEADER"
             SQL_putin_lies = "COPY (SELECT * FROM putin_lies) TO STDOUT WITH CSV HEADER"
             SQL_putin_old_lies = "COPY (SELECT * FROM putin_old_lies) TO STDOUT WITH CSV HEADER"
             SQL_truthgame = "COPY (SELECT * FROM truthgame) TO STDOUT WITH CSV HEADER"
+            SQL_mistakeorlie = "COPY (SELECT * FROM mistakeorlie) TO STDOUT WITH CSV HEADER"
             SQL_ucraine_or_not_game = "COPY (SELECT * FROM ucraine_or_not_game) TO STDOUT WITH CSV HEADER"
             # Set up a variable to store our file path and name.
             t_path_n_texts = f"export_to_csv/backups/PostgreSQL/Texts-{today}.csv"
@@ -102,11 +102,9 @@ async def mongo_export_to_file(message: types.Message):
     await asyncio.sleep(0.2)
     await message.answer_document(FSInputFile(f"export_to_csv/backups/games/Putin_old_lies-{today}.csv"), caption="Putin_old_lies")
     await asyncio.sleep(0.2)
-    await message.answer_document(FSInputFile(f"export_to_csv/backups/games/Stetements_expusures-{today}.csv"), caption="Stetements_expusures")
-    await asyncio.sleep(0.2)
     await message.answer_document(FSInputFile(f"export_to_csv/backups/games/Truthgame-{today}.csv"), caption="Truthgame")
     await asyncio.sleep(0.2)
-    await message.answer_document(FSInputFile(f"export_to_csv/backups/games/Ucraine_or_not_game-{today}.csv"), caption="Assets")
+    await message.answer_document(FSInputFile(f"export_to_csv/backups/games/Ucraine_or_not_game-{today}.csv"), caption="Ucraine_or_not_game")
     await asyncio.sleep(0.2)
     await message.answer_document(FSInputFile(f'log/logs/Log-{today}.log'), caption="Logs")
 

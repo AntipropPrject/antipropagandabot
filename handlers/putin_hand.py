@@ -6,7 +6,7 @@ from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from data_base.DBuse import data_getter, sql_safe_select, sql_safe_update
-from filters.All_filters import PutinFilter
+from filters.MapFilters import PutinFilter
 from handlers.stopwar_hand import StopWarState
 from middleware import CounterMiddleware
 
@@ -36,7 +36,7 @@ async def putin_love_putin(message: Message, state: FSMContext):
 @router.message((F.text.in_({"Давай 🤝"})), state=StateofPutin.main)
 async def putin_not_love_putin(message: Message, state: FSMContext):
     await state.set_state(StateofPutin.main)
-    text = "Выберите описание Владимира Путина, которое вы считаете наиболее точным:"
+    text = await sql_safe_select('text', 'texts', {'name': 'putin_lets_speak_about'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Отличный президент ✊"))
     nmarkup.row(types.KeyboardButton(text="Военный преступник 😤"))
@@ -103,14 +103,14 @@ async def putin_game1_question(message: Message, state: FSMContext):
         count = (await state.get_data())['pgamecount']
     except:
         count = 0
-    how_many_rounds = data_getter("SELECT COUNT (*) FROM public.putin_lies")[0][0]
+    how_many_rounds = (await data_getter("SELECT COUNT (*) FROM public.putin_lies"))[0][0]
     print(f"В таблице {how_many_rounds} записей, а вот счетчик сейчас {count}")
     if count < how_many_rounds:
         count += 1
-        truth_data = data_getter("SELECT t_id, text, belivers, nonbelivers, rebuttal FROM public.putin_lies "
+        truth_data = (await data_getter("SELECT t_id, text, belivers, nonbelivers, rebuttal FROM public.putin_lies "
                                  "left outer join assets on asset_name = assets.name "
                                  "left outer join texts ON text_name = texts.name "
-                                 f"where id = {count}")[0]
+                                 f"where id = {count}"))[0]
         await state.update_data(pgamecount=count, belive=truth_data[2], not_belive=truth_data[3])
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.add(types.KeyboardButton(text="Случайная ошибка / Не ложь 👍"))
@@ -141,7 +141,7 @@ async def putin_game1_question(message: Message, state: FSMContext):
 async def putin_game1_answer(message: Message, state: FSMContext):
     data = await state.get_data()
     base_update_dict = dict()
-    END = bool(data['pgamecount'] == data_getter('SELECT COUNT(id) FROM public.putin_lies')[0][0])
+    END = bool(data['pgamecount'] == (await data_getter('SELECT COUNT(id) FROM public.putin_lies'))[0][0])
     nmarkup = ReplyKeyboardBuilder()
     if END is False:
         nmarkup.row(types.KeyboardButton(text="Продолжаем 👉"))
@@ -206,13 +206,13 @@ async def putin_game2_question(message: Message, state: FSMContext):
         count = (await state.get_data())['pgamecount']
     except:
         count = 0
-    how_many_rounds = data_getter("SELECT COUNT (*) FROM public.putin_old_lies")[0][0]
+    how_many_rounds = (await data_getter("SELECT COUNT (*) FROM public.putin_old_lies"))[0][0]
     if count < how_many_rounds:
         count += 1
-        truth_data = data_getter("SELECT t_id, text, belivers, nonbelivers, rebuttal FROM public.putin_old_lies "
+        truth_data = (await data_getter("SELECT t_id, text, belivers, nonbelivers, rebuttal FROM public.putin_old_lies "
                                  "left outer join assets on asset_name = assets.name "
                                  "left outer join texts ON text_name = texts.name "
-                                 f"where id = {count}")[0]
+                                 f"where id = {count}"))[0]
         print(truth_data)
         await state.update_data(pgamecount=count, belive=truth_data[2], not_belive=truth_data[3])
         nmarkup = ReplyKeyboardBuilder()
@@ -243,7 +243,7 @@ async def putin_game2_question(message: Message, state: FSMContext):
 async def putin_game2_answer(message: Message, state: FSMContext):
     data = await state.get_data()
     base_update_dict = dict()
-    END = bool(data['pgamecount'] == data_getter('SELECT COUNT(id) FROM public.putin_old_lies')[0][0])
+    END = bool(data['pgamecount'] == (await data_getter('SELECT COUNT(id) FROM public.putin_old_lies'))[0][0])
     nmarkup = ReplyKeyboardBuilder()
     if END is False:
         nmarkup.row(types.KeyboardButton(text="Продолжаем! 👉"))
@@ -303,6 +303,7 @@ async def stopwar_start(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_p_start'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Скорее да ✅"))
-    nmarkup.row(types.KeyboardButton(text="Не знаю 🤷‍♂️"))
     nmarkup.row(types.KeyboardButton(text="Скорее нет ❌"))
+    nmarkup.row(types.KeyboardButton(text="Не знаю 🤷‍♂️"))
+    nmarkup.adjust(2, 1)
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
