@@ -67,7 +67,7 @@ class WebPropagandaFilter(BaseFilter):
         web_lies_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: ethernet:')
         bad_lies = ("РИА Новости", "Russia Today", "Министерство обороны РФ",
                     "Телеграм-канал: Война с фейками",
-                    "ТАСС / Комсомольская правда / Коммерсантъ / Lenta.ru / Известия", "Яндекс.Новости")
+                    "ТАСС / Комсомольская правда / Коммерсантъ / Lenta.ru / Известия")
         for bad_lie in bad_lies:
             if bad_lie in web_lies_list:
                 return {'web_lies_list': web_lies_list}
