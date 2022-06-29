@@ -57,7 +57,10 @@ def redct_games():
 
 
 async def settings_bot():
-    status = await redis_just_one_read('Usrs: admins: state: status:')
+    try:
+        status = await redis_just_one_read('Usrs: admins: state: status:')
+    except:
+        pass
     print(status)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Редакторы бота"))
