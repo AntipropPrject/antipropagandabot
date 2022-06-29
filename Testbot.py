@@ -15,7 +15,7 @@ from export_to_csv import pg_mg
 from handlers.other import other_file
 from data_base import TablesCreator
 
-WEBHOOK_HOST = "https://ec2-16-170-206-95.eu-north-1.compute.amazonaws.com"
+WEBHOOK_HOST = "https://ec2-13-53-192-218.eu-north-1.compute.amazonaws.com"
 WEBHOOK_PATH = "/api/bot"
 WEBHOOK_URL = urljoin(WEBHOOK_HOST, WEBHOOK_PATH)
 
