@@ -28,14 +28,14 @@ dp = Dispatcher(storage)
 
 async def on_startup(dispatcher: Dispatcher) -> None:
 
-    logging.info("🚀 Bot launched as Serverless!")
-    logging.info(f"webhook: {WEBHOOK_URL}")
+
 
     webhook = await bot.get_webhook_info()
 
-    if webhook.url:
-        await bot.delete_webhook()
-    await bot.set_webhook(WEBHOOK_URL)
+    await bot.set_webhook("https://ec2-13-53-192-218.eu-north-1.compute.amazonaws.com")
+
+    logging.info("🚀 Bot launched as Hoook!")
+    logging.info(f"webhook: https://ec2-13-53-192-218.eu-north-1.compute.amazonaws.com")
 
 async def on_shutdown(dispatcher: Dispatcher) -> None:
     logging.warning("😴 Bot shutdown...")
@@ -45,7 +45,7 @@ async def on_shutdown(dispatcher: Dispatcher) -> None:
 
 def configure_app(dp, bot) -> web.Application:
     app = web.Application()
-    SimpleRequestHandler(dispatcher=dp, bot=bot).register(app, path=WEBHOOK_PATH)
+    SimpleRequestHandler(dispatcher=dp, bot=bot).register(app, path="")
     setup_application(app, dp, bot=bot)
     return app
 
@@ -76,7 +76,7 @@ def main():
     dp.startup.register(on_startup)
     dp.shutdown.register(on_shutdown)
     app = configure_app(dp, bot)
-    web.run_app(app, host="0.0.0.0", port=80)
+    web.run_app(app, host="0.0.0.0", port=443)
     # await bot.delete_webhook(drop_pending_updates=True)
     # await dp.start_polling(bot)
 
