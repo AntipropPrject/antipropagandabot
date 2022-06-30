@@ -462,5 +462,5 @@ async def donbas_no_army_here(message: Message, state=FSMContext):
     await state.set_state(TruereasonsState.main)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Какой ужас 😨"))
-    nmarkup.row(types.KeyboardButton(text="Давай продолжим👉"))
+    nmarkup.row(types.KeyboardButton(text="Давай продолжим 👉"))
     await simple_media(message, 'lnr_mobilization', nmarkup.as_markup(resize_keyboard=True))
