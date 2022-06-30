@@ -251,7 +251,7 @@ async def nazi_eight_years(message: Message, state: FSMContext):
 
 @router.message(
     (F.text.in_({'Продолжай...', "Я тоже задаюсь этим вопросом 🤔", "ООН предпочитает закрывать глаза на это ☝️"})),
-    state=NaziState.genocide, flags=flags)
+    state=(NaziState.genocide, NaziState.third_part), flags=flags)
 async def nazi_exaggeration(message: Message, state: FSMContext):
     await state.set_state(NaziState.third_part)
     markup = ReplyKeyboardBuilder()
