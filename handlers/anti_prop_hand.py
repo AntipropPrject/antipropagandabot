@@ -451,7 +451,6 @@ async def show_the_news(message: types.Message, state: FSMContext):
         await poll_get(f'Usrs: {message.from_user.id}: Start_answers: ethernet:')
 
 
-
 @router.message((F.text.contains('Новость посмотрел(а). Что с ней не так? 🤔')), flags=flags)
 async def revealing_the_news(message: types.Message, state: FSMContext):
     data = await state.get_data()
@@ -477,9 +476,6 @@ async def revealing_the_news(message: types.Message, state: FSMContext):
         markup = ReplyKeyboardBuilder()
         markup.row(types.KeyboardButton(text="Достаточно, мне все понятно 🤚"))
         await simple_media(message, tag_exposure+str(count_news), reply_markup=markup.as_markup(resize_keyboard=True))
-
-
-
 
 
 @router.message(text_contains=('Покажи', 'еще', 'новость'), content_types=types.ContentType.TEXT, text_ignore_case=True, flags=flags)
@@ -519,11 +515,15 @@ async def revealing_the_news(message: Message, state: FSMContext):
         redis = all_data().get_data_red()
         for key in redis.scan_iter(f"Usrs: {message.from_user.id}: Start_answers: ethernet:*"):
             redis.delete(key)
-        markup = ReplyKeyboardBuilder()
-        markup.row(types.KeyboardButton(text='Конечно!'))
-        await message.answer("Среди того, что может казаться альтернативными источниками, может быть полно лжи. "
-                             "Надеюсь, что теперь вы со мной в этом согласитесь. В любом случае, у меня кончились примеры."
-                             "\nГотовы продолжить?", reply_markup=markup.as_markup(resize_keyboard=True))
+        print(set(await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:')).isdisjoint(
+                ("Дмитрий Песков", "Сергей Лавров",
+                 "Юрий Подоляка", "Владимир Соловьев", "Никита Михалков")))
+        if set(await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:')).isdisjoint(
+                ("Дмитрий Песков", "Сергей Лавров",
+                 "Юрий Подоляка", "Владимир Соловьев", "Никита Михалков")) is False:
+            await antip_bad_people_lies(message, state)
+        else:
+            await antip_truth_game_start(message, state)
 
 
 @router.message((F.text.contains('Хватит, пропустим остальные источники 🙅‍♂️')), flags=flags)
@@ -563,7 +563,7 @@ async def antip_web_exit_1(message: Message, state: FSMContext):
 @router.message(PplPropagandaFilter(),
                 (F.text.contains('шаг')) | (F.text.contains('удивлен')) | (F.text.contains('шоке')) | (
                         F.text.contains('знал')) | (F.text == 'Конечно!'), flags=flags)
-async def antip_bad_people_lies(message: Message, ppl_lies_list, state: FSMContext):
+async def antip_bad_people_lies(message: Message, state: FSMContext):
     redis = all_data().get_data_red()
     await state.set_state(propaganda_victim.ppl_propaganda)
     text = await sql_safe_select('text', 'texts', {'name': 'antip_bad_people_lies'})
