@@ -32,13 +32,14 @@ services:
     build: .
     container_name: antiprop_Aiogrammwebhook
     ports:
-      - "443:443"
+      - "1443:443"
     command: bash -c 'python Testbot.py'
     volumes:
       - .:/code
     depends_on:
       - db
     network_mode: host
+    #restart: on-failure
 
 
 

@@ -1,4 +1,4 @@
-FROM python:3.8
+FROM python:3.8-alpine
 
 ENV PYTHONUNBUFFERED=1
 
@@ -10,4 +10,4 @@ RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
 COPY . /code/
-CMD ["-m api.bot"]
+CMD ["Testbot"]
