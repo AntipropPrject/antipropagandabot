@@ -181,6 +181,8 @@ async def mongo_select_info(tg_id):
 
     except Exception as error:
         await logg.get_error(f"mongo_select_info | {error}", __file__)
+        return False
+
 
 async def mongo_add(tg_id, answers):
     try:

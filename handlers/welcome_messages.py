@@ -7,7 +7,8 @@ from aiogram.types import ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from bata import all_data
-from data_base.DBuse import poll_write, sql_safe_select, mongo_add, mongo_select, redis_just_one_write, mongo_user_info
+from data_base.DBuse import poll_write, sql_safe_select, mongo_add, mongo_select, redis_just_one_write, mongo_user_info, \
+    mongo_select_info
 from resources.all_polls import web_prop, welc_message_one
 from states import welcome_states
 from states.antiprop_states import propaganda_victim
@@ -23,6 +24,26 @@ router = Router()
 @router.message(commands=['start', 'help'], state='*', flags=flags)
 async def commands_start(message: types.Message, state: FSMContext):  # Первое сообщение
     user_id = message.from_user.id
+    old = await mongo_select_info(message.from_user.id)
+    if int(user_id) != int(old['_id']):
+        await mongo_stat(user_id)
+        await mongo_user_info(user_id, message.from_user.username)
+        await state.clear()
+        redis = all_data().get_data_red()
+        for key in redis.scan_iter(f"Usrs: {message.from_user.id}:*"):
+            redis.delete(key)
+        markup = ReplyKeyboardBuilder()
+        markup.add(types.KeyboardButton(text="Начнем 🇷🇺🇺🇦"))
+        markup.add(types.KeyboardButton(text="А с чего мне тебе верить? 🤔"))
+        text = await sql_safe_select("text", "texts", {"name": "start_hello"})
+        await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+        await state.set_state(welcome_states.start_dialog.dialogue_1)
+    else:
+        await message.answer("Извините, этого бота можно проходить только один раз")
+
+@router.message(commands=['restart'], state='*', flags=flags)
+async def commands_start(message: types.Message, state: FSMContext):  # Первое сообщение
+    user_id = message.from_user.id
     await mongo_stat(user_id)
     await mongo_user_info(user_id, message.from_user.username)
     await state.clear()
@@ -35,6 +56,16 @@ async def commands_start(message: types.Message, state: FSMContext):  # Перв
     text = await sql_safe_select("text", "texts", {"name": "start_hello"})
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     await state.set_state(welcome_states.start_dialog.dialogue_1)
+
+
+
+
+
+
+
+
+
+
 
 
 @router.message(welcome_states.start_dialog.dialogue_1, text_contains='верить', content_types=types.ContentType.TEXT,
