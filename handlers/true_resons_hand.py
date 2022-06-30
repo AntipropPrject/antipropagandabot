@@ -163,7 +163,7 @@ async def reasons_demilitarism(message: Message):
 async def reasons_lie_no_more_1(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_lie_no_more_1'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text='Тогда продолжим 👌'))
+    nmarkup.row(types.KeyboardButton(text='Продолжим 👌'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
@@ -173,7 +173,7 @@ async def reasons_lie_no_more_2(message: Message):
                      "💂 Предотвратить размещение военных баз НАТО в Украине")
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_lie_no_more_2'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text='Тогда продолжим 👌'))
+    nmarkup.row(types.KeyboardButton(text='Продолжим 👌'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
@@ -183,7 +183,7 @@ async def reasons_lie_no_more_3(message: Message):
                      "🤯 Предотвратить секретные разработки: биологическое оружие / ядерное оружие")
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_lie_no_more_3'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text='Тогда продолжим 👌'))
+    nmarkup.row(types.KeyboardButton(text='Продолжим 👌'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
@@ -209,7 +209,7 @@ async def reasons_biopigeons(message: Message):
                                  "🤯 Предотвратить секретные разработки: биологическое оружие / ядерное оружие")
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_bio_nuclear'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text='Хорошо, продолжим 👌'))
+    nmarkup.row(types.KeyboardButton(text='Продолжим 👌'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 

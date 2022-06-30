@@ -216,7 +216,7 @@ async def message_8(message: types.Message, state: FSMContext):
 async def button(message: types.Message, state: FSMContext):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Продолжить"))
-    text = await sql_safe_select("text", "texts", {"name": "start_internet_belive"})
+    text = await sql_safe_select("text", "texts", {"name": "start_internet_poll"})
     await message.answer_poll(text, web_prop, is_anonymous=False, allows_multiple_answers=True,
                               reply_markup=markup.as_markup(resize_keyboard=True))
     await state.set_state(welcome_states.start_dialog.dialogue_9)
