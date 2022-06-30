@@ -501,8 +501,9 @@ async def country_game_question(message: Message, state: FSMContext):
         await state.update_data(ngamecount=count, belive=truth_data[2], not_belive=truth_data[3], rebutt=truth_data[4],
                                 truth=truth_data[5])
         nmarkup = ReplyKeyboardBuilder()
-        nmarkup.add(types.KeyboardButton(text="Это Украина 🇺🇦"))
-        nmarkup.add(types.KeyboardButton(text="Нет, это Россия 🇷🇺"))
+        nmarkup.add(types.KeyboardButton(text="Это в России 🇷🇺"))
+        nmarkup.add(types.KeyboardButton(text="Это на Украине 🇺🇦"))
+        nmarkup.adjust(1, 1)
         if truth_data[0] != None:
             capt = ""
             if truth_data[1] != None:
@@ -524,19 +525,19 @@ async def country_game_question(message: Message, state: FSMContext):
             reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(((F.text == "Это Украина 🇺🇦") | (F.text == "Нет, это Россия 🇷🇺")), state=NaziState.game, flags=flags)
+@router.message(((F.text == "Это на Украине 🇺🇦") | (F.text == "Это в России 🇷🇺")), state=NaziState.game, flags=flags)
 async def country_game_answer(message: Message, state: FSMContext):
     data = await state.get_data()
     print(data)
     text, base_update_dict = "", dict()
     reality = data['truth']
-    if message.text == "Это Украина 🇺🇦":
+    if message.text == "Это на Украине 🇺🇦":
         if reality is True:
             text = 'Правильно! Это на Украине!'
         if reality is False:
             text = 'Вы ошиблись! Это в России!'
         base_update_dict.update({'belivers': (data['belive'] + 1)})
-    elif message.text == "Нет, это Россия 🇷🇺":
+    elif message.text == "Это в России 🇷🇺":
         if reality is True:
             text = 'Вы ошиблись! Это на Украине!'
         if reality is False:
