@@ -10,6 +10,7 @@ from data_base.DBuse import sql_safe_select
 from filters.MapFilters import ManualFilters
 from handlers import true_resons_hand
 from middleware import CounterMiddleware
+from middleware.trottling import ThrottlingMiddleware
 from utilts import simple_media
 
 
@@ -20,14 +21,12 @@ class PreventStrikeState(StatesGroup):
     q3 = State()
     q4 = State()
 
-
+flags = {"throttling_key": "True"}
 router = Router()
-
-
 router.message.filter(state=PreventStrikeState)
 
 
-@router.message((F.text == 'Давай разберём 👌'))
+@router.message((F.text == 'Давай разберём 👌'), flags=flags)
 async def prevent_strike_any_brutality(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_any_brutality'})
     nmarkup = ReplyKeyboardBuilder()
@@ -36,7 +35,7 @@ async def prevent_strike_any_brutality(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.in_({'Каким образом? 🤔', 'Ну попробуй 😕'})))
+@router.message((F.text.in_({'Каким образом? 🤔', 'Ну попробуй 😕'})), flags=flags)
 async def prevent_strike_some_days(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_some_days'})
     await state.set_state(PreventStrikeState.q1)
@@ -45,7 +44,7 @@ async def prevent_strike_some_days(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.in_({'Какие ❓'})), state=PreventStrikeState.q1)
+@router.message((F.text.in_({'Какие ❓'})), state=PreventStrikeState.q1, flags=flags)
 async def prevent_strike_q1(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_q1'})
     nmarkup = ReplyKeyboardBuilder()
@@ -55,7 +54,7 @@ async def prevent_strike_q1(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.in_({'Да, это странно 🤔', 'Ничего подозрительного 🙅‍♂️'})), state=PreventStrikeState.q2)
+@router.message((F.text.in_({'Да, это странно 🤔', 'Ничего подозрительного 🙅‍♂️'})), state=PreventStrikeState.q2, flags=flags)
 async def prevent_strike_q2(message: Message, state: FSMContext):
     await state.set_state(PreventStrikeState.q3)
     text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_q2'})
@@ -65,7 +64,7 @@ async def prevent_strike_q2(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.in_({'Да, это странно 🤔', 'Ничего подозрительного 🙅‍♂️'})), state=PreventStrikeState.q3)
+@router.message((F.text.in_({'Да, это странно 🤔', 'Ничего подозрительного 🙅‍♂️'})), state=PreventStrikeState.q3, flags=flags)
 async def prevent_strike_q3(message: Message, state: FSMContext):
     await state.set_state(PreventStrikeState.q4)
     text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_q3'})
@@ -75,7 +74,7 @@ async def prevent_strike_q3(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.in_({'Да, это странно 🤔', 'Ничего подозрительного 🙅‍♂️'})), state=PreventStrikeState.q4)
+@router.message((F.text.in_({'Да, это странно 🤔', 'Ничего подозрительного 🙅‍♂️'})), state=PreventStrikeState.q4, flags=flags)
 async def prevent_strike_q4(message: Message, state: FSMContext):
     await state.set_state(PreventStrikeState.main)
     text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_q4'})
@@ -85,7 +84,7 @@ async def prevent_strike_q4(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.in_({'Да, это странно 🤔', 'Ничего подозрительного 🙅‍♂️'})), state=PreventStrikeState.main)
+@router.message((F.text.in_({'Да, это странно 🤔', 'Ничего подозрительного 🙅‍♂️'})), state=PreventStrikeState.main, flags=flags)
 async def prevent_strike_now_you(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_now_you'})
     nmarkup = ReplyKeyboardBuilder()
@@ -97,7 +96,7 @@ async def prevent_strike_now_you(message: Message):
 
 @router.message(
     F.text.in_(
-        {'Да, превентивный удар - лишь повод 👌', 'Я и так не верил(а) в то, что Украина готовит нападение 🤷‍♂️'}))
+        {'Да, превентивный удар - лишь повод 👌', 'Я и так не верил(а) в то, что Украина готовит нападение 🤷‍♂️'}), flags=flags)
 async def prevent_strike_hitler_allright(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_hitler_allright'})
     nmarkup = ReplyKeyboardBuilder()
@@ -106,7 +105,7 @@ async def prevent_strike_hitler_allright(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(F.text == 'Нет, это настоящая причина начала военных действий ☝️')
+@router.message(F.text == 'Нет, это настоящая причина начала военных действий ☝️', flags=flags)
 async def prevent_strike_hitler_did_it(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_hitler_did_it'})
     nmarkup = ReplyKeyboardBuilder()
@@ -115,20 +114,20 @@ async def prevent_strike_hitler_did_it(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(F.text.contains('продолжим'))
+@router.message(F.text.contains('продолжим'), flags=flags)
 async def prevent_strike_end_point(message: Message, state: FSMContext):
     await state.set_state(true_resons_hand.TruereasonsState.main)
     ManualFilters(message, state)
 
 
-@router.message(F.text == 'Да, хочу 🙂')
+@router.message(F.text == 'Да, хочу 🙂', flags=flags)
 async def prevent_strike_will_show(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Посмотрел(а) 📺'))
     await simple_media(message, 'prevent_strike_will_show', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(F.text.in_({'Посмотрел(а) 📺', '😁', '🙂', '😕', 'Достаточно, продолжим ✋'}))
+@router.message(F.text.in_({'Посмотрел(а) 📺', '😁', '🙂', '😕', 'Достаточно, продолжим ✋'}), flags=flags)
 async def prevent_strike_memes(message: Message, state: FSMContext):
     try:
         count = (await state.get_data())['lgamecount']

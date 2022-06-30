@@ -7,7 +7,7 @@ from handlers import start_hand, anti_prop_hand, smi_hand, donbass_hand, true_re
 from export_to_csv import pg_mg
 from handlers.other import other_file
 from data_base import TablesCreator
-
+from middleware.trottling import ThrottlingMiddleware
 
 TablesCreator.tables_god()
 
@@ -38,6 +38,7 @@ async def main():
     dp.include_router(putin_hand.router)
     dp.include_router(stopwar_hand.router)
 
+    dp.message.middleware(ThrottlingMiddleware())
     # Роутер для неподошедшего
     dp.include_router(other_file.router)
 
