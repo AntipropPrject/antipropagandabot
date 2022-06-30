@@ -12,7 +12,6 @@ from data_base.DBuse import sql_safe_select, data_getter, sql_safe_update
 from filters.MapFilters import WebPropagandaFilter, TVPropagandaFilter, PplPropagandaFilter, PoliticsFilter
 from handlers import true_resons_hand
 from keyboards.map_keys import antip_why_kb, antip_killme_kb
-from middleware.trottling import ThrottlingMiddleware
 from resources.all_polls import web_prop
 from resources.other_lists import channels
 from states.antiprop_states import propaganda_victim
@@ -21,7 +20,7 @@ from utilts import simple_media
 
 flags = {"throttling_key": "True"}
 router = Router()
-router.message.middleware(ThrottlingMiddleware())
+
 
 router.message.filter(state=propaganda_victim)
 

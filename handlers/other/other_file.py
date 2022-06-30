@@ -1,6 +1,5 @@
 from aiogram import Router
 from aiogram import types
-from middleware.trottling import ThrottlingMiddleware
 
 flags = {"throttling_key": "True"}
 router = Router()

@@ -15,7 +15,6 @@ from handlers import anti_prop_hand
 from handlers.nazi_hand import NaziState
 from handlers.preventive_strike import PreventStrikeState
 from handlers.putin_hand import StateofPutin
-from middleware import CounterMiddleware
 from resources.all_polls import welc_message_one
 from states.donbass_states import donbass_state
 from utilts import simple_media

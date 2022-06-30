@@ -14,11 +14,10 @@ from aiogram import types
 import zipfile
 from filters.isAdmin import IsSudo
 from log import logg
-from middleware import CounterMiddleware
 from states.admin_states import admin
 
 router = Router()
-router.message.middleware(CounterMiddleware())
+
 
 
 @router.message(IsSudo(), F.text.contains('Экспорт') | F.text.contains('Создать копию'))

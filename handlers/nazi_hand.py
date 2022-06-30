@@ -11,7 +11,6 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from data_base.DBuse import data_getter, poll_write, sql_safe_select, sql_safe_update, redis_delete_from_list, poll_get
 from filters.MapFilters import NaziFilter, RusHate_pr, NotNaziFilter, ManualFilters
 from handlers import true_resons_hand
-from middleware.trottling import ThrottlingMiddleware
 from resources.all_polls import nazizm, nazizm_pr
 from utilts import simple_media
 

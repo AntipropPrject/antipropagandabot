@@ -8,7 +8,6 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from bata import all_data
 from data_base.DBuse import poll_write, sql_safe_select, mongo_add, mongo_select, redis_just_one_write, mongo_user_info
-from middleware import CounterMiddleware
 from resources.all_polls import web_prop, welc_message_one
 from states import welcome_states
 from states.antiprop_states import propaganda_victim
@@ -264,7 +263,7 @@ async def poll_filler(message: types.Message, bot: Bot):
                                reply_markup=ReplyKeyboardRemove(), disable_web_page_preview=True)
 
 
-@router.poll_answer(state=welcome_states.start_dialog.dialogue_10, flags=flags)  # Сохраняю 5 вопрос
+@router.poll_answer(state=welcome_states.start_dialog.dialogue_10)  # Сохраняю 5 вопрос
 async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, state: FSMContext):
     markup = ReplyKeyboardBuilder()
     markup.add(types.KeyboardButton(text="Поехали!"))

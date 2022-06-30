@@ -9,14 +9,12 @@ from data_base.DBuse import poll_write, sql_safe_select, poll_get, redis_delete_
 from filters.MapFilters import DonbassOptionsFilter
 from handlers.true_resons_hand import TruereasonsState
 from keyboards.main_keys import filler_kb
-from middleware.trottling import ThrottlingMiddleware
 from resources.all_polls import donbass_first_poll
 from states.donbass_states import donbass_state
 from utilts import simple_media
 
 flags = {"throttling_key": "True"}
 router = Router()
-router.message.middleware(ThrottlingMiddleware())
 router.message.filter(state=donbass_state)
 
 

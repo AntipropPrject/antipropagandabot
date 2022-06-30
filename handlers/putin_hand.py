@@ -8,7 +8,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from data_base.DBuse import data_getter, sql_safe_select, sql_safe_update
 from filters.MapFilters import PutinFilter
 from handlers.stopwar_hand import StopWarState
-from middleware import CounterMiddleware
+
 
 
 
