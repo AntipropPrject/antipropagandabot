@@ -106,6 +106,7 @@ async def message_3(message: types.Message, state: FSMContext):  # Начало 
     markup = ReplyKeyboardBuilder()
     markup.add(types.KeyboardButton(text="Задавай 👌"))
     markup.add(types.KeyboardButton(text="А долго будешь допрашивать? ⏱"))
+    markup.row(types.KeyboardButton(text="Стоп! Правильно «в Украине»! ☝️"))
     await state.update_data(answer_1=message.text)
     text = await sql_safe_select("text", "texts", {"name": "start_lets_start"})
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
