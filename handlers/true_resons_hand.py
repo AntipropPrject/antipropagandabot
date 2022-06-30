@@ -101,7 +101,7 @@ async def reasons_sorry_im_bot(message: Message):
 
 
 @router.message((F.text.contains('война') & (F.text.contains('Хорошо'))))
-@router.message(OperationWar(answer='Война / Вторжение в Украину'), (F.text == 'Продолжай ⏳'),
+@router.message(OperationWar(answer='Война'), (F.text == 'Продолжай ⏳'),
                 state=TruereasonsState.main)
 async def reasons_war(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_war'})
