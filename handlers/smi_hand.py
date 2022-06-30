@@ -3,22 +3,20 @@ from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-
 from data_base.DBuse import *
 from handlers.anti_prop_hand import antip_truth_game_start
-from middleware import CounterMiddleware
 from states.antiprop_states import propaganda_victim
 
+flags = {"throttling_key": "True"}
 router = Router()
-
 router.message.filter(state=propaganda_victim)
 messageDict = dict()
 
 
-@router.message((F.text.contains("Давайте начнём!")))
-@router.message((F.text.contains("Хорошо, давай послушаем 🗣")))
-@router.message((F.text.contains('послушаем его еще! 🗣')))
-@router.message(commands=["testsmi"])
+@router.message((F.text.contains("Давайте начнём!")), flags=flags)
+@router.message((F.text.contains("Хорошо, давай послушаем 🗣")), flags=flags)
+@router.message((F.text.contains('послушаем его еще! 🗣')), flags=flags)
+@router.message(commands=["testsmi"], flags=flags)
 async def smi_statement(message: Message, state: FSMContext):
     messageDict.update({message.from_user.id: message})
 
@@ -83,7 +81,7 @@ async def smi_statement(message: Message, state: FSMContext):
         await sme_statement_start_over(message, state)
 
 
-@router.message((F.text.in_({"Случайная ошибка / Не ложь 👍", "Целенаправленная ложь 👎"})))
+@router.message((F.text.in_({"Случайная ошибка / Не ложь 👍", "Целенаправленная ложь 👎"})), flags=flags)
 async def smi_statement_enough(message: Message, state: FSMContext):
     person_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
     data = await state.get_data()
@@ -120,7 +118,7 @@ async def smi_statement_enough(message: Message, state: FSMContext):
 #                                                  reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Достаточно 🤚"))
+@router.message((F.text == "Достаточно 🤚"), flags=flags)
 async def sme_statement_start_over(message: Message, state: FSMContext):
     await redis_delete_first_item("Usrs: 5316104187: Start_answers: who_to_trust_persons:")
     person_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
@@ -147,7 +145,7 @@ async def sme_statement_start_over(message: Message, state: FSMContext):
         # await state.set_state(antiprop_states.propaganda_victim.ppl_propaganda.dialogue_start_over)
 
 
-@router.message(state=propaganda_victim.options)
+@router.message(state=propaganda_victim.options, flags=flags)
 async def smi_statement_poll(message: Message, state: FSMContext):
     options = await state.get_data()
     redis = all_data().get_data_red()
@@ -174,7 +172,7 @@ async def smi_statement_poll(message: Message, state: FSMContext):
         await sme_statement_skip(message, state)
 
 
-@router.message((F.text.contains('Хватит, не будем слушать остальных 🙅‍♂️')))
+@router.message((F.text.contains('Хватит, не будем слушать остальных 🙅‍♂️')), flags=flags)
 async def sme_statement_skip(message: Message, state=FSMContext):
     data = await state.get_data()
 

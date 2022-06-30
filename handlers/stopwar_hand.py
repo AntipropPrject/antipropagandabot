@@ -5,19 +5,18 @@ from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from data_base.DBuse import sql_safe_select
-from middleware import CounterMiddleware
+
 
 
 class StopWarState(StatesGroup):
     main = State()
 
-
+flags = {"throttling_key": "True"}
 router = Router()
-
 router.message.filter(state=StopWarState)
 
 
-@router.message(F.text == "Скорее да ✅")
+@router.message(F.text == "Скорее да ✅", flags=flags)
 async def stopwar_rather_yes(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_rather_yes'})
     photo = await sql_safe_select('t_id', 'assets', {'name': 'stopwar_rather_yes'})
@@ -30,7 +29,7 @@ async def stopwar_rather_yes(message: Message):
         await message.answer_video(photo, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(F.text == "Не знаю 🤷‍♂️")
+@router.message(F.text == "Не знаю 🤷‍♂️", flags=flags)
 async def stopwar_idk(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_idk'})
     photo = await sql_safe_select('t_id', 'assets', {'name': 'stopwar_idk'})
@@ -43,7 +42,7 @@ async def stopwar_idk(message: Message):
         await message.answer_video(photo, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(F.text == "Скорее нет ❌")
+@router.message(F.text == "Скорее нет ❌", flags=flags)
 async def stopwar_rather_no(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_rather_no'})
     nmarkup = ReplyKeyboardBuilder()
@@ -51,7 +50,7 @@ async def stopwar_rather_no(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Не согласен(а) 🙅") | (F.text == "Согласен(а) 👌") | (F.text == "Продолжим 👌"))
+@router.message((F.text == "Не согласен(а) 🙅") | (F.text == "Согласен(а) 👌") | (F.text == "Продолжим 👌"), flags=flags)
 async def stopwar_will_it_stop(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_will_it_stop'})
     nmarkup = ReplyKeyboardBuilder()
@@ -61,7 +60,7 @@ async def stopwar_will_it_stop(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Да, это закончит войну 🕊"))
+@router.message((F.text == "Да, это закончит войну 🕊"), flags=flags)
 async def stopwar_ofc(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_ofc'})
     nmarkup = ReplyKeyboardBuilder()
@@ -69,7 +68,7 @@ async def stopwar_ofc(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Не знаю 🤷‍♀️") | (F.text == "Не обязательно, новый президент может продолжить войну 🗡"))
+@router.message((F.text == "Не знаю 🤷‍♀️") | (F.text == "Не обязательно, новый президент может продолжить войну 🗡"), flags=flags)
 async def stopwar_war_eternal(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_war_eternal'})
     nmarkup = ReplyKeyboardBuilder()
@@ -77,7 +76,7 @@ async def stopwar_war_eternal(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Продолжай ⏳"))
+@router.message((F.text == "Продолжай ⏳"), flags=flags)
 async def stopwar_isolation(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_isolation'})
     nmarkup = ReplyKeyboardBuilder()
@@ -85,7 +84,7 @@ async def stopwar_isolation(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Продолжим👌"))
+@router.message((F.text == "Продолжим👌"), flags=flags)
 async def stopwar_stop_putin(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_stop_putin'})
     nmarkup = ReplyKeyboardBuilder()
@@ -95,7 +94,7 @@ async def stopwar_stop_putin(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "В результате выборов 📊") | (F.text == "Сложно сказать 🤔"))
+@router.message((F.text == "В результате выборов 📊") | (F.text == "Сложно сказать 🤔"), flags=flags)
 async def stopwar_stolen_votes(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_stolen_votes'})
     nmarkup = ReplyKeyboardBuilder()
@@ -103,7 +102,7 @@ async def stopwar_stolen_votes(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "По иным причинам 💀"))
+@router.message((F.text == "По иным причинам 💀"), flags=flags)
 async def stopwar_just_a_scene(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_just_a_scene'})
     nmarkup = ReplyKeyboardBuilder()
@@ -111,7 +110,7 @@ async def stopwar_just_a_scene(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "А что главное?"))
+@router.message((F.text == "А что главное?"), flags=flags)
 async def stopwar_end_it_now(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_end_it_now'})
     nmarkup = ReplyKeyboardBuilder()
@@ -119,7 +118,7 @@ async def stopwar_end_it_now(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Что ты предлагаешь ❓ ❓ ❓"))
+@router.message((F.text == "Что ты предлагаешь ❓ ❓ ❓"), flags=flags)
 async def stopwar_lets_fight(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_lets_fight'})
     nmarkup = ReplyKeyboardBuilder()
@@ -127,7 +126,7 @@ async def stopwar_lets_fight(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Спасибо 🤝"))
+@router.message((F.text == "Спасибо 🤝"), flags=flags)
 async def stopwar_lets_fight(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_hello_world'})
     text2 = await sql_safe_select('text', 'texts', {'name': 'stopwar_send_me'})

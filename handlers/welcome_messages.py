@@ -14,11 +14,14 @@ from states import welcome_states
 from states.antiprop_states import propaganda_victim
 from stats.stat import mongo_stat, mongo_update_stat
 
+flags = {"throttling_key": "True"}
 router = Router()
 
+#router.message(flags=flags)
 
 
-@router.message(commands=['start', 'help'], state="*")
+
+@router.message(commands=['start', 'help'], state='*', flags=flags)
 async def commands_start(message: types.Message, state: FSMContext):  # Первое сообщение
     user_id = message.from_user.id
     await mongo_stat(user_id)
@@ -36,7 +39,7 @@ async def commands_start(message: types.Message, state: FSMContext):  # Перв
 
 
 @router.message(welcome_states.start_dialog.dialogue_1, text_contains='верить', content_types=types.ContentType.TEXT,
-                text_ignore_case=True)  # А с чего мне тебе верить?
+                text_ignore_case=True, flags=flags)  # А с чего мне тебе верить?
 async def message_1(message: types.Message, state: FSMContext):
     markup = ReplyKeyboardBuilder()
     markup.add(types.KeyboardButton(text="Хорошо 👌"))
@@ -47,10 +50,10 @@ async def message_1(message: types.Message, state: FSMContext):
 
 
 @router.message(welcome_states.start_dialog.dialogue_2, text_contains='Хорошо', content_types=types.ContentType.TEXT,
-                text_ignore_case=True)
+                text_ignore_case=True, flags=flags)
 @router.message(welcome_states.start_dialog.dialogue_1, text_contains='Начнем 🇷🇺🇺🇦',
                 content_types=types.ContentType.TEXT,
-                text_ignore_case=True)
+                text_ignore_case=True, flags=flags)
 # @router.message(welcome_states.start_dialog.dialogue_3) запомнить на ты или на вы в базу
 async def message_2(message: types.Message, state: FSMContext):
     # запись значения в базу
@@ -67,7 +70,7 @@ async def message_2(message: types.Message, state: FSMContext):
     await state.set_state(welcome_states.start_dialog.dialogue_4)
 
 
-@router.message(welcome_states.start_dialog.dialogue_4, (F.text == '1️⃣ Специальная военная операция (СВО)'))
+@router.message(welcome_states.start_dialog.dialogue_4, (F.text == '1️⃣ Специальная военная операция (СВО)'), flags=flags)
 async def message_3(message: types.Message, state: FSMContext):  # Начало опроса
     await poll_write(f'Usrs: {message.from_user.id}: Start_answers: Is_it_war:', message.text)
     markup = ReplyKeyboardBuilder()
@@ -80,7 +83,7 @@ async def message_3(message: types.Message, state: FSMContext):  # Начало 
     await state.set_state(welcome_states.start_dialog.dialogue_5)
 
 
-@router.message(welcome_states.start_dialog.dialogue_4, (F.text == "2️⃣ Война"))
+@router.message(welcome_states.start_dialog.dialogue_4, (F.text == "2️⃣ Война"), flags=flags)
 async def start_lets_start_2(message: types.Message, state: FSMContext):  # Начало опроса
     await poll_write(f'Usrs: {message.from_user.id}: Start_answers: Is_it_war:', message.text)
     markup = ReplyKeyboardBuilder()
@@ -94,7 +97,7 @@ async def start_lets_start_2(message: types.Message, state: FSMContext):  # На
     await state.set_state(welcome_states.start_dialog.dialogue_5)
 
 
-@router.message(welcome_states.start_dialog.dialogue_5, (F.text == "Стоп! Правильно «в Украине»! ☝️"))
+@router.message(welcome_states.start_dialog.dialogue_5, (F.text == "Стоп! Правильно «в Украине»! ☝️"), flags=flags)
 async def start_lets_start_2(message: types.Message, state: FSMContext):
     text = await sql_safe_select("text", "texts", {"name": "start_is_it_correct"})
     markup = ReplyKeyboardBuilder()
@@ -104,7 +107,7 @@ async def start_lets_start_2(message: types.Message, state: FSMContext):
 
 
 @router.message(welcome_states.start_dialog.dialogue_4, text_contains=('выражать', 'незаконно'),
-                content_types=types.ContentType.TEXT, text_ignore_case=True)
+                content_types=types.ContentType.TEXT, text_ignore_case=True, flags=flags)
 async def message_4(message: types.Message):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="1️⃣ Специальная военная операция (СВО)"))
@@ -115,7 +118,7 @@ async def message_4(message: types.Message):
 
 
 @router.message(welcome_states.start_dialog.dialogue_5, text_contains=('долго', 'допрашивать'),
-                content_types=types.ContentType.TEXT, text_ignore_case=True)
+                content_types=types.ContentType.TEXT, text_ignore_case=True, flags=flags)
 async def message_5(message: types.Message, state: FSMContext):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Хорошо, задавай свои вопросы 👌"))
@@ -125,9 +128,9 @@ async def message_5(message: types.Message, state: FSMContext):
 
 
 @router.message(welcome_states.start_dialog.dialogue_5, text_contains=('Хорошо', 'свои', 'вопросы'),
-                content_types=types.ContentType.TEXT, text_ignore_case=True)
+                content_types=types.ContentType.TEXT, text_ignore_case=True, flags=flags)
 @router.message(welcome_states.start_dialog.dialogue_5, text_contains='Задавай', content_types=types.ContentType.TEXT,
-                text_ignore_case=True)  # Задаю первый вопрос и ставлю состояние
+                text_ignore_case=True, flags=flags)  # Задаю первый вопрос и ставлю состояние
 async def message_6(message: types.Message, state: FSMContext):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Скорее да  🙂"), types.KeyboardButton(text="Скорее нет  🙅‍♂"))
@@ -137,7 +140,7 @@ async def message_6(message: types.Message, state: FSMContext):
     await state.set_state(welcome_states.start_dialog.dialogue_6)
 
 
-@router.message(welcome_states.start_dialog.dialogue_6)
+@router.message(welcome_states.start_dialog.dialogue_6, flags=flags)
 async def message_6to7(message: types.Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Покажи варианты ✍"))
@@ -150,7 +153,7 @@ async def message_6to7(message: types.Message, state: FSMContext):
 
 
 @router.message(text_contains='Покажи варианты',
-                state=welcome_states.start_dialog.dialogue_extrafix)  # Сохраняю 1 вопрос
+                state=welcome_states.start_dialog.dialogue_extrafix, flags=flags)  # Сохраняю 1 вопрос
 async def message_7(message: types.Message, state: FSMContext):
     # Сохранить 1 вопрос в базу
     text = message.text
@@ -166,13 +169,13 @@ async def message_7(message: types.Message, state: FSMContext):
     await state.set_state(welcome_states.start_dialog.dialogue_7)
 
 
-@router.message(welcome_states.start_dialog.dialogue_7, (F.text == 'Продолжить'))
+@router.message(welcome_states.start_dialog.dialogue_7, (F.text == 'Продолжить'), flags=flags)
 async def poll_filler(message: types.Message, bot: Bot):
     msg = await message.answer('Чтобы продолжить -- отметьте ответы выше и нажмите "Проголосовать" или "Vote"',
                                reply_markup=ReplyKeyboardRemove(), disable_web_page_preview=True)
 
 
-@router.poll_answer(state=welcome_states.start_dialog.dialogue_7)  # Сохраняю 2 вопрос
+@router.poll_answer(state=welcome_states.start_dialog.dialogue_7, flags=flags)  # Сохраняю 2 вопрос
 async def poll_answer_handler(poll_answer: types.PollAnswer, state: FSMContext):
     # сохранение 2 вопроса
     options = await state.get_data()
@@ -192,7 +195,7 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, state: FSMContext):
     await state.set_state(welcome_states.start_dialog.dialogue_8)
 
 
-@router.message(state=welcome_states.start_dialog.dialogue_8)  # Сохраняю 3 вопрос
+@router.message(state=welcome_states.start_dialog.dialogue_8, flags=flags)  # Сохраняю 3 вопрос
 async def message_8(message: types.Message, state: FSMContext):
     text = message.text
     if text == "Да, полностью доверяю ✅" or text == "Скорее да 👍" or \
@@ -212,7 +215,7 @@ async def message_8(message: types.Message, state: FSMContext):
                              disable_web_page_preview=True)
 
 
-@router.message((F.text.contains("Покажи варианты ✍️")), state=welcome_states.start_dialog.button_next)
+@router.message((F.text.contains("Покажи варианты ✍️")), state=welcome_states.start_dialog.button_next, flags=flags)
 async def button(message: types.Message, state: FSMContext):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Продолжить"))
@@ -222,7 +225,7 @@ async def button(message: types.Message, state: FSMContext):
     await state.set_state(welcome_states.start_dialog.dialogue_9)
 
 
-@router.message(welcome_states.start_dialog.dialogue_9, (F.text == 'Продолжить'))
+@router.message(welcome_states.start_dialog.dialogue_9, (F.text == 'Продолжить'), flags=flags)
 async def poll_filler(message: types.Message, bot: Bot):
     msg = await message.answer('Чтобы продолжить -- отметьте ответы выше и нажмите "Проголосовать" или "Vote"',
                                reply_markup=ReplyKeyboardRemove(), disable_web_page_preview=True)
@@ -230,7 +233,7 @@ async def poll_filler(message: types.Message, bot: Bot):
     await bot.delete_message(message.from_user.id, msg.message_id)
 
 
-@router.poll_answer(state=welcome_states.start_dialog.dialogue_9)  # Сохраняю 4 вопрос
+@router.poll_answer(state=welcome_states.start_dialog.dialogue_9, flags=flags)  # Сохраняю 4 вопрос
 async def poll_answer_handler_tho(poll_answer: types.PollAnswer, state=FSMContext):
     options = ["Владимир Путин", "Дмитрий Песков", "Сергей Лавров", "Владимир Соловьев", "Никита Михалков",
                "Юрий Подоляка",
@@ -255,13 +258,13 @@ async def poll_answer_handler_tho(poll_answer: types.PollAnswer, state=FSMContex
     await state.set_state(welcome_states.start_dialog.dialogue_10)
 
 
-@router.message(welcome_states.start_dialog.dialogue_10, (F.text == 'Продолжить'))
+@router.message(welcome_states.start_dialog.dialogue_10, (F.text == 'Продолжить'), flags=flags)
 async def poll_filler(message: types.Message, bot: Bot):
     msg = await message.answer('Чтобы продолжить -- отметьте ответы выше и нажмите "Проголосовать" или "Vote"',
                                reply_markup=ReplyKeyboardRemove(), disable_web_page_preview=True)
 
 
-@router.poll_answer(state=welcome_states.start_dialog.dialogue_10)  # Сохраняю 5 вопрос
+@router.poll_answer(state=welcome_states.start_dialog.dialogue_10, flags=flags)  # Сохраняю 5 вопрос
 async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, state: FSMContext):
     markup = ReplyKeyboardBuilder()
     markup.add(types.KeyboardButton(text="Поехали!"))

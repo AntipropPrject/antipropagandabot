@@ -6,24 +6,17 @@ import zipfile
 from aiogram import Router, F
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
-from aiogram.dispatcher.fsm.state import State, StatesGroup
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
-
 from Testbot import bot
-from bata import all_data
 from data_base.DBuse import sql_safe_select, sql_safe_update, sql_safe_insert, mongo_select_info, mongo_add_admin, \
-    mongo_pop_admin, mongo_select_admins, sql_delete, poll_write, redis_just_one_write, redis_just_one_read
+    mongo_pop_admin, mongo_select_admins, sql_delete, redis_just_one_write, redis_just_one_read
 from export_to_csv.pg_mg import backin
-from filters.filter_status import Status
 from filters.isAdmin import IsAdmin, IsSudo
 from keyboards.admin_keys import main_admin_keyboard, middle_admin_keyboard, app_admin_keyboard, redct_text, \
     redct_media, redct_games, settings_bot, redct_editors
-from log import logg
 from states.admin_states import admin
-from stats.stat import mongo_select_stat
-from utilts import phoenix_protocol, simple_media
 
 router = Router()
 

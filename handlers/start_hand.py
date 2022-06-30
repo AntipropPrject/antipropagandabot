@@ -5,35 +5,31 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.dispatcher.fsm.state import StatesGroup, State
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-import bata
-from data_base.DBuse import data_getter, mongo_select_admins, sql_safe_insert
-from handlers import true_resons_hand, putin_hand
+from handlers import true_resons_hand
 from handlers.true_resons_hand import reasons_who_to_blame
-from keyboards.admin_keys import main_admin_keyboard
-from middleware import CounterMiddleware
 from states.donbass_states import donbass_state
-from utilts import simple_media, phoenix_protocol
 
+flags = {"throttling_key": "True"}
 router = Router()
 
 
 
-@router.message(commands=["testnazi"])
+@router.message(commands=["testnazi"], flags=flags)
 async def cmd_start(message: Message, state: FSMContext):
     await true_resons_hand.reasons_denazi(message, state)
 
 
-@router.message(commands=["teststrike"])
+@router.message(commands=["teststrike"], flags=flags)
 async def cmd_start(message: Message, state: FSMContext):
     await true_resons_hand.prevent_strike_start(message, state)
 
 
-@router.message(commands=["putest"])
+@router.message(commands=["putest"], flags=flags)
 async def cmd_start(message: Message, state: FSMContext):
     await reasons_who_to_blame(message, state)
 
 
-@router.message(commands=["donbass"])
+@router.message(commands=["donbass"], flags=flags)
 async def cmd_start(message: Message, state: FSMContext):
     await state.clear()
     await state.set_state(donbass_state.eight_years)
@@ -49,13 +45,13 @@ class add_id(StatesGroup):
     one = State()
 
 
-@router.message(commands=["load"])
+@router.message(commands=["load"], flags=flags)
 async def csv_dump(message: Message, state: FSMContext):
     await message.answer("Отправьте фото с тегом")
     await state.set_state(add_id.one)
 
 
-@router.message(state=add_id.one)
+@router.message(state=add_id.one, flags=flags)
 async def csv_dump(message: Message, state: FSMContext):
     ph_id = message.photo[0].file_id
     capt = message.caption

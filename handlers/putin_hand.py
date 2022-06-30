@@ -11,19 +11,19 @@ from handlers.stopwar_hand import StopWarState
 from middleware import CounterMiddleware
 
 
+
 class StateofPutin(StatesGroup):
     main = State()
     game1 = State()
     game2 = State()
     final = State()
 
-
+flags = {"throttling_key": "True"}
 router = Router()
-
 router.message.filter(state=(StateofPutin))
 
 
-@router.message(PutinFilter(), (F.text.in_({"Давай 🤝"})), state=StateofPutin.main)
+@router.message(PutinFilter(), (F.text.in_({"Давай 🤝"})), state=StateofPutin.main, flags=flags)
 async def putin_love_putin(message: Message, state: FSMContext):
     await state.set_state(StateofPutin.main)
     text = await sql_safe_select('text', 'texts', {'name': 'putin_love_putin'})
@@ -33,7 +33,7 @@ async def putin_love_putin(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.in_({"Давай 🤝"})), state=StateofPutin.main)
+@router.message((F.text.in_({"Давай 🤝"})), state=StateofPutin.main, flags=flags)
 async def putin_not_love_putin(message: Message, state: FSMContext):
     await state.set_state(StateofPutin.main)
     text = await sql_safe_select('text', 'texts', {'name': 'putin_lets_speak_about'})
@@ -48,7 +48,7 @@ async def putin_not_love_putin(message: Message, state: FSMContext):
 
 
 @router.message(
-    (F.text.in_({"Нет, не согласен 🙅‍♂️", "Может и есть, но пока их не видно 🤷‍♂️", "Конечно такие люди есть 🙂"})))
+    (F.text.in_({"Нет, не согласен 🙅‍♂️", "Может и есть, но пока их не видно 🤷‍♂️", "Конечно такие люди есть 🙂"})), flags=flags)
 async def putin_big_love_putin(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'putin_big_love_putin'})
     nmarkup = ReplyKeyboardBuilder()
@@ -58,7 +58,7 @@ async def putin_big_love_putin(message: Message):
 
 
 @router.message(
-    (F.text == "Согласен, кто, если не Путин? 🤷‍♂️") | (F.text == "Не лучший президент, но кто, если не Путин? 🤷‍♂️"))
+    (F.text == "Согласен, кто, если не Путин? 🤷‍♂️") | (F.text == "Не лучший президент, но кто, если не Путин? 🤷‍♂️"), flags=flags)
 async def putin_only_one(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'putin_only_one'})
     nmarkup = ReplyKeyboardBuilder()
@@ -69,7 +69,7 @@ async def putin_only_one(message: Message):
 
 
 @router.message(
-    (F.text == "Не говори такие вещи, Путин с нами надолго! ✊") | (F.text == "Отличный президент ✊"))
+    (F.text == "Не говори такие вещи, Путин с нами надолго! ✊") | (F.text == "Отличный президент ✊"), flags=flags)
 async def putin_so_handsome(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'putin_so_handsome'})
     nmarkup = ReplyKeyboardBuilder()
@@ -78,7 +78,7 @@ async def putin_so_handsome(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Хороший президент, но его приказы плохо исполняют 🤷‍♀️"))
+@router.message((F.text == "Хороший президент, но его приказы плохо исполняют 🤷‍♀️"), flags=flags)
 async def putin_not_putin(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'putin_not_putin'})
     nmarkup = ReplyKeyboardBuilder()
@@ -87,7 +87,7 @@ async def putin_not_putin(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.in_({'Скорее да 👍', "Скорее нет 👎"})))
+@router.message((F.text.in_({'Скорее да 👍', "Скорее нет 👎"})), flags=flags)
 async def putin_game_of_lie(message: Message, state: FSMContext):
     await state.set_state(StateofPutin.game1)
     text = await sql_safe_select('text', 'texts', {'name': 'putin_game_of_lie'})
@@ -97,7 +97,7 @@ async def putin_game_of_lie(message: Message, state: FSMContext):
 
 
 @router.message(((F.text == "Начнем!  🚀") | (F.text == "Нет, давай продолжим 👉") | (F.text == "Продолжаем 👉")),
-                state=StateofPutin.game1)
+                state=StateofPutin.game1, flags=flags)
 async def putin_game1_question(message: Message, state: FSMContext):
     try:
         count = (await state.get_data())['pgamecount']
@@ -137,7 +137,7 @@ async def putin_game1_question(message: Message, state: FSMContext):
 
 
 @router.message(((F.text == "Случайная ошибка / Не ложь 👍") | (F.text == "Целенаправленная ложь 👎")),
-                state=StateofPutin.game1)
+                state=StateofPutin.game1, flags=flags)
 async def putin_game1_answer(message: Message, state: FSMContext):
     data = await state.get_data()
     base_update_dict = dict()
@@ -164,7 +164,7 @@ async def putin_game1_answer(message: Message, state: FSMContext):
                              'не менее важному качеству хорошего президента.')
 
 
-@router.message((F.text == "Достаточно ✋"), state=StateofPutin.game1)
+@router.message((F.text == "Достаточно ✋"), state=StateofPutin.game1, flags=flags)
 async def putin_game1_are_you_sure(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Нет, давай продолжим 👉"))
@@ -173,7 +173,7 @@ async def putin_game1_are_you_sure(message: Message):
 
 
 @router.message(((F.text == "Да, хватит 🙅‍♀️") | (F.text == "Давай") | (F.text == "Хорошо 🤔")),
-                state=StateofPutin.game1)
+                state=StateofPutin.game1, flags=flags)
 async def putin_plenty_promises(message: Message, state: FSMContext):
     await state.clear()
     await state.set_state(StateofPutin.game2)
@@ -183,7 +183,7 @@ async def putin_plenty_promises(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(((F.text == "Давай 👌")), state=StateofPutin.game2)
+@router.message(((F.text == "Давай 👌")), state=StateofPutin.game2, flags=flags)
 async def putin_nothing_done(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'putin_nothing_done'})
     nmarkup = ReplyKeyboardBuilder()
@@ -191,7 +191,7 @@ async def putin_nothing_done(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(((F.text == "Начнем! 🚀")), state=StateofPutin.game2)
+@router.message(((F.text == "Начнем! 🚀")), state=StateofPutin.game2, flags=flags)
 async def putin_gaming(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'putin_gaming'})
     nmarkup = ReplyKeyboardBuilder()
@@ -200,7 +200,7 @@ async def putin_gaming(message: Message):
 
 
 @router.message(((F.text == "Я готов(а) 👌") | (F.text == "Нет, давай продолжим 👉") | (F.text == "Продолжаем! 👉")),
-                state=StateofPutin.game2)
+                state=StateofPutin.game2, flags=flags)
 async def putin_game2_question(message: Message, state: FSMContext):
     try:
         count = (await state.get_data())['pgamecount']
@@ -239,7 +239,7 @@ async def putin_game2_question(message: Message, state: FSMContext):
             reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(((F.text == "Не виноват 👍") | (F.text == "Виноват 👎")), state=StateofPutin.game2)
+@router.message(((F.text == "Не виноват 👍") | (F.text == "Виноват 👎")), state=StateofPutin.game2, flags=flags)
 async def putin_game2_answer(message: Message, state: FSMContext):
     data = await state.get_data()
     base_update_dict = dict()
@@ -265,7 +265,7 @@ async def putin_game2_answer(message: Message, state: FSMContext):
         await message.answer('Спасибо за игру 🤝 Давайте подведем итоги.')
 
 
-@router.message(((F.text == "Достаточно ✋")), state=StateofPutin.game2)
+@router.message(((F.text == "Достаточно ✋")), state=StateofPutin.game2, flags=flags)
 async def putin_game2_are_you_sure(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Нет, давай продолжим 👉"))
@@ -274,7 +274,7 @@ async def putin_game2_are_you_sure(message: Message):
 
 
 @router.message(((F.text == "Да, достаточно 🤷‍♀️") | (F.text == "Хорошо, давай дальше") |
-                 (F.text == "Давай 🤝")), state=StateofPutin.game2)
+                 (F.text == "Давай 🤝")), state=StateofPutin.game2, flags=flags)
 async def putin_in_the_past(message: Message, state: FSMContext):
     await state.clear()
     await state.set_state(StateofPutin.final)
@@ -287,7 +287,7 @@ async def putin_in_the_past(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(((F.text == "Докажи 🤔") | (F.text == "Нет, я не согласен(а) ❌")), state=StateofPutin.final)
+@router.message(((F.text == "Докажи 🤔") | (F.text == "Нет, я не согласен(а) ❌")), state=StateofPutin.final, flags=flags)
 async def putin_prove_me(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'putin_prove_me'})
     nmarkup = ReplyKeyboardBuilder()
@@ -297,7 +297,7 @@ async def putin_prove_me(message: Message, state: FSMContext):
 
 @router.message(((F.text == "Да, я согласен(а) ✅") | (F.text == "Военный преступник 😤") |
                  (F.text == "Был хорошим президентом раньше, но сейчас - нет 🙅") |
-                 (F.text == "Давай 👌")), state=StateofPutin)
+                 (F.text == "Давай 👌")), state=StateofPutin, flags=flags)
 async def stopwar_start(message: Message, state: FSMContext):
     await state.set_state(StopWarState.main)
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_p_start'})

@@ -11,7 +11,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from data_base.DBuse import data_getter, poll_write, sql_safe_select, sql_safe_update, redis_delete_from_list, poll_get
 from filters.MapFilters import NaziFilter, RusHate_pr, NotNaziFilter, ManualFilters
 from handlers import true_resons_hand
-from middleware import CounterMiddleware
+from middleware.trottling import ThrottlingMiddleware
 from resources.all_polls import nazizm, nazizm_pr
 from utilts import simple_media
 
@@ -41,14 +41,11 @@ async def denanazification(message, state):
     else:
         await nazi_game_start(message, state)
 
-
+flags = {"throttling_key": "True"}
 router = Router()
-
-
 router.message.filter(state=NaziState)
 
-
-@router.message((F.text == "Покажи варианты ✍️"), state=NaziState.first_poll)
+@router.message((F.text == "Покажи варианты ✍️"), state=NaziState.first_poll, flags=flags)
 async def nazi_first_poll(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Продолжить'))
@@ -57,13 +54,13 @@ async def nazi_first_poll(message: Message):
                               reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Продолжить"), state=NaziState.first_poll)
+@router.message((F.text == "Продолжить"), state=NaziState.first_poll, flags=flags)
 async def nazi_poll_filler(message: Message):
     await message.answer('Пожалуйста, выберите в опросе те пункты, с которыми вы согласны, '
                          'и нажмите кнопку <b>"Подтвердить"</b> или <b>"Vote"</b>', reply_markup=ReplyKeyboardRemove())
 
 
-@router.poll_answer(state=NaziState.first_poll)
+@router.poll_answer(state=NaziState.first_poll, flags=flags)
 async def npoll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FSMContext):
     await state.set_state(NaziState.after_first_poll)
     nazizm_answers = poll_answer.option_ids
@@ -93,7 +90,7 @@ async def npoll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: F
             await bot.send_photo(poll_answer.user.id, photo=media, caption=text, reply_markup=markup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.contains('Давай 👌')), state=NaziState.after_first_poll)
+@router.message((F.text.contains('Давай 👌')), state=NaziState.after_first_poll, flags=flags)
 async def nazi_in_masses(message: Message):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Продолжай ⏳"))
@@ -101,7 +98,7 @@ async def nazi_in_masses(message: Message):
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.contains('Продолжай ⏳')), state=NaziState.after_first_poll)
+@router.message((F.text.contains('Продолжай ⏳')), state=NaziState.after_first_poll, flags=flags)
 async def nazi_propaganda(message: Message):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="А как же неонацизм? 🤨"))
@@ -109,7 +106,7 @@ async def nazi_propaganda(message: Message):
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.contains('А как же неонацизм? 🤨')))
+@router.message((F.text.contains('А как же неонацизм? 🤨')), flags=flags)
 async def nazi_neonazi(message: Message):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Понятно 👌"))
@@ -120,7 +117,7 @@ async def nazi_neonazi(message: Message):
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.contains('Черт ногу сломит 🤦‍♂️')) | (F.text.contains('А можно попроще? 🤔')))
+@router.message((F.text.contains('Черт ногу сломит 🤦‍♂️')) | (F.text.contains('А можно попроще? 🤔')), flags=flags)
 async def nazi_many_forms(message: Message):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Так понятнее! 👌"))
@@ -129,7 +126,7 @@ async def nazi_many_forms(message: Message):
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.contains('Ты всё слишком упрощаешь 🤷‍♀️')))
+@router.message((F.text.contains('Ты всё слишком упрощаешь 🤷‍♀️')), flags=flags)
 async def nazi_simple(message: Message):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Хорошо, продолжим 👌"))
@@ -139,13 +136,13 @@ async def nazi_simple(message: Message):
 
 @router.message(NotNaziFilter(), (
         (F.text.contains('Хорошо, продолжим 👌')) | (F.text.contains('Так понятнее! 👌')) | (
-        F.text.contains('Понятно 👌'))))
+        F.text.contains('Понятно 👌'))), flags=flags)
 async def nazi_not_zombie(message: Message, state: FSMContext):
     await nazi_game_start(message, state)
 
 
 @router.message(((F.text.contains('Хорошо, продолжим')) | (F.text.contains('Так понятнее! 👌')) | (
-        F.text.contains('Понятно 👌'))))
+        F.text.contains('Понятно 👌'))), flags=flags)
 async def nazi_how_many(message: Message, state: FSMContext):
     await state.set_state(NaziState.small_poll)
     text = await sql_safe_select("text", "texts", {"name": "nazi_how_many"})
@@ -155,7 +152,7 @@ async def nazi_how_many(message: Message, state: FSMContext):
                               reply_markup=ReplyKeyboardRemove())
 
 
-@router.poll_answer(state=NaziState.small_poll)
+@router.poll_answer(state=NaziState.small_poll, flags=flags)
 async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FSMContext):
     data = await state.get_data()
     await state.set_state(NaziState.after_small_poll)
@@ -179,14 +176,14 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FS
                                    reply_markup=markup_1.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.contains('Продолжай ⏳')), state=NaziState.after_small_poll)
+@router.message((F.text.contains('Продолжай ⏳')), state=NaziState.after_small_poll, flags=flags)
 async def nazi_canny(message: Message):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Посмотрел(а) 📺"))
     await simple_media(message, "nazi_canny", markup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.contains('Посмотрел(а) 📺')), state=NaziState.after_small_poll)
+@router.message((F.text.contains('Посмотрел(а) 📺')), state=NaziState.after_small_poll, flags=flags)
 async def nazi_many_forms(message: Message):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Продолжим 👌"))
@@ -194,7 +191,7 @@ async def nazi_many_forms(message: Message):
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(NaziFilter(answer="На Украине происходит геноцид русскоязычного населения"))
+@router.message(NaziFilter(answer="На Украине происходит геноцид русскоязычного населения"), flags=flags)
 async def nazi_genocide(message: Message, state: FSMContext):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Продолжай ⏳"))
@@ -205,7 +202,7 @@ async def nazi_genocide(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Продолжай ⏳"), state=NaziState.genocide)
+@router.message((F.text == "Продолжай ⏳"), state=NaziState.genocide, flags=flags)
 async def nazi_many_forms(message: Message):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Да, можно 💀"))
@@ -216,7 +213,7 @@ async def nazi_many_forms(message: Message):
     await simple_media(message, 'nazi_genocide_chart', markup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.contains('пожар')), state=NaziState.genocide)
+@router.message((F.text.contains('пожар')), state=NaziState.genocide, flags=flags)
 async def nazi_odessa(message: Message):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Да, это можно назвать геноцидом 💀"))
@@ -227,7 +224,7 @@ async def nazi_odessa(message: Message):
 
 
 @router.message(((F.text == "Нет, нельзя 🙅‍♀️") | (F.text == "Это трагедия, но не геноцид 🙅‍♀️")),
-                state=NaziState.genocide)
+                state=NaziState.genocide, flags=flags)
 async def nazi_many_forms(message: Message):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Продолжай..."))
@@ -236,7 +233,7 @@ async def nazi_many_forms(message: Message):
 
 
 @router.message(((F.text.contains("можно")) | (F.text == "Я не в праве давать такие оценки 🤷")),
-                state=NaziState.genocide)
+                state=NaziState.genocide, flags=flags)
 async def nazi_eight_years(message: Message, state: FSMContext):
     if message.text == "Я не в праве давать такие оценки 🤷":
         text = 'Понимаю, поэтому пусть оценку дадут факты. Задайте себе вопрос:'
@@ -255,7 +252,7 @@ async def nazi_eight_years(message: Message, state: FSMContext):
 
 @router.message(
     (F.text.in_({'Продолжай...', "Я тоже задаюсь этим вопросом 🤔", "ООН предпочитает закрывать глаза на это ☝️"})),
-    state=NaziState.genocide)
+    state=NaziState.genocide, flags=flags)
 async def nazi_exaggeration(message: Message, state: FSMContext):
     await state.set_state(NaziState.third_part)
     markup = ReplyKeyboardBuilder()
@@ -274,12 +271,12 @@ async def nazi_genocide_exit_2(message: Message, state: FSMContext):
                          reply_markup=markup.as_markup(resize_keyboard=True))"""
 
 
-@router.message((F.text == "Геноцида не было, но ненависть к русским - есть 😠"), state=NaziState.third_part)
+@router.message((F.text == "Геноцида не было, но ненависть к русским - есть 😠"), state=NaziState.third_part, flags=flags)
 async def nazi_genocide_exit_1(message: Message, state: FSMContext):
     await nazi_second_poll(message, state)
 
 
-@router.message((F.text == "Нет, это геноцид 💀"), state=NaziState.third_part)
+@router.message((F.text == "Нет, это геноцид 💀"), state=NaziState.third_part, flags=flags)
 async def nazi_bounds(message: Message, state: FSMContext):
     text = await sql_safe_select("text", "texts", {"name": "nazi_bounds"})
     markup = ReplyKeyboardBuilder()
@@ -287,7 +284,7 @@ async def nazi_bounds(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(NaziFilter(answer="Многие украинцы ненавидят русских только за то, что они русские"))
+@router.message(NaziFilter(answer="Многие украинцы ненавидят русских только за то, что они русские"), flags=flags)
 async def nazi_second_poll(message: Message, state: FSMContext):
     await state.set_state(NaziState.rushate)
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Nazi_answers: first_poll:',
@@ -300,13 +297,13 @@ async def nazi_second_poll(message: Message, state: FSMContext):
                               is_anonymous=False, allows_multiple_answers=False, correct_option_id=1)
 
 
-@router.message(NaziState.rushate, (F.text == 'Продолжай'))
+@router.message(NaziState.rushate, (F.text == 'Продолжай'), flags=flags)
 async def poll_filler(message: types.Message):
     await message.answer('Чтобы продолжить -- отметьте ответы выше и нажмите "Проголосовать" или "Vote"',
                          reply_markup=ReplyKeyboardRemove())
 
 
-@router.poll_answer(state=NaziState.rushate)
+@router.poll_answer(state=NaziState.rushate, flags=flags)
 async def nazi_76_percent(poll_answer: types.PollAnswer, bot: Bot, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'nazi_76_percent'})
     photo = await sql_safe_select('t_id', 'assets', {'name': 'nazi_76_percent'})
@@ -324,7 +321,7 @@ async def nazi_76_percent(poll_answer: types.PollAnswer, bot: Bot, state: FSMCon
                              reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.contains('А я слышал(а) другие цифры')), state=NaziState.rushate)
+@router.message((F.text.contains('А я слышал(а) другие цифры')), state=NaziState.rushate, flags=flags)
 async def nazi_manipulation(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Я удивлен(а) 🤔"))
@@ -333,14 +330,14 @@ async def nazi_manipulation(message: Message, state: FSMContext):
     await simple_media(message, 'nazi_manipulation', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.contains('удивлен')) | (F.text == "Хорошо, покажи"), state=NaziState.rushate)
+@router.message((F.text.contains('удивлен')) | (F.text == "Хорошо, покажи"), state=NaziState.rushate, flags=flags)
 async def nazi_not_really(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Посмотрел(а) 📺"))
     await simple_media(message, 'nazi_not_really', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.contains('не доверяю соц. опросам')), state=NaziState.rushate)
+@router.message((F.text.contains('не доверяю соц. опросам')), state=NaziState.rushate, flags=flags)
 async def nazi_poll_is_cool(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'nazi_poll_is_cool'})
     nmarkup = ReplyKeyboardBuilder()
@@ -348,7 +345,7 @@ async def nazi_poll_is_cool(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Посмотрел(а) 📺"), state=NaziState.rushate)
+@router.message((F.text == "Посмотрел(а) 📺"), state=NaziState.rushate, flags=flags)
 async def nazi_vs_gopnics(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'nazi_vs_gopnics'})
     nmarkup = ReplyKeyboardBuilder()
@@ -356,7 +353,7 @@ async def nazi_vs_gopnics(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(RusHate_pr(), (F.text == "Понятно ✔️"), state=NaziState.rushate)
+@router.message(RusHate_pr(), (F.text == "Понятно ✔️"), state=NaziState.rushate, flags=flags)
 async def nazi_very_little(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'nazi_very_little'})
     text2 = await sql_safe_select('text', 'texts', {'name': 'nazi_less_than_5'})
@@ -368,7 +365,7 @@ async def nazi_very_little(message: Message):
     await message.answer(text2, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Понятно ✔️"), state=NaziState.rushate)
+@router.message((F.text == "Понятно ✔️"), state=NaziState.rushate, flags=flags)
 async def nazi_you_wrong(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'nazi_you_wrong'})
     answer_lower = ((await poll_get(f'Usrs: {message.from_user.id}: Nazi_answers: small_poll:'))[0]).lower
@@ -383,7 +380,7 @@ async def nazi_you_wrong(message: Message, state: FSMContext):
     await message.answer(text2, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Это было в 2021 году, а сейчас их полстраны 😬"), state=NaziState.rushate)
+@router.message((F.text == "Это было в 2021 году, а сейчас их полстраны 😬"), state=NaziState.rushate, flags=flags)
 async def nazi_vs_gopnics(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'nazi_half_country'})
     nmarkup = ReplyKeyboardBuilder()
@@ -393,17 +390,17 @@ async def nazi_vs_gopnics(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.contains('захватили')), state=NaziState.rushate)
+@router.message((F.text.contains('захватили')), state=NaziState.rushate, flags=flags)
 async def nazi_thirdpart_end(message: Message, state: FSMContext):
     await nazi_one_neonazi(message, state)
 
 
-@router.message(((F.text.contains('преувеличение')) | (F.text.contains('не соглашусь'))), state=NaziState.rushate)
+@router.message(((F.text.contains('преувеличение')) | (F.text.contains('не соглашусь'))), state=NaziState.rushate, flags=flags)
 async def nazi_manual_endpoint_1(message: Message, state: FSMContext):
     await denanazification(message, state)
 
 
-@router.message(NaziFilter(answer="Власть на Украине захватили неонацисты"))
+@router.message(NaziFilter(answer="Власть на Украине захватили неонацисты"), flags=flags)
 async def nazi_one_neonazi(message: Message, state: FSMContext):
     await state.set_state(NaziState.neopower)
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Nazi_answers: first_poll:', nazizm[1])
@@ -412,7 +409,7 @@ async def nazi_one_neonazi(message: Message, state: FSMContext):
     await simple_media(message, 'nazi_addict', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.contains('Продолжай ⏳')), state=NaziState.neopower)
+@router.message((F.text.contains('Продолжай ⏳')), state=NaziState.neopower, flags=flags)
 async def nazi_elections(message: Message, state: FSMContext):
     await state.set_state(NaziState.third_part)
     text = await sql_safe_select('text', 'texts', {'name': 'nazi_elections'})
@@ -475,7 +472,7 @@ async def nazi_no_WW2(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))"""
 
 
-@router.message(state=(NaziState.after_small_poll, NaziState.third_part))
+@router.message(state=(NaziState.after_small_poll, NaziState.third_part), flags=flags)
 async def nazi_game_start(message: Message, state: FSMContext):
     await state.set_state(NaziState.game)
     text = await sql_safe_select('text', 'texts', {'name': 'nazi_game_start'})
@@ -486,7 +483,7 @@ async def nazi_game_start(message: Message, state: FSMContext):
 
 
 @router.message(((F.text == "Начнём! 🚀") | (F.text == "Ну давай еще 😎") | (F.text == "Продолжаем, давай еще! 👉")),
-                state=NaziState.game)
+                state=NaziState.game, flags=flags)
 async def country_game_question(message: Message, state: FSMContext):
     try:
         count = (await state.get_data())['ngamecount']
@@ -528,7 +525,7 @@ async def country_game_question(message: Message, state: FSMContext):
             reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(((F.text == "Это Украина 🇺🇦") | (F.text == "Нет, это Россия 🇷🇺")), state=NaziState.game)
+@router.message(((F.text == "Это Украина 🇺🇦") | (F.text == "Нет, это Россия 🇷🇺")), state=NaziState.game, flags=flags)
 async def country_game_answer(message: Message, state: FSMContext):
     data = await state.get_data()
     print(data)
@@ -563,7 +560,7 @@ async def country_game_answer(message: Message, state: FSMContext):
         await message.answer('Мы посмотрели все фото. Спасибо за игру 🤝')
 
 
-@router.message((F.text == "Достаточно, давай закончим 🙅"), state=NaziState.game)
+@router.message((F.text == "Достаточно, давай закончим 🙅"), state=NaziState.game, flags=flags)
 async def putin_game2_are_you_sure(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Ну давай еще 😎"))
@@ -573,7 +570,7 @@ async def putin_game2_are_you_sure(message: Message, state: FSMContext):
 
 @router.message(
     ((F.text == "Мне уже хватит 👌") | (F.text == "Спасибо 🤝") | (F.text == "Пропустим игру 🙅‍♂️")),
-    state=NaziState.game)
+    state=NaziState.game, flags=flags)
 async def putin_in_the_past(message: Message, state: FSMContext):
     await state.clear()
     await state.set_state(true_resons_hand.TruereasonsState.main)

@@ -26,13 +26,12 @@ class TruereasonsState(StatesGroup):
     game = State()
     final = State()
 
-
+flags = {"throttling_key": "True"}
 router = Router()
-
 router.message.filter(state=TruereasonsState)
 
 
-@router.message((F.text.contains('не')) & (F.text.contains('интересуюсь')) & (F.text.contains('политикой')))
+@router.message((F.text.contains('не')) & (F.text.contains('интересуюсь')) & (F.text.contains('политикой')), flags=flags)
 async def reasons_true_reason_for_all(message: Message):
     await redis_just_one_write(f'Usrs: {message.from_user.id}: Politics:', 'Аполитичный')
     base_list = ("👪 Защитить русских в Донбассе", "🛡 Предотвратить вторжение на территорию России или ДНР/ЛНР",
@@ -45,14 +44,14 @@ async def reasons_true_reason_for_all(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(((F.text.contains('цели')) & (F.text.contains('бессмысленны')) & (F.text.contains('Не'))))
+@router.message(((F.text.contains('цели')) & (F.text.contains('бессмысленны')) & (F.text.contains('Не'))), flags=flags)
 async def reasons_king_of_info(message: Message, state: FSMContext):
     await redis_just_one_write(f'Usrs: {message.from_user.id}: Politics:', 'Сторонник войны')
     await state.set_state(anti_prop_hand.propaganda_victim.final)
     await anti_prop_hand.reasons_king_of_info(message, state)
 
 
-@router.message((F.text == "Подожди. Я так не говорил(а). С чего ты взял, что это ненастоящие цели? 🤷‍♂️"))
+@router.message((F.text == "Подожди. Я так не говорил(а). С чего ты взял, что это ненастоящие цели? 🤷‍♂️"), flags=flags)
 async def reasons_king_of_info(message: Message):
     await redis_just_one_write(f'Usrs: {message.from_user.id}: Politics:', 'Сторонник войны')
     base_list = ("👪 Защитить русских в Донбассе", "🛡 Предотвратить вторжение на территорию России или ДНР/ЛНР",
@@ -65,25 +64,25 @@ async def reasons_king_of_info(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Давай поговорим о целях 👌"))
+@router.message((F.text == "Давай поговорим о целях 👌"), flags=flags)
 async def reasons_now_you_nothing(message: Message, state: FSMContext):
     await anti_prop_hand.war_point_now(message, state)
 
 
-@router.message((F.text == "Давай попробуем 👌"))
+@router.message((F.text == "Давай попробуем 👌"), flags=flags)
 async def reasons_now_you_fucked(message: Message, state: FSMContext):
     await redis_just_one_write(f'Usrs: {message.from_user.id}: Politics:', 'Сторонник войны')
     await anti_prop_hand.war_point_now(message, state)
 
 
-@router.message((F.text == "Хорошо!"))
+@router.message((F.text == "Хорошо!"), flags=flags)
 async def reasons_now_you_blessed(message: Message, state: FSMContext):
     await redis_just_one_write(f'Usrs: {message.from_user.id}: Politics:', 'Оппозиционер')
     await reasons_normal_game_start(message, state)
 
 
 @router.message(OperationWar(answer='Специальная военная операция (СВО)'), (F.text == 'Продолжай ⏳'),
-                state=TruereasonsState.main)
+                state=TruereasonsState.main, flags=flags)
 async def reasons_operation(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_operation'})
     nmarkup = ReplyKeyboardBuilder()
@@ -92,7 +91,7 @@ async def reasons_operation(message: Message):
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.contains('спецоперация')))
+@router.message((F.text.contains('спецоперация')), flags=flags)
 async def reasons_sorry_im_bot(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_sorry_im_bot'})
     nmarkup = ReplyKeyboardBuilder()
@@ -100,9 +99,9 @@ async def reasons_sorry_im_bot(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.contains('война') & (F.text.contains('Хорошо'))))
+@router.message((F.text.contains('война') & (F.text.contains('Хорошо'))), flags=flags)
 @router.message(OperationWar(answer='Война'), (F.text == 'Продолжай ⏳'),
-                state=TruereasonsState.main)
+                state=TruereasonsState.main, flags=flags)
 async def reasons_war(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_war'})
     nmarkup = ReplyKeyboardBuilder()
@@ -110,7 +109,7 @@ async def reasons_war(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(WarReason(answer="👪 Защитить русских в Донбассе"))
+@router.message(WarReason(answer="👪 Защитить русских в Донбассе"), flags=flags)
 async def donbass_big_tragedy(message: Message, state=FSMContext):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Start_answers: Invasion:',
                                  "👪 Защитить русских в Донбассе")
@@ -121,7 +120,7 @@ async def donbass_big_tragedy(message: Message, state=FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(WarReason(answer="🤬 Денацификация / Уничтожить нацистов"))
+@router.message(WarReason(answer="🤬 Денацификация / Уничтожить нацистов"), flags=flags)
 async def reasons_denazi(message: Message, state=FSMContext):
     await state.set_state(NaziState.first_poll)
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Start_answers: Invasion:',
@@ -132,7 +131,7 @@ async def reasons_denazi(message: Message, state=FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(WarReason(answer="🛡 Предотвратить вторжение на территорию России или ДНР/ЛНР"))
+@router.message(WarReason(answer="🛡 Предотвратить вторжение на территорию России или ДНР/ЛНР"), flags=flags)
 async def prevent_strike_start(message: Message, state: FSMContext):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Start_answers: Invasion:',
                                  "🛡 Предотвратить вторжение на территорию России или ДНР/ЛНР")
@@ -143,7 +142,7 @@ async def prevent_strike_start(message: Message, state: FSMContext):
     await simple_media(message, 'prevent_strike_start', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(WarReason(answer="Демилитаризация / Снижение военной мощи"))
+@router.message(WarReason(answer="Демилитаризация / Снижение военной мощи"), flags=flags)
 async def reasons_demilitarism(message: Message):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Start_answers: Invasion:',
                                  "💣 Демилитаризация / Снижение военной мощи")
@@ -159,7 +158,7 @@ async def reasons_demilitarism(message: Message):
 
 
 @router.message(
-    (F.text == 'Им наверху виднее 🤔') | (F.text == 'Я не знаю 🤷‍♀️') | (F.text.contains('хотел, как лучше')))
+    (F.text == 'Им наверху виднее 🤔') | (F.text == 'Я не знаю 🤷‍♀️') | (F.text.contains('хотел, как лучше')), flags=flags)
 async def reasons_lie_no_more_1(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_lie_no_more_1'})
     nmarkup = ReplyKeyboardBuilder()
@@ -167,7 +166,7 @@ async def reasons_lie_no_more_1(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.contains('размещение военных баз')))
+@router.message((F.text.contains('размещение военных баз')), flags=flags)
 async def reasons_lie_no_more_2(message: Message):
     await poll_write(f'Usrs: {message.from_user.id}: Start_answers: Invasion:',
                      "💂 Предотвратить размещение военных баз НАТО в Украине")
@@ -177,7 +176,7 @@ async def reasons_lie_no_more_2(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.contains('создание ядерного оружия на')))
+@router.message((F.text.contains('создание ядерного оружия на')), flags=flags)
 async def reasons_lie_no_more_3(message: Message):
     await poll_write(f'Usrs: {message.from_user.id}: Start_answers: Invasion:',
                      "🤯 Предотвратить секретные разработки: биологическое оружие / ядерное оружие")
@@ -187,7 +186,7 @@ async def reasons_lie_no_more_3(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(WarReason(answer="💂 Предотвратить размещение военных баз НАТО в Украине"))
+@router.message(WarReason(answer="💂 Предотвратить размещение военных баз НАТО в Украине"), flags=flags)
 async def reasons_big_bad_nato(message: Message):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Start_answers: Invasion:', welc_message_one[8])
     nmarkup = ReplyKeyboardBuilder()
@@ -195,7 +194,7 @@ async def reasons_big_bad_nato(message: Message):
     await simple_media(message, 'reasons_big_bad_NATO', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == 'Давай 👌'), state=TruereasonsState.main)
+@router.message((F.text == 'Давай 👌'), state=TruereasonsState.main, flags=flags)
 async def reasons_lie_no_more_1(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_NATO_is_coming'})
     nmarkup = ReplyKeyboardBuilder()
@@ -203,7 +202,7 @@ async def reasons_lie_no_more_1(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(WarReason(answer="🤯 Предотвратить секретные разработки: биологическое оружие / ядерное оружие"))
+@router.message(WarReason(answer="🤯 Предотвратить секретные разработки: биологическое оружие / ядерное оружие"), flags=flags)
 async def reasons_biopigeons(message: Message):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Start_answers: Invasion:',
                                  "🤯 Предотвратить секретные разработки: биологическое оружие / ядерное оружие")
@@ -232,7 +231,7 @@ async def reasons_new_power(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))"""
 
 
-@router.message(state=TruereasonsState.main)
+@router.message(state=TruereasonsState.main, flags=flags)
 async def reasons_normal_game_start(message: Message, state: FSMContext):
     await state.set_state(TruereasonsState.game)
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_normal_game_start'})
@@ -243,7 +242,7 @@ async def reasons_normal_game_start(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(((F.text == "Начнем! 🚀") | (F.text == "Продолжаем, давай еще! 👉")), state=TruereasonsState.game)
+@router.message(((F.text == "Начнем! 🚀") | (F.text == "Продолжаем, давай еще! 👉")), state=TruereasonsState.game, flags=flags)
 async def reasons_normal_game_question(message: Message, state: FSMContext):
     try:
         count = (await state.get_data())['ngamecount']
@@ -282,7 +281,7 @@ async def reasons_normal_game_question(message: Message, state: FSMContext):
             reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(((F.text == "Это абсурд🤦🏼‍♀️") | (F.text == "Это нормально👌")), state=TruereasonsState.game)
+@router.message(((F.text == "Это абсурд🤦🏼‍♀️") | (F.text == "Это нормально👌")), state=TruereasonsState.game, flags=flags)
 async def reasons_normal_game_answer(message: Message, state: FSMContext):
     data = await state.get_data()
     END = bool(data['ngamecount'] == (await data_getter('SELECT COUNT(id) FROM public.normal_game'))[0][0])
@@ -309,7 +308,7 @@ async def reasons_normal_game_answer(message: Message, state: FSMContext):
 
 
 @router.message(((F.text.contains("Достаточно,")) | (F.text == "Продолжим 🤝") | (F.text == 'Пропустим игру 🙅‍♀️')),
-                state=TruereasonsState.game)
+                state=TruereasonsState.game, flags=flags)
 async def reasons_real_reasons(message: Message, state: FSMContext):
     await state.set_state(TruereasonsState.final)
     nmarkup = ReplyKeyboardBuilder()
@@ -318,7 +317,7 @@ async def reasons_real_reasons(message: Message, state: FSMContext):
     await simple_media(message, 'reasons_real_reasons', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Подожди, а какие тогда настоящие цели войны? 🎯"), state=TruereasonsState.final)
+@router.message((F.text == "Подожди, а какие тогда настоящие цели войны? 🎯"), state=TruereasonsState.final, flags=flags)
 async def reasons_are_they_real(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_are_they_real'})
     nmarkup = ReplyKeyboardBuilder()
@@ -326,7 +325,7 @@ async def reasons_are_they_real(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Продолжай ⏳"), state=TruereasonsState.final)
+@router.message((F.text == "Продолжай ⏳"), state=TruereasonsState.final, flags=flags)
 async def reasons_war_of_noone(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Скорее да 😔"))
@@ -337,7 +336,7 @@ async def reasons_war_of_noone(message: Message):
 
 
 @router.message(((F.text == "Я думаю, что люди наверху знают, что делают 👮‍♂️") | (F.text == "Скорее нет 🙅‍♂️")),
-                state=TruereasonsState.final)
+                state=TruereasonsState.final, flags=flags)
 async def reasons_cynical_view(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_cynical_view'})
     nmarkup = ReplyKeyboardBuilder()
@@ -347,7 +346,7 @@ async def reasons_cynical_view(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Конец гегемонии США / Однополярного мира 🇺🇸"), state=TruereasonsState.final)
+@router.message((F.text == "Конец гегемонии США / Однополярного мира 🇺🇸"), state=TruereasonsState.final, flags=flags)
 async def reasons_usa_gegemony(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Нет, не понимаю 🤷‍♂️"))
@@ -355,7 +354,7 @@ async def reasons_usa_gegemony(message: Message):
     await simple_media(message, 'reasons_USA_gegemony', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Да, понимаю ✔️"), state=TruereasonsState.final)
+@router.message((F.text == "Да, понимаю ✔️"), state=TruereasonsState.final, flags=flags)
 async def reasons_europe_cold(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_Europe_cold'})
     nmarkup = ReplyKeyboardBuilder()
@@ -365,7 +364,7 @@ async def reasons_europe_cold(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Ни в чем не улучшалось 🤷‍♂️"), state=TruereasonsState.final)
+@router.message((F.text == "Ни в чем не улучшалось 🤷‍♂️"), state=TruereasonsState.final, flags=flags)
 async def reasons_only_misery(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_only_misery'})
     nmarkup = ReplyKeyboardBuilder()
@@ -373,7 +372,7 @@ async def reasons_only_misery(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Импортозамещение 📦"), state=TruereasonsState.final)
+@router.message((F.text == "Импортозамещение 📦"), state=TruereasonsState.final, flags=flags)
 async def reasons_nails_lol(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_nails_lol'})
     nmarkup = ReplyKeyboardBuilder()
@@ -381,7 +380,7 @@ async def reasons_nails_lol(message: Message):
     await simple_media(message, 'reasons_nails_lol', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Нет, не понимаю 🤷‍♂️"), state=TruereasonsState.final)
+@router.message((F.text == "Нет, не понимаю 🤷‍♂️"), state=TruereasonsState.final, flags=flags)
 async def reasons_21_cent(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_21_cent'})
     nmarkup = ReplyKeyboardBuilder()
@@ -389,7 +388,7 @@ async def reasons_21_cent(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Нет, цель не в этом 🙅‍♂️"), state=TruereasonsState.final)
+@router.message((F.text == "Нет, цель не в этом 🙅‍♂️"), state=TruereasonsState.final, flags=flags)
 async def reasons_hail_china(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_hail_China'})
     nmarkup = ReplyKeyboardBuilder()
@@ -397,7 +396,7 @@ async def reasons_hail_china(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Да, именно в этом 👍"), state=TruereasonsState.final)
+@router.message((F.text == "Да, именно в этом 👍"), state=TruereasonsState.final, flags=flags)
 async def reasons_bot_afraid(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_bot_afraid'})
     nmarkup = ReplyKeyboardBuilder()
@@ -405,7 +404,7 @@ async def reasons_bot_afraid(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Давай 👌"), state=TruereasonsState.final)
+@router.message((F.text == "Давай 👌"), state=TruereasonsState.final, flags=flags)
 async def reasons_why_only_rus(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_why_only_rus'})
     nmarkup = ReplyKeyboardBuilder()
@@ -413,7 +412,7 @@ async def reasons_why_only_rus(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Какие результаты? 📊"), state=TruereasonsState.final)
+@router.message((F.text == "Какие результаты? 📊"), state=TruereasonsState.final, flags=flags)
 async def reasons_eritrea(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_eritrea'})
     media = await sql_safe_select('t_id', 'assets', {'name': 'reasons_eritrea'})
@@ -424,21 +423,21 @@ async def reasons_eritrea(message: Message, state: FSMContext):
     await simple_media(message, 'reasons_eritrea', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Это показательный пример... 🙁"), state=TruereasonsState.final)
+@router.message((F.text == "Это показательный пример... 🙁"), state=TruereasonsState.final, flags=flags)
 async def reasons_mb_think(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Давай"))
     await simple_media(message, 'reasons_mb_think', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Просто весь мир против нас 🖕"), state=TruereasonsState.final)
+@router.message((F.text == "Просто весь мир против нас 🖕"), state=TruereasonsState.final, flags=flags)
 async def reasons_propaganda_man(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Давай"))
     await simple_media(message, 'reasons_propaganda_man', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Давай"), state=TruereasonsState.final)
+@router.message((F.text == "Давай"), state=TruereasonsState.final, flags=flags)
 async def reasons_celeb_video(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_celeb_video'})
     media = await sql_safe_select('t_id', 'assets', {'name': 'reasons_celeb_video'})
@@ -448,7 +447,7 @@ async def reasons_celeb_video(message: Message, state: FSMContext):
     await simple_media(message, 'reasons_celeb_video', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "..."), state=TruereasonsState.final)
+@router.message((F.text == "..."), state=TruereasonsState.final, flags=flags)
 async def reasons_open_eyes(message: Message, state: FSMContext):
     await state.set_state(TruereasonsState.final)
     nmarkup = ReplyKeyboardBuilder()
@@ -462,7 +461,7 @@ async def reasons_open_eyes(message: Message, state: FSMContext):
     await simple_media(message, 'reasons_open_eyes', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Я хочу подумать, давай сделаем паузу... ⏱"), state=TruereasonsState.final)
+@router.message((F.text == "Я хочу подумать, давай сделаем паузу... ⏱"), state=TruereasonsState.final, flags=flags)
 async def reasons_pause(message: Message, state: FSMContext):
     await state.set_state(TruereasonsState.final)
     nmarkup = ReplyKeyboardBuilder()
@@ -475,7 +474,7 @@ async def reasons_pause(message: Message, state: FSMContext):
 
 
 @router.message((F.text == "Столько парней погибло, теперь мы не имеем права проиграть... 😔"),
-                state=TruereasonsState.final)
+                state=TruereasonsState.final, flags=flags)
 async def reasons_why_support_war(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_why_support_war'})
     nmarkup = ReplyKeyboardBuilder()
@@ -488,7 +487,7 @@ async def reasons_why_support_war(message: Message):
 
 
 @router.message(((F.text.contains('не нужна эта война...')) | (F.text == "Я не знаю...😨")),
-                state=TruereasonsState.final)
+                state=TruereasonsState.final, flags=flags)
 async def reasons_now_he_normal(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_now_he_normal'})
     await state.set_state(StateofPutin.main)
@@ -499,7 +498,7 @@ async def reasons_now_he_normal(message: Message, state: FSMContext):
 
 @router.message(
     ((F.text == "Да, я готов(а) поддержать войну / спецоперацию 💥") | (F.text == "Давай закончим этот разговор! 🖕")),
-    state=TruereasonsState.final)
+    state=TruereasonsState.final, flags=flags)
 async def reasons_he_needs_war(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Покажи текст песни 📝"))
@@ -507,7 +506,7 @@ async def reasons_he_needs_war(message: Message):
     await simple_media(message, 'reasons_he_needs_war', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Покажи текст песни 📝"), state=TruereasonsState.final)
+@router.message((F.text == "Покажи текст песни 📝"), state=TruereasonsState.final, flags=flags)
 async def reasons_generation_z(message: Message):
     await simple_media(message, 'reasons_generation_Z', ReplyKeyboardRemove())
     await asyncio.sleep(4)
@@ -517,7 +516,7 @@ async def reasons_generation_z(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Скорее да 😔"), state=TruereasonsState.final)
+@router.message((F.text == "Скорее да 😔"), state=TruereasonsState.final, flags=flags)
 async def reasons_who_to_blame(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_who_to_blame'})
     await state.set_state(StateofPutin.main)
