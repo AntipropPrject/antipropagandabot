@@ -15,8 +15,8 @@ from export_to_csv import pg_mg
 from handlers.other import other_file
 from data_base import TablesCreator
 
-WEBHOOK_HOST = "https://ec2-13-53-192-218.eu-north-1.compute.amazonaws.com"
-WEBHOOK_PATH = "/api/bot"
+WEBHOOK_HOST = "https://16.170.117.55"
+WEBHOOK_PATH = ""
 WEBHOOK_URL = urljoin(WEBHOOK_HOST, WEBHOOK_PATH)
 
 TablesCreator.tables_god()
@@ -32,10 +32,10 @@ async def on_startup(dispatcher: Dispatcher) -> None:
 
     webhook = await bot.get_webhook_info()
 
-    await bot.set_webhook("https://ec2-16-170-117-55.eu-north-1.compute.amazonaws.com" , certificate="antikey.pem")
+    await bot.set_webhook("https://16.170.117.55")
 
     logging.info("🚀 Bot launched as Hoook!")
-    logging.info(f"webhook: ec2-16-170-117-55.eu-north-1.compute.amazonaws.com")
+    logging.info(f"webhook: https://16.170.117.55")
 
 async def on_shutdown(dispatcher: Dispatcher) -> None:
     logging.warning("😴 Bot shutdown...")
