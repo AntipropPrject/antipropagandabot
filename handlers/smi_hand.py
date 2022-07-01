@@ -13,7 +13,7 @@ router.message.filter(state=propaganda_victim)
 messageDict = dict()
 
 
-@router.message((F.text.contains("Давайте начнём!")), flags=flags)
+@router.message((F.text.contains("Начнём 🙂")), flags=flags)
 @router.message((F.text.contains("Хорошо, давай послушаем 🗣")), flags=flags)
 @router.message((F.text.contains('послушаем его еще! 🗣')), flags=flags)
 @router.message(commands=["testsmi"], flags=flags)
@@ -123,7 +123,7 @@ async def smi_statement_enough(message: Message, state: FSMContext):
 
 @router.message((F.text == "Достаточно 🤚"), flags=flags)
 async def sme_statement_start_over(message: Message, state: FSMContext):
-    await redis_delete_first_item("Usrs: 5316104187: Start_answers: who_to_trust_persons:")
+    await redis_delete_first_item(f"Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:")
     person_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
     print(person_list)
 
@@ -135,7 +135,8 @@ async def sme_statement_start_over(message: Message, state: FSMContext):
         nmarkup = ReplyKeyboardBuilder()
         options = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons_newpoll:')
         for person in options:
-            nmarkup.add(types.KeyboardButton(text=f'{person}🗣'))
+            nmarkup.row(types.KeyboardButton(text=f'{person}🗣'))
+            nmarkup.adjust(2)
         nmarkup.row(types.KeyboardButton(text="Хватит, не будем слушать остальных 🙅‍♂️"))
         await state.set_state(propaganda_victim.options)
         text = await sql_safe_select('text', 'texts',
