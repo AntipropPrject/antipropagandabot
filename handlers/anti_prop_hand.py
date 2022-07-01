@@ -553,6 +553,8 @@ async def antip_web_exit_1(message: Message, state: FSMContext):
     redis = all_data().get_data_red()
     for key in redis.scan_iter(f"Usrs: {message.from_user.id}: Start_answers: ethernet:"):
         redis.delete(key)
+    if await state.get_state() == "propaganda_victim:ppl_propaganda":
+        await antip_truth_game_start(message, state)
     if set(await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:')).isdisjoint(("Дмитрий Песков", "Сергей Лавров",
                         "Юрий Подоляка", "Владимир Соловьев", "Никита Михалков")) is False:
         await antip_bad_people_lies(message, state)

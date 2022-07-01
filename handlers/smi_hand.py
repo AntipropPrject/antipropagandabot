@@ -206,3 +206,5 @@ async def sme_statement_skip(message: Message, state=FSMContext):
                          "разобрались, кому можно верить, а кому нет.\n\n"
                          "Можно я все-таки покажу хотя бы один "
                          f"сюжет от {next_channel}?", reply_markup=markup.as_markup(resize_keyboard=True))
+
+
