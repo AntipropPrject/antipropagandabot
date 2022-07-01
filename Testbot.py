@@ -28,7 +28,7 @@ dp = Dispatcher(storage)
 async def on_startup(dispatcher: Dispatcher) -> None:
 
 
-    await bot.set_webhook("https://16.170.117.55", certificate="16.170.117.55+2-key.pem")
+    await bot.set_webhook("https://16.170.117.55", certificate="16.170.117.55+7.pem")
     webhook = await bot.get_webhook_info()
 
     print(webhook)
