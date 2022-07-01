@@ -13,7 +13,7 @@ router.message.filter(state=propaganda_victim)
 messageDict = dict()
 
 
-@router.message((F.text.contains("ачнём!")), flags=flags)
+@router.message((F.text.contains("Начнём 🙂")), flags=flags)
 @router.message((F.text.contains("Хорошо, давай послушаем 🗣")), flags=flags)
 @router.message((F.text.contains('послушаем его еще! 🗣')), flags=flags)
 @router.message(commands=["testsmi"], flags=flags)
