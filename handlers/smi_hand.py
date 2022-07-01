@@ -52,8 +52,8 @@ async def smi_statement(message: Message, state: FSMContext):
                 0]
 
             print('aaaaaa', truth_data)
-
-            await state.update_data(gamecount=count, truth=truth_data[0], rebuttal=truth_data[5], belive=truth_data[3],
+            await state.update_data({f'{person}_gamecount': count})
+            await state.update_data(truth=truth_data[0], rebuttal=truth_data[5], belive=truth_data[3],
                                     not_belive=truth_data[4], last_media=truth_data[6])
 
         except IndexError as er:
@@ -74,7 +74,7 @@ async def smi_statement(message: Message, state: FSMContext):
             except:
                 await message.answer_photo(truth_data[1], caption=capt,
                                            reply_markup=nmarkup.as_markup(resize_keyboard=True))
-            await state.update_data({f'{person}_gamecount': count})
+
         else:
             await message.answer(truth_data[2], reply_markup=nmarkup.as_markup(resize_keyboard=True))
     else:
