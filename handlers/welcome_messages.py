@@ -12,7 +12,7 @@ from data_base.DBuse import poll_write, sql_safe_select, mongo_add, mongo_select
 from resources.all_polls import web_prop, welc_message_one
 from states import welcome_states
 from states.antiprop_states import propaganda_victim
-from stats.stat import mongo_stat, mongo_update_stat, day_count
+from stats.stat import mongo_stat, mongo_update_stat
 
 flags = {"throttling_key": "True"}
 router = Router()
@@ -45,7 +45,7 @@ async def commands_start(message: types.Message, state: FSMContext):  # Перв
 
 @router.message(commands=['restart'], state='*', flags=flags)
 async def commands_restart(message: types.Message, state: FSMContext):  # Первое сообщение
-    await day_count()
+
     user_id = message.from_user.id
     await mongo_stat(user_id)
     await mongo_user_info(user_id, message.from_user.username)
