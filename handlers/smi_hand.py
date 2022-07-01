@@ -4,7 +4,7 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from data_base.DBuse import *
-from handlers.anti_prop_hand import antip_truth_game_start
+from handlers.anti_prop_hand import antip_truth_game_start, antip_web_exit_1
 from states.antiprop_states import propaganda_victim
 
 flags = {"throttling_key": "True"}
@@ -208,3 +208,10 @@ async def sme_statement_skip(message: Message, state=FSMContext):
                          f"сюжет от {next_channel}?", reply_markup=markup.as_markup(resize_keyboard=True))
 
 
+@router.message(F.text.contains('Не надо'))
+async def skipskip(message: Message, state=FSMContext):
+    redis = all_data().get_data_red()
+    redis.delete(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:')
+
+
+    await antip_web_exit_1(message, state)
