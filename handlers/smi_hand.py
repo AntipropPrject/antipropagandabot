@@ -151,7 +151,7 @@ async def sme_statement_start_over(message: Message, state: FSMContext):
 
 @router.message(state=propaganda_victim.options, flags=flags)
 async def smi_statement_poll(message: Message, state: FSMContext):
-    trimed = ""
+
     redis = all_data().get_data_red()
 
     list_to_customize = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
@@ -174,10 +174,10 @@ async def smi_statement_poll(message: Message, state: FSMContext):
             await poll_write(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:', person)
         await sme_statement_skip(message, state)
     else:
-
+        redis.lpush(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:', trimed)
         for person in list_to_customize:
             await poll_write(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:', person)
-            redis.lpush(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:', trimed)
+
         await smi_statement(message, state)
 
 
