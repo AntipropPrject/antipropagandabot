@@ -298,7 +298,7 @@ async def nazi_second_poll(message: Message, state: FSMContext):
 
 @router.message(NaziState.rushate, (F.text == 'Продолжай'), flags=flags)
 async def poll_filler(message: types.Message):
-    await message.answer('Чтобы продолжить -- отметьте ответы выше и нажмите "Проголосовать" или "Vote"',
+    await message.answer('Чтобы продолжить — отметьте варианты выше и нажмите «ГОЛОСОВАТЬ» или «VOTE»',
                          reply_markup=ReplyKeyboardRemove())
 
 

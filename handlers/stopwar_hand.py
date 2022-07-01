@@ -3,6 +3,7 @@ from aiogram import types
 from aiogram.dispatcher.fsm.state import StatesGroup, State
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
+from handlers.welcome_messages import commands_restart
 
 from data_base.DBuse import sql_safe_select
 
@@ -130,5 +131,12 @@ async def stopwar_lets_fight(message: Message):
 async def stopwar_lets_fight(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_hello_world'})
     text2 = await sql_safe_select('text', 'texts', {'name': 'stopwar_send_me'})
-    await message.answer(text, reply_markup=ReplyKeyboardRemove(), disable_web_page_preview=True)
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Начать общение заново ♻️"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     await message.answer(text2, disable_web_page_preview=True)
+
+
+@router.message((F.text == "Начать общение заново ♻️"), flags=flags)
+async def stopwar_lets_anew(message: Message, state: Message):
+    await commands_restart(message, state)

@@ -56,7 +56,7 @@ async def donbass_poll(message: Message):
 
 @router.message(donbass_state.eight_years_selection, (F.text == 'Продолжить'), flags=flags)
 async def poll_filler(message: types.Message):
-    await message.answer('Чтобы продолжить -- отметьте ответы выше и нажмите "Проголосовать" или "Vote"',
+    await message.answer('Чтобы продолжить — отметьте варианты выше и нажмите «ГОЛОСОВАТЬ» или «VOTE»',
                          reply_markup=ReplyKeyboardRemove())
 
 
