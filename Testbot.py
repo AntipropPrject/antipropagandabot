@@ -27,8 +27,12 @@ dp = Dispatcher(storage)
 
 async def on_startup(dispatcher: Dispatcher) -> None:
     webhook = await bot.get_webhook_info()
-    print(webhook)
+
     await bot.set_webhook("https://16.170.117.55", certificate="16.170.117.55+2.pem")
+
+    print(webhook)
+    print(webhook)
+    print(webhook)
 
     logging.info("🚀 Bot launched as Hoook!")
     logging.info(f"webhook: https://16.170.117.55")
