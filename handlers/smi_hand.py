@@ -29,7 +29,8 @@ async def smi_statement(message: Message, state: FSMContext):
 
     try:
         how_many_rounds = (await data_getter(
-            f"SELECT COUNT (*) FROM public.mistakeorlie where asset_name like '%{str(person_list[0])[-5:-1].strip()}%'"))[0][0]
+            f"SELECT COUNT (*) FROM public.mistakeorlie where asset_name like '%{str(person_list[0])[-5:-1].strip()}%'"))[
+            0][0]
     except:
         errmarkup = ReplyKeyboardBuilder()
         errmarkup.rows(types.KeyboardButton(text="Переход к игре в правду"))
@@ -147,12 +148,13 @@ async def sme_statement_start_over(message: Message, state: FSMContext):
 
 @router.message(state=propaganda_victim.options, flags=flags)
 async def smi_statement_poll(message: Message, state: FSMContext):
-    options = await state.get_data()
     redis = all_data().get_data_red()
-    lst_options = options["options_start_over"]
-    #
+
     list_to_customize = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
+    list_to_customize1 = list_to_customize.copy()
+
     print(list_to_customize)
+
     try:
         message_text = message.text
         trimed = message_text.rstrip(message_text[-1])
@@ -160,16 +162,20 @@ async def smi_statement_poll(message: Message, state: FSMContext):
     except:
         print('дубликатов нет')
     print(list_to_customize)
+
     redis.delete(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
-    if message.text != "Хватит, не будем слушать остальных 🙅‍♂️":
-        redis.lpush(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:', trimed)
-    for person in list_to_customize:
-        await poll_write(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:', person)
 
     if message.text != "Хватит, не будем слушать остальных 🙅‍♂️":
-        await smi_statement(message, state)
+        for person in list_to_customize1:
+            await poll_write(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:', person)
+            await sme_statement_skip(message, state)
     else:
-        await sme_statement_skip(message, state)
+        await smi_statement(message, state)
+        for person in list_to_customize:
+            await poll_write(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:', person)
+
+
+
 
 
 @router.message((F.text.contains('Хватит, не будем слушать остальных 🙅‍♂️')), flags=flags)
@@ -188,7 +194,11 @@ async def sme_statement_skip(message: Message, state=FSMContext):
     lst_web_answers = str(', '.join(not_viewed))
 
     await state.update_data(not_viewed_chanel=not_viewed[0])
-    await message.answer("Я хотел показать вам еще, как врут "
+    string = "врут"
+    if lst_web_answers.__sizeof__() == 1:
+        string = "врёт"
+
+    await message.answer(f"Я хотел показать вам еще, как {string} "
                          f"{lst_web_answers}, ведь вы "
                          "отметили, что доверяете им. Для нашей "
                          "дальнейшей беседы важно, чтобы мы "
