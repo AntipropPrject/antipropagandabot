@@ -310,24 +310,11 @@ async def antip_not_only_TV(message: Message, web_lies_list: List[str], state: F
     await state.update_data(answers_int=answer_id_int)  # Все ответы пользователя индексы
     await state.update_data(answers_str=lies_list)  # Все ответы пользователя строки
     channel = lies_list[0]
-    text = 'Но пропаганда в России не заканчивается ' \
-           'на ТВ. Молодое поколение получает ' \
-           'новости из интернета: новостных ' \
-           'порталов, соцсетей и телеграм-каналов.  ' \
-           'Больше 10 лет пропаганда постепенно ' \
-           'захватывала интернет-ресурсы, которые ' \
-           'до этого были независимыми: РИА ' \
-           'Новости, Известия, Коммерсант, РБК и ' \
-           'даже Яндекс.Новости. Этот список ' \
-           'включает в себя сотни интернет-порталов,  ' \
-           'а также блогеров и телеграм-каналы.\n\n' \
-           'Я заметил, что среди источников, которым ' \
-           f'вы доверяете - есть {channel}.' \
-           f' К сожалению, {channel} ставит целью не ' \
-           'донести правдивые новости, а составить у ' \
-           'людей нужную [властям] картину мира. ' \
-           'Давайте я покажу несколько сюжетов,  ' \
-           'которые это докажут'
+    #antip_not_only_TV
+    text = await sql_safe_select('text', 'texts', {'name': 'antip_not_only_TV'})
+    text = text.replace('[[первый красный источник]]', channel)
+    text = text.replace('[[ещё раз название источника]]', channel)
+
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
