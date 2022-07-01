@@ -26,7 +26,8 @@ async def commands_start(message: types.Message, state: FSMContext):  # Перв
     user_id = message.from_user.id
     old = await mongo_select_info(message.from_user.id)
     print(old)
-    if int(user_id) not in int(old['_id']):
+    print(int(user_id) != int(old['_id']))
+    if int(user_id) != int(old['_id']):
         await mongo_stat(user_id)
         await mongo_user_info(user_id, message.from_user.username)
         await state.clear()
