@@ -135,7 +135,8 @@ async def sme_statement_start_over(message: Message, state: FSMContext):
         nmarkup = ReplyKeyboardBuilder()
         options = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons_newpoll:')
         for person in options:
-            nmarkup.add(types.KeyboardButton(text=f'{person}🗣'))
+            nmarkup.row(types.KeyboardButton(text=f'{person}🗣'))
+            nmarkup.adjust(2)
         nmarkup.row(types.KeyboardButton(text="Хватит, не будем слушать остальных 🙅‍♂️"))
         await state.set_state(propaganda_victim.options)
         text = await sql_safe_select('text', 'texts',
