@@ -196,7 +196,7 @@ async def sme_statement_skip(message: Message, state=FSMContext):
 
     await state.update_data(not_viewed_chanel=not_viewed[0])
     string = "врут"
-    if lst_web_answers.__sizeof__() == 1:
+    if len(lst_web_answers) == 1:
         string = "врёт"
 
     await message.answer(f"Я хотел показать вам еще, как {string} "
