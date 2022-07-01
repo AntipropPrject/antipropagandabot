@@ -177,7 +177,7 @@ async def smi_statement_poll(message: Message, state: FSMContext):
 
         for person in list_to_customize:
             await poll_write(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:', person)
-            await redis.lpush(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:', trimed)
+            redis.lpush(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:', trimed)
         await smi_statement(message, state)
 
 
