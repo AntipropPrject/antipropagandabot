@@ -169,7 +169,7 @@ async def smi_statement_poll(message: Message, state: FSMContext):
 
     redis.delete(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
 
-    if message.text != "Хватит, не будем слушать остальных 🙅‍♂️":
+    if message.text == "Хватит, не будем слушать остальных 🙅‍♂️":
         for person in list_to_customize1:
             await poll_write(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:', person)
         await sme_statement_skip(message, state)
