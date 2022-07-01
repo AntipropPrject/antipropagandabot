@@ -123,7 +123,7 @@ async def smi_statement_enough(message: Message, state: FSMContext):
 
 @router.message((F.text == "Достаточно 🤚"), flags=flags)
 async def sme_statement_start_over(message: Message, state: FSMContext):
-    await redis_delete_first_item("Usrs: 5316104187: Start_answers: who_to_trust_persons:")
+    await redis_delete_first_item(f"Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:")
     person_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
     print(person_list)
 
