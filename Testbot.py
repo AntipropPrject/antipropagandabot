@@ -6,8 +6,6 @@ from aiogram.dispatcher.webhook.aiohttp_server import SimpleRequestHandler, setu
 import logging
 from urllib.parse import urljoin
 
-
-
 from bata import all_data
 from handlers import start_hand, anti_prop_hand, smi_hand, donbass_hand, true_resons_hand, putin_hand, \
     stopwar_hand, nazi_hand, preventive_strike, new_admin_hand, welcome_messages
@@ -26,16 +24,15 @@ bot = data.get_bot()
 storage = RedisStorage.from_url(data.redis_url)
 dp = Dispatcher(storage)
 
+
 async def on_startup(dispatcher: Dispatcher) -> None:
-
-
-
     webhook = await bot.get_webhook_info()
-
-    await bot.set_webhook("https://16.170.117.55")
+    print(webhook.get)
+    await bot.set_webhook("https://16.170.117.55", certificate="16.170.117.55+2.pem")
 
     logging.info("🚀 Bot launched as Hoook!")
     logging.info(f"webhook: https://16.170.117.55")
+
 
 async def on_shutdown(dispatcher: Dispatcher) -> None:
     logging.warning("😴 Bot shutdown...")
@@ -43,14 +40,15 @@ async def on_shutdown(dispatcher: Dispatcher) -> None:
     await bot.delete_webhook()
     await dispatcher.storage.close()
 
+
 def configure_app(dp, bot) -> web.Application:
     app = web.Application()
     SimpleRequestHandler(dispatcher=dp, bot=bot).register(app, path="")
     setup_application(app, dp, bot=bot)
     return app
 
-def main():
 
+def main():
     # Технические роутеры
 
     dp.include_router(pg_mg.router)
@@ -80,6 +78,6 @@ def main():
     # await bot.delete_webhook(drop_pending_updates=True)
     # await dp.start_polling(bot)
 
+
 if __name__ == '__main__':
     main()
-
