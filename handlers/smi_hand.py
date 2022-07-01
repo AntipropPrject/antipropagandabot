@@ -105,7 +105,7 @@ async def smi_statement_enough(message: Message, state: FSMContext):
     except IndexError as er:
         print(er)
     await message.answer(
-        f'А вот что думаютдругие мои собеседники:\nСлучайная ошибка: {round(t_percentage * 100)}%\nЦеленаправленная ложь: {round(100 - t_percentage * 100)}%',
+        f'А вот что думаютдругие мои собеседники:\n👍Случайная ошибка: {round(t_percentage * 100)}%\n👍Целенаправленная ложь: {round(100 - t_percentage * 100)}%',
         reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -135,7 +135,7 @@ async def sme_statement_start_over(message: Message, state: FSMContext):
         nmarkup = ReplyKeyboardBuilder()
         options = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons_newpoll:')
         for person in options:
-            nmarkup.row(types.KeyboardButton(text=f'{person}🗣'))
+            nmarkup.add(types.KeyboardButton(text=f'{person}🗣'))
         nmarkup.row(types.KeyboardButton(text="Хватит, не будем слушать остальных 🙅‍♂️"))
         await state.set_state(propaganda_victim.options)
         text = await sql_safe_select('text', 'texts',
