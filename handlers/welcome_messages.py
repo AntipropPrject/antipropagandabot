@@ -12,7 +12,7 @@ from data_base.DBuse import poll_write, sql_safe_select, mongo_add, mongo_select
 from resources.all_polls import web_prop, welc_message_one
 from states import welcome_states
 from states.antiprop_states import propaganda_victim
-from stats.stat import mongo_stat, mongo_update_stat
+from stats.stat import mongo_stat, mongo_update_stat, day_count
 
 flags = {"throttling_key": "True"}
 router = Router()
@@ -26,25 +26,26 @@ async def commands_start(message: types.Message, state: FSMContext):  # Перв
     user_id = message.from_user.id
     old = await mongo_select_info(message.from_user.id)
     print(old)
-    if old is None:
-        await mongo_stat(user_id)
-        await mongo_user_info(user_id, message.from_user.username)
-        await state.clear()
-        redis = all_data().get_data_red()
-        for key in redis.scan_iter(f"Usrs: {message.from_user.id}:*"):
-            redis.delete(key)
-        markup = ReplyKeyboardBuilder()
-        markup.add(types.KeyboardButton(text="Начнем 🇷🇺🇺🇦"))
-        markup.add(types.KeyboardButton(text="А с чего мне тебе верить? 🤔"))
-        text = await sql_safe_select("text", "texts", {"name": "start_hello"})
-        await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
-        await state.set_state(welcome_states.start_dialog.dialogue_1)
-    else:
-        await message.answer("Извините, этого бота можно проходить только один раз")
+    #if old is None:
+    await mongo_stat(user_id)
+    await mongo_user_info(user_id, message.from_user.username)
+    await state.clear()
+    redis = all_data().get_data_red()
+    for key in redis.scan_iter(f"Usrs: {message.from_user.id}:*"):
+        redis.delete(key)
+    markup = ReplyKeyboardBuilder()
+    markup.add(types.KeyboardButton(text="Начнем 🇷🇺🇺🇦"))
+    markup.add(types.KeyboardButton(text="А с чего мне тебе верить? 🤔"))
+    text = await sql_safe_select("text", "texts", {"name": "start_hello"})
+    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await state.set_state(welcome_states.start_dialog.dialogue_1)
+    #else:
+    #    await message.answer("Извините, этого бота можно проходить только один раз")
 
 
 @router.message(commands=['restart'], state='*', flags=flags)
 async def commands_restart(message: types.Message, state: FSMContext):  # Первое сообщение
+    await day_count()
     user_id = message.from_user.id
     await mongo_stat(user_id)
     await mongo_user_info(user_id, message.from_user.username)
