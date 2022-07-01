@@ -298,8 +298,8 @@ async def reasons_normal_game_answer(message: Message, state: FSMContext):
     await sql_safe_update("normal_game", base_update_dict, {'id': data['ngamecount']})
     t_percentage = data['belive'] / (data['belive'] + data['not_belive'])
     await message.answer(
-        f'Результаты других участников:\n🤦‍♂️ Это абсурд: {round(100 - t_percentage * 100)}%'
-        f'\n👌 Это нормально: {round(t_percentage * 100)}%',
+        f'Результаты других участников:\n🤦‍♂️ Это абсурд: {round(t_percentage * 100)}%'
+        f'\n👌 Это нормально: {round(100 - t_percentage * 100)}%',
         reply_markup=nmarkup.as_markup(resize_keyboard=True))
     if END is True:
         await message.answer("У меня закончились новости. Спасибо за игру 🤝",

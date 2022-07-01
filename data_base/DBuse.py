@@ -170,7 +170,6 @@ async def mongo_select_info(tg_id):
         client = all_data().get_mongo()
         database = client['database']
         collection = database['userinfo']
-
         try:
             x = collection.find_one({"_id": int(tg_id)})
             print(x)
