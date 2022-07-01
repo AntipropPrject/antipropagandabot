@@ -41,8 +41,9 @@ async def commands_start(message: types.Message, state: FSMContext):  # Перв
     else:
         await message.answer("Извините, этого бота можно проходить только один раз")
 
+
 @router.message(commands=['restart'], state='*', flags=flags)
-async def commands_start(message: types.Message, state: FSMContext):  # Первое сообщение
+async def commands_restart(message: types.Message, state: FSMContext):  # Первое сообщение
     user_id = message.from_user.id
     await mongo_stat(user_id)
     await mongo_user_info(user_id, message.from_user.username)
@@ -56,16 +57,6 @@ async def commands_start(message: types.Message, state: FSMContext):  # Перв
     text = await sql_safe_select("text", "texts", {"name": "start_hello"})
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     await state.set_state(welcome_states.start_dialog.dialogue_1)
-
-
-
-
-
-
-
-
-
-
 
 
 @router.message(welcome_states.start_dialog.dialogue_1, text_contains='верить', content_types=types.ContentType.TEXT,
@@ -202,7 +193,7 @@ async def message_7(message: types.Message, state: FSMContext):
 
 @router.message(welcome_states.start_dialog.dialogue_7, (F.text == 'Продолжить'), flags=flags)
 async def poll_filler(message: types.Message, bot: Bot):
-    msg = await message.answer('Чтобы продолжить -- отметьте ответы выше и нажмите "Проголосовать" или "Vote"',
+    msg = await message.answer('Чтобы продолжить — отметьте варианты выше и нажмите «ГОЛОСОВАТЬ» или «VOTE»',
                                reply_markup=ReplyKeyboardRemove(), disable_web_page_preview=True)
 
 
@@ -258,7 +249,7 @@ async def button(message: types.Message, state: FSMContext):
 
 @router.message(welcome_states.start_dialog.dialogue_9, (F.text == 'Продолжить'), flags=flags)
 async def poll_filler(message: types.Message, bot: Bot):
-    msg = await message.answer('Чтобы продолжить -- отметьте ответы выше и нажмите "Проголосовать" или "Vote"',
+    msg = await message.answer('Чтобы продолжить — отметьте варианты выше и нажмите «ГОЛОСОВАТЬ» или «VOTE»',
                                reply_markup=ReplyKeyboardRemove(), disable_web_page_preview=True)
     await asyncio.sleep(10)
     await bot.delete_message(message.from_user.id, msg.message_id)
@@ -291,7 +282,7 @@ async def poll_answer_handler_tho(poll_answer: types.PollAnswer, state=FSMContex
 
 @router.message(welcome_states.start_dialog.dialogue_10, (F.text == 'Продолжить'), flags=flags)
 async def poll_filler(message: types.Message, bot: Bot):
-    msg = await message.answer('Чтобы продолжить -- отметьте ответы выше и нажмите "Проголосовать" или "Vote"',
+    msg = await message.answer('Чтобы продолжить — отметьте варианты выше и нажмите «ГОЛОСОВАТЬ» или «VOTE»',
                                reply_markup=ReplyKeyboardRemove(), disable_web_page_preview=True)
 
 
