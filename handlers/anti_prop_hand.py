@@ -577,10 +577,10 @@ async def antip_bad_people_lies(message: Message, state: FSMContext):
     await state.set_state(propaganda_victim.ppl_propaganda)
     text = await sql_safe_select('text', 'texts', {'name': 'antip_bad_people_lies'})
     text = text.replace('[[первая красная личность]]',
-                        ((await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:'))[0]))
+                        ((await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:'))[0]))
 
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Давайте начнём!"))
+    nmarkup.row(types.KeyboardButton(text="Начнём 🙂"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
