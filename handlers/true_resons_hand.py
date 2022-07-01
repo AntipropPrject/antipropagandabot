@@ -475,7 +475,7 @@ async def reasons_pause(message: Message, state: FSMContext):
 @router.message((F.text == "Столько парней погибло, теперь мы не имеем права проиграть... 😔"),
                 state=TruereasonsState.final, flags=flags)
 async def reasons_why_support_war(message: Message):
-    text = await sql_safe_select('text', 'texts', {'nПреame': 'reasons_why_support_war'})
+    text = await sql_safe_select('text', 'texts', {'name': 'reasons_why_support_war'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Нет, мне не нужна эта война... 🙅‍♂️"))
     nmarkup.row(types.KeyboardButton(text="Я не знаю...😨"))

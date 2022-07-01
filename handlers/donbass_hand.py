@@ -337,10 +337,10 @@ async def donbas_long_maidan(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'short_separ_text'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Вернемся к другим причинам войны 👌"))
+    nmarkup.row(types.KeyboardButton(text="Вообще-то, наших войск не было в ДНР/ ЛНР все эти 8 лет 🙅"))
     nmarkup.row(types.KeyboardButton(text="Путин просто помогал, которые не хотели жить в Украине после Майдана 🤷"))
     nmarkup.row(
         types.KeyboardButton(text="Путин помог разжечь этот конфликт, чтобы помешать Украине вступить в НАТО 🛡"))
-    nmarkup.row(types.KeyboardButton(text="Вообще-то, наших войск не было в ДНР/ ЛНР все эти 8 лет 🙅"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), parse_mode="HTML",
                          disable_web_page_preview=True)
 
