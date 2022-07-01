@@ -22,10 +22,12 @@ async def smi_statement(message: Message, state: FSMContext):
 
     person_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
 
-    try:
-        count = (await state.get_data())['gamecount']
-    except:
-        count = 0
+    for person in person_list:
+        try:
+            count = (await state.get_data())[f'{person}_gamecount']
+        except:
+            await state.update_data({f'{person}_gamecount': 0})
+            count = 0
 
     try:
         how_many_rounds = (await data_getter(
@@ -56,7 +58,7 @@ async def smi_statement(message: Message, state: FSMContext):
 
         except IndexError as er:
             await message.answer(text=f"Медиафайл не найден {er}")
-            await state.update_data(gamecount=count)
+
 
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Целенаправленная ложь 👎"))
@@ -72,10 +74,11 @@ async def smi_statement(message: Message, state: FSMContext):
             except:
                 await message.answer_photo(truth_data[1], caption=capt,
                                            reply_markup=nmarkup.as_markup(resize_keyboard=True))
+            await state.update_data({f'{person}_gamecount': count})
         else:
             await message.answer(truth_data[2], reply_markup=nmarkup.as_markup(resize_keyboard=True))
     else:
-        await state.update_data(gamecount=0)
+
         # await message.answer(
         #     "Ой, у меня закончились примеры",
         #     reply_markup=nmarkup.as_markup())
@@ -148,6 +151,7 @@ async def sme_statement_start_over(message: Message, state: FSMContext):
 
 @router.message(state=propaganda_victim.options, flags=flags)
 async def smi_statement_poll(message: Message, state: FSMContext):
+    trimed = ""
     redis = all_data().get_data_red()
 
     list_to_customize = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
@@ -173,10 +177,8 @@ async def smi_statement_poll(message: Message, state: FSMContext):
 
         for person in list_to_customize:
             await poll_write(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:', person)
+            await redis.lpush(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:', trimed)
         await smi_statement(message, state)
-
-
-
 
 
 @router.message((F.text.contains('Хватит, не будем слушать остальных 🙅‍♂️')), flags=flags)
