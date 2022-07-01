@@ -130,7 +130,7 @@ async def sme_statement_start_over(message: Message, state: FSMContext):
         await antip_truth_game_start(message, state)
     else:
         nmarkup = ReplyKeyboardBuilder()
-        options = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:')
+        options = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons_newpoll:')
         for person in options:
             nmarkup.row(types.KeyboardButton(text=f'{person}🗣'))
         nmarkup.row(types.KeyboardButton(text="Хватит, не будем слушать остальных 🙅‍♂️"))
