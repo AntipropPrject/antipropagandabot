@@ -45,7 +45,7 @@ async def commands_start(message: types.Message, state: FSMContext):  # Перв
 
 @router.message(commands=['restart'], state='*', flags=flags)
 async def commands_restart(message: types.Message, state: FSMContext):  # Первое сообщение
-    #await day_count()
+    await day_count()
     user_id = message.from_user.id
     await mongo_stat(user_id)
     await mongo_user_info(user_id, message.from_user.username)
