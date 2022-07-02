@@ -98,7 +98,7 @@ async def reasons_sorry_im_bot(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.contains('война') & (F.text.contains('Хорошо'))), flags=flags)
+@router.message(((F.text.contains('война') & (F.text.contains('Хорошо'))) | (F.text == 'Хорошо...')), flags=flags)
 @router.message(OperationWar(answer='Война'), (F.text == 'Продолжай ⏳'),
                 state=TruereasonsState.main, flags=flags)
 async def reasons_war(message: Message):

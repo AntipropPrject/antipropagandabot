@@ -40,6 +40,7 @@ async def denanazification(message, state):
     else:
         await nazi_game_start(message, state)
 
+
 flags = {"throttling_key": "True"}
 router = Router()
 router.message.filter(state=NaziState)
