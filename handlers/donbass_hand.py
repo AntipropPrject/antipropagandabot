@@ -9,7 +9,7 @@ from data_base.DBuse import poll_write, sql_safe_select, poll_get, redis_delete_
 from filters.MapFilters import DonbassOptionsFilter
 from handlers.true_resons_hand import TruereasonsState
 from keyboards.main_keys import filler_kb
-from resources.all_polls import donbass_first_poll
+from resources.all_polls import donbass_first_poll, welc_message_one
 from states.donbass_states import donbass_state
 from utilts import simple_media
 
@@ -85,10 +85,12 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FS
         text = await sql_safe_select('text', 'texts', {'name': 'civil_casualties'})
         video = await sql_safe_select('t_id', 'assets', {'name': 'civil_casualties'})
         await redis_delete_from_list(f'Usrs: {poll_answer.user.id}: Donbass_polls: First:', donbass_first_poll[2])
+        nmarkup = ReplyKeyboardBuilder()
+        nmarkup.row(types.KeyboardButton(text="Понятно 👌"))
         try:
-            await bot.send_video(poll_answer.user.id, video, caption=text, reply_markup=filler_kb())
+            await bot.send_video(poll_answer.user.id, video, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
         except TelegramBadRequest:
-            await bot.send_message(poll_answer.user.id, text, reply_markup=filler_kb(), disable_web_page_preview=True)
+            await bot.send_message(poll_answer.user.id, text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     elif "🏢 Это украинцы сами стреляют по своим же жителям! Мы же бьем только по военным объектам" in true_options:
         await redis_delete_from_list(f'Usrs: {poll_answer.user.id}: Donbass_polls: First:', donbass_first_poll[4])
         text = await sql_safe_select('text', 'texts', {'name': 'only_war_objects'})
@@ -99,9 +101,10 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FS
         nmarkup.row(
             types.KeyboardButton(text="Просто укронацисты размещаются в домах и делают их легитимной военной целью 😡"))
         try:
-            await bot.send_video(poll_answer.user.id, video, caption=text, reply_markup=filler_kb())
+            await bot.send_video(poll_answer.user.id, video, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
         except TelegramBadRequest:
-            await bot.send_message(poll_answer.user.id, text, reply_markup=filler_kb(), disable_web_page_preview=True)
+            await bot.send_message(poll_answer.user.id, text, reply_markup=nmarkup.as_markup(resize_keyboard=True),
+                                   disable_web_page_preview=True)
     elif "👨‍👩‍👧‍👦 Так они используют население, как живой щит! Поэтому погибают мирные жители" in true_options:
         await redis_delete_from_list(f'Usrs: {poll_answer.user.id}: Donbass_polls: First:', donbass_first_poll[5])
         text = await sql_safe_select('text', 'texts', {'name': 'donbas_live_shield_start'})
@@ -127,6 +130,8 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FS
         reason_list_2 = set(await poll_get(f'Usrs: {poll_answer.user.id}: Start_answers: Invasion:'))
         reason_text = '\n\n'
         for reason in reason_list_2:
+            if reason == welc_message_one[-1]:
+                continue
             reason_text = reason_text + reason + '\n'
         text = text + reason_text + '\nОбязательно их все обсудим, а пока что вернемся к теме Донбасса'
         nmarkup = ReplyKeyboardBuilder()
@@ -174,7 +179,9 @@ async def donbas_reason_to_war(message: Message, state=FSMContext):
                 (F.text.in_({'Договорились 👌', "Хорошо 👌 ", "Понятно 👌", "Согласен(а) 👌"})), flags=flags)
 async def donbas_OOH(message: Message):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Donbass_polls: First:', donbass_first_poll[2])
-    await simple_media(message, 'civil_casualties', filler_kb())
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Понятно 👌"))
+    await simple_media(message, 'civil_casualties', nmarkup.as_markup(resize_keyboard=True))
 
 
 # @router.message(
@@ -220,12 +227,14 @@ async def provocation(message: Message):
 
 @router.message(text_contains=('среди', 'населения', 'важных'), content_types=types.ContentType.TEXT,
                 text_ignore_case=True, flags=flags)
-async def exit_point_two(message: Message, state: FSMContext):
+async def donbas_return_to_donbass(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'donbas_return_to_donbass'})
     answers = await poll_get(f'Usrs: {message.from_user.id}: Donbass_polls: First:')
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Хорошо 👌 "))
     await poll_write(f'Usrs: {message.from_user.id}: Donbass_polls: First:', donbass_first_poll[7])
     await state.update_data(big_game='Помимо защиты жителей Донбасса есть более весомые причины для начала войны.')
-    await message.answer(text, reply_markup=filler_kb(), parse_mode="HTML")
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), parse_mode="HTML")
 
 
 @router.message(text_contains=('ужас', 'следующей', 'теме'), content_types=types.ContentType.TEXT,
@@ -314,6 +323,8 @@ async def donbas_more_reasons(message: Message, state: FSMContext):
     reason_list_2 = set(await poll_get(f'Usrs: {message.from_user.id}: Start_answers: Invasion:'))
     reason_text = '\n\n'
     for reason in reason_list_2:
+        if reason == welc_message_one[-1]:
+            continue
         reason_text = reason_text + reason + '\n'
     text = text + reason_text + '\nОбязательно их все обсудим, а пока что вернемся к теме Донбасса'
     nmarkup = ReplyKeyboardBuilder()
