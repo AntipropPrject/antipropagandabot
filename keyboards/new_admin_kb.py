@@ -66,3 +66,12 @@ def app_admin_keyboard():
     nmarkup.row(types.KeyboardButton(text="Подтвердить"))
     nmarkup.adjust(1, 1)
     return nmarkup.as_markup(resize_keyboard=True)
+
+
+def secretrebornkb():
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Скачать медиа"))
+    nmarkup.row(types.KeyboardButton(text="Починить медиа"))
+    nmarkup.row(types.KeyboardButton(text="Вернуться в менее опасное место"))
+    nmarkup.adjust(2,1)
+    return nmarkup.as_markup(resize_keyboard=True)

@@ -1,13 +1,14 @@
+import asyncio
 import csv
 import os
 import shutil
 import zipfile
 
-from aiogram import Router, F
+from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.exceptions import TelegramBadRequest
-from aiogram.types import Message
+from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 from Testbot import bot
 from data_base.DBuse import sql_safe_select, sql_safe_update, sql_safe_insert, mongo_select_info, mongo_add_admin, \
@@ -16,7 +17,9 @@ from export_to_csv.pg_mg import backin
 from filters.isAdmin import IsAdmin, IsSudo
 from keyboards.admin_keys import main_admin_keyboard, middle_admin_keyboard, app_admin_keyboard, redct_text, \
     redct_media, redct_games, settings_bot, redct_editors
+from keyboards.new_admin_kb import secretrebornkb
 from states.admin_states import admin
+from utilts import Phoenix
 
 router = Router()
 
@@ -27,6 +30,7 @@ async def admin_home(message: types.Message, state: FSMContext):
     await message.answer("Добро пожаловать в режим администрации. Что вам угодно сегодня?",
                                 reply_markup=main_admin_keyboard(message.from_user.id))
     await state.set_state(admin.menu)
+
 
 @router.message(state=admin.home)
 async def admin_home(message: types.Message, state: FSMContext):
@@ -126,7 +130,7 @@ async def select_text(message: types.Message, state: FSMContext):
     await state.set_state(admin.edit_context)
 
 @router.message(IsSudo(), ((F.text.contains('ботом'))), state=admin.menu)
-async def select_text(message: types.Message, state: FSMContext):
+async def suadmin_bot_edit(message: types.Message, state: FSMContext):
     await message.answer("Выберите интересующий вас пункт меню", reply_markup=await settings_bot())
     await state.set_state(admin.edit_context)
 
@@ -631,3 +635,39 @@ async def import_csv(query: types.CallbackQuery, state: FSMContext):
         pass
     await state.set_state(admin.edit_context)
     await query.message.answer("Импорт завершен успешно", reply_markup=await settings_bot())
+
+
+@router.message(IsSudo(), commands=["reborn"], state=admin.edit_context)
+async def reborn_menu(message: Message, state: FSMContext):
+    await state.set_state(admin.secretreborn)
+    await message.answer('<b>ВНИМАНИЕ! Последствия использования этого режима несут потенциальную угрозу персистентности бота.\n'
+                         'Убедитесь в том, что вы понимаете, что делаете</b>')
+    await asyncio.sleep(2)
+    await message.answer('Добро пожаловать в резервную систему восстановления. Здесь вы можете:\n\n'
+                         '- Скачать на диск все медиафайлы, у которых в базе есть несломанный telegram_id\n'
+                         '- Починить все медиафайлы в базе, взяв их с их директории /resources/media', reply_markup=secretrebornkb())
+
+
+@router.message((F.text == 'Скачать медиа'), state=admin.secretreborn)
+async def secretreborn(message: types.Message, bot: Bot, state: FSMContext):
+    await message.answer('Процесс записи медиа запущен. Пожалуйста, ничего не трогайте до его завершения.', reply_markup=ReplyKeyboardRemove())
+    await Phoenix.fire(message, bot)
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Скачать медиа"))
+    await message.answer('Процесс записи медиа на диск завершен. \nОни сохранены в директории /resources/media', reply_markup=secretrebornkb())
+
+
+@router.message((F.text == 'Починить медиа'), state=admin.secretreborn)
+async def secretreborn(message: types.Message):
+    await message.answer('Процесс починки медиа сейчас будет запущен. Пожалуйста, ничего не пишите боту, пока он не будет завершен\n\n'
+                         'Также вам нужно будет нажать на значок загрузки каждого видео, чтобы все записалось корректно.',
+                         reply_markup=ReplyKeyboardRemove())
+    await asyncio.sleep(5)
+    await Phoenix.rebirth(message)
+    await message.answer('Процесс восстановления медиа завершен.\nДля ненайденных тегов выведены ошибки. Либо добавьте медиа под этими именами на диск...\n\n'
+                         '      ...либо просто игнорируйте это, если уверены, что этот тег нигде не используется.', reply_markup=secretrebornkb())
+
+
+@router.message((F.text == 'Вернуться в менее опасное место'), state=admin.secretreborn)
+async def secretreborn(message: types.Message, state: FSMContext):
+    await suadmin_bot_edit(message, state)

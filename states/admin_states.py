@@ -28,4 +28,5 @@ class admin(StatesGroup):
     delete_media = State()
     import_menu = State()
     import_csv = State()
-    import_csv_from_local= State()
+    import_csv_from_local = State()
+    secretreborn = State()
