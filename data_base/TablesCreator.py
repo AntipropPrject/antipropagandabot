@@ -34,7 +34,7 @@ def tables_god():
         cur.execute("DROP TABLE IF EXISTS texts")
         logg.get_info("Table texts has been deleted".upper())
         cur.execute("DROP TABLE IF EXISTS assets")
-        logg.get_info("Table assets has been deleted".upper())
+        logg.get_info("Table assets has been deleted".upper())"""
 
         # Создание таблиц
         cur.execute('''CREATE TABLE IF NOT EXISTS texts(
@@ -176,65 +176,65 @@ def tables_god():
         logg.get_info("table ucraine_or_not_game is created".upper())
 
         # MONGODB
-        try:
-            client = all_data().get_mongo()
-            # get version
-            logg.get_info(f"You connect to - server MongoDb version - {client.server_info()['version']} \n".upper())
-            client.close()
-        except Exception as error:
-            logg.get_error(f"MongoDB, {error}", __file__)
-
-        # import CSV
-        try:
-            csv_file_name = 'resources/assets.csv'
-            sql = "COPY assets FROM STDIN DELIMITER ',' CSV HEADER"
-            cur.copy_expert(sql, open(csv_file_name, "r"))
-        except Exception as error:
-            logg.get_error(f"{error}", __file__)
-        try:
-            csv_file_name = 'resources/texts.csv'
-            sql = "COPY texts FROM STDIN DELIMITER ',' CSV HEADER"
-            cur.copy_expert(sql, open(csv_file_name, "r"))
-        except Exception as error:
-            logg.get_error(f"{error}", __file__)
-        try:
-            csv_file_name = 'resources/truthgame.csv'
-            sql = "COPY truthgame FROM STDIN DELIMITER ',' CSV HEADER"
-            cur.copy_expert(sql, open(csv_file_name, "r"))
-        except Exception as error:
-            logg.get_error(f"{error}", __file__)
-        try:
-            csv_file_name = 'resources/putin_lies.csv'
-            sql = "COPY putin_lies FROM STDIN DELIMITER ',' CSV HEADER"
-            cur.copy_expert(sql, open(csv_file_name, "r"))
-        except Exception as error:
-            logg.get_error(f"{error}", __file__)
-
-        try:
-            csv_file_name = 'resources/mistakeorlie.csv'
-            sql = "COPY mistakeorlie FROM STDIN DELIMITER ',' CSV HEADER"
-            cur.copy_expert(sql, open(csv_file_name, "r"))
-        except Exception as error:
-            logg.get_error(f"{error}", __file__)
-
-        try:
-            csv_file_name = 'resources/putin_old_lies.csv'
-            sql = "COPY putin_old_lies FROM STDIN DELIMITER ',' CSV HEADER"
-            cur.copy_expert(sql, open(csv_file_name, "r"))
-        except Exception as error:
-            logg.get_error(f"{error}", __file__)
-        try:
-            csv_file_name = 'resources/normal_game.csv'
-            sql = "COPY normal_game FROM STDIN DELIMITER ',' CSV HEADER"
-            cur.copy_expert(sql, open(csv_file_name, "r"))
-        except Exception as error:
-            logg.get_error(f"{error}", __file__)
-        try:
-            csv_file_name = 'resources/ucraine_or_not_game.csv'
-            sql = "COPY ucraine_or_not_game FROM STDIN DELIMITER ',' CSV HEADER"
-            cur.copy_expert(sql, open(csv_file_name, "r"))
-        except Exception as error:
-            logg.get_error(f"{error}", __file__)"""
+        # try:
+        #     client = all_data().get_mongo()
+        #     # get version
+        #     logg.get_info(f"You connect to - server MongoDb version - {client.server_info()['version']} \n".upper())
+        #     client.close()
+        # except Exception as error:
+        #     logg.get_error(f"MongoDB, {error}", __file__)
+        #
+        # # import CSV
+        # try:
+        #     csv_file_name = 'resources/assets.csv'
+        #     sql = "COPY assets FROM STDIN DELIMITER ',' CSV HEADER"
+        #     cur.copy_expert(sql, open(csv_file_name, "r"))
+        # except Exception as error:
+        #     logg.get_error(f"{error}", __file__)
+        # try:
+        #     csv_file_name = 'resources/texts.csv'
+        #     sql = "COPY texts FROM STDIN DELIMITER ',' CSV HEADER"
+        #     cur.copy_expert(sql, open(csv_file_name, "r"))
+        # except Exception as error:
+        #     logg.get_error(f"{error}", __file__)
+        # try:
+        #     csv_file_name = 'resources/truthgame.csv'
+        #     sql = "COPY truthgame FROM STDIN DELIMITER ',' CSV HEADER"
+        #     cur.copy_expert(sql, open(csv_file_name, "r"))
+        # except Exception as error:
+        #     logg.get_error(f"{error}", __file__)
+        # try:
+        #     csv_file_name = 'resources/putin_lies.csv'
+        #     sql = "COPY putin_lies FROM STDIN DELIMITER ',' CSV HEADER"
+        #     cur.copy_expert(sql, open(csv_file_name, "r"))
+        # except Exception as error:
+        #     logg.get_error(f"{error}", __file__)
+        #
+        # try:
+        #     csv_file_name = 'resources/mistakeorlie.csv'
+        #     sql = "COPY mistakeorlie FROM STDIN DELIMITER ',' CSV HEADER"
+        #     cur.copy_expert(sql, open(csv_file_name, "r"))
+        # except Exception as error:
+        #     logg.get_error(f"{error}", __file__)
+        #
+        # try:
+        #     csv_file_name = 'resources/putin_old_lies.csv'
+        #     sql = "COPY putin_old_lies FROM STDIN DELIMITER ',' CSV HEADER"
+        #     cur.copy_expert(sql, open(csv_file_name, "r"))
+        # except Exception as error:
+        #     logg.get_error(f"{error}", __file__)
+        # try:
+        #     csv_file_name = 'resources/normal_game.csv'
+        #     sql = "COPY normal_game FROM STDIN DELIMITER ',' CSV HEADER"
+        #     cur.copy_expert(sql, open(csv_file_name, "r"))
+        # except Exception as error:
+        #     logg.get_error(f"{error}", __file__)
+        # try:
+        #     csv_file_name = 'resources/ucraine_or_not_game.csv'
+        #     sql = "COPY ucraine_or_not_game FROM STDIN DELIMITER ',' CSV HEADER"
+        #     cur.copy_expert(sql, open(csv_file_name, "r"))
+        # except Exception as error:
+        #     logg.get_error(f"{error}", __file__)
 
         con.close()
         cur.close()

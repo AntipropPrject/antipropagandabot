@@ -9,7 +9,6 @@ from handlers.other import other_file
 from data_base import TablesCreator
 from middleware.trottling import ThrottlingMiddleware
 
-TablesCreator.tables_god()
 
 data = all_data()
 bot = data.get_bot()
@@ -19,7 +18,7 @@ dp = Dispatcher(storage)
 
 async def main():
     # Технические роутеры
-
+    TablesCreator.tables_god()
     dp.include_router(pg_mg.router)
     dp.include_router(new_admin_hand.router)
     dp.include_router(status.router)
