@@ -17,20 +17,6 @@
             </Attribute>
           </value>
         </entry>
-        <entry key="\resources\assets(new).csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\resources\assets(old).csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
         <entry key="\resources\assets.csv">
           <value>
             <Attribute>

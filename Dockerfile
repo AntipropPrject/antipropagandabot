@@ -9,5 +9,7 @@ COPY requirements.txt /code/
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
+EXPOSE 80 443
+
 COPY . /code/
-CMD ["Testbot"]
+CMD ["python", "Testbot.py"]
