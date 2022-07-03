@@ -25,7 +25,6 @@ router = Router()
 async def commands_start(message: types.Message, state: FSMContext):  # Первое сообщение
     user_id = message.from_user.id
     old = await mongo_select_info(message.from_user.id)
-    print(old)
     #if old is None:
     await mongo_stat(user_id)
     await mongo_user_info(user_id, message.from_user.username)
@@ -305,6 +304,8 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
                                  lst_options[index])
                 await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons_newpoll:',
                                  lst_options[index])
+        else:
+            await redis_just_one_write(f'Usrs: {poll_answer.user.id}: Start_answers: LovePutin', 'True')
     await state.update_data(answer_5=poll_answer.option_ids)
     text = await sql_safe_select("text", "texts", {"name": "start_thank_you"})
     await bot.send_message(poll_answer.user.id, text)
@@ -344,7 +345,7 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
     if data["answer_3"] == "Нет, не верю ни слову ⛔":
         markup = ReplyKeyboardBuilder()
         markup.row(types.KeyboardButton(text="Пропустим этот шаг 👉"))
-        markup.row(types.KeyboardButton(text="Покажи ложь на ТВ -- мне интересно посмотреть! 📺"))
+        markup.row(types.KeyboardButton(text="Покажи ложь на ТВ — мне интересно посмотреть! 📺"))
         text = await sql_safe_select("text", "texts", {"name": "antip_all_no_TV"})
         await bot.send_message(poll_answer.user.id, text, reply_markup=markup.as_markup(resize_keyboard=True),
                                disable_web_page_preview=True)

@@ -366,7 +366,7 @@ async def donbas_long_maidan(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Вернемся к другим причинам войны 👌"))
     nmarkup.row(types.KeyboardButton(text="Вообще-то, наших войск не было в ДНР/ ЛНР все эти 8 лет 🙅"))
-    nmarkup.row(types.KeyboardButton(text="Путин просто помогал, которые не хотели жить в Украине после Майдана 🤷"))
+    nmarkup.row(types.KeyboardButton(text="Путин просто помогал жителям Донбасса, которым не понравились результаты Майдана 🤷"))
     nmarkup.row(
         types.KeyboardButton(text="Путин помог разжечь этот конфликт, чтобы помешать Украине вступить в НАТО 🛡"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), parse_mode="HTML",
@@ -386,7 +386,7 @@ async def donbas_long_maidan(message: Message):
 async def donbas_can_you_be_normal(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Вернемся к другим причинам войны 👌"))
-    nmarkup.row(types.KeyboardButton(text="Путин просто помогал, которые не хотели жить в Украине после Майдана 🤷"))
+    nmarkup.row(types.KeyboardButton(text="Путин просто помогал жителям Донбасса, которым не понравились результаты Майдана 🤷"))
     nmarkup.row(
         types.KeyboardButton(text="Путин помог разжечь этот конфликт, чтобы помешать Украине вступить в НАТО 🛡"))
     nmarkup.row(types.KeyboardButton(text="Вообще-то, наших войск не было в ДНР/ ЛНР все эти 8 лет 🙅"))
@@ -483,7 +483,7 @@ async def donbas_untrue(message: Message, state=FSMContext):
 
 @router.message((F.text == "Продолжай🖱") | (F.text == 'Хорошо 👌'), flags=flags)
 @router.message((F.text == "Вернемся к другим причинам войны 👌"))
-@router.message((F.text == "Путин просто помогал, которые не хотели жить в Украине после Майдана 🤷"))
+@router.message((F.text == "Путин просто помогал жителям Донбасса, которым не понравились результаты Майдана 🤷"))
 async def donbas_no_army_here(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Да, замечаю‍♀"))

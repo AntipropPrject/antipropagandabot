@@ -207,7 +207,7 @@ async def reasons_biopigeons(message: Message):
                                  "🤯 Предотвратить секретные разработки: биологическое оружие / ядерное оружие")
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_bio_nuclear'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text='Продолжим 👌'))
+    nmarkup.row(types.KeyboardButton(text='Хорошо, продолжим 👌'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 

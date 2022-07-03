@@ -4,7 +4,7 @@ from aiogram.types import Message
 from typing import Union, Dict, Any
 from data_base.DBuse import poll_get, redis_just_one_read
 from handlers import true_resons_hand
-from resources.all_polls import welc_message_one, nazizm
+from resources.all_polls import welc_message_one, nazizm, donbass_first_poll
 
 
 class DonbassOptionsFilter(BaseFilter):
@@ -111,7 +111,7 @@ class WarReason(BaseFilter):
 
 class PutinFilter(BaseFilter):
     async def __call__(self, message: Message):
-        if 'Владимир Путин' in await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:'):
+        if await redis_just_one_read('Usrs: 5306348087: Start_answers: LovePutin') == 'True':
             return True
         else:
             return False
@@ -167,3 +167,5 @@ class ManualFilters:
             await true_resons_hand.reasons_demilitarism(self.message, self.state)
         elif welc_message_one[5] in war_answers:
             await true_resons_hand.reasons_biopigeons(self.message, self.state)
+
+

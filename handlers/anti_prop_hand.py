@@ -68,7 +68,7 @@ async def antiprop_all_yes_second(message: Message):
 
 
 @router.message(
-    (F.text.in_({'Открой мне глаза 👀', "Ну удиви меня 🤔", "Покажи ложь на ТВ -- мне интересно посмотреть! 📺"})),
+    (F.text.in_({'Открой мне глаза 👀', "Ну удиви меня 🤔", "Покажи ложь на ТВ — мне интересно посмотреть! 📺"})),
     flags=flags)
 async def antiprop_tv_selecter(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_pile_of_lies'})
