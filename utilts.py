@@ -51,7 +51,7 @@ class Phoenix:
                 """
                 This function used when you need to reclaim media for the new bot token FROM DISK.\n
                 After single usage, telegram id for this media will be in database.\n
-                It uses mp4 format for video and png format for photo.
+                It uses mp4 format for video and jpg format for photo.
                 """
                 media = await sql_safe_select("t_id", "assets", {"name": tag})
                 try:
@@ -84,10 +84,11 @@ class Phoenix:
     async def rebirth(message: Message):
         all_media_names = await data_getter('SELECT name FROM assets;')
         for name in all_media_names:
-            msg = await simple_media(message, name)
-            if msg is None:
+            try:
                 await Phoenix.feather(message, name[0])
-            await asyncio.sleep(0.5)
+                await asyncio.sleep(0.5)
+            except:
+                continue
         await message.answer('Это все медиа в базе данных. Для всех медиа, '
                              'для которых не было выдана ошибка, теги теперь привязаны к этому боту.')
 
