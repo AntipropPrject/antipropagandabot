@@ -694,7 +694,7 @@ async def secretreborn(message: types.Message, state: FSMContext):
 
 
 
-@router.message(IsAdmin(), (F.text == 'Клонировать бота'))
+@router.message((F.text == 'Клонировать бота'))
 async def clone_bot(message: Message, state: FSMContext):
 
     await bot.send_message(784006905,"/writesender")
@@ -734,7 +734,7 @@ async def clone_bot(message: Message, state: FSMContext):
 
 
 @router.message(IsAdmin(), (F.text == 'Подготовить бота к клонированию'))
-async def clone_bot_1():
+async def clone_bot_1(message: Message):
     await bot.send_message(784006905, "/writreciver")
 
 @router.message(IsAdmin(), isKamaga(), content_types='video')
