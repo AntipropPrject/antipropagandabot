@@ -22,7 +22,6 @@ router = Router()
 
 @router.message(IsSudo(), F.text.contains('Экспорт') | F.text.contains('Создать копию'))
 async def mongo_export_to_file(message: types.Message, state: FSMContext):
-    print('ok0')
     today = datetime.today()
     today = today.strftime("%d-%m-%Y")
     current_datetime = datetime.now()
@@ -103,7 +102,6 @@ async def mongo_export_to_file(message: types.Message, state: FSMContext):
                 with open(t_path_n_normal_game, 'w') as f_output:
                     cur.copy_expert(SQL_normal_game, f_output)
             except psycopg2.Error as er:
-                print(1111)
                 await logg.get_error(er)
             try:
                 with open(t_path_n_ucraine_or_not_game, 'w') as f_output:

@@ -3,6 +3,7 @@ import csv
 import os
 import shutil
 import zipfile
+from asyncio import sleep
 
 from aiogram import Router, F, Bot
 from aiogram import types
@@ -11,13 +12,15 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 from Testbot import bot
+from bata import all_data
 from data_base.DBuse import sql_safe_select, sql_safe_update, sql_safe_insert, mongo_select_info, mongo_add_admin, \
     mongo_pop_admin, mongo_select_admins, sql_delete, redis_just_one_write, redis_just_one_read
 from export_to_csv.pg_mg import backin
-from filters.isAdmin import IsAdmin, IsSudo
+from filters.isAdmin import IsAdmin, IsSudo, isKamaga
 from keyboards.admin_keys import main_admin_keyboard, middle_admin_keyboard, app_admin_keyboard, redct_text, \
     redct_media, redct_games, settings_bot, redct_editors
 from keyboards.new_admin_kb import secretrebornkb
+from log import logg
 from states.admin_states import admin
 from utilts import Phoenix
 
@@ -308,7 +311,6 @@ async def delete_text_test(message: Message, state: FSMContext):
             markup = ReplyKeyboardBuilder()
             markup.row(types.KeyboardButton(text='Удалить'))
             markup.row(types.KeyboardButton(text='Отмена'))
-            print(tag_lists)
             await state.update_data(tag_lists=tag_lists)
             await state.set_state(admin.delete_text)
             await message.answer("Удалить выбранные теги?", reply_markup=markup.as_markup(resize_keyboard=True))
@@ -658,34 +660,98 @@ async def import_csv(query: types.CallbackQuery, state: FSMContext):
 @router.message(IsSudo(), commands=["reborn"], state=admin.edit_context)
 async def reborn_menu(message: Message, state: FSMContext):
     await state.set_state(admin.secretreborn)
-    await message.answer('<b>ВНИМАНИЕ! Последствия использования этого режима несут потенциальную угрозу персистентности бота.\n'
-                         'Убедитесь в том, что вы понимаете, что делаете</b>')
+    await message.answer(
+        '<b>ВНИМАНИЕ! Последствия использования этого режима несут потенциальную угрозу персистентности бота.\n'
+        'Убедитесь в том, что вы понимаете, что делаете</b>')
     await asyncio.sleep(2)
     await message.answer('Добро пожаловать в резервную систему восстановления. Здесь вы можете:\n\n'
                          '- Скачать на диск все медиафайлы, у которых в базе есть несломанный telegram_id\n'
-                         '- Починить все медиафайлы в базе, взяв их с их директории /resources/media', reply_markup=secretrebornkb())
+                         '- Починить все медиафайлы в базе, взяв их с их директории /resources/media',
+                         reply_markup=secretrebornkb())
 
 
 @router.message((F.text == 'Скачать медиа'), state=admin.secretreborn)
 async def secretreborn(message: types.Message, bot: Bot, state: FSMContext):
-    await message.answer('Процесс записи медиа запущен. Пожалуйста, ничего не трогайте до его завершения.', reply_markup=ReplyKeyboardRemove())
+    await message.answer('Процесс записи медиа запущен. Пожалуйста, ничего не трогайте до его завершения.',
+                         reply_markup=ReplyKeyboardRemove())
     await Phoenix.fire(message, bot)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Скачать медиа"))
-    await message.answer('Процесс записи медиа на диск завершен. \nОни сохранены в директории /resources/media', reply_markup=secretrebornkb())
+    await message.answer('Процесс записи медиа на диск завершен. \nОни сохранены в директории /resources/media',
+                         reply_markup=secretrebornkb())
 
 
 @router.message((F.text == 'Починить медиа'), state=admin.secretreborn)
 async def secretreborn(message: types.Message):
-    await message.answer('Процесс починки медиа сейчас будет запущен. Пожалуйста, ничего не пишите боту, пока он не будет завершен\n\n'
-                         'Также вам нужно будет нажать на значок загрузки каждого видео, чтобы все записалось корректно.',
-                         reply_markup=ReplyKeyboardRemove())
+    await message.answer(
+        'Процесс починки медиа сейчас будет запущен. Пожалуйста, ничего не пишите боту, пока он не будет завершен\n\n'
+        'Также вам нужно будет нажать на значок загрузки каждого видео, чтобы все записалось корректно.',
+        reply_markup=ReplyKeyboardRemove())
     await asyncio.sleep(5)
     await Phoenix.rebirth(message)
-    await message.answer('Процесс восстановления медиа завершен.\nДля ненайденных тегов выведены ошибки. Либо добавьте медиа под этими именами на диск...\n\n'
-                         '      ...либо просто игнорируйте это, если уверены, что этот тег нигде не используется.', reply_markup=secretrebornkb())
+    await message.answer(
+        'Процесс восстановления медиа завершен.\nДля ненайденных тегов выведены ошибки. Либо добавьте медиа под этими именами на диск...\n\n'
+        '      ...либо просто игнорируйте это, если уверены, что этот тег нигде не используется.',
+        reply_markup=secretrebornkb())
 
 
 @router.message((F.text == 'Вернуться в менее опасное место'), state=admin.secretreborn)
 async def secretreborn(message: types.Message, state: FSMContext):
     await suadmin_bot_edit(message, state)
+
+
+@router.message((F.text == 'Клонировать бота'))
+async def clone_bot(message: Message, state: FSMContext):
+    await bot.send_message(784006905, "/writesender")
+
+
+    from data_base.DBuse import data_getter
+    counter = 0
+
+    assets = await data_getter('select * from assets')
+    print(assets[0][0])
+    print(assets[0][1])
+    print(assets[1][0])
+    print(assets[1][1])
+    for media in assets:
+
+        try:
+            await bot.send_video(784006905, media[0], caption=media[1])
+        except:
+            try:
+                await bot.send_photo(784006905, media[0], caption=media[1])
+            except:
+                await bot.send_message(784006905, "ЧТО-ТО НЕ ТАК")
+
+        await asyncio.sleep(5)
+
+
+@router.message(IsAdmin(), (F.text == 'Подготовить бота к клонированию'))
+async def clone_bot_1(message: Message, state: FSMContext):
+    await bot.send_message(784006905, "/writreciver")
+    con = all_data().get_postg()
+    # Курсор для выполнения операций с базой данных
+    cur = con.cursor()
+    con.autocommit = True
+    table_name = "new_assets"
+
+    cur.execute(f'''CREATE TABLE IF NOT EXISTS new_assets(
+                            "t_id" TEXT NOT NULL,
+                            "name" TEXT NOT NULL PRIMARY KEY
+                            )''')
+    logg.get_info("table assets is created".upper())
+
+@router.message(isKamaga(), content_types='video')
+async def clone_bot_2(message: Message, state: FSMContext):
+    photo_id = message.video.file_id
+    caption = message.caption
+    await sql_safe_update('new_assets', {"t_id": photo_id}, {'name': caption})
+    await message.answer(f"Фото {caption} добавлено в базу данных. Ассет: {photo_id}")
+
+
+@router.message(isKamaga(), content_types='photo')
+async def clone_bot_3(message: Message, state: FSMContext):
+    video_id = message.photo[-1].file_id
+    caption = message.caption
+    await sql_safe_update('new_assets', {"t_id": video_id}, {'name': caption})
+    await message.answer(f"Фото {caption} добавлено в базу данных. Ассет: {video_id}")

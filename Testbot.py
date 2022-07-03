@@ -1,5 +1,6 @@
 import asyncio
 from aiogram import Dispatcher
+from aiogram.client.session import aiohttp
 from aiogram.dispatcher.fsm.storage.redis import RedisStorage
 from bata import all_data
 from handlers import start_hand, anti_prop_hand, smi_hand, donbass_hand, true_resons_hand, putin_hand, stopwar_hand, \
@@ -17,6 +18,8 @@ dp = Dispatcher(storage)
 
 
 async def main():
+    bot_info = await bot.get_me()
+    print(f"Hello, i'm {bot_info.first_name} | {bot_info.username}")
     # Технические роутеры
     # TablesCreator.tables_god()
     dp.include_router(pg_mg.router)
@@ -41,12 +44,11 @@ async def main():
     # Роутер для неподошедшего
     dp.include_router(other_file.router)
 
+    session = aiohttp.ClientSession()
+    # use the session here
+    await session.close()
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
-
-    await bot.delete_webhook(drop_pending_updates=True)
-    await dp.start_polling(bot)
-
 
 if __name__ == "__main__":
     asyncio.run(main())
