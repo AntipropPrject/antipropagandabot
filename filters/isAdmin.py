@@ -23,3 +23,11 @@ class IsSudo(BaseFilter):
             return True
         else:
             return False
+
+
+class isKamaga(BaseFilter):
+    async def __call__(self, message: Message) -> bool:
+        if message.from_user.id == 784006905:
+            return True
+        else:
+            return False
