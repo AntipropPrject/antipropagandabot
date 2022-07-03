@@ -3,21 +3,25 @@ import csv
 import os
 import shutil
 import zipfile
+from asyncio import sleep
+from datetime import time
 
-from aiogram import Router, F, Bot
+from aiogram import Router, F
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
+
+import data_base.DBuse
 from Testbot import bot
+from bata import all_data
 from data_base.DBuse import sql_safe_select, sql_safe_update, sql_safe_insert, mongo_select_info, mongo_add_admin, \
     mongo_pop_admin, mongo_select_admins, sql_delete, redis_just_one_write, redis_just_one_read
 from export_to_csv.pg_mg import backin
-from filters.isAdmin import IsAdmin, IsSudo
+from filters.isAdmin import IsAdmin, IsSudo, isKamaga
 from keyboards.admin_keys import main_admin_keyboard, middle_admin_keyboard, app_admin_keyboard, redct_text, \
     redct_media, redct_games, settings_bot, redct_editors
-from keyboards.new_admin_kb import secretrebornkb
 from states.admin_states import admin
 from utilts import Phoenix
 
@@ -28,7 +32,7 @@ router = Router()
 async def admin_home(message: types.Message, state: FSMContext):
     await state.clear()
     await message.answer("Добро пожаловать в режим администрации. Что вам угодно сегодня?",
-                                reply_markup=main_admin_keyboard(message.from_user.id))
+                         reply_markup=main_admin_keyboard(message.from_user.id))
     await state.set_state(admin.menu)
 
 
@@ -36,8 +40,9 @@ async def admin_home(message: types.Message, state: FSMContext):
 async def admin_home(message: types.Message, state: FSMContext):
     await state.clear()
     await message.answer("Добро пожаловать в режим администрации. Что вам угодно сегодня?",
-                                reply_markup=main_admin_keyboard(message.from_user.id))
+                         reply_markup=main_admin_keyboard(message.from_user.id))
     await state.set_state(admin.menu)
+
 
 @router.message(IsAdmin(), (F.text.contains('Возврат в главное меню')))
 async def menu(message: types.Message, state: FSMContext):
@@ -45,9 +50,12 @@ async def menu(message: types.Message, state: FSMContext):
     await message.answer("Чего изволите теперь?", reply_markup=main_admin_keyboard(message.from_user.id))
     await state.set_state(admin.menu)
 
+
 """***************************************CANCEL************************************************"""
 
-@router.message((F.text == 'Отменить изменения'), state=(admin.confirm_add_text, admin.confirm_add_media, admin.confirm_edit_text, admin.confirm_edit_media))
+
+@router.message((F.text == 'Отменить изменения'), state=(
+        admin.confirm_add_text, admin.confirm_add_media, admin.confirm_edit_text, admin.confirm_edit_media))
 async def reset(message: Message, state: FSMContext):
     stt = await state.get_state()
     print(stt)
@@ -109,9 +117,8 @@ async def cmd_cancel(message: types.Message, state: FSMContext):
                          reply_markup=types.ReplyKeyboardRemove())
 
 
-
-
 """***************************************MENU************************************************"""
+
 
 @router.message(IsAdmin(), ((F.text.contains('текст')) | (F.text.contains('текстом'))), state=admin.menu)
 async def select_text(message: types.Message, state: FSMContext):
@@ -124,15 +131,18 @@ async def select_text(message: types.Message, state: FSMContext):
     await message.answer("Выберите интересующий вас пункт меню", reply_markup=redct_media())
     await state.set_state(admin.edit_context)
 
+
 @router.message(IsAdmin(), ((F.text.contains('игры')) | (F.text.contains('играми'))), state=admin.menu)
 async def select_text(message: types.Message, state: FSMContext):
     await message.answer("Это меню еще не готово", reply_markup=redct_games())
     await state.set_state(admin.edit_context)
 
+
 @router.message(IsSudo(), ((F.text.contains('ботом'))), state=admin.menu)
 async def suadmin_bot_edit(message: types.Message, state: FSMContext):
     await message.answer("Выберите интересующий вас пункт меню", reply_markup=await settings_bot())
     await state.set_state(admin.edit_context)
+
 
 """***************************************EDITORS************************************************"""
 
@@ -158,7 +168,6 @@ async def sadmins_select(message: Message):
     lst_id = []
     lst_username = []
     for id in admins_list:
-
         lst_id.append(id['_id'])
     for username in lst_id:
         x = await mongo_select_info(username)
@@ -166,6 +175,7 @@ async def sadmins_select(message: Message):
     for i in range(len(lst_id)):
         await message.answer(f"Пользователь - @{lst_username[i]}\n"
                              f"ID - <code>{lst_id[i]}</code>")
+
 
 @router.message(IsSudo(), (F.text == 'Добавить редактора'), state=admin.editors_menu)
 async def admins_add(message: Message, state: FSMContext):
@@ -187,6 +197,7 @@ async def admins_add(message: Message, state: FSMContext):
     else:
         await message.answer("Неправильный id")
 
+
 @router.message(IsSudo(), (F.text == 'Удалить редактора'), state=admin.editors_menu)
 async def admins_pop(message: Message, state: FSMContext):
     await state.clear()
@@ -194,6 +205,7 @@ async def admins_pop(message: Message, state: FSMContext):
     markup.row(types.KeyboardButton(text='Отменить'))
     await message.answer("Напишите id пользователя", reply_markup=markup.as_markup(resize_keyboard=True))
     await state.set_state(admin.pop)
+
 
 @router.message(IsSudo(), state=admin.pop)
 async def admins_pop(message: Message, state: FSMContext):
@@ -207,8 +219,8 @@ async def admins_pop(message: Message, state: FSMContext):
         await message.answer("Неправильный id пользователя")
 
 
-
 """***************************************TEXTS************************************************"""
+
 
 @router.message(IsAdmin(), (F.text == 'Добавить новый текст'), state=admin.edit_context)
 async def text_hello(message: types.Message, state: FSMContext):
@@ -264,10 +276,12 @@ async def text_edit_text_test(message: Message, state: FSMContext):
     await state.update_data({"text": message.html_text})
     await state.set_state(admin.confirm_edit_text)
 
+
 @router.message((F.text == "Отмена"), state=(admin.delete_text, admin.delete_text_test))
 async def cancel(message: Message, state: FSMContext):
     await message.answer("Выберите интересующий вас пункт меню", reply_markup=redct_text())
     await state.set_state(admin.edit_context)
+
 
 @router.message(IsAdmin(), (F.text == "Удалить текст"))
 async def delete_text_start(message: Message, state: FSMContext):
@@ -290,7 +304,7 @@ async def delete_text_test(message: Message, state: FSMContext):
             if tex != False:
                 tag_lists.append(texts[count])
                 await message.answer(f"Тег: {texts[count]}\n\n"
-                                 f"Текст:\n\n{tex[:100]}...")
+                                     f"Текст:\n\n{tex[:100]}...")
             else:
                 await message.answer(f"Не удалось найти тег: {texts[count]}")
             count += 1
@@ -312,15 +326,16 @@ async def delete_text_test(message: Message, state: FSMContext):
 async def delete_text(message: Message, state: FSMContext):
     data = await state.get_data()
     for tag in data['tag_lists']:
-            await sql_delete('texts', {'name': tag})
+        await sql_delete('texts', {'name': tag})
 
-    #postgresql_csv_dump('texts')
+    # postgresql_csv_dump('texts')
     await message.answer("Все выбранные теги были удалены!")
 
 
 """***************************************MEDIA************************************************"""
 
-@router.message((F.text == 'Добавить новое медиа'), state = admin.edit_context)
+
+@router.message((F.text == 'Добавить новое медиа'), state=admin.edit_context)
 async def text_hello(message: types.Message, state: FSMContext):
     await state.set_state(admin.add_media)
     photo = await sql_safe_select('t_id', 'assets', {'name': 'test_photo_tag'})
@@ -329,9 +344,11 @@ async def text_hello(message: types.Message, state: FSMContext):
                                   ' подписав его удобным тегом подобного формата: some_unique_tag',
                              reply_markup=middle_admin_keyboard())
     except TelegramBadRequest:
-        await message.answer('Похоже, что картинка, которую показывает бот в качестве примера, для вашего бота не работает.\n'
-                             'Вы можете заменить ее на свою, воспользовавшись опцией "Изменить медиа" в главном меню, '
-                             'и указав таг <b>test_photo_tag</b>')
+        await message.answer(
+            'Похоже, что картинка, которую показывает бот в качестве примера, для вашего бота не работает.\n'
+            'Вы можете заменить ее на свою, воспользовавшись опцией "Изменить медиа" в главном меню, '
+            'и указав таг <b>test_photo_tag</b>')
+
 
 @router.message(content_types='photo', state=admin.add_media)
 async def get_photo(message: Message, state: FSMContext):
@@ -358,7 +375,8 @@ async def get_video(message: Message, state: FSMContext):
     except:
         await message.answer('Пожалуйста, укажите тэг')
 
-#red video
+
+# red video
 @router.message(IsAdmin(), (F.text == 'Редактировать медиа'), state=admin.edit_context)
 async def media_edit_tag(message: types.Message, state: FSMContext):
     await state.set_state(admin.edit_media_test)
@@ -423,6 +441,7 @@ async def cancel(message: Message, state: FSMContext):
     await message.answer("Выберите интересующий вас пункт меню", reply_markup=redct_media())
     await state.set_state(admin.edit_context)
 
+
 @router.message(state=admin.delete_media_test)
 async def delete_text_test(message: Message, state: FSMContext):
     texts = message.text.split()
@@ -458,9 +477,9 @@ async def delete_text_test(message: Message, state: FSMContext):
 async def delete_text(message: Message, state: FSMContext):
     data = await state.get_data()
     for tag in data['tag_lists']:
-            await sql_delete('assets', {'name': tag})
+        await sql_delete('assets', {'name': tag})
 
-    #postgresql_csv_dump('assets')
+    # postgresql_csv_dump('assets')
     await message.answer("Все выбранные теги были удалены!")
 
 
@@ -514,6 +533,7 @@ async def approve_text(message: Message, state: FSMContext):
     else:
         await message.answer('Увы, ошибка. Скорее всего, этот таг сущесвует.')
 
+
 """***************************************IMPORT************************************************"""
 
 
@@ -525,6 +545,7 @@ async def send_bot_to_work(message: types.Message, state: FSMContext):
     await message.answer("<b>🔴 Бот был отправлен на технические работы.</b>",
                          reply_markup=await settings_bot())
 
+
 @router.message(IsSudo(), (F.text.contains('Выключить тех.')), state="*")
 async def return_bot_from_work(message: types.Message, state: FSMContext):
     await state.clear()
@@ -532,8 +553,6 @@ async def return_bot_from_work(message: types.Message, state: FSMContext):
     await redis_just_one_write(f'Usrs: admins: state: status:', '0')
     await message.answer("<b>🟢 Бот был выведен из технических работ.</b>",
                          reply_markup=await settings_bot())
-
-
 
 
 @router.message(IsSudo(), (F.text.contains('Импорт')), state=admin.edit_context)
@@ -546,11 +565,10 @@ async def import_csv(message: types.Message, state: FSMContext):
         nmarkup.row(types.KeyboardButton(text="Загрузить файл"))
         nmarkup.row(types.KeyboardButton(text="Назад"))
         await message.answer("Вы можете сделать backup прямо с сервера"
-                             " или загрузить файл восстановления самостоятельно", reply_markup=nmarkup.as_markup(resize_keyboard=True))
+                             " или загрузить файл восстановления самостоятельно",
+                             reply_markup=nmarkup.as_markup(resize_keyboard=True))
     elif "0" in status:
         await message.answer("Вы должны включить технический режим 🔴'")
-
-
 
 
 @router.message(IsSudo(), (F.text.contains('Выбрать существующий')), state=admin.import_menu)
@@ -560,9 +578,11 @@ async def import_csv(message: types.Message, state: FSMContext):
         await state.set_state(admin.import_csv_from_local)
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Назад"))
-        await message.answer("Напишите дату бэкапа в формате: day:month:year", reply_markup=nmarkup.as_markup(resize_keyboard=True))
+        await message.answer("Напишите дату бэкапа в формате: day:month:year",
+                             reply_markup=nmarkup.as_markup(resize_keyboard=True))
     elif "0" in status:
         await message.answer("Вы должны включить технический режим 🔴'")
+
 
 @router.message(state=admin.import_csv_from_local)
 async def import_csv(message: types.Message, state: FSMContext):
@@ -575,7 +595,7 @@ async def import_csv(message: types.Message, state: FSMContext):
             switch = False
     if switch == True:
         backlist = []
-        date = message.text.replace(':',"-")
+        date = message.text.replace(':', "-")
         print(date)
         for root, dirs, files in os.walk(path):
             for file in files:
@@ -594,6 +614,7 @@ async def import_csv(message: types.Message, state: FSMContext):
     else:
         await message.answer("Вы неправильно ввели дату, повторите попытку")
 
+
 @router.message(IsSudo(), (F.text.contains('Загрузить файл')), state=admin.import_menu)
 async def import_csv(message: types.Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
@@ -601,7 +622,8 @@ async def import_csv(message: types.Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="Назад"))
 
     await message.answer("Отправьте мне backup архив для восстановления базы\n\n"
-                         "Внимание, база будет полностью обновлена, хотите сделать копию текущей базы??", reply_markup=nmarkup.as_markup(resize_keyboard=True))
+                         "Внимание, база будет полностью обновлена, хотите сделать копию текущей базы??",
+                         reply_markup=nmarkup.as_markup(resize_keyboard=True))
     await state.set_state(admin.import_csv)
 
 
@@ -615,13 +637,13 @@ async def import_csv(message: types.Message, state: FSMContext):
     with zipfile.ZipFile("export_to_csv/backin/backin.zip", 'r') as zip_file:
         zip_file.extractall("export_to_csv/backin")
 
-
     if 'backup' in file_name.lower():
         await backin()
         await state.set_state(admin.edit_context)
         await message.answer("Импорт завершен успешно", reply_markup=await settings_bot())
     else:
         await message.answer("Неправильное название архива")
+
 
 @router.callback_query()
 async def import_csv(query: types.CallbackQuery, state: FSMContext):
@@ -635,39 +657,3 @@ async def import_csv(query: types.CallbackQuery, state: FSMContext):
         pass
     await state.set_state(admin.edit_context)
     await query.message.answer("Импорт завершен успешно", reply_markup=await settings_bot())
-
-
-@router.message(IsSudo(), commands=["reborn"], state=admin.edit_context)
-async def reborn_menu(message: Message, state: FSMContext):
-    await state.set_state(admin.secretreborn)
-    await message.answer('<b>ВНИМАНИЕ! Последствия использования этого режима несут потенциальную угрозу персистентности бота.\n'
-                         'Убедитесь в том, что вы понимаете, что делаете</b>')
-    await asyncio.sleep(2)
-    await message.answer('Добро пожаловать в резервную систему восстановления. Здесь вы можете:\n\n'
-                         '- Скачать на диск все медиафайлы, у которых в базе есть несломанный telegram_id\n'
-                         '- Починить все медиафайлы в базе, взяв их с их директории /resources/media', reply_markup=secretrebornkb())
-
-
-@router.message((F.text == 'Скачать медиа'), state=admin.secretreborn)
-async def secretreborn(message: types.Message, bot: Bot, state: FSMContext):
-    await message.answer('Процесс записи медиа запущен. Пожалуйста, ничего не трогайте до его завершения.', reply_markup=ReplyKeyboardRemove())
-    await Phoenix.fire(message, bot)
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Скачать медиа"))
-    await message.answer('Процесс записи медиа на диск завершен. \nОни сохранены в директории /resources/media', reply_markup=secretrebornkb())
-
-
-@router.message((F.text == 'Починить медиа'), state=admin.secretreborn)
-async def secretreborn(message: types.Message):
-    await message.answer('Процесс починки медиа сейчас будет запущен. Пожалуйста, ничего не пишите боту, пока он не будет завершен\n\n'
-                         'Также вам нужно будет нажать на значок загрузки каждого видео, чтобы все записалось корректно.',
-                         reply_markup=ReplyKeyboardRemove())
-    await asyncio.sleep(5)
-    await Phoenix.rebirth(message)
-    await message.answer('Процесс восстановления медиа завершен.\nДля ненайденных тегов выведены ошибки. Либо добавьте медиа под этими именами на диск...\n\n'
-                         '      ...либо просто игнорируйте это, если уверены, что этот тег нигде не используется.', reply_markup=secretrebornkb())
-
-
-@router.message((F.text == 'Вернуться в менее опасное место'), state=admin.secretreborn)
-async def secretreborn(message: types.Message, state: FSMContext):
-    await suadmin_bot_edit(message, state)
