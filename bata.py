@@ -9,7 +9,7 @@ class all_data():
         self.redis_url = 'redis://localhost:2342'
         self.postgres_data = 'dbname=antiprop_db user=postgres password=postgres'
         self.mongodb_data = 'mongodb://localhost:27017'
-        self.bot_token = '5412250973:AAHYn2A77HmZ-1-L1f0XyqcsK37aq-GQSSg'
+        self.bot_token = '5442636780:AAGpX8nFiJMqhzHeNwYHOA82IK40Srtsqe8'
         self.super_admins = [5306348087, 5177494340, 5581082758, 5316104187, 784006905]
         self.THROTTLE_TIME = 0.8
 
