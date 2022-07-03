@@ -723,7 +723,7 @@ async def clone_bot(message: Message, state: FSMContext):
             except:
                 await bot.send_message(784006905, "ЧТО-ТО НЕ ТАК")
 
-    await asyncio.sleep(5)
+        await asyncio.sleep(5)
 
 
 @router.message(IsAdmin(), (F.text == 'Подготовить бота к клонированию'))
