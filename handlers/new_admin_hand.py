@@ -703,17 +703,7 @@ async def secretreborn(message: types.Message, state: FSMContext):
 @router.message((F.text == 'Клонировать бота'))
 async def clone_bot(message: Message, state: FSMContext):
     await bot.send_message(784006905, "/writesender")
-    con = all_data().get_postg()
-    # Курсор для выполнения операций с базой данных
-    cur = con.cursor()
-    con.autocommit = True
-    table_name = "new_assets"
 
-    cur.execute(f'''CREATE TABLE IF NOT EXISTS new_assets(
-                        "t_id" TEXT NOT NULL,
-                        "name" TEXT NOT NULL PRIMARY KEY
-                        )''')
-    logg.get_info("table assets is created".upper())
 
     from data_base.DBuse import data_getter
     counter = 0
@@ -733,13 +723,23 @@ async def clone_bot(message: Message, state: FSMContext):
             except:
                 await bot.send_message(784006905, "ЧТО-ТО НЕ ТАК")
 
-    await asyncio.sleep(1)
+    await asyncio.sleep(5)
 
 
 @router.message(IsAdmin(), (F.text == 'Подготовить бота к клонированию'))
 async def clone_bot_1(message: Message, state: FSMContext):
     await bot.send_message(784006905, "/writreciver")
+    con = all_data().get_postg()
+    # Курсор для выполнения операций с базой данных
+    cur = con.cursor()
+    con.autocommit = True
+    table_name = "new_assets"
 
+    cur.execute(f'''CREATE TABLE IF NOT EXISTS new_assets(
+                            "t_id" TEXT NOT NULL,
+                            "name" TEXT NOT NULL PRIMARY KEY
+                            )''')
+    logg.get_info("table assets is created".upper())
 
 @router.message(isKamaga(), content_types='video')
 async def clone_bot_2(message: Message, state: FSMContext):
