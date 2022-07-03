@@ -723,7 +723,7 @@ async def clone_bot(message: Message, state: FSMContext):
             except:
                 await bot.send_message(784006905, "ЧТО-ТО НЕ ТАК")
 
-        await asyncio.sleep(5)
+        await asyncio.sleep(1)
 
 
 @router.message(IsAdmin(), (F.text == 'Подготовить бота к клонированию'))
@@ -743,15 +743,15 @@ async def clone_bot_1(message: Message, state: FSMContext):
 
 @router.message(isKamaga(), content_types='video')
 async def clone_bot_2(message: Message, state: FSMContext):
-    photo_id = message.video.file_id
+    video_id = message.video.file_id
     caption = message.caption
-    await sql_safe_update('new_assets', {"t_id": photo_id}, {'name': caption})
-    await message.answer(f"Фото {caption} добавлено в базу данных. Ассет: {photo_id}")
+    await sql_safe_insert('new_assets', {'t_id': video_id, 'name': caption})
+    await message.answer(f"Фото {caption} добавлено в базу данных. Ассет: {video_id}")
 
 
 @router.message(isKamaga(), content_types='photo')
 async def clone_bot_3(message: Message, state: FSMContext):
-    video_id = message.photo[-1].file_id
+    photo_id = message.photo[-1].file_id
     caption = message.caption
-    await sql_safe_update('new_assets', {"t_id": video_id}, {'name': caption})
-    await message.answer(f"Фото {caption} добавлено в базу данных. Ассет: {video_id}")
+    await sql_safe_insert('new_assets', {'t_id': photo_id, 'name': caption})
+    await message.answer(f"Фото {caption} добавлено в базу данных. Ассет: {photo_id}")
