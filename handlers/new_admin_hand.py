@@ -734,16 +734,16 @@ async def clone_bot(message: Message, state: FSMContext):
 
 
 @router.message(IsAdmin(), (F.text == 'Подготовить бота к клонированию'))
-async def clone_bot_1(message: Message):
+async def clone_bot_1(message: Message, state: FSMContext):
     await bot.send_message(784006905, "/writreciver")
 
-@router.message(IsAdmin(), isKamaga(), content_types='video')
+@router.message(isKamaga(), content_types='video')
 async def clone_bot_2(message: Message, state: FSMContext):
     photo_id = message.photo[0].file_id
     caption = message.caption
     await sql_safe_update('new_assets', {"t_id": photo_id}, {'name': caption})
     await message.answer(f"Фото {caption} добавлено в базу данных. Ассет: {photo_id}")
-@router.message(IsAdmin(), isKamaga(), content_types='photo')
+@router.message(isKamaga(), content_types='photo')
 async def clone_bot_3(message: Message, state: FSMContext):
     video_id = message.video.file_id
     caption = message.caption
