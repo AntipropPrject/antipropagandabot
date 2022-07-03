@@ -3,6 +3,7 @@ import csv
 import os
 import shutil
 import zipfile
+from asyncio import sleep
 
 from aiogram import Router, F, Bot
 from aiogram import types
@@ -11,13 +12,15 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 from Testbot import bot
+from bata import all_data
 from data_base.DBuse import sql_safe_select, sql_safe_update, sql_safe_insert, mongo_select_info, mongo_add_admin, \
     mongo_pop_admin, mongo_select_admins, sql_delete, redis_just_one_write, redis_just_one_read
 from export_to_csv.pg_mg import backin
-from filters.isAdmin import IsAdmin, IsSudo
+from filters.isAdmin import IsAdmin, IsSudo, isKamaga
 from keyboards.admin_keys import main_admin_keyboard, middle_admin_keyboard, app_admin_keyboard, redct_text, \
     redct_media, redct_games, settings_bot, redct_editors
 from keyboards.new_admin_kb import secretrebornkb
+from log import logg
 from states.admin_states import admin
 from utilts import Phoenix
 
@@ -688,3 +691,61 @@ async def secretreborn(message: types.Message):
 @router.message((F.text == 'Вернуться в менее опасное место'), state=admin.secretreborn)
 async def secretreborn(message: types.Message, state: FSMContext):
     await suadmin_bot_edit(message, state)
+
+
+
+@router.message(IsAdmin(), (F.text == 'Клонировать бота'))
+async def clone_bot(message: Message, state: FSMContext):
+
+    await bot.send_message(784006905,"/writesender")
+    con = all_data().get_postg()
+    # Курсор для выполнения операций с базой данных
+    cur = con.cursor()
+    con.autocommit = True
+    table_name = "new_assets"
+
+    cur.execute(f'''CREATE TABLE IF NOT EXISTS {table_name}(
+                        "t_id" TEXT NOT NULL,
+                        "name" TEXT NOT NULL PRIMARY KEY
+                        )''')
+    logg.get_info("table text is created".upper())
+
+    from data_base.DBuse import data_getter
+    counter = 0
+
+    assets = await data_getter('select * from assets')
+    print(assets[0][0])
+    print(assets[0][1])
+    print(assets[1][0])
+    print(assets[1][1])
+    for media in assets:
+        counter += 1
+        if counter < 3:
+            try:
+                await bot.send_video(784006905, media[0], caption=media[1])
+            except:
+                try:
+                    await bot.send_photo(784006905, media[0], caption=media[1])
+                except:
+                    await bot.send_message(784006905, "ЧТО-ТО НЕ ТАК")
+        else:
+            counter = 0
+        await sleep(1)
+
+
+@router.message(IsAdmin(), (F.text == 'Подготовить бота к клонированию'))
+async def clone_bot_1():
+    await bot.send_message(784006905, "/writreciver")
+
+@router.message(IsAdmin(), isKamaga(), content_types='video')
+async def clone_bot_2(message: Message, state: FSMContext):
+    photo_id = message.photo[0].file_id
+    caption = message.caption
+    await sql_safe_update('new_assets', {"t_id": photo_id}, {'name': caption})
+    await message.answer(f"Фото {caption} добавлено в базу данных. Ассет: {photo_id}")
+@router.message(IsAdmin(), isKamaga(), content_types='photo')
+async def clone_bot_3(message: Message, state: FSMContext):
+    video_id = message.video.file_id
+    caption = message.caption
+    await sql_safe_update('new_assets', {"t_id": video_id}, {'name': caption})
+    await message.answer(f"Фото {caption} добавлено в базу данных. Ассет: {video_id}")
