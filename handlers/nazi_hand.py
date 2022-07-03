@@ -291,13 +291,13 @@ async def nazi_second_poll(message: Message, state: FSMContext):
                                  nazizm[0])
     text = await sql_safe_select('text', 'texts', {'name': 'nazi_second_poll'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Продолжай"))
+    nmarkup.row(types.KeyboardButton(text="Продолжить"))
     await message.answer(text, disable_web_page_preview=True, reply_markup=ReplyKeyboardRemove())
     await message.answer_poll(question='Попробуйте угадать!', options=['95%', '76%', '45%', '21%', '6%'],
                               is_anonymous=False, allows_multiple_answers=False, correct_option_id=1)
 
 
-@router.message(NaziState.rushate, (F.text == 'Продолжай'), flags=flags)
+@router.message(NaziState.rushate, (F.text == 'Продолжить'), flags=flags)
 async def poll_filler(message: types.Message):
     await message.answer('Чтобы продолжить — отметьте варианты выше и нажмите «ГОЛОСОВАТЬ» или «VOTE»',
                          reply_markup=ReplyKeyboardRemove())
@@ -330,7 +330,7 @@ async def nazi_manipulation(message: Message, state: FSMContext):
     await simple_media(message, 'nazi_manipulation', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.contains('удивлен')) | (F.text == "Хорошо, покажи"), state=NaziState.rushate, flags=flags)
+@router.message((F.text.contains('удивлен')) | (F.text == "Продолжай ⏳"), state=NaziState.rushate, flags=flags)
 async def nazi_not_really(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Посмотрел(а) 📺"))
@@ -341,7 +341,7 @@ async def nazi_not_really(message: Message, state: FSMContext):
 async def nazi_poll_is_cool(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'nazi_poll_is_cool'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Хорошо, покажи"))
+    nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
