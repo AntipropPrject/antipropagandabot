@@ -730,7 +730,8 @@ async def clone_bot(message: Message, state: FSMContext):
                     await bot.send_message(784006905, "ЧТО-ТО НЕ ТАК")
         else:
             counter = 0
-        await sleep(1)
+            break
+        await asyncio.sleep(1)
 
 
 @router.message(IsAdmin(), (F.text == 'Подготовить бота к клонированию'))
