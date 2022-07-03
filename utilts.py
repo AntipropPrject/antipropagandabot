@@ -107,4 +107,5 @@ class Phoenix:
                     await bot.download_file(telegram_path, f"resources/media/{name[0]}.mp4")
                 except (TelegramBadRequest, AttributeError):
                     pass
+            await asyncio.sleep(1)
         await message.answer('Все имеющиеся в базе медиа, для которых удалось найти валидный тег, были сохрнены в папку /resources/media директории бота')
