@@ -111,5 +111,5 @@ class Phoenix:
                         print(f'video {name[0]} was downloaded')
                 else:
                     print(f'photo {name[0]} was downloaded')
-                await asyncio.sleep(5)
+            await asyncio.sleep(5)
         await message.answer('Все имеющиеся в базе медиа, для которых удалось найти валидный тег, были сохрнены в папку /resources/media директории бота')
