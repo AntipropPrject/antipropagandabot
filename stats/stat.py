@@ -13,14 +13,14 @@ async def mongo_stat(tg_id):
                        'war_aims': 0, 'putin': 0}
         collection_stat.insert_one(user_answer)
     except Exception as error:
-        logg.get_error(f"mongo_add | {error}", __file__)
+        pass
 
 
 async def mongo_update_stat(tg_id, value):
     try:
         collection_stat.update_one({'_id': int(tg_id)}, {'$inc': {value: 1}})
     except Exception as error:
-        logg.get_error(f"mongo update | {error}", __file__)
+        await logg.get_error(f"mongo update | {error}", __file__)
 
 
 async def mongo_select_stat():
@@ -30,4 +30,4 @@ async def mongo_select_stat():
             lst.append(answer)
         return lst
     except Exception as error:
-        logg.get_error(f"mongo_select | {error}", __file__)
+        await logg.get_error(f"mongo_select | {error}", __file__)

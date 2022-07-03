@@ -172,10 +172,8 @@ async def mongo_select_info(tg_id):
         collection = database['userinfo']
         try:
             x = collection.find_one({"_id": int(tg_id)})
-            print(x)
         except:
             x = collection.find_one({"username": str(tg_id)})
-            print(x)
         return x
 
     except Exception as error:
@@ -289,7 +287,7 @@ def postgresql_csv_dump(table_name):
             cur.copy_expert(query, file)
             conn.close()
     except psycopg2.Error as error:
-        logg.get_error(f"{error}", __file__)
+        pass
 
 
 # update_csv

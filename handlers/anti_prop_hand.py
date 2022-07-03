@@ -382,7 +382,6 @@ async def show_the_news(message: types.Message, state: FSMContext):
         await state.update_data(viewed_channel=user_answer_str[0])  # передаю канал для разоблачения
         await state.update_data(all_viwed=[user_answer_str[0]])  # записываю просмотренный источник
     elif message.text != 'Хорошо, давай вернемся и посмотрим 👀':
-        print(message.text)
         markup = ReplyKeyboardBuilder()
         markup.row(types.KeyboardButton(text="Новость посмотрел(а). Что с ней не так? 🤔"))
         await state.update_data(count_news=1)
@@ -395,8 +394,6 @@ async def show_the_news(message: types.Message, state: FSMContext):
             await state.update_data(all_viwed=list(set(viewed)))  # Список просмотренных источников
         tag_media = ''
 
-        print(other_channel)
-        print(web_prop)
         if other_channel == web_prop[0]:
             tag_media = 'RIANEWS_media_'
         elif other_channel == web_prop[1]:
@@ -407,7 +404,6 @@ async def show_the_news(message: types.Message, state: FSMContext):
             tag_media = 'TACC_media_'
         elif other_channel == web_prop[5]:
             tag_media = 'MINISTRY_media_'
-        print(tag_media)
         await simple_media(message, tag_media + str(new_data), reply_markup=markup.as_markup(resize_keyboard=True))
 
     elif message.text == 'Хорошо, давай вернемся и посмотрим 👀':
@@ -427,7 +423,6 @@ async def show_the_news(message: types.Message, state: FSMContext):
             tag_media = 'TACC_media_'
         elif other_channel == web_prop[5]:
             tag_media = 'MINISTRY_media_'
-        print(tag_media)
         await state.update_data(viewed_channel=other_channel)
         if other_channel != 'Хватит, пропустим остальные источники 🙅‍♂️':
             viewed = data["all_viwed"]
@@ -455,7 +450,6 @@ async def revealing_the_news(message: types.Message, state: FSMContext):
         tag_exposure = 'TACC_exposure_'
     elif viewed_channel == web_prop[5]:
         tag_exposure = 'MINISTRY_exposure_'
-    print(tag_exposure)
     check_end = await check_name(tag_exposure + str(count_news + 1))
     if check_end is not False:  # Проверка если новости закончились
         markup = await keyboard_for_next_chanel(f"Покажи еще новость с {viewed_channel} 👀")
@@ -485,7 +479,6 @@ async def show_more(message: types.Message, state: FSMContext):
     elif viewed_channel == web_prop[5]:
         tag_media = 'MINISTRY_media_'
 
-    print(tag_media)
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Новость посмотрел(а). Что с ней не так? 🤔"))
     await simple_media(message, tag_media + str(new_data), reply_markup=markup.as_markup(resize_keyboard=True))

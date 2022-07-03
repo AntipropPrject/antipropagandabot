@@ -11,7 +11,7 @@ services:
     environment:
       - MONGO_INITDB_ROOT_USERNAME=mongoOTPOR
       - MONGO_INITDB_ROOT_PASSWORD=mongoOTPOR
-
+    command: mongod --quiet --logpath /dev/null
   db:
     image: postgres:12
     container_name: antiprop_posgres

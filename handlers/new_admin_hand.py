@@ -298,7 +298,6 @@ async def delete_text_test(message: Message, state: FSMContext):
             markup = ReplyKeyboardBuilder()
             markup.row(types.KeyboardButton(text='Удалить'))
             markup.row(types.KeyboardButton(text='Отмена'))
-            print(tag_lists)
             await state.update_data(tag_lists=tag_lists)
             await state.set_state(admin.delete_text)
             await message.answer("Удалить выбранные теги?", reply_markup=markup.as_markup(resize_keyboard=True))

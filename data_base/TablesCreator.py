@@ -240,4 +240,4 @@ def tables_god():
         cur.close()
 
     except psycopg2.Error as error:
-        logg.get_error(f"PostgreSQL, {error}", __file__)
+        pass
