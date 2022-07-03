@@ -17,7 +17,6 @@ async def simple_media(message: Message, tag: str,
     """
     You can use one tag. If there text with that tag, it will become caption
     """
-    start = time.time()
     text = await sql_safe_select("text", "texts", {"name": tag})
     media = await sql_safe_select("t_id", "assets", {"name": tag})
     if text is not False:
@@ -95,17 +94,22 @@ class Phoenix:
         all_media_names = await data_getter('SELECT name FROM assets;')
         for name in all_media_names:
             media = str()
-            msg = await simple_media(message, name)
-            try:
-                media = msg.photo[-1].file_id
-                telegram_path = (await bot.get_file(media)).file_path
-                await bot.download_file(telegram_path, f"resources/media/{name[0]}.jpg")
-            except (TelegramBadRequest, AttributeError, TypeError):
+            msg = await simple_media(message, name[0])
+            if msg is not None:
                 try:
-                    media = msg.video.file_id
+                    media = msg.photo[-1].file_id
                     telegram_path = (await bot.get_file(media)).file_path
-                    await bot.download_file(telegram_path, f"resources/media/{name[0]}.mp4")
-                except (TelegramBadRequest, AttributeError):
-                    pass
-            await asyncio.sleep(1)
+                    await bot.download_file(telegram_path, f"resources/media/{name[0]}.jpg")
+                except (TelegramBadRequest, AttributeError, TypeError):
+                    try:
+                        media = msg.video.file_id
+                        telegram_path = (await bot.get_file(media)).file_path
+                        await bot.download_file(telegram_path, f"resources/media/{name[0]}.mp4")
+                    except (TelegramBadRequest, AttributeError):
+                        pass
+                    else:
+                        print(f'video {name[0]} was downloaded')
+                else:
+                    print(f'photo {name[0]} was downloaded')
+                await asyncio.sleep(5)
         await message.answer('Все имеющиеся в базе медиа, для которых удалось найти валидный тег, были сохрнены в папку /resources/media директории бота')
