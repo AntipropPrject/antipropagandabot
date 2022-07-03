@@ -14,30 +14,33 @@ from log import logg
 async def simple_media(message: Message, tag: str,
                        reply_markup: Union[InlineKeyboardMarkup, ReplyKeyboardMarkup,
                                            ReplyKeyboardRemove, ForceReply, None] = None):
-    """
-    You can use one tag. If there text with that tag, it will become caption
-    """
-    text = await sql_safe_select("text", "texts", {"name": tag})
-    media = await sql_safe_select("t_id", "assets", {"name": tag})
-    if text is not False:
-        try:
-            return await message.answer_photo(media, caption=text, reply_markup=reply_markup)
-        except TelegramBadRequest:
-            try:
-                return await message.answer_video(media, caption=text, reply_markup=reply_markup)
-            except TelegramBadRequest:
-                await logg.get_error(f'NO {tag}')
-                return None
-    else:
-        try:
-            return await message.answer_photo(media, reply_markup=reply_markup)
-        except TelegramBadRequest:
-            try:
-                return await message.answer_video(media, reply_markup=reply_markup)
-            except TelegramBadRequest:
-                await logg.get_error(f'NO {tag}')
-                return None
+    try:
+        """
+        You can use one tag. If there text with that tag, it will become caption
+        """
+        text = await sql_safe_select("text", "texts", {"name": tag})
 
+        media = await sql_safe_select("t_id", "assets", {"name": tag})
+        if text is not False:
+            try:
+                return await message.answer_photo(media, caption=text, reply_markup=reply_markup)
+            except TelegramBadRequest:
+                try:
+                    return await message.answer_video(media, caption=text, reply_markup=reply_markup)
+                except TelegramBadRequest:
+                    await logg.get_error(f'NO {tag}')
+                    return None
+        else:
+            try:
+                return await message.answer_photo(media, reply_markup=reply_markup)
+            except TelegramBadRequest:
+                try:
+                    return await message.answer_video(media, reply_markup=reply_markup)
+                except TelegramBadRequest:
+                    await logg.get_error(f'NO {tag}')
+                    return None
+    except:
+        print("ТУТ ГДЕТО ОШИБКА")
 
 class Phoenix:
     def __init__(self):
@@ -111,5 +114,5 @@ class Phoenix:
                         print(f'video {name[0]} was downloaded')
                 else:
                     print(f'photo {name[0]} was downloaded')
-            await asyncio.sleep(5)
+            await asyncio.sleep(1)
         await message.answer('Все имеющиеся в базе медиа, для которых удалось найти валидный тег, были сохрнены в папку /resources/media директории бота')
