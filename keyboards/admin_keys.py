@@ -17,7 +17,7 @@ def main_admin_keyboard(t_id=None):
     if t_id in all_data().super_admins:
         nmarkup.row(types.KeyboardButton(text="Управление ботом"))
         nmarkup.row(types.KeyboardButton(text="Клонировать бота"))
-
+        nmarkup.row(types.KeyboardButton(text="Подготовить бота к клонированию"))
     nmarkup.row(types.KeyboardButton(text="Выйти"))
     nmarkup.adjust(2)
     return nmarkup.as_markup(resize_keyboard=True, input_field_placeholder=random.choice(usless_list))
