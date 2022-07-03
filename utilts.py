@@ -26,18 +26,18 @@ async def simple_media(message: Message, tag: str,
         except TelegramBadRequest:
             try:
                 return await message.answer_video(media, caption=text, reply_markup=reply_markup)
-            except TelegramBadRequest as error:
+            except TelegramBadRequest:
                 await logg.get_error(f'NO {tag}')
-                raise error
+                return None
     else:
         try:
             return await message.answer_photo(media, reply_markup=reply_markup)
         except TelegramBadRequest:
             try:
                 return await message.answer_video(media, reply_markup=reply_markup)
-            except TelegramBadRequest as error:
+            except TelegramBadRequest:
                 await logg.get_error(f'NO {tag}')
-                raise error
+                return None
 
 
 class Phoenix:
@@ -82,9 +82,8 @@ class Phoenix:
     async def rebirth(message: Message):
         all_media_names = await data_getter('SELECT name FROM assets;')
         for name in all_media_names:
-            try:
-                await simple_media(message, name)
-            except TelegramBadRequest:
+            msg = await simple_media(message, name)
+            if msg is None:
                 await Phoenix.feather(message, name[0])
             await asyncio.sleep(0.5)
         await message.answer('Это все медиа в базе данных. Для всех медиа, '
