@@ -235,9 +235,9 @@ def tables_god():
         #     cur.copy_expert(sql, open(csv_file_name, "r"))
         # except Exception as error:
         #     logg.get_error(f"{error}", __file__)
-
-        con.close()
-        cur.close()
+        #
+        # con.close()
+        # cur.close()
 
     except psycopg2.Error as error:
         logg.get_error(f"PostgreSQL, {error}", __file__)
