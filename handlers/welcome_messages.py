@@ -257,7 +257,7 @@ async def poll_filler(message: types.Message, bot: Bot):
 
 
 @router.poll_answer(state=welcome_states.start_dialog.dialogue_9, flags=flags)  # Сохраняю 4 вопрос
-async def poll_answer_handler_tho(poll_answer: types.PollAnswer, state=FSMContext):
+async def poll_answer_handler_tho(poll_answer: types.PollAnswer, bot: Bot, state: FSMContext):
     options = ["Владимир Путин", "Дмитрий Песков", "Сергей Лавров", "Владимир Соловьев", "Никита Михалков",
                "Юрий Подоляка",
                "Никому из них..."]
@@ -275,7 +275,10 @@ async def poll_answer_handler_tho(poll_answer: types.PollAnswer, state=FSMContex
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Продолжить"))
     text = await sql_safe_select("text", "texts", {"name": "start_people_belive"})
-    await Bot(all_data().bot_token).send_poll(poll_answer.user.id, text, options, is_anonymous=False,
+    await bot.send_message(poll_answer.user.id, text)
+    await Bot(all_data().bot_token).send_poll(poll_answer.user.id, 'Отметьте всех людей, которым '
+                                                                   'доверяете или частично доверяете. Затем нажмите '
+                                                                   '«Проголосовать»', options, is_anonymous=False,
                                               allows_multiple_answers=True,
                                               reply_markup=markup.as_markup(resize_keyboard=True))
     await state.set_state(welcome_states.start_dialog.dialogue_10)
