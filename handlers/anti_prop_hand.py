@@ -231,16 +231,14 @@ async def antip_another_tv(message: Message, state: FSMContext):
     if await sql_safe_select('t_id', 'assets', {'name': f'tv_first_lie_{bigdata["first_tv_count"] + 1}'}) is not False:
         nmarkup.row(types.KeyboardButton(text='1 канал 📺'))
     if await sql_safe_select('t_id', 'assets', {'name': f'tv_24_lie_{bigdata["rus24_tv_count"] + 1}'}) is not False:
-        nmarkup.row(types.KeyboardButton(text='Россия 1 / 24 📺'))
+        nmarkup.add(types.KeyboardButton(text='Россия 1 / 24 📺'))
     if await sql_safe_select('t_id', 'assets', {'name': f'tv_star_lie_{bigdata["Star_tv_count"] + 1}'}) is not False:
         nmarkup.row(types.KeyboardButton(text='Звезда 📺'))
     if await sql_safe_select('t_id', 'assets', {'name': f'tv_HTB_lie_{bigdata["HTB_tv_count"] + 1}'}) is not False:
-        nmarkup.row(types.KeyboardButton(text='НТВ 📺'))
+        nmarkup.add(types.KeyboardButton(text='НТВ 📺'))
     nmarkup.row(types.KeyboardButton(text="Достаточно, мне все понятно ✋"))
-    nmarkup.adjust(2, 2, 1)
-    await message.answer('Я собрал для вас большую базу лжи на федеральных каналах.'
-                         ' Выбирайте любой -- и убедитесь сами!', reply_markup=nmarkup.as_markup(resize_keyboard=True),
-                         disable_web_page_preview=True)
+    text = await sql_safe_select('text', 'texts', {'name': 'antip_lies_for_you'})
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text.contains('пропаганда')), flags=flags)

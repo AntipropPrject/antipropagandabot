@@ -469,7 +469,7 @@ async def donbas_no_army_here(message: Message, state=FSMContext):
 async def donbas_hypocrisy(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'donbas_hypocrisy'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Продолжай🖱"))
+    nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
@@ -481,7 +481,7 @@ async def donbas_untrue(message: Message, state=FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Продолжай🖱") | (F.text == 'Хорошо 👌'), flags=flags)
+@router.message((F.text == "Продолжай ⏳") | (F.text == 'Хорошо 👌'), flags=flags)
 @router.message((F.text == "Вернемся к другим причинам войны 👌"))
 @router.message((F.text == "Путин просто помогал жителям Донбасса, которым не понравились результаты Майдана 🤷"))
 async def donbas_no_army_here(message: Message, state: FSMContext):
