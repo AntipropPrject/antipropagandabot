@@ -6,7 +6,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from handlers.welcome_messages import commands_restart
 
 from data_base.DBuse import sql_safe_select
-
+from stats.stat import mongo_update_stat
 
 
 class StopWarState(StatesGroup):
@@ -129,6 +129,7 @@ async def stopwar_lets_fight(message: Message):
 
 @router.message((F.text == "Спасибо 🤝"), flags=flags)
 async def stopwar_lets_fight(message: Message):
+    await mongo_update_stat(message.from_user.id, 'end')
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_hello_world'})
     text2 = await sql_safe_select('text', 'texts', {'name': 'stopwar_send_me'})
     nmarkup = ReplyKeyboardBuilder()

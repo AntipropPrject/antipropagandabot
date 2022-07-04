@@ -9,6 +9,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from bata import all_data
 from data_base.DBuse import poll_write, sql_safe_select, mongo_add, mongo_select, redis_just_one_write, mongo_user_info, \
     mongo_select_info
+from day_func import day_count
 from resources.all_polls import web_prop, welc_message_one
 from states import welcome_states
 from states.antiprop_states import propaganda_victim
@@ -26,6 +27,7 @@ async def commands_start(message: types.Message, state: FSMContext):  # Перв
     user_id = message.from_user.id
     old = await mongo_select_info(message.from_user.id)
     #if old is None:
+    await day_count()
     await mongo_stat(user_id)
     await mongo_user_info(user_id, message.from_user.username)
     await state.clear()
