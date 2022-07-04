@@ -8,8 +8,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from data_base.DBuse import data_getter, sql_safe_select, sql_safe_update
 from filters.MapFilters import PutinFilter
 from handlers.stopwar_hand import StopWarState
-
-
+from utilts import simple_media
 
 
 class StateofPutin(StatesGroup):
@@ -26,11 +25,12 @@ router.message.filter(state=(StateofPutin))
 @router.message(PutinFilter(), (F.text.in_({"Давай 🤝"})), state=StateofPutin.main, flags=flags)
 async def putin_love_putin(message: Message, state: FSMContext):
     await state.set_state(StateofPutin.main)
-    text = await sql_safe_select('text', 'texts', {'name': 'putin_love_putin'})
+
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Согласен, кто, если не Путин? 🤷‍♂️"))
     nmarkup.row(types.KeyboardButton(text="Нет, не согласен 🙅‍♂️"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await simple_media(message, tag='putin_love_putin', reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
 
 
 @router.message((F.text.in_({"Давай 🤝"})), state=StateofPutin.main, flags=flags)

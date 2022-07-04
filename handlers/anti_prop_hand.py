@@ -388,7 +388,7 @@ async def show_the_news(message: types.Message, state: FSMContext):
         other_channel = message.text[:-2]
         if other_channel != 'Хватит, пропустим остальные источники 🙅‍♂️':
             viewed = data["all_viwed"]
-            viewed.append(other_channel[:-2])
+            viewed.append(other_channel)
             await state.update_data(all_viwed=list(set(viewed)))  # Список просмотренных источников
         tag_media = ''
 
@@ -450,7 +450,10 @@ async def revealing_the_news(message: types.Message, state: FSMContext):
         tag_exposure = 'MINISTRY_exposure_'
     check_end = await check_name(tag_exposure + str(count_news + 1))
     if check_end is not False:  # Проверка если новости закончились
-        markup = await keyboard_for_next_chanel(f"Покажи еще новость с {viewed_channel} 👀")
+        if str(viewed_channel) != 'Министерство обороны РФ':
+            markup = await keyboard_for_next_chanel(f"Покажи еще новость с {viewed_channel} 👀")
+        else:
+            markup = await keyboard_for_next_chanel(f"Покажи еще новость от Министерства обороны РФ 👀")
         await simple_media(message, tag_exposure + str(count_news), reply_markup=markup.as_markup(resize_keyboard=True))
     else:
         markup = ReplyKeyboardBuilder()
