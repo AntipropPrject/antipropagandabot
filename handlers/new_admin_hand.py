@@ -692,7 +692,6 @@ async def statistics(message: Message, state: FSMContext):
     oppos = 1
     apolitical = 1
     stat = await mongo_select_stat()
-    print(stat)
     all_user = len(await mongo_select_stat_all_user())
 
     for i in stat:
@@ -714,7 +713,6 @@ async def statistics(message: Message, state: FSMContext):
                     oppos +=1
                 elif str(j) == 'apolitical':
                     apolitical +=1
-        print(lst_count)
         count_start += lst_count[5]
         count_antiprop += lst_count[1]
         count_donbass += lst_count[2]
