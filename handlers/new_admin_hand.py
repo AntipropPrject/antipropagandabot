@@ -675,7 +675,7 @@ async def statistics(message: Message, state: FSMContext):
         lst = []
         for j in i.values():
             if len(str(j))<2:
-                lst.append(j)
+                lst.append(int(j))
         count_start += lst[1]
         count_antiprop += lst[2]
         count_donbass += lst[3]
