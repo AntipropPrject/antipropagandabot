@@ -326,26 +326,30 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
         set(data["answer_5"])) is False):  # Жертва пропаганды?
         # Вот это все бы не в списки совать, потом займусь
         await redis_just_one_write(f'Usrs: {poll_answer.user.id}: INFOState:', 'Жертва пропаганды')
+        await mongo_update_stat(poll_answer.user.id, column='faith', value='victim', options='$set')
         print('Жертва пропаганды')
     elif {2}.isdisjoint(set(data["answer_4"])) is False:  # Король информации?
         if len(data["answer_2"]) <= 2 and {0, 1, 2, 3, 5, 7, 8} not in set(data["answer_2"]):
             await redis_just_one_write(f'Usrs: {poll_answer.user.id}: INFOState:', 'Король информации')
+            await mongo_update_stat(poll_answer.user.id, column='faith', value='kinginfo', options='$set')
             print('Король информации')
         else:
             await redis_just_one_write(f'Usrs: {poll_answer.user.id}: INFOState:', "Фома неверующий")
+            await mongo_update_stat(poll_answer.user.id, column='faith', value='foma', options='$set')
             print('Фома неерующий')
-
     await state.clear()
     await state.set_state(propaganda_victim.start)
 
     # Вот это все бы не в списки совать
     if {0, 1, 2, 3, 5, 7, 8}.isdisjoint(set(data["answer_2"])) is False:
         await redis_just_one_write(f'Usrs: {poll_answer.user.id}: Politics:', 'Сторонник войны')
+        await mongo_update_stat(poll_answer.user.id, column='political_view', value='warsupp', options='$set')
     elif {4, 6}.isdisjoint(set(data["answer_2"])) is False:
         await redis_just_one_write(f'Usrs: {poll_answer.user.id}: Politics:', 'Оппозиционер')
+        await mongo_update_stat(poll_answer.user.id, column='political_view', value='oppos', options='$set')
     elif {9}.isdisjoint(set(data["answer_2"])) is False:
         await redis_just_one_write(f'Usrs: {poll_answer.user.id}: Politics:', 'Аполитичный')
-
+        await mongo_update_stat(poll_answer.user.id, column='political_view', value='apolitical', options='$set')
     await state.set_state(propaganda_victim.start)
     if data["answer_3"] == "Нет, не верю ни слову ⛔":
         markup = ReplyKeyboardBuilder()
