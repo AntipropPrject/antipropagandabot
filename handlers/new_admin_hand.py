@@ -711,6 +711,7 @@ async def statistics(message: Message, state: FSMContext):
                 oppos +=1
             elif str(j) == 'apolitical':
                 apolitical +=1
+        print(lst_count)
         count_start += lst_count[1]
         count_antiprop += lst_count[2]
         count_donbass += lst_count[3]
