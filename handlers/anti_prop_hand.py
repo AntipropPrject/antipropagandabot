@@ -50,12 +50,13 @@ async def antip_water_lie(message: Message):
 
 @router.message((F.text == "Продолжай ⌛️"), state=propaganda_victim.start, flags=flags)
 async def antip_cant_unsee(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'antip_cant_unsee'})
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Это случайность, просто редакторам скинули фейк, а они не проверили 🤷‍♀️"))
     nmarkap.row(types.KeyboardButton(text="Это явная ложь, не случайность 🗣"))
     nmarkap.add(types.KeyboardButton(text="Не знаю, давай продолжим 👉"))
     nmarkap.row(types.KeyboardButton(text="Это специальная ложь, но и на Украине так же делают ☝️"))
-    await simple_media(message, 'antip_cant_unsee', nmarkap.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text.contains('редакторам скинули фейк')), flags=flags)
