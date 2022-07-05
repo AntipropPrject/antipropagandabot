@@ -698,6 +698,7 @@ async def statistics(message: Message, state: FSMContext):
         lst_count = []
         for j in i.values():
             if len(str(j))<2:
+                print(j)
                 lst_count.append(int(j))
             if str(j) == 'victim':
                 victim +=1
