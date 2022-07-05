@@ -8,7 +8,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from bata import all_data
 from data_base.DBuse import poll_write, sql_safe_select, mongo_add, mongo_select, redis_just_one_write, mongo_user_info, \
-    mongo_select_info
+    mongo_select_info, redis_just_one_read
 from resources.all_polls import web_prop, welc_message_one
 from states import welcome_states
 from states.antiprop_states import propaganda_victim
@@ -343,9 +343,38 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
         await redis_just_one_write(f'Usrs: {poll_answer.user.id}: Politics:', 'Оппозиционер')
     elif {9}.isdisjoint(set(data["answer_2"])) is False:
         await redis_just_one_write(f'Usrs: {poll_answer.user.id}: Politics:', 'Аполитичный')
-
     await state.set_state(propaganda_victim.start)
-    if data["answer_3"] == "Нет, не верю ни слову ⛔":
+    if await redis_just_one_read(f'Usrs: {poll_answer.user.id}: INFOState:') == 'Жертва пропаганды':
+        text = await sql_safe_select("text", "texts", {"name": "antip_only_facts"})
+        nmarkap = ReplyKeyboardBuilder()
+        nmarkap.row(types.KeyboardButton(text="Мне интересно 👌"))
+        nmarkap.add(types.KeyboardButton(text="Ну давай... 🤨"))
+        nmarkap.row(types.KeyboardButton(text="Что такое пропаганда? 🤔"))
+        await bot.send_message(poll_answer.user.id, text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+    else:
+        markup = ReplyKeyboardBuilder()
+        markup.row(types.KeyboardButton(text="Пропустим этот шаг 👉"))
+        markup.row(types.KeyboardButton(text="Покажи ложь на ТВ — мне интересно посмотреть! 📺"))
+        text = await sql_safe_select("text", "texts", {"name": "antip_all_no_TV"})
+        await bot.send_message(poll_answer.user.id, text, reply_markup=markup.as_markup(resize_keyboard=True),
+                               disable_web_page_preview=True)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"""    if data["answer_3"] == "Нет, не верю ни слову ⛔":
         markup = ReplyKeyboardBuilder()
         markup.row(types.KeyboardButton(text="Пропустим этот шаг 👉"))
         markup.row(types.KeyboardButton(text="Покажи ложь на ТВ — мне интересно посмотреть! 📺"))
@@ -371,4 +400,4 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
         nmarkup.row(types.KeyboardButton(text="Открой мне глаза 👀"))
         nmarkup.row(types.KeyboardButton(text="Ну удиви меня 🤔"))
         await bot.send_message(poll_answer.user.id, text, reply_markup=nmarkup.as_markup(resize_keyboard=True),
-                               disable_web_page_preview=True)
+                               disable_web_page_preview=True)"""

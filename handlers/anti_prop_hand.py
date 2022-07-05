@@ -23,7 +23,59 @@ router = Router()
 
 router.message.filter(state=propaganda_victim)
 
-"""@router.message(TVPropagandaFilter(option="Скорее да"), (F.text == 'Поехали!'))
+
+@router.message((F.text.contains('такое пропаганда')), flags=flags)
+async def antip_what_is_prop(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'antip_what_is_prop'})
+    nmarkap = ReplyKeyboardBuilder()
+    nmarkap.row(types.KeyboardButton(text="Мне интересно 👌"))
+    nmarkap.add(types.KeyboardButton(text="Ну давай... 🤨"))
+    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+
+
+@router.message((F.text == 'Мне интересно 👌') | (F.text == 'Ну давай... 🤨'), flags=flags)
+async def antip_time_wasted(message: Message):
+    nmarkap = ReplyKeyboardBuilder()
+    nmarkap.row(types.KeyboardButton(text="В чём подвох? 🤔"))
+    nmarkap.add(types.KeyboardButton(text="Я заметил(а)! 😯"))
+    await simple_media(message, 'antip_time_wasted', nmarkap.as_markup(resize_keyboard=True))
+
+
+@router.message((F.text == 'В чём подвох? 🤔') | (F.text == 'Я заметил(а)! 😯'), flags=flags)
+async def antip_water_lie(message: Message):
+    nmarkap = ReplyKeyboardBuilder()
+    nmarkap.row(types.KeyboardButton(text="Продолжай ⌛️"))
+    await simple_media(message, 'antip_water_lie', nmarkap.as_markup(resize_keyboard=True))
+
+
+@router.message((F.text == "Продолжай ⌛️"), state=propaganda_victim.start, flags=flags)
+async def antip_cant_unsee(message: Message):
+    nmarkap = ReplyKeyboardBuilder()
+    nmarkap.row(types.KeyboardButton(text="Это случайность, просто редакторам скинули фейк, а они не проверили 🤷‍♀️"))
+    nmarkap.row(types.KeyboardButton(text="Это явная ложь, не случайность 🗣"))
+    nmarkap.add(types.KeyboardButton(text="Не знаю, давай продолжим 👉"))
+    nmarkap.row(types.KeyboardButton(text="Это специальная ложь, но и на Украине так же делают ☝️"))
+    await simple_media(message, 'antip_cant_unsee', nmarkap.as_markup(resize_keyboard=True))
+
+
+@router.message((F.text.contains('редакторам скинули фейк')), flags=flags)
+async def antip_cant_unsee(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'antip_fake_on_main'})
+    nmarkap = ReplyKeyboardBuilder()
+    nmarkap.row(types.KeyboardButton(text="Хорошо 👌"))
+    await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+
+
+@router.message((F.text.contains(' специальная ложь, но')), flags=flags)
+async def antip_eye_log(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'antip_eye_log'})
+    nmarkap = ReplyKeyboardBuilder()
+    nmarkap.row(types.KeyboardButton(text="Хорошо 👌"))
+    await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+
+
+@router.message(TVPropagandaFilter(option="Скорее да"), ((F.text == "Хорошо 👌") |
+                (F.text.contains('явная ложь')) | (F.text.contains('Не знаю, давай'))))
 async def antiprop_rather_yes_start(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_rather_yes_TV'})
     nmarkup = ReplyKeyboardBuilder()
@@ -32,15 +84,17 @@ async def antiprop_rather_yes_start(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(TVPropagandaFilter(option="Да, полностью доверяю"), (F.text == 'Поехали!'))
-async def antiprop_all_yes_start(message: Message):
+@router.message(TVPropagandaFilter(option="Да, полностью доверяю"), ((F.text == "Хорошо 👌") |
+                (F.text.contains('явная ложь')) | (F.text.contains('Не знаю, давай'))))
+async def antip_all_yes_TV(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_all_yes_TV'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Продолжай 📺"))
+    nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(TVPropagandaFilter(option="Скорее нет"), (F.text == 'Поехали!'))
+@router.message(TVPropagandaFilter(option="Скорее нет"), ((F.text == "Хорошо 👌") |
+                (F.text.contains('явная ложь')) | (F.text.contains('Не знаю, давай'))))
 async def rather_no_TV(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_rather_no_TV'})
     nmarkup = ReplyKeyboardBuilder()
@@ -49,17 +103,19 @@ async def rather_no_TV(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(TVPropagandaFilter(option="Нет, не верю ни слову"), (F.text == 'Поехали!'))
+@router.message(TVPropagandaFilter(option="Нет, не верю ни слову"), ((F.text == "Хорошо 👌") |
+                (F.text.contains('явная ложь')) | (F.text.contains('Не знаю, давай'))))
 async def antip_all_no_TV(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_all_no_TV'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Пропустим этот шаг 👉"))
     nmarkup.row(types.KeyboardButton(text="Покажи ложь на ТВ -- мне интересно посмотреть! 📺"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)"""
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(TVPropagandaFilter(option="Да, полностью доверяю"), (F.text == 'Продолжай ⏳'), flags=flags)
-async def antiprop_all_yes_second(message: Message):
+@router.message(TVPropagandaFilter(option="Да, полностью доверяю"), (F.text == 'Продолжай ⏳'),
+                state=propaganda_victim.start, flags=flags)
+async def antip_all_yes_TV_2(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_all_yes_TV_2'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Открой мне глаза 👀"))
@@ -70,16 +126,36 @@ async def antiprop_all_yes_second(message: Message):
 @router.message(
     (F.text.in_({'Открой мне глаза 👀', "Ну удиви меня 🤔", "Покажи ложь на ТВ — мне интересно посмотреть! 📺"})),
     flags=flags)
-async def antiprop_tv_selecter(message: Message, state: FSMContext):
+async def antip_censorship_lie(message: Message, state: FSMContext):
+    await state.set_state(propaganda_victim.choose_TV)
+    text = await sql_safe_select('text', 'texts', {'name': 'antip_censorship_lie'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
+    nmarkup.row(types.KeyboardButton(text="Больше похоже на теорию заговора 👽"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message((F.text.contains('теорию заговора')), state=propaganda_victim.choose_TV, flags=flags)
+async def antip_conspirasy(message: Message, state: FSMContext):
+    text = await sql_safe_select('text', 'texts', {'name': 'antip_conspiracy'})
+    nmarkup = ReplyKeyboardBuilder()
+    utv_list = ['1 канал 📺', 'Россия 1 / 24 📺', 'НТВ 📺', 'Звезда 📺']
+    for channel in utv_list:
+        nmarkup.row(types.KeyboardButton(text=channel))
+    nmarkup.adjust(2, 2)
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message((F.text == "Продолжай ⏳"), state=propaganda_victim.choose_TV, flags=flags)
+async def antip_pile_of_lies(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_pile_of_lies'})
-    utv_list = ['1 канал 📺', 'Россия 1 / 24 📺', 'Звезда 📺', 'НТВ 📺']
+    utv_list = ['1 канал 📺', 'Россия 1 / 24 📺', 'НТВ 📺', 'Звезда 📺']
     await state.update_data(first_tv_count=0, rus24_tv_count=0, HTB_tv_count=0, Star_tv_count=0)
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Что такое пропаганда? 🤔"))
     for channel in utv_list:
         nmarkup.row(types.KeyboardButton(text=channel))
     nmarkup.row(types.KeyboardButton(text="Какая-то теория заговора, не верю... 👽"))
-    nmarkup.adjust(1, 2, 2, 1)
+    nmarkup.adjust(2, 2, 1)
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
@@ -241,28 +317,7 @@ async def antip_another_tv(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.contains('пропаганда')), flags=flags)
-async def russia_in_nutshell(message: Message, state: FSMContext):
-    text = await sql_safe_select('text', 'texts', {'name': 'antip_what_is_prop'})
-    utv_list = ['1 канал 📺', 'Россия 1 / 24 📺', 'Звезда 📺', 'НТВ 📺']
-    nmarkup = ReplyKeyboardBuilder()
-    for channel in utv_list:
-        nmarkup.row(types.KeyboardButton(text=channel))
-    nmarkup.row(types.KeyboardButton(text="Какая-то теория заговора, не верю... 👽"))
-    nmarkup.adjust(2, 2, 1)
-    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
-
-@router.message((F.text.contains('заговора')), flags=flags)
-async def antip_conspirasy(message: Message, state: FSMContext):
-    text = await sql_safe_select('text', 'texts', {'name': 'antip_conspiracy'})
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Что такое пропаганда? 🤔"))
-    utv_list = ['1 канал 📺', 'Россия 1 / 24 📺', 'Звезда 📺', 'НТВ 📺']
-    for channel in utv_list:
-        nmarkup.row(types.KeyboardButton(text=channel))
-    nmarkup.adjust(1, 2, 2)
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message(WebPropagandaFilter(), (
