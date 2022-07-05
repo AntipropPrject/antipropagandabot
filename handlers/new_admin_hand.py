@@ -658,6 +658,23 @@ async def import_csv(query: types.CallbackQuery, state: FSMContext):
     await state.set_state(admin.edit_context)
     await query.message.answer("Импорт завершен успешно", reply_markup=await settings_bot())
 
+
+def count_visual(all_user, count):
+
+    pr = round(count / all_user * 100)
+    if pr <= 20:
+        return f'<b>{pr}%</b> 🔴'
+    elif pr <= 40:
+        return f"<b>{pr}%</b> 🟤"
+    elif pr <= 60:
+        return f"<b>{pr}%</b> 🟠"
+    elif pr <= 80:
+        return f"<b>{pr}%</b> 🟡"
+    elif pr <= 100:
+        return f"<b>{pr}%</b> 🟢"
+
+
+
 @router.message((F.text == 'Статистика бота'), state=admin.edit_context)
 async def statistics(message: Message, state: FSMContext):
     await state.set_state(admin.edit_context)
@@ -668,31 +685,51 @@ async def statistics(message: Message, state: FSMContext):
     count_war_aims = 1
     count_putin = 1
     count_end = 1
+    victim = 1
+    kinginfo = 1
+    foma = 1
+    warsupp = 1
+    oppos = 1
+    apolitical = 1
     stat = await mongo_select_stat()
     all_user = len(await mongo_select_stat_all_user())
 
     for i in stat:
-        lst = []
+        lst_count = []
         for j in i.values():
             if len(str(j))<2:
-                lst.append(int(j))
-        count_start += lst[1]
-        count_antiprop += lst[2]
-        count_donbass += lst[3]
-        count_war_aims += lst[4]
-        count_putin += lst[5]
-        count_end += lst[6]
+                lst_count.append(int(j))
+            if str(j) == 'victim':
+                victim +=1
+            elif str(j) == 'kinginfo':
+                kinginfo +=1
+            elif str(j) == 'foma':
+                foma +=1
+            elif str(j) == 'warsupp':
+                warsupp +=1
+            elif str(j) == 'oppos':
+                oppos +=1
+            elif str(j) == 'apolitical':
+                apolitical +=1
+        count_start += lst_count[1]
+        count_antiprop += lst_count[2]
+        count_donbass += lst_count[3]
+        count_war_aims += lst_count[4]
+        count_putin += lst_count[5]
+        count_end += lst_count[6]
     await message.answer('<b>СТАТИСТИКА БОТА</b>\n'
                          '➖➖➖➖➖➖➖➖➖➖\n\n'
                          f'Пользователей за всё время: <b>{all_user}</b>\n'
                          f'Пользователей за 24 часа: <b>{day_unt}</b>\n'
                          f'➖➖➖➖➖➖➖➖➖➖\n\n'
-                         f'Прошли начало: {count_start} (<b>{round(count_start/all_user*100, 1)}%</b>)\n'
-                         f'Прошли Антипропаганду: {count_antiprop} (<b>{round(count_antiprop/all_user*100, 1)}%</b>)\n'
-                         f'Прошли Донбасс: {count_donbass} (<b>{round(count_donbass/all_user*100, 1)}%</b>)\n'
-                         f'Прошли Цели войны: {count_war_aims} (<b>{round(count_war_aims/all_user*100, 1)}%</b>)\n'
-                         f'Прошли Путина: {count_putin} (<b>{round(count_putin/all_user*100, 1)}%</b>)\n'
-                         f'Дошли до конца: {count_end} (<b>{round(count_end/all_user*100, 1)}%</b>)')
+                         f'Прошли начало: {count_start} ({count_visual(all_user, count_start)})\n'
+                         f'Прошли Антипропаганду: {count_antiprop} ({count_visual(all_user, count_antiprop)})\n'
+                         f'Прошли Донбасс: {count_donbass} ({count_visual(all_user, count_donbass)})\n'
+                         f'Прошли Цели войны: {count_war_aims} ({count_visual(all_user, count_war_aims)})\n'
+                         f'Прошли Путина: {count_putin} ({count_visual(all_user, count_putin)})\n'
+                         f'Дошли до конца: {count_end} ({count_visual(all_user, count_end)})')
+
+
 
 
 

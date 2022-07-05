@@ -40,3 +40,4 @@ async def mongo_select_stat_all_user():
         return lst
     except Exception as error:
         await logg.get_error(f"mongo_select | {error}", __file__)
+
