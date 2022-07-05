@@ -670,7 +670,7 @@ def count_visual(all_user, count):
         return f"<b>{pr}%</b> 🟠"
     elif pr <= 80:
         return f"<b>{pr}%</b> 🟡"
-    elif pr <= 100:
+    elif pr >= 80:
         return f"<b>{pr}%</b> 🟢"
 
 
@@ -698,39 +698,40 @@ async def statistics(message: Message, state: FSMContext):
     for i in stat:
         lst_count = []
         for j in i.values():
-            if len(str(j))<2:
-                print(j)
-                lst_count.append(int(j))
-            if str(j) == 'victim':
-                victim +=1
-            elif str(j) == 'kinginfo':
-                kinginfo +=1
-            elif str(j) == 'foma':
-                foma +=1
-            elif str(j) == 'warsupp':
-                warsupp +=1
-            elif str(j) == 'oppos':
-                oppos +=1
-            elif str(j) == 'apolitical':
-                apolitical +=1
+            try:
+                if int(j) < 199990:
+                    lst_count.append(int(j))
+            except:
+                if str(j) == 'victim':
+                    victim +=1
+                elif str(j) == 'kinginfo':
+                    kinginfo +=1
+                elif str(j) == 'foma':
+                    foma +=1
+                elif str(j) == 'warsupp':
+                    warsupp +=1
+                elif str(j) == 'oppos':
+                    oppos +=1
+                elif str(j) == 'apolitical':
+                    apolitical +=1
         print(lst_count)
-        count_start += lst_count[1]
-        count_antiprop += lst_count[2]
-        count_donbass += lst_count[3]
-        count_war_aims += lst_count[4]
-        count_putin += lst_count[5]
-        count_end += lst_count[6]
+        count_start += lst_count[5]
+        count_antiprop += lst_count[1]
+        count_donbass += lst_count[2]
+        count_war_aims += lst_count[6]
+        count_putin += lst_count[4]
+        count_end += lst_count[3]
     await message.answer('<b>СТАТИСТИКА БОТА</b>\n'
                          '➖➖➖➖➖➖➖➖➖➖\n\n'
                          f'Пользователей за всё время: <b>{all_user}</b>\n'
                          f'Пользователей за 24 часа: <b>{day_unt}</b>\n'
                          f'➖➖➖➖➖➖➖➖➖➖\n\n'
-                         f'Прошли начало: {count_start} ({count_visual(all_user, count_start)})\n'
-                         f'Прошли Антипропаганду: {count_antiprop} ({count_visual(all_user, count_antiprop)})\n'
-                         f'Прошли Донбасс: {count_donbass} ({count_visual(all_user, count_donbass)})\n'
+                         f'Прошли вступление: {count_start} ({count_visual(all_user, count_start)})\n'
+                         f'Прошли пропаганду: {count_antiprop} ({count_visual(all_user, count_antiprop)})\n'
+                         f'Прошли кт.Донбасс: {count_donbass} ({count_visual(all_user, count_donbass)})\n'
                          f'Прошли Цели войны: {count_war_aims} ({count_visual(all_user, count_war_aims)})\n'
-                         f'Прошли Путина: {count_putin} ({count_visual(all_user, count_putin)})\n'
-                         f'Дошли до конца: {count_end} ({count_visual(all_user, count_end)})')
+                         f'Прошли Президента: {count_putin} ({count_visual(all_user, count_putin)})\n'
+                         f'Прошли до   конца: {count_end} ({count_visual(all_user, count_end)})')
 
 
 
