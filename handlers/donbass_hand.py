@@ -11,6 +11,7 @@ from handlers.true_resons_hand import TruereasonsState
 from keyboards.main_keys import filler_kb
 from resources.all_polls import donbass_first_poll, welc_message_one
 from states.donbass_states import donbass_state
+from stats.stat import mongo_update_stat
 from utilts import simple_media
 
 
@@ -496,6 +497,7 @@ async def donbas_no_army_here(message: Message, state: FSMContext):
 @router.message((F.text == "Да, замечаю‍♀") | (F.text == "Нет, не замечаю🤷‍♀"), flags=flags)
 async def donbas_no_army_here(message: Message, state=FSMContext):
     await state.set_state(TruereasonsState.main)
+    await mongo_update_stat(message.from_user.id, 'donbass')
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Какой ужас 😨"))
     nmarkup.row(types.KeyboardButton(text="Давай продолжим 👉"))

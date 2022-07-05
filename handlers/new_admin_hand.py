@@ -14,7 +14,8 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 from Testbot import bot
 from bata import all_data
 from data_base.DBuse import sql_safe_select, sql_safe_update, sql_safe_insert, mongo_select_info, mongo_add_admin, \
-    mongo_pop_admin, mongo_select_admins, sql_delete, redis_just_one_write, redis_just_one_read
+    mongo_pop_admin, mongo_select_admins, sql_delete, redis_just_one_write, redis_just_one_read, mongo_select
+from day_func import day_count
 from export_to_csv.pg_mg import backin
 from filters.isAdmin import IsAdmin, IsSudo, isKamaga
 from keyboards.admin_keys import main_admin_keyboard, middle_admin_keyboard, app_admin_keyboard, redct_text, \
@@ -22,6 +23,7 @@ from keyboards.admin_keys import main_admin_keyboard, middle_admin_keyboard, app
 from keyboards.new_admin_kb import secretrebornkb
 from log import logg
 from states.admin_states import admin
+from stats.stat import mongo_select_stat, mongo_select_stat_all_user
 from utilts import Phoenix
 
 router = Router()
@@ -656,6 +658,43 @@ async def import_csv(query: types.CallbackQuery, state: FSMContext):
     await state.set_state(admin.edit_context)
     await query.message.answer("Импорт завершен успешно", reply_markup=await settings_bot())
 
+@router.message((F.text == 'Статистика бота'), state=admin.edit_context)
+async def statistics(message: Message, state: FSMContext):
+    await state.set_state(admin.edit_context)
+    day_unt = await day_count(get_count=True)
+    count_start = 1
+    count_antiprop = 1
+    count_donbass = 1
+    count_war_aims = 1
+    count_putin = 1
+    count_end = 1
+    stat = await mongo_select_stat()
+    all_user = len(await mongo_select_stat_all_user())
+
+    for i in stat:
+        lst = []
+        for j in i.values():
+            if len(str(j))<2:
+                lst.append(j)
+        count_start += lst[1]
+        count_antiprop += lst[2]
+        count_donbass += lst[3]
+        count_war_aims += lst[4]
+        count_putin += lst[5]
+        count_end += lst[6]
+    await message.answer('<b>СТАТИСТИКА БОТА</b>\n'
+                         '➖➖➖➖➖➖➖➖➖➖\n\n'
+                         f'Пользователей за всё время: <b>{all_user}</b>\n'
+                         f'Пользователей за 24 часа: <b>{day_unt}</b>\n'
+                         f'➖➖➖➖➖➖➖➖➖➖\n\n'
+                         f'Прошли начало: {count_start} (<b>{round(count_start/all_user*100, 1)}%</b>)\n'
+                         f'Прошли Антипропаганду: {count_antiprop} (<b>{round(count_antiprop/all_user*100, 1)}%</b>)\n'
+                         f'Прошли Донбасс: {count_donbass} (<b>{round(count_donbass/all_user*100, 1)}%</b>)\n'
+                         f'Прошли Цели войны: {count_war_aims} (<b>{round(count_war_aims/all_user*100, 1)}%</b>)\n'
+                         f'Прошли Путина: {count_putin} (<b>{round(count_putin/all_user*100, 1)}%</b>)\n'
+                         f'Дошли до конца: {count_end} (<b>{round(count_end/all_user*100, 1)}%</b>)')
+
+
 
 @router.message(IsSudo(), commands=["reborn"], state=admin.edit_context)
 async def reborn_menu(message: Message, state: FSMContext):
@@ -755,3 +794,5 @@ async def clone_bot_3(message: Message, state: FSMContext):
     caption = message.caption
     await sql_safe_insert('new_assets', {'t_id': photo_id, 'name': caption})
     await message.answer(f"Фото {caption} добавлено в базу данных. Ассет: {photo_id}")
+
+

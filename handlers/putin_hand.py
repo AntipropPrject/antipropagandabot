@@ -8,6 +8,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from data_base.DBuse import data_getter, sql_safe_select, sql_safe_update
 from filters.MapFilters import PutinFilter
 from handlers.stopwar_hand import StopWarState
+from stats.stat import mongo_update_stat
 from utilts import simple_media
 
 
@@ -277,6 +278,7 @@ async def putin_game2_are_you_sure(message: Message):
                  (F.text == "Давай 🤝")), state=StateofPutin.game2, flags=flags)
 async def putin_in_the_past(message: Message, state: FSMContext):
     await state.clear()
+    await mongo_update_stat(message.from_user.id, 'putin')
     await state.set_state(StateofPutin.final)
     text = await sql_safe_select('text', 'texts', {'name': 'putin_in_the_past'})
     nmarkup = ReplyKeyboardBuilder()
@@ -299,6 +301,7 @@ async def putin_prove_me(message: Message, state: FSMContext):
                  (F.text == "Был хорошим президентом раньше, но сейчас - нет 🙅") |
                  (F.text == "Давай 👌")), state=StateofPutin, flags=flags)
 async def stopwar_start(message: Message, state: FSMContext):
+    await mongo_update_stat(message.from_user.id, 'putin')
     await state.set_state(StopWarState.main)
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_p_start'})
     nmarkup = ReplyKeyboardBuilder()

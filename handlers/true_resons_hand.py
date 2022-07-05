@@ -17,6 +17,7 @@ from handlers.preventive_strike import PreventStrikeState
 from handlers.putin_hand import StateofPutin
 from resources.all_polls import welc_message_one
 from states.donbass_states import donbass_state
+from stats.stat import mongo_update_stat
 from utilts import simple_media
 
 
@@ -490,6 +491,7 @@ async def reasons_why_support_war(message: Message):
                 state=TruereasonsState.final, flags=flags)
 async def reasons_now_he_normal(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_now_he_normal'})
+    await mongo_update_stat(message.from_user.id, 'war_aims')
     await state.set_state(StateofPutin.main)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Давай 🤝"))
