@@ -2,8 +2,8 @@ from aiogram.dispatcher.fsm.state import State, StatesGroup
 
 
 class propaganda_victim(StatesGroup):
-
     start = State()
+    choose_TV = State()
     options = State()
     tv_first = State()
     tv_russia24 = State()
