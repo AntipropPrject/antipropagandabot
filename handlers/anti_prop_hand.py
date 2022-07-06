@@ -13,7 +13,7 @@ from filters.MapFilters import WebPropagandaFilter, TVPropagandaFilter, PplPropa
 from handlers import true_resons_hand
 from keyboards.map_keys import antip_why_kb, antip_killme_kb
 from resources.all_polls import web_prop
-from resources.other_lists import channels
+from resources.all_polls import channels
 from states.antiprop_states import propaganda_victim
 from stats.stat import mongo_update_stat
 from utilts import simple_media
