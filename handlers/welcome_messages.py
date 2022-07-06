@@ -1,11 +1,8 @@
-import asyncio
-
 from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-
 from bata import all_data
 from data_base.DBuse import poll_write, sql_safe_select, mongo_add, mongo_select, redis_just_one_write, mongo_user_info, \
     mongo_select_info, redis_just_one_read
@@ -201,7 +198,7 @@ async def poll_filler(message: types.Message, bot: Bot):
 
 
 @router.poll_answer(state=welcome_states.start_dialog.dialogue_7, flags=flags)  # Сохраняю 2 вопрос
-async def poll_answer_handler(poll_answer: types.PollAnswer, state: FSMContext):
+async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FSMContext):
     # сохранение 2 вопроса
     options = await state.get_data()
     lst_options = options["option_1"]
@@ -215,7 +212,7 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, state: FSMContext):
     markup.row(types.KeyboardButton(text="Скорее да 👍"), types.KeyboardButton(text="Скорее нет 👎"))
 
     text = await sql_safe_select("text", "texts", {"name": "start_belive_TV"})
-    await Bot(all_data().bot_token).send_message(chat_id=poll_answer.user.id, text=text,
+    await bot.send_message(chat_id=poll_answer.user.id, text=text,
                                                  reply_markup=markup.as_markup(resize_keyboard=True))
     await state.set_state(welcome_states.start_dialog.dialogue_8)
 
