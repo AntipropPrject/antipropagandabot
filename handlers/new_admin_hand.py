@@ -679,57 +679,19 @@ def count_visual(all_user, count):
 async def statistics(message: Message, state: FSMContext):
     await state.set_state(admin.edit_context)
     day_unt = await day_count(get_count=True)
-    count_start = 1
-    count_antiprop = 1
-    count_donbass = 1
-    count_war_aims = 1
-    count_putin = 1
-    count_end = 1
-    victim = 1
-    kinginfo = 1
-    foma = 1
-    warsupp = 1
-    oppos = 1
-    apolitical = 1
     stat = await mongo_select_stat()
     all_user = len(await mongo_select_stat_all_user())
-
-    for i in stat:
-        lst_count = []
-        for j in i.values():
-            try:
-                if int(j) < 199990:
-                    lst_count.append(int(j))
-            except:
-                if str(j) == 'victim':
-                    victim +=1
-                elif str(j) == 'kinginfo':
-                    kinginfo +=1
-                elif str(j) == 'foma':
-                    foma +=1
-                elif str(j) == 'warsupp':
-                    warsupp +=1
-                elif str(j) == 'oppos':
-                    oppos +=1
-                elif str(j) == 'apolitical':
-                    apolitical +=1
-        count_start += lst_count[5]
-        count_antiprop += lst_count[1]
-        count_donbass += lst_count[2]
-        count_war_aims += lst_count[6]
-        count_putin += lst_count[4]
-        count_end += lst_count[3]
     await message.answer('<b>СТАТИСТИКА БОТА</b>\n'
                          '➖➖➖➖➖➖➖➖➖➖\n\n'
                          f'Пользователей за всё время: <b>{all_user}</b>\n'
                          f'Пользователей за 24 часа: <b>{day_unt}</b>\n'
                          f'➖➖➖➖➖➖➖➖➖➖\n\n'
-                         f'Прошли вступление: {count_start} ({count_visual(all_user, count_start)})\n'
-                         f'Прошли пропаганду: {count_antiprop} ({count_visual(all_user, count_antiprop)})\n'
-                         f'Прошли кт.Донбасс: {count_donbass} ({count_visual(all_user, count_donbass)})\n'
-                         f'Прошли Цели войны: {count_war_aims} ({count_visual(all_user, count_war_aims)})\n'
-                         f'Прошли Президента: {count_putin} ({count_visual(all_user, count_putin)})\n'
-                         f'Прошли до   конца: {count_end} ({count_visual(all_user, count_end)})')
+                         f'Прошли вступление: {stat["start"]} ({count_visual(all_user, stat["start"])})\n'
+                         f'Прошли пропаганду: {stat["antiprop"]} ({count_visual(all_user, stat["antiprop"])})\n'
+                         f'Прошли кт.Донбасс: {stat["donbass"]} ({count_visual(all_user, stat["donbass"])})\n'
+                         f'Прошли Цели войны: {stat["war_aims"]} ({count_visual(all_user, stat["war_aims"])})\n'
+                         f'Прошли Президента: {stat["putin"]} ({count_visual(all_user, stat["putin"])})\n'
+                         f'Прошли до   конца: {stat["end"]} ({count_visual(all_user, stat["end"])})')
 
 
 
