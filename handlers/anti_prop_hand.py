@@ -140,6 +140,7 @@ async def antip_censorship_lie(message: Message, state: FSMContext):
 async def antip_conspirasy(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_conspiracy'})
     nmarkup = ReplyKeyboardBuilder()
+    await state.update_data(first_tv_count=0, rus24_tv_count=0, HTB_tv_count=0, Star_tv_count=0)
     utv_list = ['1 канал 📺', 'Россия 1 / 24 📺', 'НТВ 📺', 'Звезда 📺']
     for channel in utv_list:
         nmarkup.row(types.KeyboardButton(text=channel))
