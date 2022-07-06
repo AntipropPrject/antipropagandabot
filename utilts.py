@@ -131,7 +131,6 @@ async def happy_tester(bot):
     loginfo = g.log('--since=2013-09-01', '--pretty=format:%s')
     old_log_set = redis.smembers('TESTSET')
     new_log_set = set(loginfo.split('\n'))
-    print('Commits', new_log_set)
     redis.sadd('TESTSET', *new_log_set)
     diff = new_log_set - old_log_set
     botname = (await bot.get_me()).first_name
