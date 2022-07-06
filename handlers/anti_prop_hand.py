@@ -155,8 +155,7 @@ async def antip_pile_of_lies(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     for channel in utv_list:
         nmarkup.row(types.KeyboardButton(text=channel))
-    nmarkup.row(types.KeyboardButton(text="Какая-то теория заговора, не верю... 👽"))
-    nmarkup.adjust(2, 2, 1)
+    nmarkup.adjust(2, 2)
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
