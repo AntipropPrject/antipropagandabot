@@ -147,6 +147,6 @@ async def happy_tester(bot):
         print(f'[{datetime.now().strftime("%H:%M")}] Bot is up, detected new commits:{string}')
     else:
         await bot.send_message(bata.all_data().commichannel,
-                               f'[{datetime.now().strftime("%H:%M")}] Bot {botname} is up, detected new commits:\n {string}')
+                               f'All is fine')
         print(f'[{datetime.now().strftime("%H:%M")}] Bot is up, shore is clear: no new commits here')
     await bot.session.close()
