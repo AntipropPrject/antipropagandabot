@@ -661,7 +661,7 @@ async def import_csv(query: types.CallbackQuery, state: FSMContext):
 
 def count_visual(all_user, count):
 
-    pr = round(count / all_user * 100)
+    pr = round(int(count) / int(all_user * 100))
     if pr <= 20:
         return f'<b>{pr}%</b> 🔴'
     elif pr <= 40:
