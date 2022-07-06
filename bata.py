@@ -36,4 +36,4 @@ class all_data():
 
 #Settings:
 
-Check_tickets = False
+Check_tickets = True
