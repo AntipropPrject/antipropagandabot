@@ -5,6 +5,7 @@ import shutil
 import zipfile
 from asyncio import sleep
 
+import pymongo
 from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
@@ -660,6 +661,7 @@ async def import_csv(query: types.CallbackQuery, state: FSMContext):
 
 
 def count_visual(all_user, count):
+
     pr = round(count / all_user * 100)
     if pr <= 20:
         return f'<b>{pr}%</b> 🔴'
@@ -673,66 +675,75 @@ def count_visual(all_user, count):
         return f"<b>{pr}%</b> 🟢"
 
 
+
 @router.message((F.text == 'Статистика бота'), state=admin.edit_context)
 async def statistics(message: Message, state: FSMContext):
-    await state.set_state(admin.edit_context)
-    day_unt = await day_count(get_count=True)
-    count_start = 1
-    count_antiprop = 1
-    count_donbass = 1
-    count_war_aims = 1
-    count_putin = 1
-    count_end = 1
-    victim = 1
-    kinginfo = 1
-    foma = 1
-    warsupp = 1
-    oppos = 1
-    apolitical = 1
-    stat = await mongo_select_stat()
+    mongo = pymongo.MongoClient(host='mongodb://localhost:27017', username='mongoOTPOR', password='mongoOTPOR')
+    database = mongo['database']
+    collection_stat = database['statistics']
+    collection_stat_all = database['userinfo']
     all_user = len(await mongo_select_stat_all_user())
+    print(all_user)
 
-    for i in stat:
-        lst_count = []
-        for j in i.values():
-            try:
-                if int(j) < 199990:
-                    lst_count.append(int(j))
-            except:
-                if str(j) == 'victim':
-                    victim += 1
-                elif str(j) == 'kinginfo':
-                    kinginfo += 1
-                elif str(j) == 'foma':
-                    foma += 1
-                elif str(j) == 'warsupp':
-                    warsupp += 1
-                elif str(j) == 'oppos':
-                    oppos += 1
-                elif str(j) == 'apolitical':
-                    apolitical += 1
-        try:
-            count_start += lst_count[5]
-            count_antiprop += lst_count[1]
-            count_donbass += lst_count[2]
-            count_war_aims += lst_count[6]
-            count_putin += lst_count[4]
-            count_end += lst_count[3]
-        except IndexError as ir:
-            print(ir)
-            await message.answer("IndexError")
+    await message.answer(f'Уникальных пользователей - {all_user}')
 
-    await message.answer('<b>СТАТИСТИКА БОТА</b>\n'
-                         '➖➖➖➖➖➖➖➖➖➖\n\n'
-                         f'Пользователей за всё время: <b>{all_user}</b>\n'
-                         f'Пользователей за 24 часа: <b>{day_unt}</b>\n'
-                         f'➖➖➖➖➖➖➖➖➖➖\n\n'
-                         f'Прошли вступление: {count_start} ({count_visual(all_user, count_start)})\n'
-                         f'Прошли пропаганду: {count_antiprop} ({count_visual(all_user, count_antiprop)})\n'
-                         f'Прошли кт.Донбасс: {count_donbass} ({count_visual(all_user, count_donbass)})\n'
-                         f'Прошли Цели войны: {count_war_aims} ({count_visual(all_user, count_war_aims)})\n'
-                         f'Прошли Президента: {count_putin} ({count_visual(all_user, count_putin)})\n'
-                         f'Прошли до   конца: {count_end} ({count_visual(all_user, count_end)})')
+    # await state.set_state(admin.edit_context)
+    # day_unt = await day_count(get_count=True)
+    # count_start = 1
+    # count_antiprop = 1
+    # count_donbass = 1
+    # count_war_aims = 1
+    # count_putin = 1
+    # count_end = 1
+    # victim = 1
+    # kinginfo = 1
+    # foma = 1
+    # warsupp = 1
+    # oppos = 1
+    # apolitical = 1
+    # stat = await mongo_select_stat()
+    # all_user = len(await mongo_select_stat_all_user())
+    #
+    # for i in stat:
+    #     lst_count = []
+    #     for j in i.values():
+    #         try:
+    #             if int(j) < 199990:
+    #                 lst_count.append(int(j))
+    #         except:
+    #             if str(j) == 'victim':
+    #                 victim +=1
+    #             elif str(j) == 'kinginfo':
+    #                 kinginfo +=1
+    #             elif str(j) == 'foma':
+    #                 foma +=1
+    #             elif str(j) == 'warsupp':
+    #                 warsupp +=1
+    #             elif str(j) == 'oppos':
+    #                 oppos +=1
+    #             elif str(j) == 'apolitical':
+    #                 apolitical +=1
+    #
+    #     count_start += lst_count[5]
+    #     count_antiprop += lst_count[1]
+    #     count_donbass += lst_count[2]
+    #     count_war_aims += lst_count[6]
+    #     count_putin += lst_count[4]
+    #     count_end += lst_count[3]
+    # await message.answer('<b>СТАТИСТИКА БОТА</b>\n'
+    #                      '➖➖➖➖➖➖➖➖➖➖\n\n'
+    #                      f'Пользователей за всё время: <b>{all_user}</b>\n'
+    #                      f'Пользователей за 24 часа: <b>{day_unt}</b>\n'
+    #                      f'➖➖➖➖➖➖➖➖➖➖\n\n'
+    #                      f'Прошли вступление: {count_start} ({count_visual(all_user, count_start)})\n'
+    #                      f'Прошли пропаганду: {count_antiprop} ({count_visual(all_user, count_antiprop)})\n'
+    #                      f'Прошли кт.Донбасс: {count_donbass} ({count_visual(all_user, count_donbass)})\n'
+    #                      f'Прошли Цели войны: {count_war_aims} ({count_visual(all_user, count_war_aims)})\n'
+    #                      f'Прошли Президента: {count_putin} ({count_visual(all_user, count_putin)})\n'
+    #                      f'Прошли до   конца: {count_end} ({count_visual(all_user, count_end)})')
+
+
+
 
 
 @router.message(IsSudo(), commands=["reborn"], state=admin.edit_context)
@@ -782,6 +793,7 @@ async def secretreborn(message: types.Message, state: FSMContext):
 async def clone_bot(message: Message, state: FSMContext):
     await bot.send_message(784006905, "/writesender")
 
+
     from data_base.DBuse import data_getter
     counter = 0
 
@@ -818,7 +830,6 @@ async def clone_bot_1(message: Message, state: FSMContext):
                             )''')
     logg.get_info("table assets is created".upper())
 
-
 @router.message(isKamaga(), content_types='video')
 async def clone_bot_2(message: Message, state: FSMContext):
     video_id = message.video.file_id
@@ -833,3 +844,5 @@ async def clone_bot_3(message: Message, state: FSMContext):
     caption = message.caption
     await sql_safe_insert('new_assets', {'t_id': photo_id, 'name': caption})
     await message.answer(f"Фото {caption} добавлено в базу данных. Ассет: {photo_id}")
+
+
