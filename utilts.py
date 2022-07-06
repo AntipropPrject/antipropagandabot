@@ -146,5 +146,7 @@ async def happy_tester(bot):
             print(f'BOT NOT IN CHANNEL AND THIS MESSAGE NEED TO BE IN LOGS')
         print(f'[{datetime.now().strftime("%H:%M")}] Bot is up, detected new commits:{string}')
     else:
+        await bot.send_message(bata.all_data().commichannel,
+                               f'[{datetime.now().strftime("%H:%M")}] Bot {botname} is up, detected new commits:\n {string}')
         print(f'[{datetime.now().strftime("%H:%M")}] Bot is up, shore is clear: no new commits here')
     await bot.session.close()
