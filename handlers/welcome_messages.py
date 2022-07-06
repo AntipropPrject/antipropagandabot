@@ -254,8 +254,6 @@ async def button(message: types.Message, state: FSMContext):
 async def poll_filler(message: types.Message, bot: Bot):
     msg = await message.answer('Чтобы продолжить — отметьте варианты выше и нажмите «ГОЛОСОВАТЬ» или «VOTE»',
                                reply_markup=ReplyKeyboardRemove(), disable_web_page_preview=True)
-    await asyncio.sleep(10)
-    await bot.delete_message(message.from_user.id, msg.message_id)
 
 
 @router.poll_answer(state=welcome_states.start_dialog.dialogue_9, flags=flags)  # Сохраняю 4 вопрос
