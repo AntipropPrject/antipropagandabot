@@ -26,7 +26,6 @@ async def mongo_update_stat(tg_id, column, options='$inc', value=1):
 async def mongo_select_stat():
     try:
         count_dict={}
-        print((collection_stat.count_documents({'come': {'$gte':1}})))
         count_dict['start'] = int(collection_stat.count_documents({'start': {'$gte':1}}))
         count_dict['antiprop'] = int(collection_stat.count_documents({'antiprop': {'$gte':1}}))
         count_dict['donbass'] = int(collection_stat.count_documents({'donbass': {'$gte':1}}))
