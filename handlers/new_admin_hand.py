@@ -22,6 +22,7 @@ from keyboards.admin_keys import main_admin_keyboard, middle_admin_keyboard, app
     redct_media, redct_games, settings_bot, redct_editors
 from keyboards.new_admin_kb import secretrebornkb
 from log import logg
+from log.logg import get_error
 
 from states.admin_states import admin
 from stats.stat import mongo_select_stat, mongo_select_stat_all_user
@@ -670,6 +671,11 @@ async def import_csv(message: types.Message, state: FSMContext):
     file_name = csv_id.file_name
     file = await bot.get_file(csv_id.file_id)
     file_path = file.file_path
+    path = 'export_to_csv/backin'
+    try:
+        if not os.path.exists(path): os.makedirs(path)
+    except OSError:
+        await get_error("Создать директорию %s не удалось" % path)
     await bot.download_file(file_path, f"export_to_csv/backin/backin.zip")
     with zipfile.ZipFile("export_to_csv/backin/backin.zip", 'r') as zip_file:
         zip_file.extractall("export_to_csv/backin")
@@ -686,6 +692,11 @@ async def import_csv(message: types.Message, state: FSMContext):
 @router.callback_query()
 async def import_csv(query: types.CallbackQuery, state: FSMContext):
     file = query.data
+    path = 'export_to_csv/backups'
+    try:
+        if not os.path.exists(path): os.makedirs(path)
+    except OSError:
+        await get_error("Создать директорию %s не удалось" % path)
     with zipfile.ZipFile(f"export_to_csv/backups/{file}", 'r') as zip_file:
         zip_file.extractall("export_to_csv/backin")
     await backin()
