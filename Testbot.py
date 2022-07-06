@@ -2,6 +2,8 @@ import asyncio
 from aiogram import Dispatcher
 from aiogram.client.session import aiohttp
 from aiogram.dispatcher.fsm.storage.redis import RedisStorage
+
+import bata
 from bata import all_data
 from handlers import start_hand, anti_prop_hand, smi_hand, donbass_hand, true_resons_hand, putin_hand, stopwar_hand, \
     nazi_hand, preventive_strike, new_admin_hand, welcome_messages, status
@@ -20,7 +22,10 @@ dp = Dispatcher(storage)
 async def main():
     bot_info = await bot.get_me()
     print(f"Hello, i'm {bot_info.first_name} | {bot_info.username}")
-    await happy_tester(bot)
+    if bata.Check_tickets is True:
+        await happy_tester(bot)
+    else:
+        print('Tickets checking is disabled, so noone will know...')
     # Технические роутеры
     # TablesCreator.tables_god()
     dp.include_router(pg_mg.router)

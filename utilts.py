@@ -115,7 +115,7 @@ class Phoenix:
                         telegram_path = (await bot.get_file(media)).file_path
                         await bot.download_file(telegram_path, f"resources/media/{name[0]}.mp4")
                     except (TelegramBadRequest, AttributeError):
-                        pass
+                        print(f'Something wrong with {name[0]}')
                     else:
                         print(f'video {name[0]} was downloaded')
                 else:
@@ -128,25 +128,22 @@ class Phoenix:
 async def happy_tester(bot):
     redis = bata.all_data().get_data_red()
     g = git.Git(os.getcwd())
-    loginfo = g.log('--since=2013-09-01', '--pretty=format:%s')
-    old_log_set = redis.smembers('TESTSET')
-    new_log_set = set(loginfo.split('\n'))
-    redis.sadd('TESTSET', *new_log_set)
+    loginfo = g.log('--pretty=format:%s || %an')
+    old_log_set = redis.smembers('LastCommies')
+    new_log_set = set([commname for commname in loginfo.split('\n') if commname.find('OTPOR-') != -1])
+    redis.sadd('LastCommies', *new_log_set)
     diff = new_log_set - old_log_set
-    botname = (await bot.get_me()).first_name
-    print(len(diff))
+    botname = (await bot.get_me()).username
     if len(diff) != 0:
         string, count = '', 0
         for comm in diff:
             count += 1
             string = string + '\n' + str(count) + '. ' + comm
         try:
-            await bot.send_message(bata.all_data().commichannel, f'[{datetime.now().strftime("%H:%M")}] Bot {botname} is up, detected new commits:\n {string}')
+            await bot.send_message(bata.all_data().commichannel, f'[{datetime.now().strftime("%H:%M")}] Bot @{botname} is up, detected new commits:\n {string}')
         except TelegramBadRequest:
             print(f'BOT NOT IN CHANNEL AND THIS MESSAGE NEED TO BE IN LOGS')
         print(f'[{datetime.now().strftime("%H:%M")}] Bot is up, detected new commits:{string}')
     else:
-        await bot.send_message(bata.all_data().commichannel,
-                               f'No new commits')
         print(f'[{datetime.now().strftime("%H:%M")}] Bot is up, shore is clear: no new commits here')
     await bot.session.close()
