@@ -9,7 +9,7 @@ from export_to_csv import pg_mg
 from handlers.other import other_file
 from data_base import TablesCreator
 from middleware.trottling import ThrottlingMiddleware
-
+from utilts import happy_tester
 
 data = all_data()
 bot = data.get_bot()
@@ -20,6 +20,7 @@ dp = Dispatcher(storage)
 async def main():
     bot_info = await bot.get_me()
     print(f"Hello, i'm {bot_info.first_name} | {bot_info.username}")
+    await happy_tester(bot)
     # Технические роутеры
     # TablesCreator.tables_god()
     dp.include_router(pg_mg.router)
