@@ -6,3 +6,4 @@ class MainMenuStates(StatesGroup):
     baseoflie = State()
     crossed_boy = State()
     about_bucha = State()
+    tv = State()

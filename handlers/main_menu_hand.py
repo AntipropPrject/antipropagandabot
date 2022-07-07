@@ -1,31 +1,19 @@
-import asyncio
-
 from aiogram import Router, F
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
-from aiogram.dispatcher.fsm.state import StatesGroup, State
-from aiogram.exceptions import TelegramBadRequest
-from aiogram.types import Message, ReplyKeyboardRemove
+from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
-from data_base.DBuse import data_getter, sql_safe_select, sql_safe_update, redis_just_one_write, poll_write
-from data_base.DBuse import redis_delete_from_list
-from filters.MapFilters import OperationWar, WarReason
-from handlers import anti_prop_hand
-from handlers.nazi_hand import NaziState
-from handlers.preventive_strike import PreventStrikeState
-from handlers.putin_hand import StateofPutin
-from resources.all_polls import welc_message_one
+from data_base.DBuse import sql_safe_select
 from states.main_menu_states import MainMenuStates
-from stats.stat import mongo_update_stat
 from utilts import simple_media
-
 
 router = Router()
 router.message.filter(state=MainMenuStates)
+router.message(flags={"throttling_key": "True"})
 
 
-@router.message((F.text == 'Перейти в главное меню 👇') | (F.text == 'Вернуться в Базу Лжи 👈'))
+@router.message(F.text.contains('главное меню'))
 async def mainmenu_really_menu(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'mainmenu_really_menu'})
     nmarkup = ReplyKeyboardBuilder()
@@ -34,7 +22,7 @@ async def mainmenu_really_menu(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == 'Перейти в главное меню 👇'))
+@router.message((F.text == "Вернуться в Базу Лжи 👈") | (F.text == "База Лжи 👀"))
 async def mainmenu_baseoflie(message: Message, state: FSMContext):
     await state.set_state(MainMenuStates.baseoflie)
     text = await sql_safe_select('text', 'texts', {'name': 'mainmenu_baseoflie'})
@@ -43,8 +31,9 @@ async def mainmenu_baseoflie(message: Message, state: FSMContext):
     nmarkup.add(types.KeyboardButton(text="Распятый мальчик ☦️"))
     nmarkup.row(types.KeyboardButton(text="Ложь по ТВ 📺"))
     nmarkup.add(types.KeyboardButton(text="Ложь прочих СМИ 👀"))
-    nmarkup.add(types.KeyboardButton(text="Ложь политиков и пропагандистов 🗣"))
+    nmarkup.row(types.KeyboardButton(text="Ложь политиков и пропагандистов 🗣"))
     nmarkup.add(types.KeyboardButton(text="Обещания Путина 🗣"))
+    nmarkup.row(types.KeyboardButton(text="Вернуться в главное меню 👇"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
@@ -84,8 +73,7 @@ async def mainmenu_bucha_1(message: Message, state: FSMContext):
 
 
 @router.message(((F.text == 'В чём подвох? 🤔') | (F.text == 'Я заметил(а)! 😯')), state=MainMenuStates.about_bucha)
-async def mainmenu_bucha_2(message: Message, state: FSMContext):
-    text = await sql_safe_select('text', 'texts', {'name': 'mainmenu_bucha_2'})
+async def mainmenu_bucha_2(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
     await simple_media(message, 'mainmenu_bucha_2', nmarkup.as_markup(resize_keyboard=True))
@@ -99,6 +87,19 @@ async def mainmenu_bucha_3(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="Вернуться в Базу Лжи 👈"))
     nmarkup.add(types.KeyboardButton(text="Вернуться в главное меню 👇"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message((F.text == "Ложь по ТВ 📺"), state=MainMenuStates.baseoflie)
+async def mainmenu_tv_select(message: Message, state: FSMContext):
+    await state.set_state(MainMenuStates.tv)
+    tv_list = ('1 канал 📺', 'Россия 1 / 24 📺', 'НТВ 📺', 'Звезда 📺')
+    nmarkup = ReplyKeyboardBuilder()
+    for tv in tv_list:
+        nmarkup.row(types.KeyboardButton(text=tv))
+    nmarkup.row(types.KeyboardButton(text="Вернуться в Базу Лжи 👈"))
+    nmarkup.add(types.KeyboardButton(text="Вернуться в главное меню 👇"))
+    nmarkup.adjust(2, 2, 2)
+    await message.answer('Выберите любой телеканал', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 

@@ -172,7 +172,7 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FS
             markup_1 = ReplyKeyboardBuilder()
             markup_1.row(types.KeyboardButton(text="Хорошо, давай продолжим 👌"))
             await bot.send_message(poll_answer.user.id,
-                                   'Спасибо, я запомнил ваш ответ. Позже в разговоре мы его обсудим',
+                                   'Спасибо, я запомнил ваш ответ. Позже в разговоре мы его обсудим.',
                                    reply_markup=markup_1.as_markup(resize_keyboard=True))
 
 
