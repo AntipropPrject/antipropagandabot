@@ -21,6 +21,7 @@ class StopWarState(StatesGroup):
     arg_1 = State()
     arg_2 = State()
     arg_3 = State()
+
 flags = {"throttling_key": "True"}
 router = Router()
 router.message.filter(state=StopWarState)
@@ -217,26 +218,30 @@ async def stopwar_I_told_you_everything(message: Message, bot: Bot, state: FSMCo
 
 #timer
 async def preview_timer(message, bot,):
-    sec = 300
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
-    bot_message = await message.answer('5:00')
-    m_id = bot_message.message_id
-    a = await bot.pin_chat_message(chat_id=message.from_user.id, message_id=m_id, disable_notification=True)
-    while sec:
-        m, s = divmod(sec, 60)
-        sec_t = '{:02d}:{:02d}'.format(m, s)
-        await redis_just_one_write(f'Usrs: {message.from_user.id}: count:', sec_t)
-        print(sec_t)
-        await bot.edit_message_text(chat_id=message.from_user.id, message_id=m_id, text=f'{sec_t}')
-        await asyncio.sleep(1)
-        sec -= 1
+    check_user = await redis_just_one_read(f'Usrs: {message.from_user.id}: check:')
+    await redis_just_one_write(f'Usrs: {message.from_user.id}: check:', message.from_user.id)
+    print(check_user)
+    if str(check_user) != str(message.from_user.id):
+        sec = 300
+        nmarkup = ReplyKeyboardBuilder()
+        nmarkup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
+        bot_message = await message.answer('5:00')
+        m_id = bot_message.message_id
+        a = await bot.pin_chat_message(chat_id=message.from_user.id, message_id=m_id, disable_notification=True)
+        while sec:
+            m, s = divmod(sec, 60)
+            sec_t = '{:02d}:{:02d}'.format(m, s)
+            await redis_just_one_write(f'Usrs: {message.from_user.id}: count:', sec_t)
+            print(sec_t)
+            await bot.edit_message_text(chat_id=message.from_user.id, message_id=m_id, text=f'{sec_t}')
+            await asyncio.sleep(1)
+            sec -= 1
 
-    await message.answer('Таймер вышел. Вы можете перейти в главное меню.'
-                         ' Но если у вас есть ещё с кем поделиться ссылкой на меня'
-                         ' — обязательно сделайте это!', reply_markup=nmarkup.as_markup(resize_keyboard=True))
-    print('Countdown finished.')
-    return sec
+        await message.answer('Таймер вышел. Вы можете перейти в главное меню.'
+                             ' Но если у вас есть ещё с кем поделиться ссылкой на меня'
+                             ' — обязательно сделайте это!', reply_markup=nmarkup.as_markup(resize_keyboard=True))
+        print('Countdown finished.')
+
 
 @router.message(((F.text.contains('Я передумал(а). Важно, чтобы россияне поняли — война им не нужна 🕊')) |
                  (F.text.contains('Да, согласен(а), это остановит войну 🕊')) |
@@ -257,6 +262,7 @@ async def stopwar_lets_fight(message: Message, bot: Bot, state: FSMContext):
     await message.answer(text_3, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     await preview_timer(message, bot)
 
+
 @router.message((F.text == "Какие советы? 🤔"), flags=flags)
 async def stopwar_share_blindly(message: Message, bot: Bot, state: FSMContext):
     timer = await redis_just_one_read(f'Usrs: {message.from_user.id}: count:')
@@ -264,8 +270,8 @@ async def stopwar_share_blindly(message: Message, bot: Bot, state: FSMContext):
     if timer != '00:01':
         text = await sql_safe_select('text', 'texts', {'name': 'stopwar_share_blindly'})
         nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
         nmarkup.row(types.KeyboardButton(text="Покажи инструкцию, как поделиться со всем списком контактов 📝"))
+        nmarkup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
         await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     else:
         nmarkup = ReplyKeyboardBuilder()
