@@ -45,7 +45,7 @@ async def simple_media(message: Message, tag: str,
                     await logg.get_error(f'NO {tag}')
                     return None
     except:
-        print("ТУТ ГДЕТО ОШИБКА")
+        print("Ошибка")
 
 class Phoenix:
     def __init__(self):
