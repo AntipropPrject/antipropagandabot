@@ -9,6 +9,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from handlers.welcome_messages import commands_restart
 
 from data_base.DBuse import sql_safe_select, redis_just_one_write, redis_just_one_read
+from states.main_menu_states import MainMenuStates
 from stats.stat import mongo_update_stat
 
 
@@ -257,6 +258,7 @@ async def stopwar_lets_fight(message: Message, bot: Bot, state: FSMContext):
 @router.message((F.text == "Какие советы? 🤔"), flags=flags)
 async def stopwar_share_blindly(message: Message, bot: Bot, state: FSMContext):
     timer = await redis_just_one_read(f'Usrs: {message.from_user.id}: count:')
+
     if timer != '00:01':
         text = await sql_safe_select('text', 'texts', {'name': 'stopwar_share_blindly'})
         nmarkup = ReplyKeyboardBuilder()
@@ -283,12 +285,21 @@ async def stopwar_share_blindly(message: Message, bot: Bot, state: FSMContext):
                              ' Но если у вас есть ещё с кем поделиться ссылкой на меня'
                              ' — обязательно сделайте это!', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
+@router.message((F.text == "Перейти в главное меню 👇"), flags=flags)
+async def main_menu(message: Message, state: FSMContext):
+    timer = await redis_just_one_read(f'Usrs: {message.from_user.id}: count:')
+    if timer != '00:01':
+        await message.answer('Пожалуйста, дождитесь окончания таймера,'
+                             ' прежде, чем попасть в главное меню. Не теряйте'
+                             ' это время зря — поделитесь мной со своими родственниками,'
+                             ' друзьями и знакомыми! 🙏')
+    else:
+        text = await sql_safe_select('text', 'texts', {'name': 'mainmenu_really_menu'})
+        nmarkup = ReplyKeyboardBuilder()
+        nmarkup.row(types.KeyboardButton(text="Мини-игры 🎲"))
+        nmarkup.row(types.KeyboardButton(text="База Лжи 👀"))
+        await state.set_state(MainMenuStates.main)
+        await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 
-
-
-
-@router.message((F.text == "Начать общение заново ♻️"), flags=flags)
-async def stopwar_lets_anew(message: Message, state: Message):
-    await commands_restart(message, state)
