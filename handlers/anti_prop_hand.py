@@ -695,7 +695,7 @@ async def antip_truth_game_start_question(message: Message, state: FSMContext):
                                 not_belive=truth_data[4], reb_media_tag=truth_data[6], game_id=truth_data[8])
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Это правда ✅"))
-        nmarkup.row(types.KeyboardButton(text="Это ложь ❌"))
+        nmarkup.add(types.KeyboardButton(text="Это ложь ❌"))
         if truth_data[1] is not None:
             capt = ""
             if truth_data[2] is not None:
