@@ -11,6 +11,7 @@ from handlers.welcome_messages import commands_restart
 from data_base.DBuse import sql_safe_select, redis_just_one_write, redis_just_one_read
 from states.main_menu_states import MainMenuStates
 from stats.stat import mongo_update_stat
+from utilts import simple_media
 
 
 class StopWarState(StatesGroup):
@@ -131,12 +132,14 @@ async def stopwar_end_it_now(message: Message):
 
 @router.message((F.text == "Что ты предлагаешь ❓ ❓ ❓"), flags=flags)
 async def stopwar_lets_fight(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'stopwar_lets_fight'})
+
+
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Объясни 🤔"))
     nmarkup.row(types.KeyboardButton(text="Нет, власти всё равно будут делать, что хотят 🙅‍♂️"))
     nmarkup.row(types.KeyboardButton(text="Да, согласен(а), это остановит войну 🕊"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await simple_media(message, 'stopwar_lets_fight', reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
 
 
 @router.message((F.text == "Объясни 🤔") | (F.text == "Нет, власти всё равно будут делать, что хотят 🙅‍♂️"), flags=flags)
@@ -249,11 +252,10 @@ async def stopwar_lets_fight(message: Message, bot: Bot, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Какие советы? 🤔"))
     nmarkup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
-    await preview_timer(message, bot)
     await message.answer(text_1, disable_web_page_preview=True)
     await message.answer(text_2, disable_web_page_preview=True)
     await message.answer(text_3, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
-
+    await preview_timer(message, bot)
 
 @router.message((F.text == "Какие советы? 🤔"), flags=flags)
 async def stopwar_share_blindly(message: Message, bot: Bot, state: FSMContext):
