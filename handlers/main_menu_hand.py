@@ -22,7 +22,7 @@ from utilts import simple_media
 
 
 router = Router()
-router.message(flags={"throttling_key": "True"}).filter(state=MainMenuStates)
+router.message.filter(state=MainMenuStates)
 
 
 @router.message((F.text == 'Перейти в главное меню 👇') | (F.text == 'Вернуться в Базу Лжи 👈'))
