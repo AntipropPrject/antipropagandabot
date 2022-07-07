@@ -6,6 +6,7 @@ from aiogram.dispatcher.fsm.state import StatesGroup, State
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from handlers import true_resons_hand
+from handlers import stopwar_hand
 from handlers.true_resons_hand import reasons_who_to_blame
 from states.donbass_states import donbass_state
 from states.main_menu_states import MainMenuStates
@@ -14,7 +15,9 @@ from handlers.main_menu_hand import mainmenu_really_menu
 flags = {"throttling_key": "True"}
 router = Router()
 
-
+@router.message(commands=["testend"], flags=flags)
+async def cmd_start(message: Message, state: FSMContext):
+    await state.set_state(stopwar_hand.StopWarState.main)
 @router.message(commands=["testnazi"], flags=flags)
 async def cmd_start(message: Message, state: FSMContext):
     await true_resons_hand.reasons_denazi(message, state)
