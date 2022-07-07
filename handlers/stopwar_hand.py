@@ -245,7 +245,7 @@ async def preview_timer(message, bot,):
 async def stopwar_lets_fight(message: Message, bot: Bot, state: FSMContext):
     text_1 = await sql_safe_select('text', 'texts', {'name': 'stopwar_hello_world'})
     text_2 = await sql_safe_select('text', 'texts', {'name': 'stopwar_I_told_you_everything'})
-    text_3 = await sql_safe_select('text', 'texts', {'name': 'stopwar_I_told_you_everything'})
+    text_3 = await sql_safe_select('text', 'texts', {'name': 'stopwar_send_the_message'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Какие советы? 🤔"))
     nmarkup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
