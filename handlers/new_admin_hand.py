@@ -23,6 +23,8 @@ from keyboards.admin_keys import main_admin_keyboard, middle_admin_keyboard, app
     redct_media, redct_games, settings_bot, redct_editors
 from keyboards.new_admin_kb import secretrebornkb
 from log import logg
+from log.logg import get_error
+
 from states.admin_states import admin
 from stats.stat import mongo_select_stat, mongo_select_stat_all_user
 from utilts import Phoenix
@@ -33,6 +35,7 @@ router = Router()
 @router.message(IsAdmin(), commands=["admin"])
 async def admin_home(message: types.Message, state: FSMContext):
     await state.clear()
+    await logg.admin_logs(message.from_user.id, message.from_user.username, "Вошел в режим администратора")
     await message.answer("Добро пожаловать в режим администрации. Что вам угодно сегодня?",
                          reply_markup=main_admin_keyboard(message.from_user.id))
     await state.set_state(admin.menu)
@@ -48,6 +51,7 @@ async def admin_home(message: types.Message, state: FSMContext):
 
 @router.message(IsAdmin(), (F.text.contains('Возврат в главное меню')))
 async def menu(message: types.Message, state: FSMContext):
+    await logg.admin_logs(message.from_user.id, message.from_user.username, "Вернулся в главное меню")
     await state.clear()
     await message.answer("Чего изволите теперь?", reply_markup=main_admin_keyboard(message.from_user.id))
     await state.set_state(admin.menu)
@@ -59,6 +63,7 @@ async def menu(message: types.Message, state: FSMContext):
 @router.message((F.text == 'Отменить изменения'), state=(
         admin.confirm_add_text, admin.confirm_add_media, admin.confirm_edit_text, admin.confirm_edit_media))
 async def reset(message: Message, state: FSMContext):
+    await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Отменить изменения'")
     stt = await state.get_state()
     print(stt)
     if stt == 'admin:confirm_add_text':
@@ -80,8 +85,10 @@ async def reset(message: Message, state: FSMContext):
         await message.answer('Хорошо, вернемся в меню', reply_markup=main_admin_keyboard(message.from_user.id))
 
 
+
 @router.message((F.text == 'Назад'), state="*")
 async def reset(message: Message, state: FSMContext):
+    await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Назад'")
     stt = await state.get_state()
     print(stt)
     await state.clear()
@@ -114,6 +121,7 @@ async def reset(message: Message, state: FSMContext):
 
 @router.message(IsAdmin(), (F.text == "Выйти"))
 async def cmd_cancel(message: types.Message, state: FSMContext):
+    await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Выйти'")
     await state.clear()
     await message.answer("Вы покинули уютный режим администрирования.\nУдачи!",
                          reply_markup=types.ReplyKeyboardRemove())
@@ -124,24 +132,28 @@ async def cmd_cancel(message: types.Message, state: FSMContext):
 
 @router.message(IsAdmin(), ((F.text.contains('текст')) | (F.text.contains('текстом'))), state=admin.menu)
 async def select_text(message: types.Message, state: FSMContext):
+    await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Редактировать текст'")
     await message.answer("Выберите интересующий вас пункт меню", reply_markup=redct_text())
     await state.set_state(admin.edit_context)
 
 
 @router.message(IsAdmin(), ((F.text.contains('медиа'))), state=admin.menu)
 async def select_text(message: types.Message, state: FSMContext):
+    await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Редактировать медиа'")
     await message.answer("Выберите интересующий вас пункт меню", reply_markup=redct_media())
     await state.set_state(admin.edit_context)
 
 
 @router.message(IsAdmin(), ((F.text.contains('игры')) | (F.text.contains('играми'))), state=admin.menu)
 async def select_text(message: types.Message, state: FSMContext):
+    await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Редактировать игры'")
     await message.answer("Это меню еще не готово", reply_markup=redct_games())
     await state.set_state(admin.edit_context)
 
 
 @router.message(IsSudo(), ((F.text.contains('ботом'))), state=admin.menu)
 async def suadmin_bot_edit(message: types.Message, state: FSMContext):
+    await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Управление ботом'")
     await message.answer("Выберите интересующий вас пункт меню", reply_markup=await settings_bot())
     await state.set_state(admin.edit_context)
 
@@ -151,6 +163,7 @@ async def suadmin_bot_edit(message: types.Message, state: FSMContext):
 
 @router.message(IsAdmin(), (F.text == 'Отменить'), state='*')
 async def sadmins(message: Message, state: FSMContext):
+    await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Отменить'")
     await state.clear()
     await message.answer("Выберите интересующий вас пункт меню", reply_markup=redct_editors())
     await state.set_state(admin.editors_menu)
@@ -158,6 +171,7 @@ async def sadmins(message: Message, state: FSMContext):
 
 @router.message(IsSudo(), (F.text == 'Редакторы бота'), state=admin.edit_context)
 async def sadmins(message: Message, state: FSMContext):
+    await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Редакторы бота'")
     await state.clear()
     await message.answer("Тут можно изменять список редакторов бота", reply_markup=redct_editors())
     await state.set_state(admin.editors_menu)
@@ -165,6 +179,7 @@ async def sadmins(message: Message, state: FSMContext):
 
 @router.message(IsSudo(), (F.text == 'Посмотреть редакторов'), state=admin.editors_menu)
 async def sadmins_select(message: Message):
+    await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Посмотреть редакторов'")
     admins_list = await mongo_select_admins()
 
     lst_id = []
@@ -181,6 +196,7 @@ async def sadmins_select(message: Message):
 
 @router.message(IsSudo(), (F.text == 'Добавить редактора'), state=admin.editors_menu)
 async def admins_add(message: Message, state: FSMContext):
+    await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Добавить редактора'")
     await state.clear()
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text='Отменить'))
@@ -195,6 +211,7 @@ async def admins_add(message: Message, state: FSMContext):
     if message.text in str(id_admin):
         await mongo_add_admin(message.text)
         await message.answer("Пользователь добавлен")
+        await logg.admin_logs(message.from_user.id, message.from_user.username, f"Редактор -- '{message.text}' -- был добавлен")
         await state.clear()
     else:
         await message.answer("Неправильный id")
@@ -202,6 +219,7 @@ async def admins_add(message: Message, state: FSMContext):
 
 @router.message(IsSudo(), (F.text == 'Удалить редактора'), state=admin.editors_menu)
 async def admins_pop(message: Message, state: FSMContext):
+    await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Удалить редактора'")
     await state.clear()
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text='Отменить'))
@@ -215,6 +233,7 @@ async def admins_pop(message: Message, state: FSMContext):
     id_admin = await mongo_select_info(message.text)
     if message.text in str(id_admin):
         await mongo_pop_admin(message.text)
+        await logg.admin_logs(message.from_user.id, message.from_user.username, f"Редактор -- '{message.text}' -- был удалён")
         await message.answer("Пользователь удалён", reply_markup=redct_editors())
         await state.clear()
     else:
@@ -226,6 +245,7 @@ async def admins_pop(message: Message, state: FSMContext):
 
 @router.message(IsAdmin(), (F.text == 'Добавить новый текст'), state=admin.edit_context)
 async def text_hello(message: types.Message, state: FSMContext):
+    await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Добавить новый текст'")
     await state.set_state(admin.add_text)
     text = await sql_safe_select('text', 'texts', {'name': 'any_unique_readible_tag'})
     text = text
@@ -251,6 +271,7 @@ async def get_text(message: Message, state: FSMContext):
 
 @router.message(IsAdmin(), (F.text == 'Редактировать текст'), state=admin.edit_context)
 async def text_edit_tag(message: types.Message, state: FSMContext):
+    await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Редактировать текст'")
     await state.set_state(admin.edit_text)
     await message.answer('Пришлите тэг текстового блока, который вы хотите изменить.',
                          reply_markup=middle_admin_keyboard())
@@ -281,12 +302,14 @@ async def text_edit_text_test(message: Message, state: FSMContext):
 
 @router.message((F.text == "Отмена"), state=(admin.delete_text, admin.delete_text_test))
 async def cancel(message: Message, state: FSMContext):
+    await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Отмена'")
     await message.answer("Выберите интересующий вас пункт меню", reply_markup=redct_text())
     await state.set_state(admin.edit_context)
 
 
 @router.message(IsAdmin(), (F.text == "Удалить текст"))
 async def delete_text_start(message: Message, state: FSMContext):
+    await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Удалить текст'")
     await state.set_state(admin.delete_text_test)
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text='Отмена'))
@@ -330,6 +353,7 @@ async def delete_text(message: Message, state: FSMContext):
         await sql_delete('texts', {'name': tag})
 
     # postgresql_csv_dump('texts')
+    await logg.admin_logs(message.from_user.id, message.from_user.username, 'Удалил теги')
     await message.answer("Все выбранные теги были удалены!")
 
 
@@ -338,6 +362,7 @@ async def delete_text(message: Message, state: FSMContext):
 
 @router.message((F.text == 'Добавить новое медиа'), state=admin.edit_context)
 async def text_hello(message: types.Message, state: FSMContext):
+    await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Добавить новое медиа'")
     await state.set_state(admin.add_media)
     photo = await sql_safe_select('t_id', 'assets', {'name': 'test_photo_tag'})
     try:
@@ -380,6 +405,7 @@ async def get_video(message: Message, state: FSMContext):
 # red video
 @router.message(IsAdmin(), (F.text == 'Редактировать медиа'), state=admin.edit_context)
 async def media_edit_tag(message: types.Message, state: FSMContext):
+    await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Редактировать медиа'")
     await state.set_state(admin.edit_media_test)
     await message.answer('Пришлите тэг медиа, которое вы хотите изменить.', reply_markup=middle_admin_keyboard())
 
@@ -429,6 +455,7 @@ async def updated_video_test(message: Message, state: FSMContext):
 
 @router.message(IsAdmin(), (F.text == "Удалить медиа"), state=admin.edit_context)
 async def delete_text_start(message: Message, state: FSMContext):
+    await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Удалить медиа'")
     await state.set_state(admin.delete_media_test)
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text='Отмена'))
@@ -439,6 +466,7 @@ async def delete_text_start(message: Message, state: FSMContext):
 
 @router.message((F.text == "Отмена"), state=(admin.delete_media, admin.delete_media_test))
 async def cancel(message: Message, state: FSMContext):
+    await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Отмена'")
     await message.answer("Выберите интересующий вас пункт меню", reply_markup=redct_media())
     await state.set_state(admin.edit_context)
 
@@ -476,6 +504,7 @@ async def delete_text_test(message: Message, state: FSMContext):
 
 @router.message((F.text == 'Удалить'), state=admin.delete_media)
 async def delete_text(message: Message, state: FSMContext):
+    await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Удалить'")
     data = await state.get_data()
     for tag in data['tag_lists']:
         await sql_delete('assets', {'name': tag})
@@ -489,6 +518,7 @@ async def delete_text(message: Message, state: FSMContext):
 
 @router.message((F.text == 'Подтвердить'), state=admin.confirm_edit_media)
 async def approve_media_edit(message: Message, state: FSMContext):
+    await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Подтвердить'")
     data = await state.get_data()
     text = await sql_safe_update('assets', {"t_id": data["t_id"]}, {'name': data['name']})
     if text is not False:
@@ -501,6 +531,7 @@ async def approve_media_edit(message: Message, state: FSMContext):
 
 @router.message((F.text == 'Подтвердить'), state=admin.confirm_edit_text)
 async def approve_edit_text(message: Message, state: FSMContext):
+    await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Подтвердить'")
     data = await state.get_data()
     text = await sql_safe_update('texts', {"text": data["text"]}, {'name': data['name']})
     if text is not False:
@@ -513,6 +544,7 @@ async def approve_edit_text(message: Message, state: FSMContext):
 
 @router.message((F.text == 'Подтвердить'), state=admin.confirm_add_media)
 async def approve_media(message: Message, state: FSMContext):
+    await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Подтвердить' -- Медиа добавлено")
     data = await state.get_data()
     text = await sql_safe_insert('assets', data)
     if text is not False:
@@ -526,6 +558,7 @@ async def approve_media(message: Message, state: FSMContext):
 
 @router.message((F.text == 'Подтвердить'), state=admin.confirm_add_text)
 async def approve_text(message: Message, state: FSMContext):
+    await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Подтвердить' -- Текст добавлен")
     data = await state.get_data()
     r = await sql_safe_insert('texts', data)
     if r != False:
@@ -540,6 +573,7 @@ async def approve_text(message: Message, state: FSMContext):
 
 @router.message(IsSudo(), (F.text.contains('Включить тех.')), state="*")
 async def send_bot_to_work(message: types.Message, state: FSMContext):
+    await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Включить технический режим'")
     await state.clear()
     await state.set_state(admin.edit_context)
     await redis_just_one_write(f'Usrs: admins: state: status:', '1')
@@ -549,6 +583,7 @@ async def send_bot_to_work(message: types.Message, state: FSMContext):
 
 @router.message(IsSudo(), (F.text.contains('Выключить тех.')), state="*")
 async def return_bot_from_work(message: types.Message, state: FSMContext):
+    await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Выключить технический режим'")
     await state.clear()
     await state.set_state(admin.edit_context)
     await redis_just_one_write(f'Usrs: admins: state: status:', '0')
@@ -558,6 +593,7 @@ async def return_bot_from_work(message: types.Message, state: FSMContext):
 
 @router.message(IsSudo(), (F.text.contains('Импорт')), state=admin.edit_context)
 async def import_csv(message: types.Message, state: FSMContext):
+    await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Импорт'")
     status = await redis_just_one_read('Usrs: admins: state: status:')
     if '1' in status:
         await state.set_state(admin.import_menu)
@@ -574,6 +610,7 @@ async def import_csv(message: types.Message, state: FSMContext):
 
 @router.message(IsSudo(), (F.text.contains('Выбрать существующий')), state=admin.import_menu)
 async def import_csv(message: types.Message, state: FSMContext):
+    await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Выбрать существующий'")
     status = await redis_just_one_read('Usrs: admins: state: status:')
     if '1' in status:
         await state.set_state(admin.import_csv_from_local)
@@ -618,6 +655,7 @@ async def import_csv(message: types.Message, state: FSMContext):
 
 @router.message(IsSudo(), (F.text.contains('Загрузить файл')), state=admin.import_menu)
 async def import_csv(message: types.Message, state: FSMContext):
+    await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Загрузить файл'")
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Создать копию"))
     nmarkup.row(types.KeyboardButton(text="Назад"))
@@ -634,6 +672,11 @@ async def import_csv(message: types.Message, state: FSMContext):
     file_name = csv_id.file_name
     file = await bot.get_file(csv_id.file_id)
     file_path = file.file_path
+    path = 'export_to_csv/backin'
+    try:
+        if not os.path.exists(path): os.makedirs(path)
+    except OSError:
+        await get_error("Создать директорию %s не удалось" % path)
     await bot.download_file(file_path, f"export_to_csv/backin/backin.zip")
     with zipfile.ZipFile("export_to_csv/backin/backin.zip", 'r') as zip_file:
         zip_file.extractall("export_to_csv/backin")
@@ -642,6 +685,7 @@ async def import_csv(message: types.Message, state: FSMContext):
         await backin()
         await state.set_state(admin.edit_context)
         await message.answer("Импорт завершен успешно", reply_markup=await settings_bot())
+        await logg.admin_logs(message.from_user.id, message.from_user.username, "Завершил(a) импорт")
     else:
         await message.answer("Неправильное название архива")
 
@@ -649,6 +693,11 @@ async def import_csv(message: types.Message, state: FSMContext):
 @router.callback_query()
 async def import_csv(query: types.CallbackQuery, state: FSMContext):
     file = query.data
+    path = 'export_to_csv/backups'
+    try:
+        if not os.path.exists(path): os.makedirs(path)
+    except OSError:
+        await get_error("Создать директорию %s не удалось" % path)
     with zipfile.ZipFile(f"export_to_csv/backups/{file}", 'r') as zip_file:
         zip_file.extractall("export_to_csv/backin")
     await backin()
@@ -657,12 +706,13 @@ async def import_csv(query: types.CallbackQuery, state: FSMContext):
     except:
         pass
     await state.set_state(admin.edit_context)
+    await logg.admin_logs(query.from_user.id, query.from_user.username , "Завершил(a) импорт")
     await query.message.answer("Импорт завершен успешно", reply_markup=await settings_bot())
 
 
 def count_visual(all_user, count):
 
-    pr = round(count / all_user * 100)
+    pr = round(int(count) / int(all_user) * 100)
     if pr <= 20:
         return f'<b>{pr}%</b> 🔴'
     elif pr <= 40:
@@ -678,69 +728,22 @@ def count_visual(all_user, count):
 
 @router.message((F.text == 'Статистика бота'), state=admin.edit_context)
 async def statistics(message: Message, state: FSMContext):
-    mongo = pymongo.MongoClient(host='mongodb://localhost:27017', username='mongoOTPOR', password='mongoOTPOR')
-    database = mongo['database']
-    collection_stat = database['statistics']
-    collection_stat_all = database['userinfo']
+    await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Статистика бота'")
+    await state.set_state(admin.edit_context)
+    day_unt = await day_count(get_count=True)
+    stat = await mongo_select_stat()
     all_user = len(await mongo_select_stat_all_user())
-    print(all_user)
-
-    await message.answer(f'Уникальных пользователей - {all_user}')
-
-    # await state.set_state(admin.edit_context)
-    # day_unt = await day_count(get_count=True)
-    # count_start = 1
-    # count_antiprop = 1
-    # count_donbass = 1
-    # count_war_aims = 1
-    # count_putin = 1
-    # count_end = 1
-    # victim = 1
-    # kinginfo = 1
-    # foma = 1
-    # warsupp = 1
-    # oppos = 1
-    # apolitical = 1
-    # stat = await mongo_select_stat()
-    # all_user = len(await mongo_select_stat_all_user())
-    #
-    # for i in stat:
-    #     lst_count = []
-    #     for j in i.values():
-    #         try:
-    #             if int(j) < 199990:
-    #                 lst_count.append(int(j))
-    #         except:
-    #             if str(j) == 'victim':
-    #                 victim +=1
-    #             elif str(j) == 'kinginfo':
-    #                 kinginfo +=1
-    #             elif str(j) == 'foma':
-    #                 foma +=1
-    #             elif str(j) == 'warsupp':
-    #                 warsupp +=1
-    #             elif str(j) == 'oppos':
-    #                 oppos +=1
-    #             elif str(j) == 'apolitical':
-    #                 apolitical +=1
-    #
-    #     count_start += lst_count[5]
-    #     count_antiprop += lst_count[1]
-    #     count_donbass += lst_count[2]
-    #     count_war_aims += lst_count[6]
-    #     count_putin += lst_count[4]
-    #     count_end += lst_count[3]
-    # await message.answer('<b>СТАТИСТИКА БОТА</b>\n'
-    #                      '➖➖➖➖➖➖➖➖➖➖\n\n'
-    #                      f'Пользователей за всё время: <b>{all_user}</b>\n'
-    #                      f'Пользователей за 24 часа: <b>{day_unt}</b>\n'
-    #                      f'➖➖➖➖➖➖➖➖➖➖\n\n'
-    #                      f'Прошли вступление: {count_start} ({count_visual(all_user, count_start)})\n'
-    #                      f'Прошли пропаганду: {count_antiprop} ({count_visual(all_user, count_antiprop)})\n'
-    #                      f'Прошли кт.Донбасс: {count_donbass} ({count_visual(all_user, count_donbass)})\n'
-    #                      f'Прошли Цели войны: {count_war_aims} ({count_visual(all_user, count_war_aims)})\n'
-    #                      f'Прошли Президента: {count_putin} ({count_visual(all_user, count_putin)})\n'
-    #                      f'Прошли до   конца: {count_end} ({count_visual(all_user, count_end)})')
+    await message.answer('<b>СТАТИСТИКА БОТА</b>\n'
+                         '➖➖➖➖➖➖➖➖➖➖\n\n'
+                         f'Пользователей за всё время: <b>{all_user}</b>\n'
+                         f'Пользователей за 24 часа: <b>{day_unt}</b>\n'
+                         f'➖➖➖➖➖➖➖➖➖➖\n\n'
+                         f'Прошли вступление: {stat["start"]} ({count_visual(all_user, stat["start"])})\n'
+                         f'Прошли пропаганду: {stat["antiprop"]} ({count_visual(all_user, stat["antiprop"])})\n'
+                         f'Прошли кт.Донбасс: {stat["donbass"]} ({count_visual(all_user, stat["donbass"])})\n'
+                         f'Прошли Цели войны: {stat["war_aims"]} ({count_visual(all_user, stat["war_aims"])})\n'
+                         f'Прошли Президента: {stat["putin"]} ({count_visual(all_user, stat["putin"])})\n'
+                         f'Прошли до   конца: {stat["end"]} ({count_visual(all_user, stat["end"])})')
 
 
 

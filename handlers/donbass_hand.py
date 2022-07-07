@@ -144,14 +144,14 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FS
                                parse_mode="HTML", disable_web_page_preview=True)
     elif "🎯 Это ужасно, но помимо защиты жителей Донбасса есть более весомые причины для начала войны" in true_options:
         await redis_delete_from_list(f'Usrs: {poll_answer.user.id}: Donbass_polls: First:', donbass_first_poll[7])
-        text = await sql_safe_select('text', 'texts', {'name': 'reasons_here'})
+        text = await sql_safe_select('text', 'texts', {'name': 'donbas_more_reasons'})
         reason_list_2 = set(await poll_get(f'Usrs: {poll_answer.user.id}: Start_answers: Invasion:'))
         reason_text = '\n\n'
         for reason in reason_list_2:
             if reason == welc_message_one[-1]:
                 continue
             reason_text = reason_text + reason + '\n'
-        text = text + reason_text + '\nОбязательно их все обсудим, а пока что вернемся к теме Донбасса'
+        text = text.replace('[перечислить списком все выбранные причины]', reason_text)
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Хорошо  👌"))
         await bot.send_message(poll_answer.user.id, text, reply_markup=nmarkup.as_markup(resize_keyboard=True), parse_mode="HTML")
@@ -346,7 +346,7 @@ async def donbas_more_reasons(message: Message, state: FSMContext):
         if reason == welc_message_one[-1]:
             continue
         reason_text = reason_text + reason + '\n'
-    text = text + reason_text + '\nОбязательно их все обсудим, а пока что вернемся к теме Донбасса'
+    text = text.replace('[перечислить списком все выбранные причины]', reason_text)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Хорошо  👌"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), parse_mode="HTML", disable_web_page_preview=True)
@@ -389,10 +389,10 @@ async def donbas_long_maidan(message: Message):
 async def donbas_can_you_be_normal(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Вернемся к другим причинам войны 👌"))
+    nmarkup.row(types.KeyboardButton(text="Вообще-то, наших войск не было в ДНР/ ЛНР все эти 8 лет 🙅"))
     nmarkup.row(types.KeyboardButton(text="Путин просто помогал жителям Донбасса, которым не понравились результаты Майдана 🤷"))
     nmarkup.row(
         types.KeyboardButton(text="Путин помог разжечь этот конфликт, чтобы помешать Украине вступить в НАТО 🛡"))
-    nmarkup.row(types.KeyboardButton(text="Вообще-то, наших войск не было в ДНР/ ЛНР все эти 8 лет 🙅"))
     text = await sql_safe_select('text', 'texts', {'name': 'donbas_can_you_be_normal'})
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), parse_mode="HTML",
                          disable_web_page_preview=True)

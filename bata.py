@@ -10,8 +10,9 @@ class all_data():
         self.postgres_data = 'dbname=antiprop_db user=postgres password=postgres'
         self.mongodb_data = 'mongodb://localhost:27017'
         self.bot_token = '5480651654:AAHN90GGJui6qFWJUzS6DByNpCPYrsm83AM'
-        self.super_admins = [5306348087, 5177494340, 5581082758, 5316104187, 784006905]
+        self.super_admins = [5429649862, 5177494340, 5581082758, 5316104187, 784006905]
         self.THROTTLE_TIME = 0.8
+        self.commichannel = -1001704405613
 
 # фывфывфдв
     def get_bot(self):
@@ -32,3 +33,7 @@ class all_data():
     def get_THROTTLE_TIME(self):
         return self.THROTTLE_TIME
 
+
+#Settings:
+
+Check_tickets = True

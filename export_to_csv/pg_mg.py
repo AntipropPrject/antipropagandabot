@@ -14,6 +14,7 @@ from aiogram import types
 import zipfile
 from filters.isAdmin import IsSudo
 from log import logg
+from log.logg import get_error
 from states.admin_states import admin
 
 router = Router()
@@ -34,6 +35,17 @@ async def mongo_export_to_file(message: types.Message, state: FSMContext):
     mongo_docs = collection.find()
     # Convert the mongo docs to a DataFrame
     docs = pandas.DataFrame(mongo_docs)
+    path = 'export_to_csv/backups'
+    path_mongo = 'export_to_csv/backups/MongoDB'
+    path_pg = 'export_to_csv/backups/PostgreSQL'
+    path_games = 'export_to_csv/backups/games'
+    try:
+        if not os.path.exists(path): os.makedirs(path)
+        if not os.path.exists(path_mongo): os.makedirs(path_mongo)
+        if not os.path.exists(path_pg): os.makedirs(path_pg)
+        if not os.path.exists(path_games): os.makedirs(path_games)
+    except OSError:
+        await get_error("Создать директорию %s не удалось" % path)
     try:
         export_zip = zipfile.ZipFile(rf'export_to_csv/backups/backup-{today}-{ch}-{mn}.zip', 'w')
     except Exception as er:
