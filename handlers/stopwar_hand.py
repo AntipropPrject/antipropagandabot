@@ -214,7 +214,7 @@ async def stopwar_I_told_you_everything(message: Message, bot: Bot, state: FSMCo
 
 #timer
 async def preview_timer(message, bot,):
-    sec = 30
+    sec = 300
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
     bot_message = await message.answer('5:00')
