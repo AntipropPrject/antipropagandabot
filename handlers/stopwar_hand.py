@@ -138,7 +138,7 @@ async def stopwar_lets_fight(message: Message):
     nmarkup.row(types.KeyboardButton(text="Объясни 🤔"))
     nmarkup.row(types.KeyboardButton(text="Нет, власти всё равно будут делать, что хотят 🙅‍♂️"))
     nmarkup.row(types.KeyboardButton(text="Да, согласен(а), это остановит войну 🕊"))
-    await simple_media(message, 'stopwar_lets_fight', reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await simple_media(message, 'stopwar_lets_fight', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 
@@ -149,7 +149,7 @@ async def stopwar_lets_fight(message: Message):
 
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Какие аргументы? 🤔"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 @router.message((F.text == "Какие аргументы? 🤔"), flags=flags)
 async def stopwar_lets_fight(message: Message, state: FSMContext):
