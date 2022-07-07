@@ -212,7 +212,7 @@ async def stopwar_I_told_you_everything(message: Message, bot: Bot, state: FSMCo
     nmarkup.row(types.KeyboardButton(text="Я передумал(а). Важно, чтобы россияне поняли — война им не нужна 🕊"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
-
+#timer
 async def preview_timer(message, bot,):
     sec = 30
     nmarkup = ReplyKeyboardBuilder()
