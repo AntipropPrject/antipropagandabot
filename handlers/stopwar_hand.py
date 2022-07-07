@@ -214,7 +214,7 @@ async def stopwar_I_told_you_everything(message: Message, bot: Bot, state: FSMCo
 
 
 async def preview_timer(message, bot,):
-    sec = 10
+    sec = 30
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
     bot_message = await message.answer('5:00')
@@ -249,10 +249,10 @@ async def stopwar_lets_fight(message: Message, bot: Bot, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Какие советы? 🤔"))
     nmarkup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
+    await preview_timer(message, bot)
     await message.answer(text_1, disable_web_page_preview=True)
     await message.answer(text_2, disable_web_page_preview=True)
     await message.answer(text_3, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
-    await preview_timer(message, bot)
 
 
 @router.message((F.text == "Какие советы? 🤔"), flags=flags)
@@ -288,7 +288,6 @@ async def stopwar_share_blindly(message: Message, bot: Bot, state: FSMContext):
 @router.message((F.text == "Перейти в главное меню 👇"), flags=flags)
 async def main_menu(message: Message, state: FSMContext):
     timer = await redis_just_one_read(f'Usrs: {message.from_user.id}: count:')
-    print(timer)
     if timer != '00:01':
         await message.answer('Пожалуйста, дождитесь окончания таймера,'
                              ' прежде, чем попасть в главное меню. Не теряйте'
