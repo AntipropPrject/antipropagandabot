@@ -16,7 +16,9 @@ fancy_numbers = ('1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣
                  '1️⃣4️⃣', '1️⃣5️⃣')
 web_list = ("Министерство обороны РФ", "РИА Новости", "Russia Today", "Телеграм-канал: Война с фейками",
             "ТАСС / Комсомольская правда / Коммерсантъ / Lenta.ru / Известия")
-
+tv_list = ('1 канал 📺', 'Россия 1 / 24 📺', 'НТВ 📺', 'Звезда 📺')
+ppl_options = ("Владимир Путин 🗣", "Дмитрий Песков 🗣", "Сергей Лавров 🗣",
+               "Владимир Соловьев 🗣", "Никита Михалков 🗣", "Маргарита Симоньян 🗣")
 
 @router.message(F.text.contains('главное меню'))
 async def mainmenu_really_menu(message: Message):
@@ -29,6 +31,7 @@ async def mainmenu_really_menu(message: Message):
 
 @router.message((F.text == "Вернуться в Базу Лжи 👈") | (F.text == "База Лжи 👀"))
 async def mainmenu_baseoflie(message: Message, state: FSMContext):
+    await state.clear()
     await state.set_state(MainMenuStates.baseoflie)
     text = await sql_safe_select('text', 'texts', {'name': 'mainmenu_baseoflie'})
     nmarkup = ReplyKeyboardBuilder()
@@ -225,3 +228,103 @@ async def mainmenu_tv_one_reb(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text='Выбрать другое СМИ 🔄'))
     nmarkup.add(types.KeyboardButton(text='Вернуться в главное меню 👇'))
     await simple_media(message, f"{data['smi']}_exposure_{data['web_number']}", nmarkup.as_markup(resize_keyboard=True))
+
+
+@router.message(((F.text == "Ложь политиков и пропагандистов 🗣") | (F.text.contains('🔄'))),
+                state=(MainMenuStates.baseoflie, MainMenuStates.ppl))
+async def mainmenu_tv_select(message: Message, state: FSMContext):
+    await state.set_state(MainMenuStates.ppl)
+    nmarkup = ReplyKeyboardBuilder()
+    for lying_shit in ppl_options:
+        nmarkup.row(types.KeyboardButton(text=lying_shit))
+    nmarkup.adjust(2, 2, 2, 2)
+    nmarkup.row(types.KeyboardButton(text="Вернуться в Базу Лжи 👈"))
+    nmarkup.add(types.KeyboardButton(text="Вернуться в главное меню 👇"))
+    await message.answer('Выберите человека.', reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
+
+@router.message(((F.text.in_(set(ppl_options))) | (F.text == '👈 Выбрать ложь')), state=MainMenuStates.ppl)
+async def mainmenu_tv_lie_select(message: Message, state: FSMContext):
+    similarity, ppl = str(), str()
+    if message.text == '👈 Выбрать ложь':
+        similarity = (await state.get_data())['ppl']
+    else:
+        person = message.text
+        print(person)
+        if person == ppl_options[0]:
+            similarity = 'putin_lie_game_'
+        elif person == ppl_options[1]:
+            similarity = 'statement_Песков_'
+        elif person == ppl_options[2]:
+            similarity = 'statement_Лавров_'
+        elif person == ppl_options[3]:
+            similarity = 'statement_Соловьев_'
+        elif person == ppl_options[4]:
+            similarity = 'statement_Михалков_'
+        elif person == ppl_options[5]:
+            similarity = 'statement_Симоньян_'
+        await state.update_data(ppl=similarity)
+    how_many = len(await data_getter(f"SELECT name FROM assets WHERE name LIKE '{similarity}%'"))
+    print(how_many)
+    nmarkup = ReplyKeyboardBuilder()
+    for i in range(how_many):
+        nmarkup.row(types.KeyboardButton(text=f'{fancy_numbers[i]}'))
+    nmarkup.adjust(5, 5, 5)
+    nmarkup.row(types.KeyboardButton(text='Выбрать другого человека 🔄'))
+    nmarkup.add(types.KeyboardButton(text='Вернуться в главное меню 👇'))
+    await message.answer('Какую ложь вам показать? Выберите номер.',
+                         reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
+
+@router.message(((F.text.in_(set(fancy_numbers))) | (F.text == 'Следующая ложь 🗣')), state=MainMenuStates.ppl)
+async def mainmenu_tv_one_lie(message: Message, state: FSMContext):
+    data = await state.get_data()
+    if message.text == 'Следующая ложь 🗣':
+        number = (await state.get_data())['ppl_number'] + 1
+    else:
+        number = fancy_numbers.index(message.text) + 1
+    await state.update_data(ppl_number=number)
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text='Целенаправленная ложь 👎'))
+    nmarkup.row(types.KeyboardButton(text='Случайная ошибка / Не ложь 👍'))
+    print(data['ppl'])
+    if data['ppl'] == 'putin_lie_game_':
+        tag = f'putin_lie_game_{number}'
+        print(tag)
+        await simple_media(message, tag,
+                           nmarkup.as_markup(resize_keyboard=True))
+        truth_data = (await data_getter(f"SELECT belivers, nonbelivers FROM "
+                                        f"public.putin_lies WHERE asset_name = '{tag}'"))[0]
+        print('DAAATA', truth_data)
+        await state.update_data({'belive': truth_data[0], 'unbelive': truth_data[1]})
+    else:
+        tag = f'{data["ppl"]}{number}'
+        await simple_media(message, tag,
+                           nmarkup.as_markup(resize_keyboard=True))
+        truth_data = (await data_getter(f"SELECT belivers, nonbelivers FROM "
+                                        f"public.mistakeorlie WHERE asset_name = '{tag}'"))[0]
+        print('DAAATA', truth_data[0])
+        await state.update_data({'belive': truth_data[0], 'unbelive': truth_data[1]})
+
+
+@router.message(((F.text == 'Целенаправленная ложь 👎') | (F.text == 'Случайная ошибка / Не ложь 👍')),
+                state=MainMenuStates.ppl)
+async def mainmenu_tv_one_reb(message: Message, state: FSMContext):
+    data = await state.get_data()
+    tag = ''
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text='👈 Выбрать ложь'))
+    if data['ppl'] == ppl_options[0]:
+        if await sql_safe_select('t_id', 'assets', {'name': f'putin_lie_game_{data["ppl_number"] + 1}'}) is not False:
+            nmarkup.add(types.KeyboardButton(text='Следующая ложь 🗣'))
+    else:
+        if await sql_safe_select('t_id', 'assets', {'name': f"{data['ppl']}{data['ppl_number'] + 1}"}) \
+                is not False:
+            nmarkup.add(types.KeyboardButton(text='Следующая ложь 🗣'))
+    nmarkup.row(types.KeyboardButton(text='Выбрать другого человека 🔄'))
+    nmarkup.add(types.KeyboardButton(text='Вернуться в главное меню 👇'))
+    t_percentage = (data['belive'] / (data['belive'] + data['unbelive']))*100
+    await message.answer(f'А вот, что думают другие мои собеседники:\n\n👍 Случайная ошибка / Не ложь: {round(t_percentage)}%\n👎 Целенаправленная ложь: {round(100 - t_percentage)}%'
+                         , reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
+
