@@ -7,6 +7,7 @@ class admin(StatesGroup):
     add = State()
     pop = State()
     editors_menu = State()
+    spam_menu = State()
     edit_context = State()
     add_text = State()
     edit_text = State()
@@ -30,3 +31,5 @@ class admin(StatesGroup):
     import_csv = State()
     import_csv_from_local = State()
     secretreborn = State()
+    add_news = State()
+    update_news = State()

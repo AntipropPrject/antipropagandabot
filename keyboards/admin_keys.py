@@ -69,6 +69,7 @@ async def settings_bot():
     nmarkup.row(types.KeyboardButton(text="Экспорт"))
     nmarkup.row(types.KeyboardButton(text="Импорт"))
     nmarkup.row(types.KeyboardButton(text="Статистика бота"))
+    nmarkup.row(types.KeyboardButton(text="Рассылка"))
     try:
         if '1' in status:
             nmarkup.row(types.KeyboardButton(text="Выключить тех. режим 🟢"))
@@ -93,6 +94,20 @@ def app_admin_keyboard():
     nmarkup.adjust(1, 1)
     return nmarkup.as_markup(resize_keyboard=True)
 
+def spam_admin_keyboard():
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Главные новости"))
+    nmarkup.row(types.KeyboardButton(text="Актуальные новости"))
+    nmarkup.row(types.KeyboardButton(text="Создать рассылку"))
+    nmarkup.row(types.KeyboardButton(text="Выключить рассылку 🟢"))
+    nmarkup.row(types.KeyboardButton(text="Возврат в главное меню"))
+    return nmarkup.as_markup(resize_keyboard=True)
 
 
-
+def red_spam_admin_keyboard():
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Добавить новость"))
+    nmarkup.row(types.KeyboardButton(text="Удалить новость"))
+    nmarkup.row(types.KeyboardButton(text="Создать рассылку"))
+    nmarkup.row(types.KeyboardButton(text="Назад"))
+    return nmarkup.as_markup(resize_keyboard=True)
