@@ -32,8 +32,8 @@ async def commands_start(message: types.Message, state: FSMContext):  # Перв
     for key in redis.scan_iter(f"Usrs: {message.from_user.id}:*"):
         redis.delete(key)
     markup = ReplyKeyboardBuilder()
-    markup.add(types.KeyboardButton(text="Начнем 🇷🇺🇺🇦"))
-    markup.add(types.KeyboardButton(text="А с чего мне тебе верить? 🤔"))
+    markup.row(types.KeyboardButton(text="Начнем 🇷🇺🇺🇦"))
+    markup.row(types.KeyboardButton(text="А с чего мне тебе верить? 🤔"))
     text = await sql_safe_select("text", "texts", {"name": "start_hello"})
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     await state.set_state(welcome_states.start_dialog.dialogue_1)
@@ -52,8 +52,8 @@ async def commands_restart(message: types.Message, state: FSMContext):  # Пер
     for key in redis.scan_iter(f"Usrs: {message.from_user.id}:*"):
         redis.delete(key)
     markup = ReplyKeyboardBuilder()
-    markup.add(types.KeyboardButton(text="Начнем 🇷🇺🇺🇦"))
-    markup.add(types.KeyboardButton(text="А с чего мне тебе верить? 🤔"))
+    markup.row(types.KeyboardButton(text="Начнем 🇷🇺🇺🇦"))
+    markup.row(types.KeyboardButton(text="А с чего мне тебе верить? 🤔"))
     text = await sql_safe_select("text", "texts", {"name": "start_hello"})
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     await state.set_state(welcome_states.start_dialog.dialogue_1)

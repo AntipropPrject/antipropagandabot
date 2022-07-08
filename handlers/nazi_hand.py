@@ -343,11 +343,11 @@ async def nazi_poll_is_cool(message: Message):
 async def nazi_vs_gopnics(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'nazi_vs_gopnics'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Понятно ✔️"))
+    nmarkup.row(types.KeyboardButton(text="Понятно  👌"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(RusHate_pr(), (F.text == "Понятно ✔️"), state=NaziState.rushate, flags=flags)
+@router.message(RusHate_pr(), (F.text == "Понятно  👌"), state=NaziState.rushate, flags=flags)
 async def nazi_very_little(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'nazi_very_little'})
     text2 = await sql_safe_select('text', 'texts', {'name': 'nazi_less_than_5'})
@@ -359,7 +359,7 @@ async def nazi_very_little(message: Message):
     await message.answer(text2, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Понятно ✔️"), state=NaziState.rushate, flags=flags)
+@router.message((F.text == "Понятно  👌"), state=NaziState.rushate, flags=flags)
 async def nazi_you_wrong(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'nazi_you_wrong'})
     answer_lower = ((await poll_get(f'Usrs: {message.from_user.id}: Nazi_answers: small_poll:'))[0]).lower
