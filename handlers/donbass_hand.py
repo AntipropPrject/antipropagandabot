@@ -489,12 +489,12 @@ async def donbas_untrue(message: Message, state=FSMContext):
 @router.message((F.text == "Путин просто помогал жителям Донбасса, которым не понравились результаты Майдана 🤷"))
 async def donbas_no_army_here(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Да, замечаю‍♀"))
+    nmarkup.row(types.KeyboardButton(text="Да, замечаю  😯"))
     nmarkup.row(types.KeyboardButton(text="Нет, не замечаю🤷‍♀"))
     await simple_media(message, 'donbass_no_male', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Да, замечаю‍♀") | (F.text == "Нет, не замечаю🤷‍♀"), flags=flags)
+@router.message((F.text == "Да, замечаю  😯") | (F.text == "Нет, не замечаю🤷‍♀"), flags=flags)
 async def donbas_no_army_here(message: Message, state=FSMContext):
     await state.set_state(TruereasonsState.main)
     await mongo_update_stat(message.from_user.id, 'donbass')
