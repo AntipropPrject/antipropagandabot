@@ -141,13 +141,14 @@ async def happy_tester(bot):
     await s_bot.auth()
 
     if len(diff) != 0:
-        string, count = '', 0
+        string, space_string, count = '', '', 0
         for comm in diff:
             count += 1
             string = string + '\n' + str(count) + '. ' + comm
+            space_string = space_string + '\n' + str(count) + comm[:comm.find("||")]
         try:
             await bot.send_message(bata.all_data().commichannel, f'[{datetime.now().strftime("%H:%M")}] Bot @{botname} is up, detected new commits:\n {string}')
-            await s_bot.send_message('general', f'Bot @{botname} is up, detected new commits:\n {string}')
+            await s_bot.send_message('general', f'Bot @{botname} is up, detected new commits:\n {space_string}')
         except TelegramBadRequest:
             print(f'BOT NOT IN CHANNEL AND THIS MESSAGE NEED TO BE IN LOGS')
         print(f'[{datetime.now().strftime("%H:%M")}] Bot is up, detected new commits:{string}')
