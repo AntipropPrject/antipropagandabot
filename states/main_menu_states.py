@@ -8,3 +8,4 @@ class MainMenuStates(StatesGroup):
     about_bucha = State()
     tv = State()
     web = State()
+    ppl = State()
