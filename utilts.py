@@ -145,7 +145,7 @@ async def happy_tester(bot):
         for comm in diff:
             count += 1
             string = string + '\n' + str(count) + '. ' + comm
-            space_string = space_string + '\n' + str(count) + comm[:comm.find("||")]
+            space_string = space_string + '\n' + str(count) + '. ' + comm[:comm.find("||")]
         try:
             await bot.send_message(bata.all_data().commichannel, f'[{datetime.now().strftime("%H:%M")}] Bot @{botname} is up, detected new commits:\n {string}')
             await s_bot.send_message('general', f'Bot @{botname} is up, detected new commits:\n {space_string}')
