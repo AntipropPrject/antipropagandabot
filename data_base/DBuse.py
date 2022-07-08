@@ -104,6 +104,21 @@ async def sql_safe_select_like(column1, column2, table_name, first_condition, se
         return False
 
 
+async def sql_select_row_like(tablename, rownumber, like):
+    try:
+        q = f"SELECT * FROM (SELECT *, row_number() over (ORDER BY name) FROM {tablename} WHERE name like '{like}') AS sub WHERE row_number = {rownumber};"
+        conn = all_data().get_postg()
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute(q)
+                data = cur.fetchall()
+        conn.close()
+        return data
+    except psycopg2.Error as error:
+        await logg.get_error(f"{error}", __file__)
+        return False
+
+
 async def poll_delete_value(key, value):
     try:
         return all_data().get_data_red().delete(value)
