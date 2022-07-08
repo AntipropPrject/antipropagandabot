@@ -12,6 +12,7 @@ import aiohttp
 import bata
 from data_base.DBuse import sql_safe_select, sql_safe_insert, sql_safe_update, data_getter
 from log import logg
+from utils.spacebot import SpaceBot
 
 os.environ["GIT_PYTHON_REFRESH"] = "quiet"
 import git
@@ -134,16 +135,24 @@ async def happy_tester(bot):
     redis.sadd('LastCommies', *new_log_set)
     diff = new_log_set - old_log_set
     botname = (await bot.get_me()).username
+
+    s_bot = SpaceBot('https://otporproject.jetbrains.space', '2dd6e561-edfe-414a-9a5b-b01114d46b9c',
+                     'c428a143d05f4512ec5275b8ae190627b71441627f5f7bd975f1021d83ad36aa')
+    await s_bot.auth()
+
     if len(diff) != 0:
         string, count = '', 0
         for comm in diff:
             count += 1
-            string = string + '\n' + str(count) + '. ' + comm
+            pr = comm.find('||') - 1
+            string = string + '\n' + str(count) + '. ' + comm[:pr] + ' '*(58-len(comm)) + comm[pr:]
         try:
             await bot.send_message(bata.all_data().commichannel, f'[{datetime.now().strftime("%H:%M")}] Bot @{botname} is up, detected new commits:\n {string}')
+            await s_bot.send_message('general', f'Bot @{botname} is up, detected new commits:\n {string}')
         except TelegramBadRequest:
             print(f'BOT NOT IN CHANNEL AND THIS MESSAGE NEED TO BE IN LOGS')
         print(f'[{datetime.now().strftime("%H:%M")}] Bot is up, detected new commits:{string}')
     else:
+        await s_bot.send_message('general', 'All is good')
         print(f'[{datetime.now().strftime("%H:%M")}] Bot is up, shore is clear: no new commits here')
     await bot.session.close()
