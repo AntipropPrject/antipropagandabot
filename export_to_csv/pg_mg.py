@@ -201,17 +201,28 @@ async def backin():
                     )''')
     logg.get_info("table assets is created".upper())
 
-    cur.execute('''CREATE TABLE public.truthgame(
-                    "id" int4 NOT NULL,
-                    truth bool NOT NULL,
-                    asset_name varchar NULL,
-                    text_name varchar NULL,
-                    belivers int4 NOT NULL,
-                    nonbelivers int4 NOT NULL,
-                    rebuttal varchar NULL,
-                    reb_asset_name varchar NULL,
-                    CONSTRAINT truthgame_pk PRIMARY KEY (id)
-                   );''')
+    cur.execute('''create table truthgame
+                (
+                    id             integer not null
+                        constraint truthgame_pk
+                            primary key,
+                    truth          boolean not null,
+                    asset_name     varchar
+                        constraint truthgame_fk
+                            references assets,
+                    text_name      varchar
+                        constraint truthgame_fk_1
+                            references texts,
+                    belivers       integer not null,
+                    nonbelivers    integer not null,
+                    rebuttal       varchar
+                        constraint "Text_rebbuttal"
+                            references texts,
+                    reb_asset_name varchar
+                        constraint truthgame_fk_2
+                            references assets
+                );
+                ''')
 
     cur.execute('''ALTER TABLE public.truthgame
              ADD CONSTRAINT truthgame_fk
@@ -225,6 +236,10 @@ async def backin():
              ADD CONSTRAINT truthgame_fk_2
               FOREIGN KEY (reb_asset_name)
                REFERENCES public.assets("name");''')
+    cur.execute('''ALTER TABLE public.truthgame
+             ADD CONSTRAINT rebbuttal_text_fk
+              FOREIGN KEY (rebuttal)
+               REFERENCES public.texts("name");''')
     logg.get_info("table Truthgame is created".upper())
 
     cur.execute('''CREATE TABLE public.mistakeorlie(

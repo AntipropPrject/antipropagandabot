@@ -7,3 +7,4 @@ class MainMenuStates(StatesGroup):
     crossed_boy = State()
     about_bucha = State()
     tv = State()
+    web = State()

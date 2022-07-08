@@ -146,34 +146,28 @@ async def nazi_not_zombie(message: Message, state: FSMContext):
 async def nazi_how_many(message: Message, state: FSMContext):
     await state.set_state(NaziState.small_poll)
     text = await sql_safe_select("text", "texts", {"name": "nazi_how_many"})
-    question = 'Выберите один ответ'
-    await message.answer(text, disable_web_page_preview=True)
-    await message.answer_poll(question=question, options=nazizm_pr, is_anonymous=False,
-                              reply_markup=ReplyKeyboardRemove())
+    markup = ReplyKeyboardBuilder()
+    for option in nazizm_pr:
+        markup.row(types.KeyboardButton(text=option))
+    markup.adjust(2, 2)
+    await message.answer(text, disable_web_page_preview=True, reply_markup=markup.as_markup(resize_keyboard=True))
 
 
-@router.poll_answer(state=NaziState.small_poll, flags=flags)
-async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FSMContext):
-    data = await state.get_data()
+@router.message((F.text.in_(set(nazizm_pr))), state=NaziState.small_poll, flags=flags)
+async def poll_answer_handler(message: Message, bot: Bot, state: FSMContext):
     await state.set_state(NaziState.after_small_poll)
-    pr_answers = poll_answer.option_ids
-    for index in pr_answers:
-        answer = nazizm_pr[index]
-        first_poll_answers = await poll_get(f'Usrs: {poll_answer.user.id}: Nazi_answers: first_poll:')
-        await poll_write(f'Usrs: {poll_answer.user.id}: Nazi_answers: small_poll:', answer)
-        if answer == "📊 Менее 5%" and nazizm[0] not in first_poll_answers:
-            markup = ReplyKeyboardBuilder()
-            markup.row(types.KeyboardButton(text="Продолжай ⏳"))
-            text = await sql_safe_select("text", "texts", {"name": "nazi_piechart"})
-            media = await sql_safe_select('t_id', 'assets', {'name': 'nazi_piechart'})
-            await bot.send_photo(chat_id=poll_answer.user.id, photo=media, caption=text,
-                                 reply_markup=markup.as_markup(resize_keyboard=True))
-        else:
-            markup_1 = ReplyKeyboardBuilder()
-            markup_1.row(types.KeyboardButton(text="Хорошо, давай продолжим 👌"))
-            await bot.send_message(poll_answer.user.id,
-                                   'Спасибо, я запомнил ваш ответ. Позже в разговоре мы его обсудим.',
-                                   reply_markup=markup_1.as_markup(resize_keyboard=True))
+    answer = message.text
+    first_poll_answers = await poll_get(f'Usrs: {message.from_user.id}: Nazi_answers: first_poll:')
+    await poll_write(f'Usrs: {message.from_user.id}: Nazi_answers: small_poll:', answer)
+    markup = ReplyKeyboardBuilder()
+    if answer == "📊 Менее 5%" and nazizm[0] not in first_poll_answers:
+        markup = ReplyKeyboardBuilder()
+        markup.row(types.KeyboardButton(text="Продолжай ⏳"))
+        await simple_media(message, 'nazi_piechart', markup.as_markup(resize_keyboard=True))
+    else:
+        markup.row(types.KeyboardButton(text="Хорошо, давай продолжим 👌"))
+        await message.answer('Спасибо, я запомнил ваш ответ. Позже в разговоре мы его обсудим.',
+                             reply_markup=markup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text.contains('Продолжай ⏳')), state=NaziState.after_small_poll, flags=flags)
@@ -370,7 +364,7 @@ async def nazi_you_wrong(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'nazi_you_wrong'})
     answer_lower = ((await poll_get(f'Usrs: {message.from_user.id}: Nazi_answers: small_poll:'))[0]).lower
     text = text.replace('[[выбранный вариант ответа (с маленькой буквы)]]',
-                        ((await poll_get(f'Usrs: {message.from_user.id}: Nazi_answers: small_poll:'))[0]).lower())
+                        ((await poll_get(f'Usrs: {message.from_user.id}: Nazi_answers: small_poll:'))[0]).lower()[2:])
     text2 = await sql_safe_select('text', 'texts', {'name': 'nazi_less_than_5'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Я согласен(на), неонацизм на Украине - преувеличение 👌"))
