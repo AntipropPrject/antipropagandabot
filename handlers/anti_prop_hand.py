@@ -685,14 +685,17 @@ async def antip_truth_game_start_question(message: Message, state: FSMContext):
     print(f"В таблице {how_many_rounds} записей, а вот счетчик сейчас {count}")
     if count < how_many_rounds:
         count += 1
-        truth_data = (await data_getter(f"""SELECT * FROM ( SELECT truth, t_id, text, belivers, nonbelivers,
-                                         rebuttal, reb_asset_name,
+        truth_data = (await data_getter(f"""SELECT * FROM (Select truth, a.t_id as plot_media, t.text as plot_text, 
+                                         belivers, nonbelivers,
+                                         t2.text as rebb_text, a2.t_id as rebb_media,
                                          ROW_NUMBER () OVER (ORDER BY id), id FROM public.truthgame
-                                         left outer join assets on asset_name = assets.name
-                                         left outer join texts ON text_name = texts.name)
+                                         left outer join assets a on a.name = truthgame.asset_name
+                                         left outer join assets a2 on a2.name = truthgame.reb_asset_name
+                                         left outer join texts t on truthgame.text_name = t.name
+                                         left outer join texts t2 on truthgame.rebuttal = t2.name)
                                          AS sub WHERE row_number = {count}"""))[0]
         await state.update_data(gamecount=count, truth=truth_data[0], rebuttal=truth_data[5], belive=truth_data[3],
-                                not_belive=truth_data[4], reb_media_tag=truth_data[6], game_id=truth_data[8])
+                                not_belive=truth_data[4], reb_media=truth_data[6], game_id=truth_data[8])
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Это правда ✅"))
         nmarkup.add(types.KeyboardButton(text="Это ложь ❌"))
@@ -744,8 +747,8 @@ async def antip_truth_game_answer(message: Message, state: FSMContext):
                      f'❌ <b>Ложь</b>: {round((100 - t_percentage * 100))}%' + '\n\nПодтверждение - ниже.'
     reb = data['rebuttal']
     await sql_safe_update("truthgame", base_update_dict, {'id': data['game_id']})
-    media = await sql_safe_select('t_id', 'assets', {'name': data['reb_media_tag']})
-    if media is False:
+    media = data['reb_media']
+    if media is None:
         await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
         await message.answer(reb, disable_web_page_preview=True)
     else:
