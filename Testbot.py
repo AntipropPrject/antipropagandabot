@@ -1,4 +1,8 @@
 import asyncio
+import time
+from asyncio import events
+from datetime import datetime
+
 from aiogram import Dispatcher
 from aiogram.client.session import aiohttp
 from aiogram.dispatcher.fsm.storage.redis import RedisStorage
@@ -19,9 +23,25 @@ storage = RedisStorage.from_url(data.redis_url)
 dp = Dispatcher(storage)
 
 
+
+
+async def periodic():
+    print('periodic function has been started')
+    while True:
+        time = ''
+        time = datetime.now().strftime("%H:%M")
+        if time == '08:54':
+            pass
+        if time == '08:55':
+            pass
+        await asyncio.sleep(2)
+
+
+
 async def main():
     bot_info = await bot.get_me()
     print(f"Hello, i'm {bot_info.first_name} | {bot_info.username}")
+
     if bata.Check_tickets is True:
         await happy_tester(bot)
     else:
@@ -53,6 +73,10 @@ async def main():
 
     session = aiohttp.ClientSession()
     # use the session here
+
+    #periodic function
+    asyncio.create_task(periodic())
+
     await session.close()
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
