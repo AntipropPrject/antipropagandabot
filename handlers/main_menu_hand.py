@@ -31,6 +31,7 @@ async def mainmenu_really_menu(message: Message):
 
 @router.message((F.text == "Вернуться в Базу Лжи 👈") | (F.text == "База Лжи 👀"))
 async def mainmenu_baseoflie(message: Message, state: FSMContext):
+    await state.clear()
     await state.set_state(MainMenuStates.baseoflie)
     text = await sql_safe_select('text', 'texts', {'name': 'mainmenu_baseoflie'})
     nmarkup = ReplyKeyboardBuilder()
@@ -294,15 +295,15 @@ async def mainmenu_tv_one_lie(message: Message, state: FSMContext):
                            nmarkup.as_markup(resize_keyboard=True))
         truth_data = (await data_getter(f"SELECT belivers, nonbelivers FROM "
                                         f"public.putin_lies WHERE asset_name = '{tag}'"))[0]
-        print(truth_data)
+        print('DAAATA', truth_data)
         await state.update_data({'belive': truth_data[0], 'unbelive': truth_data[1]})
     else:
         tag = f'{data["ppl"]}{number}'
         await simple_media(message, tag,
                            nmarkup.as_markup(resize_keyboard=True))
         truth_data = (await data_getter(f"SELECT belivers, nonbelivers FROM "
-                                        f"public.mistakeorlie WHERE asset_name = '{tag}'"))
-        print(truth_data)
+                                        f"public.mistakeorlie WHERE asset_name = '{tag}'"))[0]
+        print('DAAATA', truth_data[0])
         await state.update_data({'belive': truth_data[0], 'unbelive': truth_data[1]})
 
 
