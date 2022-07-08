@@ -144,8 +144,7 @@ async def happy_tester(bot):
         string, count = '', 0
         for comm in diff:
             count += 1
-            pr = comm.find('||') - 1
-            string = string + '\n' + str(count) + '. ' + comm[:pr] + ' '*(58-len(comm)) + comm[pr:]
+            string = string + '\n' + str(count) + '. ' + comm
         try:
             await bot.send_message(bata.all_data().commichannel, f'[{datetime.now().strftime("%H:%M")}] Bot @{botname} is up, detected new commits:\n {string}')
             await s_bot.send_message('general', f'Bot @{botname} is up, detected new commits:\n {string}')
@@ -153,6 +152,5 @@ async def happy_tester(bot):
             print(f'BOT NOT IN CHANNEL AND THIS MESSAGE NEED TO BE IN LOGS')
         print(f'[{datetime.now().strftime("%H:%M")}] Bot is up, detected new commits:{string}')
     else:
-        await s_bot.send_message('general', 'All is good')
         print(f'[{datetime.now().strftime("%H:%M")}] Bot is up, shore is clear: no new commits here')
     await bot.session.close()

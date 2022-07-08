@@ -7,9 +7,7 @@ import base64
 async def make_request(url, headers, data):
     async with aiohttp.ClientSession(headers=headers) as session:
         async with session.post(url=url, data=data) as response:
-            print(response.status)
             resp = await response.read()
-            print(json.loads(resp))
             return json.loads(resp)
 
 
@@ -22,7 +20,6 @@ class SpaceBot:
 
     async def auth(self):
         secret = base64.b64encode(f'{self.id}:{self.secret}'.encode('ascii')).decode('utf-8')
-        print(secret)
         url = f'{self.url}/oauth/token'
         data = {
             'grant_type': 'client_credentials',
