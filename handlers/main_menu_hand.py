@@ -328,3 +328,50 @@ async def mainmenu_tv_one_reb(message: Message, state: FSMContext):
                          , reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
+@router.message(((F.text == "Обещания Путина 🗣") | (F.text.contains('👈'))),
+                state=(MainMenuStates.baseoflie, MainMenuStates.ptn))
+async def mainmenu_tv_select(message: Message, state: FSMContext):
+    await state.set_state(MainMenuStates.ptn)
+    how_many = len(await data_getter(f"SELECT id FROM putin_old_lies"))
+    nmarkup = ReplyKeyboardBuilder()
+    for i in range(how_many):
+        nmarkup.row(types.KeyboardButton(text=f'{fancy_numbers[i]}'))
+    nmarkup.adjust(5, 5, 5)
+    nmarkup.row(types.KeyboardButton(text="Вернуться в Базу Лжи 👈"))
+    nmarkup.add(types.KeyboardButton(text="Вернуться в главное меню 👇"))
+    await message.answer('Какое обещание вам показать? Выберите номер.',
+                         reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
+
+@router.message(((F.text.in_(set(fancy_numbers))) | (F.text == 'Следующее обещание 🗣')), state=MainMenuStates.ptn)
+async def mainmenu_tv_one_lie(message: Message, state: FSMContext):
+    data = await state.get_data()
+    if message.text == 'Следующее обещание 🗣':
+        number = (await state.get_data())['ptn_number'] + 1
+    else:
+        number = fancy_numbers.index(message.text) + 1
+    await state.update_data(ptn_number=number)
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text='Целенаправленная ложь 👎'))
+    nmarkup.row(types.KeyboardButton(text='Случайная ошибка / Не ложь 👍'))
+    tag = f'putin_oldlie_game_{number}'
+    await simple_media(message, tag, nmarkup.as_markup(resize_keyboard=True))
+    truth_data = (await data_getter(f"SELECT belivers, nonbelivers FROM "
+                                    f"public.putin_old_lies WHERE asset_name = '{tag}'"))[0]
+    print('DAAATA', truth_data)
+    await state.update_data({'belive': truth_data[0], 'unbelive': truth_data[1]})
+
+
+@router.message(((F.text == 'Целенаправленная ложь 👎') | (F.text == 'Случайная ошибка / Не ложь 👍')),
+                state=MainMenuStates.ptn)
+async def mainmenu_tv_one_reb(message: Message, state: FSMContext):
+    data = await state.get_data()
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text='👈 Выбрать обещание'))
+    if await sql_safe_select('id', 'putin_old_lies', {'asset_name': f"putin_oldlie_game_{data['ptn_number']+1}"}) \
+            is not False:
+        nmarkup.add(types.KeyboardButton(text='Следующее обещание 🗣'))
+    nmarkup.row(types.KeyboardButton(text='Вернуться в главное меню 👇'))
+    t_percentage = (data['belive'] / (data['belive'] + data['unbelive']))*100
+    await message.answer(f'А вот, что думают другие мои собеседники:\n\n👍 Случайная ошибка / Не ложь: {round(t_percentage)}%\n👎 Целенаправленная ложь: {round(100 - t_percentage)}%'
+                         , reply_markup=nmarkup.as_markup(resize_keyboard=True))

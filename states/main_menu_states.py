@@ -9,3 +9,4 @@ class MainMenuStates(StatesGroup):
     tv = State()
     web = State()
     ppl = State()
+    ptn = State()
