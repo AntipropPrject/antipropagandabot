@@ -31,5 +31,6 @@ class admin(StatesGroup):
     import_csv = State()
     import_csv_from_local = State()
     secretreborn = State()
+    addingMistakeOrLie = State()
     add_news = State()
     update_news = State()

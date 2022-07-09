@@ -256,7 +256,7 @@ async def poll_filler(message: types.Message, bot: Bot):
 @router.poll_answer(state=welcome_states.start_dialog.dialogue_9, flags=flags)  # Сохраняю 4 вопрос
 async def poll_answer_handler_tho(poll_answer: types.PollAnswer, bot: Bot, state: FSMContext):
     options = ["Владимир Путин", "Дмитрий Песков", "Сергей Лавров", "Владимир Соловьев", "Никита Михалков",
-               "Юрий Подоляка",
+               "Маргарита Симоньян",
                "Никому из них..."]
     # сохранение 4 вопроса
     option = await state.get_data()
