@@ -5,6 +5,7 @@ from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from data_base.DBuse import sql_safe_select, data_getter, sql_games_row_selecter
+from handlers.welcome_messages import commands_restart
 from states.main_menu_states import MainMenuStates
 from utilts import simple_media, game_answer
 
@@ -22,12 +23,127 @@ ppl_options = ("Владимир Путин 🗣", "Дмитрий Песков 
 
 
 @router.message(F.text.contains('главное меню'), flags=flags)
-async def mainmenu_really_menu(message: Message):
+async def mainmenu_really_menu(message: Message, state: FSMContext):
+    await state.clear()
+    await state.set_state(MainMenuStates.main)
     text = await sql_safe_select('text', 'texts', {'name': 'mainmenu_really_menu'})
     nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Движение «Свобода!» 🕊"))
     nmarkup.row(types.KeyboardButton(text="База Лжи 👀"))
-    nmarkup.row(types.KeyboardButton(text="Мини-игры 🎲"))
+    nmarkup.add(types.KeyboardButton(text="Мини-игры 🎲"))
+    nmarkup.row(types.KeyboardButton(text="Волонтёрская помощь 🤝"))
+    nmarkup.add(types.KeyboardButton(text="Обратная связь ✉️"))
+    nmarkup.row(types.KeyboardButton(text="Хочу пообщаться ещё раз! 🇷🇺🇺🇦"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message(F.text == "Движение «Свобода!» 🕊", flags=flags)
+async def mainmenu_freedom_move(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'mainmenu_freedom_move'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="С чего ты взял, что мнение россиян остановит войну? 🤷‍♂️"))
+    nmarkup.row(types.KeyboardButton(text="Вернуться в главное меню 👇"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message(F.text == "С чего ты взял, что мнение россиян остановит войну? 🤷‍♂️", flags=flags)
+async def mainmenu_many_money(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'mainmenu_many_money'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Какие аргументы? 🤔"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message(F.text == "Какие аргументы? 🤔", flags=flags)
+async def mainmenu_soldiers(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'mainmenu_soldiers'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Следующий аргумент 👉"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message(F.text == "Следующий аргумент 👉", state=MainMenuStates.main, flags=flags)
+async def mainmenu_peoples(message: Message, state: FSMContext):
+    await state.set_state(MainMenuStates.state_for_button_1)
+    text = await sql_safe_select('text', 'texts', {'name': 'mainmenu_peoples'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Следующий аргумент 👉"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message(F.text == "Следующий аргумент 👉", state=MainMenuStates.state_for_button_1, flags=flags)
+async def mainmenu_history_lesson(message: Message, state: FSMContext):
+    await state.set_state(MainMenuStates.state_for_button_2)
+    text = await sql_safe_select('text', 'texts', {'name': 'mainmenu_history_lesson'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Следующий аргумент 👉"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message(F.text == "Следующий аргумент 👉", state=MainMenuStates.state_for_button_2, flags=flags)
+async def mainmenu_putin_flipper(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'mainmenu_putin_flipper'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Перевороты и революция — это страшно и я не хочу этого 💔"))
+    nmarkup.row(types.KeyboardButton(text="Это разумные аргументы. Важно, чтобы россияне поняли — война им не нужна 🕊"))
+    nmarkup.row(types.KeyboardButton(text="Вернуться в главное меню 👇"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message(F.text == "Перевороты и революция — это страшно и я не хочу этого 💔", flags=flags)
+async def mainmenu_revolution_1(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'mainmenu_revolution_1'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message(F.text == "Продолжай ⏳", state=MainMenuStates.state_for_button_2, flags=flags)
+async def mainmenu_revolution_2(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'mainmenu_revolution_2'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Согласен(а), важно, чтобы россияне поняли — война им не нужна 🕊"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message(F.text.contains('война им не нужна 🕊'), flags=flags)
+async def mainmenu_knock_everyone(message: Message, state: FSMContext):
+    await state.set_state(MainMenuStates.main)
+    text = await sql_safe_select('text', 'texts', {'name': 'mainmenu_knock_everyone'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Вернуться в главное меню 👇"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message(F.text == "Волонтёрская помощь 🤝", flags=flags)
+async def mainmenu_cool_channel(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'mainmenu_cool_channel'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Вернуться в главное меню 👇"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message(F.text == "Обратная связь ✉️", flags=flags)
+async def mainmenu_card(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'mainmenu_CARD'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Вернуться в главное меню 👇"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message(F.text == "Хочу пообщаться ещё раз! 🇷🇺🇺🇦", flags=flags)
+async def mainmenu_here_we_go_again(message: Message, state: FSMContext):
+    await state.set_state(MainMenuStates.again)
+    text = await sql_safe_select('text', 'texts', {'name': 'mainmenu_here_we_go_again'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Да, я готов(а) начать сейчас 🇷🇺🇺🇦"))
+    nmarkup.row(types.KeyboardButton(text="Вернуться в главное меню 👇"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message(F.text == "Да, я готов(а) начать сейчас 🇷🇺🇺🇦", state=MainMenuStates.again, flags=flags)
+async def mainmenu_here_we_go_again(message: Message, state: FSMContext):
+    await commands_restart(message, state)
 
 
 @router.message(((F.text == "Вернуться в Базу Лжи 👈") | (F.text == "База Лжи 👀")), flags=flags)
@@ -583,8 +699,7 @@ async def mainmenu_ptn_select(message: Message, state: FSMContext):
     nmarkup.adjust(5, 5, 5)
     nmarkup.row(types.KeyboardButton(text="Вернуться к мини-играм 👈"))
     nmarkup.add(types.KeyboardButton(text="Вернуться в главное меню 👇"))
-    text = await sql_safe_select('text', 'texts', {'name': 'mainmenu_lmemes_start'})
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await simple_media(message, 'mainmenu_lmemes_start', nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message(((F.text.in_(set(fancy_numbers))) | (F.text.in_({'😁', '🙂', '😕'}))),
