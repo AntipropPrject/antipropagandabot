@@ -10,3 +10,8 @@ class MainMenuStates(StatesGroup):
     web = State()
     ppl = State()
     ptn = State()
+    games = State()
+    truthgame = State()
+    normalgame = State()
+    nazigame = State()
+    strikememes = State()

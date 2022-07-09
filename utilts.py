@@ -6,7 +6,7 @@ import os
 from aiogram import Bot
 from aiogram.exceptions import TelegramBadRequest, TelegramNetworkError
 from aiogram.types import Message, ReplyKeyboardRemove, InlineKeyboardMarkup, ReplyKeyboardMarkup, ForceReply, \
-    FSInputFile
+    FSInputFile, InputFile
 
 import aiohttp
 import bata
@@ -26,7 +26,6 @@ async def simple_media(message: Message, tag: str,
         You can use one tag. If there text with that tag, it will become caption
         """
         text = await sql_safe_select("text", "texts", {"name": tag})
-
         media = await sql_safe_select("t_id", "assets", {"name": tag})
         if text is not False:
             try:
@@ -48,6 +47,22 @@ async def simple_media(message: Message, tag: str,
                     return None
     except:
         print("Ошибка")
+
+
+async def game_answer(message: Message, telegram_media_id: Union[int, InputFile] = None, text: str = None,
+                       reply_markup: Union[InlineKeyboardMarkup, ReplyKeyboardMarkup,
+                                           ReplyKeyboardRemove, ForceReply, None] = None):
+    if telegram_media_id is not None:
+        try:
+            return await message.answer_photo(telegram_media_id, caption=text, reply_markup=reply_markup)
+        except TelegramBadRequest:
+            try:
+                return await message.answer_video(telegram_media_id, caption=text, reply_markup=reply_markup)
+            except TelegramBadRequest:
+                return None
+    else:
+        await message.answer(text, reply_markup=reply_markup)
+
 
 class Phoenix:
     def __init__(self):
