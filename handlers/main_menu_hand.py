@@ -414,7 +414,7 @@ async def mainmenu_tv_select(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text='Вернуться к мини-играм 👈'))
     nmarkup.add(types.KeyboardButton(text='Вернуться в главное меню 👇'))
     text = await sql_safe_select('text', 'texts', {'name': 'mainmenu_truthgame_start'})
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message(((F.text.in_(set(fancy_numbers))) | (F.text == 'Следующий сюжет 👉')),
@@ -473,7 +473,7 @@ async def mainmenu_tv_select(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text='Вернуться к мини-играм 👈'))
     nmarkup.add(types.KeyboardButton(text='Вернуться в главное меню 👇'))
     text = await sql_safe_select('text', 'texts', {'name': 'mainmenu_normalgame_start'})
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message(((F.text.in_(set(fancy_numbers))) | (F.text == 'Следующая новость 👀')),
@@ -522,7 +522,7 @@ async def mainmenu_tv_select(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text='Вернуться к мини-играм 👈'))
     nmarkup.add(types.KeyboardButton(text='Вернуться в главное меню 👇'))
     text = await sql_safe_select('text', 'texts', {'name': 'mainmenu_countrygame_start'})
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message(((F.text.in_(set(fancy_numbers))) | (F.text == 'Следующее фото 📷')),
@@ -549,7 +549,7 @@ async def mainmenu_tv_one_reb(message: Message, state: FSMContext):
     data = (await state.get_data())['game_data']
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='👈 Выбрать фото'))
-    if await sql_games_row_selecter('normal_game', data['ROW_NUMBER'] + 1) is not False:
+    if await sql_games_row_selecter('ucraine_or_not_game', data['ROW_NUMBER'] + 1) is not False:
         nmarkup.add(types.KeyboardButton(text='Следующее фото 📷'))
     nmarkup.row(types.KeyboardButton(text='Вернуться в главное меню 👇'))
     reality = data['truth']
@@ -584,7 +584,7 @@ async def mainmenu_ptn_select(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="Вернуться к мини-играм 👈"))
     nmarkup.add(types.KeyboardButton(text="Вернуться в главное меню 👇"))
     text = await sql_safe_select('text', 'texts', {'name': 'mainmenu_lmemes_start'})
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message(((F.text.in_(set(fancy_numbers))) | (F.text.in_({'😁', '🙂', '😕'}))),

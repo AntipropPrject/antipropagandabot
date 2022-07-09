@@ -61,7 +61,7 @@ async def game_answer(message: Message, telegram_media_id: Union[int, InputFile]
             except TelegramBadRequest:
                 return None
     else:
-        await message.answer(text, reply_markup=reply_markup)
+        await message.answer(text, reply_markup=reply_markup, disable_web_page_preview=True)
 
 
 class Phoenix:
