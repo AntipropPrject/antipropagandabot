@@ -5,7 +5,7 @@ from aiogram.dispatcher.fsm.state import StatesGroup, State
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
-from data_base.DBuse import data_getter, sql_safe_select, sql_safe_update
+from data_base.DBuse import data_getter, sql_safe_select, sql_safe_update, sql_add_value
 from filters.MapFilters import PutinFilter
 from handlers.stopwar_hand import StopWarState
 from stats.stat import mongo_update_stat
@@ -150,10 +150,9 @@ async def putin_game1_answer(message: Message, state: FSMContext):
     else:
         nmarkup.row(types.KeyboardButton(text="Хорошо 🤔"))
     if message.text == "Случайная ошибка / Не ложь 👍":
-        base_update_dict.update({'belivers': (data['belive'] + 1)})
+        await sql_add_value('putin_lies', 'belivers', {'id': data['pgamecount']})
     elif message.text == "Целенаправленная ложь 👎":
-        base_update_dict.update({'nonbelivers': (data['not_belive'] + 1)})
-    await sql_safe_update("putin_lies", base_update_dict, {'id': data['pgamecount']})
+        await sql_add_value('putin_lies', 'nonbelivers', {'id': data['pgamecount']})
     t_percentage = data['belive'] / (data['belive'] + data['not_belive'])
     await message.answer(
         f'А вот что думают другие участники:\n👍 <b>Случайная ошибка / не ложь:</b> {round(t_percentage * 100)}%\n'
@@ -253,11 +252,9 @@ async def putin_game2_answer(message: Message, state: FSMContext):
     else:
         nmarkup.row(types.KeyboardButton(text="Давай 🤝"))
     if message.text == "Не виноват 👍":
-        print(data['belive'] + 1)
-        base_update_dict.update({'belivers': (data['belive'] + 1)})
+        await sql_add_value('putin_lies', 'belivers', {'id': data['pgamecount']})
     elif message.text == "Виноват 👎":
-        base_update_dict.update({'nonbelivers': (data['not_belive'] + 1)})
-    await sql_safe_update("putin_old_lies", base_update_dict, {'id': data['pgamecount']})
+        await sql_add_value('putin_lies', 'nonbelivers', {'id': data['pgamecount']})
     t_percentage = data['belive'] / (data['belive'] + data['not_belive'])
     await message.answer(
         f'А вот что думают другие участники:\n\n'

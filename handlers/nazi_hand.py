@@ -8,7 +8,8 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
-from data_base.DBuse import data_getter, poll_write, sql_safe_select, sql_safe_update, redis_delete_from_list, poll_get
+from data_base.DBuse import data_getter, poll_write, sql_safe_select, sql_safe_update, redis_delete_from_list, poll_get, \
+    sql_add_value
 from filters.MapFilters import NaziFilter, RusHate_pr, NotNaziFilter, ManualFilters
 from handlers import true_resons_hand
 from resources.all_polls import nazizm, nazizm_pr
@@ -531,14 +532,13 @@ async def country_game_answer(message: Message, state: FSMContext):
             text = 'Правильно! Это на Украине!'
         if reality is False:
             text = 'Вы ошиблись! Это в России!'
-        base_update_dict.update({'belivers': (data['belive'] + 1)})
+        await sql_add_value('ucraine_or_not_game', 'belivers', {'id': data['ngamecount']})
     elif message.text == "Это в России 🇷🇺":
         if reality is True:
             text = 'Вы ошиблись! Это на Украине!'
         if reality is False:
             text = 'Правильно! Это в России!'
-        base_update_dict.update({'nonbelivers': (data['not_belive'] + 1)})
-    await sql_safe_update("ucraine_or_not_game", base_update_dict, {'id': data['ngamecount']})
+        await sql_add_value('ucraine_or_not_game', 'nonbelivers', {'id': data['ngamecount']})
     t_percentage = data['belive'] / (data['belive'] + data['not_belive'])
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжаем, давай еще! 👉"))

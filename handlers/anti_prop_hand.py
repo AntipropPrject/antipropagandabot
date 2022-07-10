@@ -7,7 +7,7 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from bata import all_data
-from data_base.DBuse import poll_get, redis_just_one_read, sql_select_row_like
+from data_base.DBuse import poll_get, redis_just_one_read, sql_select_row_like, sql_add_value
 from data_base.DBuse import sql_safe_select, data_getter, sql_safe_update
 from filters.MapFilters import WebPropagandaFilter, TVPropagandaFilter, PplPropagandaFilter, PoliticsFilter
 from handlers import true_resons_hand
@@ -737,18 +737,17 @@ async def antip_truth_game_answer(message: Message, state: FSMContext):
             reality = "Правильно! Это правда!"
         elif data['truth'] == False:
             reality = "Неверно! Это ложь!"
-        base_update_dict = {'belivers': data['belive'] + 1}
+        await sql_add_value('truthgame', 'belivers', {'id': data['game_id']})
     elif message.text == "Это ложь ❌":
         if data['truth'] == True:
             reality = "Неверно! Это правда!"
         elif data['truth'] == False:
             reality = "Правильно! Это ложь!"
-        base_update_dict = {'nonbelivers': data['not_belive'] + 1}
+        await sql_add_value('truthgame', 'nonbelivers', {'id': data['game_id']})
     t_percentage = data['belive'] / (data['belive'] + data['not_belive'])
     text = reality + f'\n\nРезультаты других участников:\n✅ <b>Правда:</b> {round(t_percentage * 100)}%\n' \
                      f'❌ <b>Ложь</b>: {round((100 - t_percentage * 100))}%' + '\n\nПодтверждение - ниже.'
     reb = data['rebuttal']
-    await sql_safe_update("truthgame", base_update_dict, {'id': data['game_id']})
     media = data['reb_media']
     if media is None:
         await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
