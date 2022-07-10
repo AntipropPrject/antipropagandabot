@@ -30,7 +30,7 @@ async def periodic():
     while True:
         time = datetime.now().strftime("%H:%M:%S")
         #удаление дневного счетчика
-        if time == '16:07:01':
+        if time == '19:00:01':
             await day_count(count_delete=True)
         await asyncio.sleep(0.5)
 
