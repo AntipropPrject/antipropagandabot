@@ -601,10 +601,10 @@ async def revealing_the_news(message: Message, state: FSMContext):
             redis.delete(key)
         print(set(await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:')).isdisjoint(
             ("Дмитрий Песков", "Сергей Лавров",
-             "Юрий Подоляка", "Владимир Соловьев", "Никита Михалков")))
+             "Маргарита Симоньян", "Владимир Соловьев", "Никита Михалков")))
         if set(await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:')).isdisjoint(
                 ("Дмитрий Песков", "Сергей Лавров",
-                 "Юрий Подоляка", "Владимир Соловьев", "Никита Михалков")) is False:
+                 "Маргарита Симоньян", "Владимир Соловьев", "Никита Михалков")) is False:
             await antip_bad_people_lies(message, state)
         else:
             await antip_truth_game_start(message, state)
@@ -645,7 +645,7 @@ async def antip_web_exit_1(message: Message, state: FSMContext):
         return
     if set(await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:')).isdisjoint(
             ("Дмитрий Песков", "Сергей Лавров",
-             "Юрий Подоляка", "Владимир Соловьев", "Никита Михалков")) is False:
+             "Маргарита Симоньян", "Владимир Соловьев", "Никита Михалков")) is False:
         await antip_bad_people_lies(message, state)
     else:
         await antip_truth_game_start(message, state)
