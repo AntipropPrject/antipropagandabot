@@ -13,7 +13,7 @@ def main_admin_keyboard(t_id=None):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Изменить медиа"))
     nmarkup.row(types.KeyboardButton(text="Изменить текст"))
-    nmarkup.row(types.KeyboardButton(text="Изменить игры"))
+    nmarkup.row(types.KeyboardButton(text="Добавить позицию к играм"))
     if t_id in all_data().super_admins:
         nmarkup.row(types.KeyboardButton(text="Управление ботом"))
         nmarkup.row(types.KeyboardButton(text="Клонировать бота"))
@@ -22,6 +22,27 @@ def main_admin_keyboard(t_id=None):
     nmarkup.adjust(2)
     return nmarkup.as_markup(resize_keyboard=True, input_field_placeholder=random.choice(usless_list))
 
+def games_keyboard(t_id=None):
+    usless_list = ['Пожалуйста, не редактируйте текст напрямую в базе данных',
+                   'Никогда не угадаешь, где скрывалась опечатка']
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Ошибка или ложь(пропагандисты)"))
+    nmarkup.row(types.KeyboardButton(text="Игра в правду"))
+    nmarkup.row(types.KeyboardButton(text="Путин"))
+    nmarkup.row(types.KeyboardButton(text="Путин - обещания"))
+    nmarkup.row(types.KeyboardButton(text="Игра в нормальность"))
+    nmarkup.row(types.KeyboardButton(text="Украина или нет?"))
+    nmarkup.row(types.KeyboardButton(text="Ложь по тв"))
+
+
+
+    if t_id in all_data().super_admins:
+        nmarkup.row(types.KeyboardButton(text="Управление ботом"))
+        nmarkup.row(types.KeyboardButton(text="Клонировать бота"))
+        nmarkup.row(types.KeyboardButton(text="Подготовить бота к клонированию"))
+    nmarkup.row(types.KeyboardButton(text="Выйти"))
+    nmarkup.adjust(2)
+    return nmarkup.as_markup(resize_keyboard=True, input_field_placeholder=random.choice(usless_list))
 
 def redct_editors():
     markup = ReplyKeyboardBuilder()

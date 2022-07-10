@@ -12,7 +12,7 @@ def main_admin_keyboard(t_id=None):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Изменить медиа"))
     nmarkup.row(types.KeyboardButton(text="Изменить текст"))
-    nmarkup.row(types.KeyboardButton(text="Изменить игры"))
+    nmarkup.row(types.KeyboardButton(text="Добавить позицию к играм"))
     if t_id in all_data().super_admins:
         nmarkup.row(types.KeyboardButton(text="Аналитика"))
         nmarkup.row(types.KeyboardButton(text="Добавить/Удалить редактора"))
