@@ -1,3 +1,5 @@
+from typing import Union
+
 import psycopg2
 from psycopg2 import sql
 from bata import all_data
@@ -105,19 +107,86 @@ async def sql_safe_select_like(column1, column2, table_name, first_condition, se
         return False
 
 
-async def sql_select_row_like(tablename, rownumber, like):
+async def sql_select_row_like(tablename, rownumber, like_dict: dict):
     try:
-        q = f"SELECT * FROM (SELECT *, row_number() over (ORDER BY name) FROM {tablename} WHERE name like '{like}') AS sub WHERE row_number = {rownumber};"
+        key = list(like_dict.keys())[0]
+        q = f"SELECT * FROM (SELECT *, row_number() over (ORDER BY {key}) FROM {tablename} WHERE " \
+            f"{key} like '{like_dict[key]}%') AS sub WHERE row_number = {rownumber};"
         conn = all_data().get_postg()
         with conn:
             with conn.cursor() as cur:
                 cur.execute(q)
                 data = cur.fetchall()
         conn.close()
-        return data
+        return data[0]
+    except (psycopg2.Error, IndexError) as error:
+        return False
+
+
+async def sql_games_row_selecter(tablename: str, row: int):
+    try:
+        if tablename == 'truthgame':
+            data = (await data_getter(f"""SELECT * FROM (Select truth, a.t_id as plot_media, t.text as plot_text, 
+                                             belivers, nonbelivers,
+                                             t2.text as rebb_text, a2.t_id as rebb_media,
+                                             ROW_NUMBER () OVER (ORDER BY id), id FROM public.{tablename}
+                                             left outer join assets a on a.name = {tablename}.asset_name
+                                             left outer join assets a2 on a2.name = {tablename}.reb_asset_name
+                                             left outer join texts t on {tablename}.text_name = t.name
+                                             left outer join texts t2 on {tablename}.rebuttal = t2.name)
+                                             AS sub WHERE row_number = {row}"""))[0]
+            keys = ('truth', 'plot_media', 'plot_text', 'belivers', 'nonbelivers',
+                    'rebb_text', 'rebb_media', 'ROW_NUMBER', 'id')
+        elif tablename == 'normal_game':
+            data = (await data_getter(f"""SELECT * FROM (Select id, assets.t_id as plot_media, texts.text as plot_text, 
+                                             belivers, nonbelivers,
+                                             ROW_NUMBER () OVER (ORDER BY id) FROM public.{tablename}
+                                             left outer join assets on assets.name = {tablename}.asset_name
+                                             left outer join texts on {tablename}.text_name = texts.name)
+                                             AS sub WHERE row_number = {row}"""))[0]
+            keys = ('id', 'plot_media', 'plot_text', 'belivers', 'nonbelivers', 'ROW_NUMBER')
+        elif tablename == 'ucraine_or_not_game':
+            data = (await data_getter(f"""SELECT * FROM (Select id, truth, assets.t_id as plot_media, texts.text as plot_text, 
+                                             belivers, nonbelivers,
+                                             ROW_NUMBER () OVER (ORDER BY id) FROM public.{tablename}
+                                             left outer join assets on assets.name = {tablename}.asset_name
+                                             left outer join texts on {tablename}.text_name = texts.name)
+                                             AS sub WHERE row_number = {row}"""))[0]
+            keys = ('id', 'truth', 'plot_media', 'plot_text', 'belivers', 'nonbelivers', 'ROW_NUMBER')
+        elif tablename == 'putin_lies':
+            data = (await data_getter(f"""SELECT * FROM (Select id, assets.t_id as plot_media, texts.text as plot_text, 
+                                             belivers, nonbelivers,
+                                             ROW_NUMBER () OVER (ORDER BY id) FROM public.{tablename}
+                                             left outer join assets on assets.name = {tablename}.asset_name
+                                             left outer join texts on {tablename}.text_name = texts.name)
+                                             AS sub WHERE row_number = {row}"""))[0]
+            keys = ('id', 'plot_media', 'plot_text', 'belivers', 'nonbelivers', 'ROW_NUMBER')
+        elif tablename == 'mistakeorlie':
+            data = (await data_getter(f"""SELECT * FROM (Select id, truth, assets.t_id as plot_media, texts.text as plot_text, 
+                                             belivers, nonbelivers,
+                                             ROW_NUMBER () OVER (ORDER BY id) FROM public.{tablename}
+                                             left outer join assets on assets.name = {tablename}.asset_name
+                                             left outer join texts on {tablename}.text_name = texts.name)
+                                             AS sub WHERE row_number = {row}"""))[0]
+            keys = ('id', 'truth', 'plot_media', 'plot_text', 'belivers', 'nonbelivers', 'ROW_NUMBER')
+        elif tablename == 'putin_old_lies':
+            data = (await data_getter(f"""SELECT * FROM (Select id, assets.t_id as plot_media, texts.text as plot_text, 
+                                             belivers, nonbelivers,
+                                             ROW_NUMBER () OVER (ORDER BY id) FROM public.{tablename}
+                                             left outer join assets on assets.name = {tablename}.asset_name
+                                             left outer join texts on {tablename}.text_name = texts.name)
+                                             AS sub WHERE row_number = {row}"""))[0]
+            keys = ('id', 'plot_media', 'plot_text', 'belivers', 'nonbelivers', 'ROW_NUMBER')
+        datadict = dict(zip(keys, data))
+        return datadict
+    except IndexError:
+        return False
     except psycopg2.Error as error:
         await logg.get_error(f"{error}", __file__)
         return False
+
+
+
 
 
 async def poll_delete_value(key, value):

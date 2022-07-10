@@ -238,7 +238,7 @@ async def provocation(message: Message):
     nmarkup.row(
         types.KeyboardButton(text="Просто укронацисты размещаются в домах и делают их легитимной военной целью 😡"))
     nmarkup.row(
-        types.KeyboardButton(text="Жертвы среди мирного населения - это плохо, но это все ради важных целей."))
+        types.KeyboardButton(text="Жертвы среди мирного населения - это плохо, но это все ради важных целей. 🇷🇺"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), parse_mode="HTML",
                          disable_web_page_preview=True)
 

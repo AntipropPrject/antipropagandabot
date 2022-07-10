@@ -105,13 +105,13 @@ async def putin_game1_question(message: Message, state: FSMContext):
     except:
         count = 0
     how_many_rounds = (await data_getter("SELECT COUNT (*) FROM public.putin_lies"))[0][0]
-    print(f"В таблице {how_many_rounds} записей, а вот счетчик сейчас {count}")
     if count < how_many_rounds:
         count += 1
-        truth_data = (await data_getter("SELECT t_id, text, belivers, nonbelivers, rebuttal FROM public.putin_lies "
+        truth_data = (await data_getter("SELECT * FROM (SELECT t_id, text, belivers, nonbelivers, rebuttal,"
+                                        " row_number() over (order by id) FROM public.putin_lies "
                                  "left outer join assets on asset_name = assets.name "
-                                 "left outer join texts ON text_name = texts.name "
-                                 f"where id = {count}"))    [0]
+                                 "left outer join texts ON text_name = texts.name) as "
+                                        f"BAKABAKABAKA where row_number = {count}"))[0]
         await state.update_data(pgamecount=count, belive=truth_data[2], not_belive=truth_data[3])
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.add(types.KeyboardButton(text="Случайная ошибка / Не ложь 👍"))
@@ -210,10 +210,11 @@ async def putin_game2_question(message: Message, state: FSMContext):
     how_many_rounds = (await data_getter("SELECT COUNT (*) FROM public.putin_old_lies"))[0][0]
     if count < how_many_rounds:
         count += 1
-        truth_data = (await data_getter("SELECT t_id, text, belivers, nonbelivers, rebuttal FROM public.putin_old_lies "
+        truth_data = (await data_getter("SELECT * FROM (SELECT t_id, text, belivers, nonbelivers, rebuttal, "
+                                        "row_number() over (order by id) FROM public.putin_old_lies "
                                  "left outer join assets on asset_name = assets.name "
-                                 "left outer join texts ON text_name = texts.name "
-                                 f"where id = {count}"))[0]
+                                 f"left outer join texts ON text_name = texts.name) as subb "
+                                        f"where row_number = {count}"))[0]
         print(truth_data)
         await state.update_data(pgamecount=count, belive=truth_data[2], not_belive=truth_data[3])
         nmarkup = ReplyKeyboardBuilder()

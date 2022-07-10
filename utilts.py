@@ -6,11 +6,11 @@ import os
 from aiogram import Bot
 from aiogram.exceptions import TelegramBadRequest, TelegramNetworkError
 from aiogram.types import Message, ReplyKeyboardRemove, InlineKeyboardMarkup, ReplyKeyboardMarkup, ForceReply, \
-    FSInputFile
+    FSInputFile, InputFile
 
 import aiohttp
 import bata
-from data_base.DBuse import sql_safe_select, sql_safe_insert, sql_safe_update, data_getter
+from data_base.DBuse import sql_safe_select, sql_safe_insert, sql_safe_update, data_getter, sql_select_row_like
 from log import logg
 from utils.spacebot import SpaceBot
 
@@ -26,7 +26,6 @@ async def simple_media(message: Message, tag: str,
         You can use one tag. If there text with that tag, it will become caption
         """
         text = await sql_safe_select("text", "texts", {"name": tag})
-
         media = await sql_safe_select("t_id", "assets", {"name": tag})
         if text is not False:
             try:
@@ -48,6 +47,34 @@ async def simple_media(message: Message, tag: str,
                     return None
     except:
         print("Ошибка")
+
+
+async def game_answer(message: Message, telegram_media_id: Union[int, InputFile] = None, text: str = None,
+                       reply_markup: Union[InlineKeyboardMarkup, ReplyKeyboardMarkup,
+                                           ReplyKeyboardRemove, ForceReply, None] = None):
+    if telegram_media_id is not None:
+        try:
+            return await message.answer_photo(telegram_media_id, caption=text, reply_markup=reply_markup)
+        except TelegramBadRequest:
+            try:
+                return await message.answer_video(telegram_media_id, caption=text, reply_markup=reply_markup)
+            except TelegramBadRequest:
+                return None
+    else:
+        await message.answer(text, reply_markup=reply_markup, disable_web_page_preview=True)
+
+
+async def dynamic_media_answer(message: Message, similarity_tag: str, row_number: int,
+                               reply_markup: Union[InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove,
+                                                   ForceReply, None] = None):
+    media = (await sql_select_row_like('assets', row_number, {'name': similarity_tag}))[0]
+    try:
+        text = (await sql_select_row_like('texts', row_number, {'name': similarity_tag}))[0]
+    except TypeError:
+        text = None
+    print(text)
+    await game_answer(message, media, text, reply_markup)
+
 
 class Phoenix:
     def __init__(self):

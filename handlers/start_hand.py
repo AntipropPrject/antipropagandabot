@@ -26,7 +26,7 @@ async def cmd_start(message: Message, state: FSMContext):
 @router.message(commands=["mainskip69"], flags=flags)
 async def cmd_start(message: Message, state: FSMContext):
     await state.set_state(MainMenuStates.main)
-    await mainmenu_really_menu(message)
+    await mainmenu_really_menu(message, state)
 
 
 @router.message(commands=["teststrike"], flags=flags)

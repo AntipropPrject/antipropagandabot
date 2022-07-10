@@ -488,10 +488,10 @@ async def country_game_question(message: Message, state: FSMContext):
     if count < how_many_rounds:
         count += 1
         truth_data = \
-            (await data_getter("SELECT t_id, text, belivers, nonbelivers, rebuttal, truth FROM public.ucraine_or_not_game "
+            (await data_getter("SELECT * FROM (SELECT t_id, text, belivers, nonbelivers, rebuttal, truth, "
+                               "ROW_NUMBER () OVER (ORDER BY id) FROM public.ucraine_or_not_game "
                         "left outer join assets on asset_name = assets.name "
-                        "left outer join texts ON text_name = texts.name "
-                        f"where id = {count}"))[0]
+                        f"left outer join texts ON text_name = texts.name) AS sub WHERE row_number = {count}"))[0]
         print(truth_data)
         await state.update_data(ngamecount=count, belive=truth_data[2], not_belive=truth_data[3], rebutt=truth_data[4],
                                 truth=truth_data[5])
