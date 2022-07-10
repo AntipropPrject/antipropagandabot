@@ -4,7 +4,7 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
-from data_base.DBuse import sql_safe_select, data_getter, sql_games_row_selecter, sql_select_row_like
+from data_base.DBuse import sql_safe_select, data_getter, sql_games_row_selecter, sql_select_row_like, mongo_game_answer
 from filters.MapFilters import SubscriberFilter
 from handlers.welcome_messages import commands_restart
 from states.main_menu_states import MainMenuStates
@@ -439,14 +439,27 @@ async def mainmenu_ppl_one_reb(message: Message, state: FSMContext):
     data = await state.get_data()
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='👈 Выбрать ложь'))
+    answer_group = str()
     if data['ppl'] == ppl_options[0]:
         if await sql_select_row_like('putin_lies', data["ppl_number"] + 1,
                                      {'asset_name': 'putin_lie_game_'}) is not False:
             nmarkup.add(types.KeyboardButton(text='Следующая ложь 🗣'))
+            if message.text == 'Целенаправленная ложь 👎':
+                answer_group = 'nonbelivers'
+            elif message.text == 'Случайная ошибка / Не ложь 👍':
+                answer_group = 'belivers'
+        await mongo_game_answer(message.from_user.id, 'putin_lies', data['id'],
+                                answer_group, {'id': data['id']})
     else:
         if await sql_select_row_like('assets', data["ppl_number"] + 1,
                                      {'name': data['ppl']}) is not False:
             nmarkup.add(types.KeyboardButton(text='Следующая ложь 🗣'))
+        if message.text == 'Целенаправленная ложь 👎':
+            answer_group = 'nonbelivers'
+        elif message.text == 'Случайная ошибка / Не ложь 👍':
+            answer_group = 'belivers'
+        await mongo_game_answer(message.from_user.id, 'mistakeorlie', data['id'],
+                                answer_group, {'id': data['id']})
     nmarkup.row(types.KeyboardButton(text='Выбрать другого человека 🔄'))
     nmarkup.add(types.KeyboardButton(text='Вернуться в главное меню 👇'))
     t_percentage = (data['belivers'] / (data['belivers'] + data['nonbelivers'])) * 100
@@ -498,6 +511,13 @@ async def mainmenu_ptn_one_reb(message: Message, state: FSMContext):
                                  {'asset_name': 'putin_oldlie_game_'}) is not False:
         nmarkup.add(types.KeyboardButton(text='Следующее обещание 🗣'))
     nmarkup.row(types.KeyboardButton(text='Вернуться в главное меню 👇'))
+    answer_group = str()
+    if message.text == 'Целенаправленная ложь 👎':
+        answer_group = 'nonbelivers'
+    elif message.text == 'Случайная ошибка / Не ложь 👍':
+        answer_group = 'belivers'
+    await mongo_game_answer(message.from_user.id, 'putin_old_lies', data['id'],
+                            answer_group, {'id': data['id']})
     t_percentage = (data['belivers'] / (data['belivers'] + data['nonbelivers'])) * 100
     await message.answer(
         f'А вот, что думают другие мои собеседники:\n\n👍 Случайная ошибка / Не ложь: {round(t_percentage)}'
@@ -559,17 +579,21 @@ async def mainmenu_tv_one_reb(message: Message, state: FSMContext):
     if await sql_games_row_selecter('truthgame', data['ROW_NUMBER'] + 1) is not False:
         nmarkup.add(types.KeyboardButton(text='Следующий сюжет 👉'))
     nmarkup.row(types.KeyboardButton(text='Вернуться в главное меню 👇'))
-    reality = ''
+    reality, answer_group = '', str()
     if message.text == "Это правда ✅":
         if data['truth'] is True:
             reality = "Правильно! Это правда!"
         elif data['truth'] is False:
             reality = "Неверно! Это ложь!"
+        answer_group = 'belivers'
     elif message.text == "Это ложь ❌":
         if data['truth'] is True:
             reality = "Неверно! Это правда!"
         elif data['truth'] is False:
             reality = "Правильно! Это ложь!"
+        answer_group = 'nonbelivers'
+    await mongo_game_answer(message.from_user.id, 'truthgame', data['id'],
+                            answer_group, {'id': data['id']})
     t_percentage = data['belivers'] / (data['belivers'] + data['nonbelivers'])
     text = reality + f'\n\nРезультаты других участников:\n✅ <b>Правда:</b> {round(t_percentage * 100)}%\n' \
                      f'❌ <b>Ложь</b>: {round((100 - t_percentage * 100))}%' + '\n\nПодтверждение - ниже.'
@@ -619,6 +643,13 @@ async def mainmenu_tv_one_reb(message: Message, state: FSMContext):
     if await sql_games_row_selecter('normal_game', data['ROW_NUMBER'] + 1) is not False:
         nmarkup.add(types.KeyboardButton(text='Следующая новость 👀'))
     nmarkup.row(types.KeyboardButton(text='Вернуться в главное меню 👇'))
+    answer_group = str()
+    if message.text == 'Это абсурд 🤦‍♀️':
+        answer_group = 'belivers'
+    elif message.text == 'Это нормально 👌':
+        answer_group = 'nonbelivers'
+    await mongo_game_answer(message.from_user.id, 'normal_game', data['id'],
+                            answer_group, {'id': data['id']})
     t_percentage = data['belivers'] / (data['belivers'] + data['nonbelivers'])
     text = f'Результаты других участников:\n🤦‍♂️ Это абсурд: {round(t_percentage * 100)}%\n' \
            f'👌 Это нормально: {round(100 - t_percentage * 100)}%'
@@ -648,9 +679,7 @@ async def mainmenu_tv_one_lie(message: Message, state: FSMContext):
         number = fancy_numbers.index(message.text) + 1
     else:
         number = (await state.get_data())['game_number'] + 1
-    print(number)
     current_row = await sql_games_row_selecter('ucraine_or_not_game', number)
-    print(current_row)
     await state.update_data(game_number=number, game_data=current_row)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Это в России 🇷🇺'))
@@ -669,17 +698,21 @@ async def mainmenu_tv_one_reb(message: Message, state: FSMContext):
         nmarkup.add(types.KeyboardButton(text='Следующее фото 📷'))
     nmarkup.row(types.KeyboardButton(text='Вернуться в главное меню 👇'))
     reality = data['truth']
-    text = ''
+    text, answer_group = '', str()
     if message.text == "Это на Украине 🇺🇦":
         if reality is True:
             text = 'Правильно! Это на Украине!'
         if reality is False:
             text = 'Вы ошиблись! Это в России!'
+        answer_group = 'belivers'
     elif message.text == "Это в России 🇷🇺":
         if reality is True:
             text = 'Вы ошиблись! Это на Украине!'
         if reality is False:
             text = 'Правильно! Это в России!'
+        answer_group = 'nonbelivers'
+    await mongo_game_answer(message.from_user.id, 'ucraine_or_not_game', data['id'],
+                            answer_group, {'id': data['id']})
     t_percentage = data['belivers'] / (data['belivers'] + data['nonbelivers'])
     await message.answer(
         f'{text}\nРезультаты других участников:\n'

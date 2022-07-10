@@ -45,7 +45,7 @@ async def smi_statement(message: Message, state: FSMContext):
         count += 1
         try:
             truth_data = (await data_getter(
-                "SELECT truth, t_id, text, belivers, nonbelivers, rebuttal, asset_name FROM public.mistakeorlie "
+                "SELECT truth, t_id, text, belivers, nonbelivers, rebuttal, asset_name, id FROM public.mistakeorlie "
                 "left outer join assets on asset_name = assets.name "
                 "left outer join texts ON text_name = texts.name "
                 f"where asset_name like '%{str(person_list[0])[-5:-1].strip()}%' and asset_name like '%{str(count)}%'"))[
@@ -53,7 +53,7 @@ async def smi_statement(message: Message, state: FSMContext):
 
             await state.update_data({f'{person_list[0]}_gamecount': count})
             await state.update_data(truth=truth_data[0], rebuttal=truth_data[5], belive=truth_data[3],
-                                    not_belive=truth_data[4], last_media=truth_data[6])
+                                    not_belive=truth_data[4], last_media=truth_data[6], gid=truth_data[7])
 
         except IndexError as er:
             await message.answer(text=f"Медиафайл не найден {er}")
@@ -87,12 +87,13 @@ async def smi_statement(message: Message, state: FSMContext):
 async def smi_statement_enough(message: Message, state: FSMContext):
     person_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
     data = await state.get_data()
-    base_update_dict = dict()
-    print(message.text)
+    answer_group = str()
     if message.text == "Случайная ошибка / Не ложь 👍":
-        await sql_add_value('mistakeorlie', 'belivers', {'asset_name': data['last_media']})
+        answer_group = 'belivers'
     elif message.text == "Целенаправленная ложь 👎":
-        await sql_add_value('mistakeorlie', 'nonbelivers', {'asset_name': data['last_media']})
+        answer_group = 'nonbelivers'
+    await mongo_game_answer(message.from_user.id, 'mistakeorlie', data['gid'],
+                            answer_group, {'id': data['gid']})
     t_percentage = data['belive'] / (data['belive'] + data['not_belive'])
     nmarkup = ReplyKeyboardBuilder()
     try:

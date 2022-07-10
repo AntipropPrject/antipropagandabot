@@ -9,6 +9,7 @@ from log import logg
 from states.admin_states import admin
 
 router = Router()
+router.message.filter(state=admin)
 
 @router.message(IsAdmin(),(F.text == 'Добавить позицию к играм'), state=admin.menu)
 async def admin_home(message: types.Message, state: FSMContext):
@@ -188,7 +189,7 @@ async def menu(message: types.Message, state: FSMContext):
                          reply_markup=nmrkup.as_markup(resize_keyboard=True))
     await state.clear()
 #######################ПУТИН
-@router.message(IsAdmin(), (F.text.contains('Путин')))
+@router.message(IsAdmin(), (F.text.contains('Путин 🚮')))
 async def admin_home(message: types.Message, state: FSMContext):
     await state.clear()
     await logg.admin_logs(message.from_user.id, message.from_user.username,
