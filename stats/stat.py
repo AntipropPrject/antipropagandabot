@@ -56,3 +56,10 @@ async def mongo_select_stat_all_user():
     except Exception as error:
         await logg.get_error(f"mongo_select_stat_all_user | {error}", __file__)
 
+
+async def mongo_is_done(p_id):
+    try:
+        collection = collection_stat.find_one({'_id': p_id})
+        return collection['end']
+    except Exception as error:
+        await logg.get_error(f"mongo_select_stat_all_user | {error}", __file__)
