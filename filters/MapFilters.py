@@ -1,7 +1,10 @@
+from aiogram import Bot
 from aiogram.dispatcher.filters import BaseFilter
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message
 from typing import Union, Dict, Any
+
+import bata
 from data_base.DBuse import poll_get, redis_just_one_read
 from handlers import true_resons_hand
 from resources.all_polls import welc_message_one, nazizm, donbass_first_poll
@@ -144,6 +147,21 @@ class NotNaziFilter(BaseFilter):
             return True
         else:
             return False
+
+
+class SubscriberFilter(BaseFilter):
+    async def __call__(self, message: Message):
+        bot = bata.all_data().get_bot()
+        user_channel_status = await bot.get_chat_member(chat_id=bata.all_data().masterchannel,
+                                                        user_id=message.from_user.id)
+        bot.close()
+        print(user_channel_status.status)
+        if user_channel_status.status not in {'left', 'banned', 'restricted'}:
+            return False
+        else:
+            return True
+
+
 
 
 

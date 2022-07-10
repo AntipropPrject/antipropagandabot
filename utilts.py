@@ -10,7 +10,7 @@ from aiogram.types import Message, ReplyKeyboardRemove, InlineKeyboardMarkup, Re
 
 import aiohttp
 import bata
-from data_base.DBuse import sql_safe_select, sql_safe_insert, sql_safe_update, data_getter
+from data_base.DBuse import sql_safe_select, sql_safe_insert, sql_safe_update, data_getter, sql_select_row_like
 from log import logg
 from utils.spacebot import SpaceBot
 
@@ -62,6 +62,17 @@ async def game_answer(message: Message, telegram_media_id: Union[int, InputFile]
                 return None
     else:
         await message.answer(text, reply_markup=reply_markup, disable_web_page_preview=True)
+
+
+async def dynamic_media_answer(message: Message, similarity_tag: str, row_number: int,
+                               reply_markup: Union[InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove,
+                                                   ForceReply, None] = None):
+    media = (await sql_select_row_like('assets', row_number, {'name': similarity_tag}))[0]
+    try:
+        text = (await sql_select_row_like('texts', row_number, {'name': similarity_tag}))
+    except TypeError:
+        text = None
+    await game_answer(message, media, text, reply_markup)
 
 
 class Phoenix:

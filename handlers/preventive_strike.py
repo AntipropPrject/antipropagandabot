@@ -9,7 +9,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from data_base.DBuse import sql_safe_select
 from filters.MapFilters import ManualFilters
 from handlers import true_resons_hand
-from utilts import simple_media
+from utilts import simple_media, dynamic_media_answer
 
 
 class PreventStrikeState(StatesGroup):
@@ -133,7 +133,6 @@ async def prevent_strike_memes(message: Message, state: FSMContext):
         count = 0
     try:
         count += 1
-        media = await sql_safe_select('t_id', 'assets', {'name': f'prevent_strike_meme_{count}'})
         isEND = await sql_safe_select('t_id', 'assets', {'name': f'prevent_strike_meme_{count + 1}'})
         nmarkup = ReplyKeyboardBuilder()
         if isEND is not False:
@@ -143,10 +142,7 @@ async def prevent_strike_memes(message: Message, state: FSMContext):
             nmarkup.row(types.KeyboardButton(text='Достаточно, продолжим ✋'))
         else:
             nmarkup.row(types.KeyboardButton(text='Продолжим 🙂'))
-        try:
-            await message.answer_photo(media, reply_markup=nmarkup.as_markup(resize_keyboard=True))
-        except:
-            await message.answer_video(media, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+        await dynamic_media_answer(message, 'prevent_strike_meme_', count, nmarkup.as_markup(resize_keyboard=True))
         await state.update_data(lgamecount=count)
         if isEND is False:
             await state.set_state(true_resons_hand.TruereasonsState.main)

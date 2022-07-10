@@ -111,7 +111,7 @@ async def sql_select_row_like(tablename, rownumber, like_dict: dict):
     try:
         key = list(like_dict.keys())[0]
         q = f"SELECT * FROM (SELECT *, row_number() over (ORDER BY {key}) FROM {tablename} WHERE " \
-            f"{key} like '{like_dict[key]}') AS sub WHERE row_number = {rownumber};"
+            f"{key} like '{like_dict[key]}%') AS sub WHERE row_number = {rownumber};"
         conn = all_data().get_postg()
         with conn:
             with conn.cursor() as cur:
@@ -119,8 +119,7 @@ async def sql_select_row_like(tablename, rownumber, like_dict: dict):
                 data = cur.fetchall()
         conn.close()
         return data[0]
-    except psycopg2.Error as error:
-        await logg.get_error(f"{error}", __file__)
+    except (psycopg2.Error, IndexError) as error:
         return False
 
 
@@ -154,6 +153,30 @@ async def sql_games_row_selecter(tablename: str, row: int):
                                              left outer join texts on {tablename}.text_name = texts.name)
                                              AS sub WHERE row_number = {row}"""))[0]
             keys = ('id', 'truth', 'plot_media', 'plot_text', 'belivers', 'nonbelivers', 'ROW_NUMBER')
+        elif tablename == 'putin_lies':
+            data = (await data_getter(f"""SELECT * FROM (Select id, assets.t_id as plot_media, texts.text as plot_text, 
+                                             belivers, nonbelivers,
+                                             ROW_NUMBER () OVER (ORDER BY id) FROM public.{tablename}
+                                             left outer join assets on assets.name = {tablename}.asset_name
+                                             left outer join texts on {tablename}.text_name = texts.name)
+                                             AS sub WHERE row_number = {row}"""))[0]
+            keys = ('id', 'plot_media', 'plot_text', 'belivers', 'nonbelivers', 'ROW_NUMBER')
+        elif tablename == 'mistakeorlie':
+            data = (await data_getter(f"""SELECT * FROM (Select id, truth, assets.t_id as plot_media, texts.text as plot_text, 
+                                             belivers, nonbelivers,
+                                             ROW_NUMBER () OVER (ORDER BY id) FROM public.{tablename}
+                                             left outer join assets on assets.name = {tablename}.asset_name
+                                             left outer join texts on {tablename}.text_name = texts.name)
+                                             AS sub WHERE row_number = {row}"""))[0]
+            keys = ('id', 'truth', 'plot_media', 'plot_text', 'belivers', 'nonbelivers', 'ROW_NUMBER')
+        elif tablename == 'putin_old_lies':
+            data = (await data_getter(f"""SELECT * FROM (Select id, assets.t_id as plot_media, texts.text as plot_text, 
+                                             belivers, nonbelivers,
+                                             ROW_NUMBER () OVER (ORDER BY id) FROM public.{tablename}
+                                             left outer join assets on assets.name = {tablename}.asset_name
+                                             left outer join texts on {tablename}.text_name = texts.name)
+                                             AS sub WHERE row_number = {row}"""))[0]
+            keys = ('id', 'plot_media', 'plot_text', 'belivers', 'nonbelivers', 'ROW_NUMBER')
         datadict = dict(zip(keys, data))
         return datadict
     except IndexError:
