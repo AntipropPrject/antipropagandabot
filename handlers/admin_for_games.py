@@ -496,6 +496,6 @@ async def menu(message: types.Message, state: FSMContext):
                          reply_markup=games_keyboard(message.from_user.id))
     await state.set_state(admin.game_deleting)
 
-@router.message(IsAdmin(), state=admin.game_deleting)
-async def menu(message: types.Message, state: FSMContext):
-    await message
+# @router.message(IsAdmin(), state=admin.game_deleting)
+# async def menu(message: types.Message, state: FSMContext):
+#     await message
