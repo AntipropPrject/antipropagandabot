@@ -6,7 +6,7 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
-from data_base.DBuse import sql_safe_select
+from data_base.DBuse import sql_safe_select, sql_select_row_like
 from filters.MapFilters import ManualFilters
 from handlers import true_resons_hand
 from utilts import simple_media, dynamic_media_answer
@@ -133,7 +133,7 @@ async def prevent_strike_memes(message: Message, state: FSMContext):
         count = 0
     try:
         count += 1
-        isEND = await sql_safe_select('t_id', 'assets', {'name': f'prevent_strike_meme_{str(count + 1).zfill(2)}'})
+        isEND = await sql_select_row_like('assets', count + 1, {'name': 'prevent_strike_meme_'})
         nmarkup = ReplyKeyboardBuilder()
         if isEND is not False:
             nmarkup.add(types.KeyboardButton(text='😁'))
