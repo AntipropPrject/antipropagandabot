@@ -222,10 +222,20 @@ async def preview_timer(message, bot,):
     await redis_just_one_write(f'Usrs: {message.from_user.id}: check:', message.from_user.id)
     print(check_user)
     if str(check_user) != str(message.from_user.id):
-        sec = 300
+        sec = 299
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
         bot_message = await message.answer('5:00')
+        text_1 = await sql_safe_select('text', 'texts', {'name': 'stopwar_hello_world'})
+        text_2 = await sql_safe_select('text', 'texts', {'name': 'stopwar_I_told_you_everything'})
+        text_3 = await sql_safe_select('text', 'texts', {'name': 'stopwar_send_the_message'})
+        nmarkup = ReplyKeyboardBuilder()
+        nmarkup.row(types.KeyboardButton(text="Какие советы? 🤔"))
+        nmarkup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
+        await message.answer(text_1, disable_web_page_preview=True)
+        await message.answer(text_2, disable_web_page_preview=True)
+        await message.answer(text_3, reply_markup=nmarkup.as_markup(resize_keyboard=True),
+                             disable_web_page_preview=True)
         m_id = bot_message.message_id
         a = await bot.pin_chat_message(chat_id=message.from_user.id, message_id=m_id, disable_notification=True)
         while sec:
@@ -251,15 +261,6 @@ async def preview_timer(message, bot,):
                  (F.text.contains('Согласен(а), важно, чтобы россияне поняли — война им не нужна 🕊'))), flags=flags)
 
 async def stopwar_lets_fight(message: Message, bot: Bot, state: FSMContext):
-    text_1 = await sql_safe_select('text', 'texts', {'name': 'stopwar_hello_world'})
-    text_2 = await sql_safe_select('text', 'texts', {'name': 'stopwar_I_told_you_everything'})
-    text_3 = await sql_safe_select('text', 'texts', {'name': 'stopwar_send_the_message'})
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Какие советы? 🤔"))
-    nmarkup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
-    await message.answer(text_1, disable_web_page_preview=True)
-    await message.answer(text_2, disable_web_page_preview=True)
-    await message.answer(text_3, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     await preview_timer(message, bot)
 
 
