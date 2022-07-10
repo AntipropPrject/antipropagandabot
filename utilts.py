@@ -69,9 +69,10 @@ async def dynamic_media_answer(message: Message, similarity_tag: str, row_number
                                                    ForceReply, None] = None):
     media = (await sql_select_row_like('assets', row_number, {'name': similarity_tag}))[0]
     try:
-        text = (await sql_select_row_like('texts', row_number, {'name': similarity_tag}))
+        text = (await sql_select_row_like('texts', row_number, {'name': similarity_tag}))[0]
     except TypeError:
         text = None
+    print(text)
     await game_answer(message, media, text, reply_markup)
 
 
