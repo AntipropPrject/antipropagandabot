@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime, timedelta
 
 from aiogram import Router, F, Bot
 from aiogram import types
@@ -231,6 +232,9 @@ async def stopwar_lets_fight(message: Message, bot: Bot):
     check_user = await redis_just_one_read(f'Usrs: {message.from_user.id}: check:')
     await redis_just_one_write(f'Usrs: {message.from_user.id}: check:', message.from_user.id)
     if str(check_user) != str(message.from_user.id):
+        user_info = await mongo_select_info(message.from_user.id)
+        date_start = user_info['datetime'].replace('_', ' ')
+        print(datetime.strptime(date_start, "%d-%m-%Y %H:%M"))
         #timer
         sec = 299
         markup = ReplyKeyboardBuilder()
@@ -254,7 +258,7 @@ async def stopwar_lets_fight(message: Message, bot: Bot):
             await redis_just_one_write(f'Usrs: {message.from_user.id}: count:', sec_t)
             print(sec_t)
             await bot.edit_message_text(chat_id=message.from_user.id, message_id=m_id, text=f'{sec_t}')
-            await asyncio.sleep(0.2)
+            await asyncio.sleep(1)
             sec -= 1
 
         await message.answer('Таймер вышел. Вы можете перейти в главное меню.'
