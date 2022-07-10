@@ -231,7 +231,7 @@ async def stopwar_lets_fight(message: Message, bot: Bot):
     check_user = await redis_just_one_read(f'Usrs: {message.from_user.id}: check:')
     await redis_just_one_write(f'Usrs: {message.from_user.id}: check:', message.from_user.id)
     if str(check_user) != str(message.from_user.id):
-        sec = 300
+        sec = 299
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
         bot_message = await message.answer('5:00')
@@ -253,7 +253,7 @@ async def stopwar_lets_fight(message: Message, bot: Bot):
             await redis_just_one_write(f'Usrs: {message.from_user.id}: count:', sec_t)
             print(sec_t)
             await bot.edit_message_text(chat_id=message.from_user.id, message_id=m_id, text=f'{sec_t}')
-            await asyncio.sleep(1)
+            await asyncio.sleep(0.2)
             sec -= 1
 
         await message.answer('Таймер вышел. Вы можете перейти в главное меню.'
