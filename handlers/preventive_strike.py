@@ -133,7 +133,7 @@ async def prevent_strike_memes(message: Message, state: FSMContext):
         count = 0
     try:
         count += 1
-        isEND = await sql_safe_select('t_id', 'assets', {'name': f'prevent_strike_meme_{count + 1}'})
+        isEND = await sql_safe_select('t_id', 'assets', {'name': f'prevent_strike_meme_{str(count + 1).zfill(2)}'})
         nmarkup = ReplyKeyboardBuilder()
         if isEND is not False:
             nmarkup.add(types.KeyboardButton(text='😁'))
