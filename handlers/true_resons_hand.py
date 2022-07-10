@@ -8,7 +8,8 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
-from data_base.DBuse import data_getter, sql_safe_select, sql_safe_update, redis_just_one_write, poll_write
+from data_base.DBuse import data_getter, sql_safe_select, sql_safe_update, redis_just_one_write, poll_write, \
+    sql_add_value
 from data_base.DBuse import redis_delete_from_list
 from filters.MapFilters import OperationWar, WarReason
 from handlers import anti_prop_hand
@@ -302,10 +303,9 @@ async def reasons_normal_game_answer(message: Message, state: FSMContext):
         nmarkup.row(types.KeyboardButton(text="Продолжим 🤝"))
     base_update_dict = dict()
     if message.text == "Это абсурд🤦🏼‍♀️":
-        base_update_dict.update({'belivers': (data['belive'] + 1)})
+        await sql_add_value('normal_game', 'belivers', {'id': data['ngamecount']})
     elif message.text == "Это нормально👌":
-        base_update_dict.update({'nonbelivers': (data['not_belive'] + 1)})
-    await sql_safe_update("normal_game", base_update_dict, {'id': data['ngamecount']})
+        await sql_add_value('normal_game', 'nonbelivers', {'id': data['ngamecount']})
     t_percentage = data['belive'] / (data['belive'] + data['not_belive'])
     await message.answer(
         f'Результаты других участников:\n🤦‍♂️ Это абсурд: {round(t_percentage * 100)}%'

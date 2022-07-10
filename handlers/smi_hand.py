@@ -90,12 +90,9 @@ async def smi_statement_enough(message: Message, state: FSMContext):
     base_update_dict = dict()
     print(message.text)
     if message.text == "Случайная ошибка / Не ложь 👍":
-        base_update_dict = {'belivers': data['belive'] + 1}
-        print('Этому верит', base_update_dict)
+        await sql_add_value('mistakeorlie', 'belivers', {'asset_name': data['last_media']})
     elif message.text == "Целенаправленная ложь 👎":
-        base_update_dict = {'nonbelivers': data['not_belive'] + 1}
-        print('Этому верит', base_update_dict)
-    await sql_safe_update("mistakeorlie", base_update_dict, {'asset_name': data['last_media']})
+        await sql_add_value('mistakeorlie', 'nonbelivers', {'asset_name': data['last_media']})
     t_percentage = data['belive'] / (data['belive'] + data['not_belive'])
     nmarkup = ReplyKeyboardBuilder()
     try:
