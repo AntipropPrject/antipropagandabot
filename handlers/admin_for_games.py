@@ -11,15 +11,17 @@ from states.admin_states import admin
 router = Router()
 router.message.filter(state=admin)
 
-@router.message(IsAdmin(),(F.text == 'Добавить позицию к играм'), state=admin.menu)
+
+@router.message(IsAdmin(), (F.text == 'Игры 🎭'), state=admin.menu)
 async def admin_home(message: types.Message, state: FSMContext):
     await state.clear()
+    await state.set_state(admin.menu)
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Вошел в режим редактирования игр")
     await message.answer("Добро пожаловать в режим редактирования игр, выберете игру.",
                          reply_markup=games_keyboard(message.from_user.id))
 
 
-@router.message(IsAdmin(), (F.text.contains('Ошибка или ложь(пропагандисты)')))
+@router.message(IsAdmin(), (F.text == "Пропагандисты 💢"))
 async def admin_home(message: types.Message, state: FSMContext):
     await state.clear()
     await logg.admin_logs(message.from_user.id, message.from_user.username,
@@ -79,7 +81,7 @@ async def menu(message: types.Message, state: FSMContext):
     await state.clear()
 
 
-@router.message(IsAdmin(), (F.text.contains('Игра в правду')))
+@router.message(IsAdmin(), (F.text == "Игра в правду 🥸"))
 async def admin_home(message: types.Message, state: FSMContext):
     await state.clear()
     await logg.admin_logs(message.from_user.id, message.from_user.username,
@@ -147,6 +149,7 @@ async def menu(message: types.Message, state: FSMContext):
         reply_markup=nmrkup.as_markup(resize_keyboard=True))
     await state.set_state(admin.truthgame_media_rebuttal)
 
+
 @router.message(IsAdmin(), state=admin.truthgame_media_rebuttal)
 async def menu(message: types.Message, state: FSMContext):
     data = await state.get_data()
@@ -189,7 +192,7 @@ async def menu(message: types.Message, state: FSMContext):
                          reply_markup=nmrkup.as_markup(resize_keyboard=True))
     await state.clear()
 #######################ПУТИН
-@router.message(IsAdmin(), (F.text.contains('Путин 🚮')))
+@router.message(IsAdmin(), (F.text == "Путин (Ложь) 🚮"))
 async def admin_home(message: types.Message, state: FSMContext):
     await state.clear()
     await logg.admin_logs(message.from_user.id, message.from_user.username,
@@ -234,7 +237,7 @@ async def menu(message: types.Message, state: FSMContext):
     await state.clear()
 
 
-@router.message(IsAdmin(), (F.text.contains('Путин - обещания')))
+@router.message(IsAdmin(), (F.text == "Путин (Обещания) 🍜"))
 async def admin_home(message: types.Message, state: FSMContext):
     await state.clear()
     await logg.admin_logs(message.from_user.id, message.from_user.username,
@@ -278,7 +281,7 @@ async def menu(message: types.Message, state: FSMContext):
                          reply_markup=nmrkup.as_markup(resize_keyboard=True))
     await state.clear()
 
-@router.message(IsAdmin(), (F.text.contains('Игра в нормальность')))
+@router.message(IsAdmin(), (F.text == "Игра Абсурда 🗯"))
 async def admin_home(message: types.Message, state: FSMContext):
     await state.clear()
     await logg.admin_logs(message.from_user.id, message.from_user.username,
@@ -322,7 +325,7 @@ async def menu(message: types.Message, state: FSMContext):
                          reply_markup=nmrkup.as_markup(resize_keyboard=True))
     await state.clear()
 
-@router.message(IsAdmin(), (F.text.contains('Украина или нет?')))
+@router.message(IsAdmin(), (F.text == "Игра Нацизма 💤"))
 async def admin_home(message: types.Message, state: FSMContext):
     await state.clear()
     await logg.admin_logs(message.from_user.id, message.from_user.username,
@@ -383,7 +386,8 @@ async def menu(message: types.Message, state: FSMContext):
                          reply_markup=nmrkup.as_markup(resize_keyboard=True))
     await state.clear()
 
-@router.message(IsAdmin(), (F.text.contains('Ложь по тв')))
+
+@router.message(IsAdmin(), (F.text == "Ложь по тв 📺"))
 async def admin_home(message: types.Message, state: FSMContext):
     await state.clear()
     await logg.admin_logs(message.from_user.id, message.from_user.username,
