@@ -45,7 +45,7 @@ async def smi_statement(message: Message, state: FSMContext):
         count += 1
         try:
             truth_data = (await data_getter(
-                "SELECT truth, t_id, text, belivers, nonbelivers, rebuttal, asset_name FROM public.mistakeorlie "
+                "SELECT t_id, text, belivers, nonbelivers, rebuttal, asset_name FROM public.mistakeorlie "
                 "left outer join assets on asset_name = assets.name "
                 "left outer join texts ON text_name = texts.name "
                 f"where asset_name like '%{str(person_list[0])[-5:-1].strip()}%' and asset_name like '%{str(count)}%'"))[

@@ -52,15 +52,6 @@ def redct_editors():
     markup.row(types.KeyboardButton(text='Назад'))
     return markup.as_markup(resize_keyboard=True)
 
-def redct_editors():
-    markup = ReplyKeyboardBuilder()
-    markup.row(types.KeyboardButton(text='Ошибка или ложь(пропагандисты)'))
-    markup.row(types.KeyboardButton(text='Правда или ложь'))
-    markup.row(types.KeyboardButton(text='Путин'))
-    markup.row(types.KeyboardButton(text='Путин старая ложь'))
-    markup.row(types.KeyboardButton(text='Украина или нет?'))
-    return markup.as_markup(resize_keyboard=True)
-
 def redct_media():
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Добавить новое медиа"))

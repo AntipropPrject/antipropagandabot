@@ -425,7 +425,7 @@ async def menu(message: types.Message, state: FSMContext):
     await state.update_data(tv_lie_statement_asset=media_id)
     nmrkup = ReplyKeyboardBuilder()
     nmrkup.row(types.KeyboardButton(text="Назад"))
-    postgressdata = await data_getter(f"select name from assets where name like '%{data['tv_channel']}%'")
+    postgressdata = await data_getter(f"select name from assets where name like '%{data['tv_channel']}_lie%'")
     count = len(postgressdata) + 1
     print(postgressdata)
     tagdata = list()
