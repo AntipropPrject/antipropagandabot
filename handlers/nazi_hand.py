@@ -287,7 +287,7 @@ async def nazi_second_poll(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжить"))
     await message.answer(text, disable_web_page_preview=True, reply_markup=ReplyKeyboardRemove())
-    await message.answer_poll(question='Попробуйте угадать!', options=['95%', '76%', '45%', '21%', '6%'],
+    await message.answer_poll(question='Попробуйте угадать!', type='quiz', options=['95%', '76%', '45%', '21%', '6%'],
                               is_anonymous=False, allows_multiple_answers=False, correct_option_id=1)
 
 
