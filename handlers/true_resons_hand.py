@@ -534,6 +534,7 @@ async def reasons_generation_z(message: Message):
 async def reasons_who_to_blame(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_who_to_blame'})
     await state.set_state(StateofPutin.main)
+    await mongo_update_stat(message.from_user.id, 'war_aims')
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Давай 🤝"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
