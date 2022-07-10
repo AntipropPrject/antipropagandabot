@@ -8,7 +8,8 @@ from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from handlers.welcome_messages import commands_restart
 
-from data_base.DBuse import sql_safe_select, redis_just_one_write, redis_just_one_read
+from data_base.DBuse import sql_safe_select, redis_just_one_write, redis_just_one_read, mongo_user_info, \
+    mongo_select_info
 from states.main_menu_states import MainMenuStates
 from stats.stat import mongo_update_stat
 from utilts import simple_media
@@ -216,13 +217,21 @@ async def stopwar_I_told_you_everything(message: Message, bot: Bot, state: FSMCo
     nmarkup.row(types.KeyboardButton(text="Я передумал(а). Важно, чтобы россияне поняли — война им не нужна 🕊"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
-#timer
-async def preview_timer(message, bot,):
+
+
+
+
+@router.message(((F.text.contains('Я передумал(а). Важно, чтобы россияне поняли — война им не нужна 🕊')) |
+                 (F.text.contains('Да, согласен(а), это остановит войну 🕊')) |
+                 (F.text.contains('Да нет, я согласен(а), важно, чтобы россияне поняли — война им не нужна 🕊')) |
+                 (F.text.contains('Ну не знаю... 🤷‍♀️')) |
+                 (F.text.contains('Это разумные аргументы. Важно, чтобы россияне поняли — война им не нужна 🕊')) |
+                 (F.text.contains('Согласен(а), важно, чтобы россияне поняли — война им не нужна 🕊'))), flags=flags)
+async def stopwar_lets_fight(message: Message, bot: Bot):
     check_user = await redis_just_one_read(f'Usrs: {message.from_user.id}: check:')
     await redis_just_one_write(f'Usrs: {message.from_user.id}: check:', message.from_user.id)
-    print(check_user)
     if str(check_user) != str(message.from_user.id):
-        sec = 299
+        sec = 300
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
         bot_message = await message.answer('5:00')
@@ -251,17 +260,6 @@ async def preview_timer(message, bot,):
                              ' Но если у вас есть ещё с кем поделиться ссылкой на меня'
                              ' — обязательно сделайте это!', reply_markup=nmarkup.as_markup(resize_keyboard=True))
         print('Countdown finished.')
-
-
-@router.message(((F.text.contains('Я передумал(а). Важно, чтобы россияне поняли — война им не нужна 🕊')) |
-                 (F.text.contains('Да, согласен(а), это остановит войну 🕊')) |
-                 (F.text.contains('Да нет, я согласен(а), важно, чтобы россияне поняли — война им не нужна 🕊')) |
-                 (F.text.contains('Ну не знаю... 🤷‍♀️')) |
-                 (F.text.contains('Это разумные аргументы. Важно, чтобы россияне поняли — война им не нужна 🕊')) |
-                 (F.text.contains('Согласен(а), важно, чтобы россияне поняли — война им не нужна 🕊'))), flags=flags)
-
-async def stopwar_lets_fight(message: Message, bot: Bot, state: FSMContext):
-    await preview_timer(message, bot)
 
 
 @router.message((F.text == "Какие советы? 🤔"), flags=flags)
