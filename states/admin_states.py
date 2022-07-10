@@ -2,6 +2,18 @@ from aiogram.dispatcher.fsm.state import StatesGroup, State
 
 
 class admin(StatesGroup):
+    game_deleting = State()
+    tv_lie_st = State()
+    tv_lie_reb = State()
+    tv_lie = State()
+    ucraine_or_not_media = State()
+    ucraine_or_not = State()
+    normal_game = State()
+    putin_game_old_lies = State()
+    putin_game = State()
+    truthgame_media_statement = State()
+    truthgame_media_rebuttal = State()
+    truthgame = State()
     home = State()
     menu = State()
     add = State()
@@ -30,3 +42,5 @@ class admin(StatesGroup):
     import_csv = State()
     import_csv_from_local = State()
     secretreborn = State()
+    addingMistakeOrLie = State()
+    addingMistakeOrLie_media = State()
