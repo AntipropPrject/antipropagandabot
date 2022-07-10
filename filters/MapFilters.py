@@ -154,7 +154,7 @@ class SubscriberFilter(BaseFilter):
         bot = bata.all_data().get_bot()
         user_channel_status = await bot.get_chat_member(chat_id=bata.all_data().masterchannel,
                                                         user_id=message.from_user.id)
-        bot.close()
+        await bot.session.close()
         print(user_channel_status.status)
         if user_channel_status.status not in {'left', 'banned', 'restricted'}:
             return False
