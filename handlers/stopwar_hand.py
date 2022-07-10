@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime, timedelta
 
 from aiogram import Router, F, Bot
 from aiogram import types
@@ -231,9 +232,13 @@ async def stopwar_lets_fight(message: Message, bot: Bot):
     check_user = await redis_just_one_read(f'Usrs: {message.from_user.id}: check:')
     await redis_just_one_write(f'Usrs: {message.from_user.id}: check:', message.from_user.id)
     if str(check_user) != str(message.from_user.id):
-        sec = 300
-        nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
+        user_info = await mongo_select_info(message.from_user.id)
+        date_start = user_info['datetime'].replace('_', ' ')
+        print(datetime.strptime(date_start, "%d-%m-%Y %H:%M"))
+        #timer
+        sec = 299
+        markup = ReplyKeyboardBuilder()
+        markup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
         bot_message = await message.answer('5:00')
         text_1 = await sql_safe_select('text', 'texts', {'name': 'stopwar_hello_world'})
         text_2 = await sql_safe_select('text', 'texts', {'name': 'stopwar_I_told_you_everything'})
@@ -258,7 +263,7 @@ async def stopwar_lets_fight(message: Message, bot: Bot):
 
         await message.answer('Таймер вышел. Вы можете перейти в главное меню.'
                              ' Но если у вас есть ещё с кем поделиться ссылкой на меня'
-                             ' — обязательно сделайте это!', reply_markup=nmarkup.as_markup(resize_keyboard=True))
+                             ' — обязательно сделайте это!', reply_markup=markup.as_markup(resize_keyboard=True))
         print('Countdown finished.')
 
 
