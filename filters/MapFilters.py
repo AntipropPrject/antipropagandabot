@@ -143,7 +143,6 @@ class NotNaziFilter(BaseFilter):
     async def __call__(self, message: Message):
         nazi_answers = await poll_get(f'Usrs: {message.from_user.id}: Nazi_answers: first_poll:')
         if "🙅 Ничего из вышеперечисленного..." in nazi_answers and len(nazi_answers) == 1:
-            print('Ошибочка вышла, он не нацист')
             return True
         else:
             return False
@@ -155,7 +154,6 @@ class SubscriberFilter(BaseFilter):
         user_channel_status = await bot.get_chat_member(chat_id=bata.all_data().masterchannel,
                                                         user_id=message.from_user.id)
         await bot.session.close()
-        print(user_channel_status.status)
         if user_channel_status.status not in {'left', 'banned', 'restricted'}:
             return False
         else:

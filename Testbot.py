@@ -9,11 +9,11 @@ from aiogram.dispatcher.fsm.storage.redis import RedisStorage
 
 import bata
 from bata import all_data
+from day_func import day_count
 from handlers import start_hand, anti_prop_hand, smi_hand, donbass_hand, true_resons_hand, putin_hand, stopwar_hand, \
     nazi_hand, preventive_strike, new_admin_hand, welcome_messages, status, main_menu_hand, admin_for_games
 from export_to_csv import pg_mg
 from handlers.other import other_file
-from data_base import TablesCreator
 from middleware.trottling import ThrottlingMiddleware
 from utilts import happy_tester
 
@@ -28,13 +28,11 @@ dp = Dispatcher(storage)
 async def periodic():
     print('periodic function has been started')
     while True:
-        time = ''
-        time = datetime.now().strftime("%H:%M")
-        if time == '08:54':
-            pass
-        if time == '08:55':
-            pass
-        await asyncio.sleep(2)
+        time = datetime.now().strftime("%H:%M:%S")
+        #удаление дневного счетчика
+        if time == '19:00:01':
+            await day_count(count_delete=True)
+        await asyncio.sleep(0.5)
 
 
 

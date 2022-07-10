@@ -7,7 +7,7 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from bata import all_data
-from data_base.DBuse import poll_get, redis_just_one_read, sql_select_row_like, sql_add_value
+from data_base.DBuse import poll_get, redis_just_one_read, sql_select_row_like, sql_add_value, mongo_game_answer
 from data_base.DBuse import sql_safe_select, data_getter, sql_safe_update
 from filters.MapFilters import WebPropagandaFilter, TVPropagandaFilter, PplPropagandaFilter, PoliticsFilter
 from handlers import true_resons_hand
@@ -684,7 +684,6 @@ async def antip_truth_game_start_question(message: Message, state: FSMContext):
     except:
         count = 0
     how_many_rounds = (await data_getter("SELECT COUNT (*) FROM public.truthgame"))[0][0]
-    print(f"В таблице {how_many_rounds} записей, а вот счетчик сейчас {count}")
     if count < how_many_rounds:
         count += 1
         truth_data = (await data_getter(f"""SELECT * FROM (Select truth, a.t_id as plot_media, t.text as plot_text, 
@@ -731,19 +730,20 @@ async def antip_truth_game_answer(message: Message, state: FSMContext):
         nmarkup.row(types.KeyboardButton(text="Достаточно, двигаемся дальше  🙅‍♀️"))
     else:
         nmarkup.row(types.KeyboardButton(text="🤝 Продолжим"))
-    base_update_dict, reality = dict(), str()
+    answer_group, reality = str(), str()
     if message.text == "Это правда ✅":
         if data['truth'] == True:
             reality = "Правильно! Это правда!"
         elif data['truth'] == False:
             reality = "Неверно! Это ложь!"
-        await sql_add_value('truthgame', 'belivers', {'id': data['game_id']})
+        answer_group = 'belivers'
     elif message.text == "Это ложь ❌":
         if data['truth'] == True:
             reality = "Неверно! Это правда!"
         elif data['truth'] == False:
             reality = "Правильно! Это ложь!"
-        await sql_add_value('truthgame', 'nonbelivers', {'id': data['game_id']})
+        answer_group = 'belivers'
+    await mongo_game_answer(message.from_user.id, 'truthgame', data['game_id'], answer_group, {'id': data['game_id']})
     t_percentage = data['belive'] / (data['belive'] + data['not_belive'])
     text = reality + f'\n\nРезультаты других участников:\n✅ <b>Правда:</b> {round(t_percentage * 100)}%\n' \
                      f'❌ <b>Ложь</b>: {round((100 - t_percentage * 100))}%' + '\n\nПодтверждение - ниже.'

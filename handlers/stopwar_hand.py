@@ -234,19 +234,30 @@ async def stopwar_lets_fight(message: Message, bot: Bot):
     if str(check_user) != str(message.from_user.id):
         user_info = await mongo_select_info(message.from_user.id)
         date_start = user_info['datetime'].replace('_', ' ')
-        print(datetime.strptime(date_start, "%d-%m-%Y %H:%M"))
+        usertime = datetime.strptime(date_start, "%d-%m-%Y %H:%M")
+        time_bot = datetime.strptime(datetime.strftime(datetime.now(), "%d-%m-%Y %H:%M"), "%d-%m-%Y %H:%M") - usertime
+        str_date = str(time_bot)[:-3].replace('days', '').replace("day", '')
+        print(time_bot)
+        days_pr = ''
+        if int(time_bot.days) == 1:
+            days_pr = 'день,'
+        elif 1 <= int(time_bot.days) <= 4:
+            days_pr = 'дня,'
+        else:
+            days_pr = 'дней,'
         #timer
-        sec = 299
+        sec = 300
         markup = ReplyKeyboardBuilder()
         markup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
         bot_message = await message.answer('5:00')
+
         text_1 = await sql_safe_select('text', 'texts', {'name': 'stopwar_hello_world'})
         text_2 = await sql_safe_select('text', 'texts', {'name': 'stopwar_I_told_you_everything'})
         text_3 = await sql_safe_select('text', 'texts', {'name': 'stopwar_send_the_message'})
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Какие советы? 🤔"))
         nmarkup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
-        await message.answer(text_1, disable_web_page_preview=True)
+        await message.answer(text_1.replace('[YY:YY]', str_date.replace(',', days_pr)), disable_web_page_preview=True)
         await message.answer(text_2, disable_web_page_preview=True)
         await message.answer(text_3, reply_markup=nmarkup.as_markup(resize_keyboard=True),
                              disable_web_page_preview=True)
@@ -256,7 +267,6 @@ async def stopwar_lets_fight(message: Message, bot: Bot):
             m, s = divmod(sec, 60)
             sec_t = '{:02d}:{:02d}'.format(m, s)
             await redis_just_one_write(f'Usrs: {message.from_user.id}: count:', sec_t)
-            print(sec_t)
             await bot.edit_message_text(chat_id=message.from_user.id, message_id=m_id, text=f'{sec_t}')
             await asyncio.sleep(1)
             sec -= 1
@@ -264,6 +274,7 @@ async def stopwar_lets_fight(message: Message, bot: Bot):
         await message.answer('Таймер вышел. Вы можете перейти в главное меню.'
                              ' Но если у вас есть ещё с кем поделиться ссылкой на меня'
                              ' — обязательно сделайте это!', reply_markup=markup.as_markup(resize_keyboard=True))
+        await bot.delete_message(chat_id=message.from_user.id, message_id=m_id)
         print('Countdown finished.')
 
 
