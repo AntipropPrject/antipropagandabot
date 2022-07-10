@@ -6,6 +6,8 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.dispatcher.fsm.state import StatesGroup, State
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
+
+from handlers.main_menu_hand import mainmenu_really_menu
 from handlers.welcome_messages import commands_restart
 
 from data_base.DBuse import sql_safe_select, redis_just_one_write, redis_just_one_read, mongo_user_info, \
@@ -146,9 +148,7 @@ async def stopwar_lets_fight(message: Message):
 
 @router.message((F.text == "Объясни 🤔") | (F.text == "Нет, власти всё равно будут делать, что хотят 🙅‍♂️"), flags=flags)
 async def stopwar_lets_fight(message: Message):
-    await mongo_update_stat(message.from_user.id, 'end')
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_The_government_does_everything'})
-
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Какие аргументы? 🤔"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
@@ -288,6 +288,7 @@ async def stopwar_share_blindly(message: Message, bot: Bot, state: FSMContext):
         text = await sql_safe_select('text', 'texts', {'name': 'stopwar_bulk_forwarding'})
         await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     else:
+        await mongo_update_stat(message.from_user.id, 'end')
         await message.answer('Таймер вышел. Вы можете перейти в главное меню.'
                              ' Но если у вас есть ещё с кем поделиться ссылкой на меня'
                              ' — обязательно сделайте это!', reply_markup=nmarkup.as_markup(resize_keyboard=True))
@@ -301,12 +302,8 @@ async def main_menu(message: Message, state: FSMContext):
                              ' это время зря — поделитесь мной со своими родственниками,'
                              ' друзьями и знакомыми! 🙏')
     else:
-        text = await sql_safe_select('text', 'texts', {'name': 'mainmenu_really_menu'})
-        nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(types.KeyboardButton(text="Мини-игры 🎲"))
-        nmarkup.row(types.KeyboardButton(text="База Лжи 👀"))
         await state.set_state(MainMenuStates.main)
-        await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+        await mainmenu_really_menu(message, state)
 
 
 
