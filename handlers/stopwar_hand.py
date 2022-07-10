@@ -231,6 +231,7 @@ async def stopwar_lets_fight(message: Message, bot: Bot):
     check_user = await redis_just_one_read(f'Usrs: {message.from_user.id}: check:')
     await redis_just_one_write(f'Usrs: {message.from_user.id}: check:', message.from_user.id)
     if str(check_user) != str(message.from_user.id):
+        #timer
         sec = 299
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
