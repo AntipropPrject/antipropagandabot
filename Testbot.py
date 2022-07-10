@@ -28,7 +28,8 @@ dp = Dispatcher(storage)
 async def on_startup(dispatcher: Dispatcher) -> None:
 
 
-    await bot.set_webhook("https://16.170.117.55", certificate="16.170.117.55+7.pem")
+    ###await bot.set_webhook("https://64.225.83.109/", certificate="64.225.83.109+7.pem")
+    await bot.set_webhook("https://64.225.83.109/")
     webhook = await bot.get_webhook_info()
 
     print(webhook)
@@ -36,7 +37,7 @@ async def on_startup(dispatcher: Dispatcher) -> None:
     print(webhook)
 
     logging.info("🚀 Bot launched as Hoook!")
-    logging.info(f"webhook: https://16.170.117.55")
+    logging.info(f"webhook: https://64.225.83.109")
 
 
 async def on_shutdown(dispatcher: Dispatcher) -> None:
@@ -79,7 +80,7 @@ def main():
     dp.startup.register(on_startup)
     dp.shutdown.register(on_shutdown)
     app = configure_app(dp, bot)
-    web.run_app(app, host="0.0.0.0", port=1443)
+    web.run_app(app, host="0.0.0.0", port=443)
     # await bot.delete_webhook(drop_pending_updates=True)
     # await dp.start_polling(bot)
 
