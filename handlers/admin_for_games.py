@@ -10,8 +10,7 @@ from states.admin_states import admin
 
 router = Router()
 
-
-@router.message(IsAdmin(),(F.text.contains('Добавить позицию к играм')), state=admin.menu)
+@router.message(IsAdmin(),(F.text == 'Добавить позицию к играм'), state=admin.menu)
 async def admin_home(message: types.Message, state: FSMContext):
     await state.clear()
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Вошел в режим редактирования игр")
