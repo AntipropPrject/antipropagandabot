@@ -339,7 +339,6 @@ async def mongo_select_info(tg_id):
         except:
             x = collection.find_one({"username": str(tg_id)})
         return x
-
     except Exception as error:
         await logg.get_error(f"mongo_select_info | {error}", __file__)
         return False
@@ -428,6 +427,18 @@ async def mongo_pop_admin(tg_id):
         await logg.get_error(f"mongo_pop_admin | {error}", __file__)
 
 
+async def mongo_game_answer(user_id, game, number, answer_group, condict):
+    base = all_data().get_mongo()['database']
+    collection = base['user_games']
+    data = collection.find_one({'_id': user_id})
+    if data is None:
+        collection.insert_one({'_id': user_id, game: [number]})
+        await sql_add_value(game, answer_group, condict)
+    elif game not in data or number not in data[game]:
+        collection.update_one({'_id': user_id}, {'$push': {game: number}})
+        await sql_add_value(game, answer_group, condict)
+    else:
+        pass
 
 
 """^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^CSV_UPDATE^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"""

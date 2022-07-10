@@ -9,7 +9,7 @@ from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from data_base.DBuse import data_getter, sql_safe_select, sql_safe_update, redis_just_one_write, poll_write, \
-    sql_add_value
+    sql_add_value, mongo_game_answer
 from data_base.DBuse import redis_delete_from_list
 from filters.MapFilters import OperationWar, WarReason
 from handlers import anti_prop_hand
@@ -301,11 +301,13 @@ async def reasons_normal_game_answer(message: Message, state: FSMContext):
         nmarkup.row(types.KeyboardButton(text="Достаточно, давай закончим 🙅"))
     else:
         nmarkup.row(types.KeyboardButton(text="Продолжим 🤝"))
-    base_update_dict = dict()
+    answer_group = str()
     if message.text == "Это абсурд🤦🏼‍♀️":
-        await sql_add_value('normal_game', 'belivers', {'id': data['ngamecount']})
+        answer_group = 'belivers'
     elif message.text == "Это нормально👌":
-        await sql_add_value('normal_game', 'nonbelivers', {'id': data['ngamecount']})
+        answer_group = 'nonbelivers'
+    await mongo_game_answer(message.from_user.id, 'normal_game', data['ngamecount'],
+                            answer_group, {'id': data['ngamecount']})
     t_percentage = data['belive'] / (data['belive'] + data['not_belive'])
     await message.answer(
         f'Результаты других участников:\n🤦‍♂️ Это абсурд: {round(t_percentage * 100)}%'

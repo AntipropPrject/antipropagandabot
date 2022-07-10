@@ -9,7 +9,7 @@ from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from data_base.DBuse import data_getter, poll_write, sql_safe_select, sql_safe_update, redis_delete_from_list, poll_get, \
-    sql_add_value
+    sql_add_value, mongo_game_answer
 from filters.MapFilters import NaziFilter, RusHate_pr, NotNaziFilter, ManualFilters
 from handlers import true_resons_hand
 from resources.all_polls import nazizm, nazizm_pr
@@ -485,7 +485,6 @@ async def country_game_question(message: Message, state: FSMContext):
     except:
         count = 0
     how_many_rounds = (await data_getter("SELECT COUNT (*) FROM public.ucraine_or_not_game"))[0][0]
-    print(f"В таблице {how_many_rounds} записей, а вот счетчик сейчас {count}")
     if count < how_many_rounds:
         count += 1
         truth_data = \
@@ -493,7 +492,6 @@ async def country_game_question(message: Message, state: FSMContext):
                                "ROW_NUMBER () OVER (ORDER BY id) FROM public.ucraine_or_not_game "
                         "left outer join assets on asset_name = assets.name "
                         f"left outer join texts ON text_name = texts.name) AS sub WHERE row_number = {count}"))[0]
-        print(truth_data)
         await state.update_data(ngamecount=count, belive=truth_data[2], not_belive=truth_data[3], rebutt=truth_data[4],
                                 truth=truth_data[5])
         nmarkup = ReplyKeyboardBuilder()
@@ -524,21 +522,22 @@ async def country_game_question(message: Message, state: FSMContext):
 @router.message(((F.text == "Это на Украине 🇺🇦") | (F.text == "Это в России 🇷🇺")), state=NaziState.game, flags=flags)
 async def country_game_answer(message: Message, state: FSMContext):
     data = await state.get_data()
-    print(data)
-    text, base_update_dict = "", dict()
+    text, answer_group = "", str()
     reality = data['truth']
     if message.text == "Это на Украине 🇺🇦":
         if reality is True:
             text = 'Правильно! Это на Украине!'
         if reality is False:
             text = 'Вы ошиблись! Это в России!'
-        await sql_add_value('ucraine_or_not_game', 'belivers', {'id': data['ngamecount']})
+        answer_group = 'belivers'
     elif message.text == "Это в России 🇷🇺":
         if reality is True:
             text = 'Вы ошиблись! Это на Украине!'
         if reality is False:
             text = 'Правильно! Это в России!'
-        await sql_add_value('ucraine_or_not_game', 'nonbelivers', {'id': data['ngamecount']})
+        answer_group = 'nonbelivers'
+    await mongo_game_answer(message.from_user.id, 'ucraine_or_not_game', data['ngamecount'],
+                            answer_group, {'id': data['ngamecount']})
     t_percentage = data['belive'] / (data['belive'] + data['not_belive'])
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжаем, давай еще! 👉"))

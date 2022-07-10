@@ -5,7 +5,7 @@ from aiogram.dispatcher.fsm.state import StatesGroup, State
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
-from data_base.DBuse import data_getter, sql_safe_select, sql_safe_update, sql_add_value
+from data_base.DBuse import data_getter, sql_safe_select, sql_safe_update, sql_add_value, mongo_game_answer
 from filters.MapFilters import PutinFilter
 from handlers.stopwar_hand import StopWarState
 from stats.stat import mongo_update_stat
@@ -141,7 +141,7 @@ async def putin_game1_question(message: Message, state: FSMContext):
                 state=StateofPutin.game1, flags=flags)
 async def putin_game1_answer(message: Message, state: FSMContext):
     data = await state.get_data()
-    base_update_dict = dict()
+    answer_group = str()
     END = bool(data['pgamecount'] == (await data_getter('SELECT COUNT(id) FROM public.putin_lies'))[0][0])
     nmarkup = ReplyKeyboardBuilder()
     if END is False:
@@ -150,9 +150,11 @@ async def putin_game1_answer(message: Message, state: FSMContext):
     else:
         nmarkup.row(types.KeyboardButton(text="Хорошо 🤔"))
     if message.text == "Случайная ошибка / Не ложь 👍":
-        await sql_add_value('putin_lies', 'belivers', {'id': data['pgamecount']})
+        answer_group = 'belivers'
     elif message.text == "Целенаправленная ложь 👎":
-        await sql_add_value('putin_lies', 'nonbelivers', {'id': data['pgamecount']})
+        answer_group = 'nonbelivers'
+    await mongo_game_answer(message.from_user.id, 'putin_lies', data['pgamecount'],
+                            answer_group, {'id': data['pgamecount']})
     t_percentage = data['belive'] / (data['belive'] + data['not_belive'])
     await message.answer(
         f'А вот что думают другие участники:\n👍 <b>Случайная ошибка / не ложь:</b> {round(t_percentage * 100)}%\n'
@@ -243,7 +245,7 @@ async def putin_game2_question(message: Message, state: FSMContext):
 @router.message(((F.text == "Не виноват 👍") | (F.text == "Виноват 👎")), state=StateofPutin.game2, flags=flags)
 async def putin_game2_answer(message: Message, state: FSMContext):
     data = await state.get_data()
-    base_update_dict = dict()
+    answer_group = str()
     END = bool(data['pgamecount'] == (await data_getter('SELECT COUNT(id) FROM public.putin_old_lies'))[0][0])
     nmarkup = ReplyKeyboardBuilder()
     if END is False:
@@ -252,9 +254,11 @@ async def putin_game2_answer(message: Message, state: FSMContext):
     else:
         nmarkup.row(types.KeyboardButton(text="Давай 🤝"))
     if message.text == "Не виноват 👍":
-        await sql_add_value('putin_lies', 'belivers', {'id': data['pgamecount']})
+        answer_group = 'belivers'
     elif message.text == "Виноват 👎":
-        await sql_add_value('putin_lies', 'nonbelivers', {'id': data['pgamecount']})
+        answer_group = 'nonbelivers'
+    await mongo_game_answer(message.from_user.id, 'putin_old_lies', data['pgamecount'],
+                            answer_group, {'id': data['pgamecount']})
     t_percentage = data['belive'] / (data['belive'] + data['not_belive'])
     await message.answer(
         f'А вот что думают другие участники:\n\n'
