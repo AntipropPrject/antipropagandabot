@@ -21,6 +21,7 @@ from data_base.DBuse import sql_safe_select, sql_safe_update, sql_safe_insert, m
 from day_func import day_count
 from export_to_csv.pg_mg import backin
 from filters.isAdmin import IsAdmin, IsSudo, isKamaga
+from handlers.admin_for_games import admin_home_games, admin_truthgame, admin_gam_tv
 from keyboards.admin_keys import main_admin_keyboard, middle_admin_keyboard, app_admin_keyboard, redct_text, \
     redct_media, redct_games, settings_bot, redct_editors, spam_admin_keyboard, red_spam_admin_keyboard
 from keyboards.new_admin_kb import secretrebornkb
@@ -95,7 +96,31 @@ async def reset(message: Message, state: FSMContext):
     print(stt)
     await state.clear()
     print(stt)
-    if 'media' in str(stt):
+    if stt == 'admin:update_news':
+        await state.set_state(admin.spam_menu)
+        await message.answer('Выберите интересующий вас пункт меню', reply_markup=spam_admin_keyboard())
+    elif stt == 'admin:add_news':
+        await state.set_state(admin.spam_menu)
+        await message.answer('Выберите интересующий вас пункт меню', reply_markup=spam_admin_keyboard())
+    elif stt == 'admin:spam_menu':
+        await state.set_state(admin.spam_menu)
+        await message.answer('Выберите интересующий вас пункт меню', reply_markup=spam_admin_keyboard())
+    elif stt in ('admin:mass_media_menu', 'admin:truthgame', 'admin:tv_lie'):
+        await admin_home_games(message, state)
+    elif 'admin:truthgame_' in stt:
+        await admin_truthgame(message, state)
+    elif 'admin:tv_lie_' in stt:
+        await admin_gam_tv(message, state)
+    elif 'admin:editors_menu' in str(stt):
+        await state.set_state(admin.edit_context)
+        await message.answer("Выберите интересующий вас пункт меню", reply_markup=await settings_bot())
+    elif 'admin:import_menu' in str(stt):
+        await state.set_state(admin.edit_context)
+        await message.answer("Выберите интересующий вас пункт меню", reply_markup=await settings_bot())
+    elif 'admin:import_csv' in str(stt):
+        await state.set_state(admin.edit_context)
+        await message.answer("Выберите интересующий вас пункт меню", reply_markup=await settings_bot())
+    elif 'media' in str(stt):
         await message.answer("Выберите интересующий вас пункт меню", reply_markup=redct_media())
         await state.set_state(admin.edit_context)
     elif 'text' in str(stt):
@@ -107,24 +132,6 @@ async def reset(message: Message, state: FSMContext):
     elif 'bot' in str(stt):
         await message.answer("Выберите интересующий вас пункт меню", reply_markup=await settings_bot())
         await state.set_state(admin.edit_context)
-    elif 'admin:editors_menu' in str(stt):
-        await state.set_state(admin.edit_context)
-        await message.answer("Выберите интересующий вас пункт меню", reply_markup=await settings_bot())
-    elif 'admin:import_menu' in str(stt):
-        await state.set_state(admin.edit_context)
-        await message.answer("Выберите интересующий вас пункт меню", reply_markup=await settings_bot())
-    elif 'admin:import_csv' in str(stt):
-        await state.set_state(admin.edit_context)
-        await message.answer("Выберите интересующий вас пункт меню", reply_markup=await settings_bot())
-    elif stt == 'admin:update_news':
-        await state.set_state(admin.spam_menu)
-        await message.answer('Выберите интересующий вас пункт меню', reply_markup=spam_admin_keyboard())
-    elif stt == 'admin:add_news':
-        await state.set_state(admin.spam_menu)
-        await message.answer('Выберите интересующий вас пункт меню', reply_markup=spam_admin_keyboard())
-    elif stt == 'admin:spam_menu':
-        await state.set_state(admin.spam_menu)
-        await message.answer('Выберите интересующий вас пункт меню', reply_markup=spam_admin_keyboard())
     else:
         await state.set_state(admin.home)
         await admin_home_main_menu(message, state)
