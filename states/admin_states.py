@@ -65,6 +65,7 @@ class admin(StatesGroup):
     addingMistakeOrLie = State()
     addingMistakeOrLie_media = State()
     add_news = State()
+    add_news_spam = State()
     update_news = State()
     mass_media_menu = State()
     mass_media_add = State()

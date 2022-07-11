@@ -262,7 +262,7 @@ async def add_news(query: types.CallbackQuery, state: FSMContext):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text='Назад'))
     if str(query.data) == 'add_main_news':
-        await state.set_state(admin.add_news)
+        await state.set_state(admin.add_news_spam)
         await query.message.answer(
                 'Чтобы добавить главную новость'
                 ' -- отправьте мне медиафайл'
@@ -320,15 +320,15 @@ async def add_news(message: Message, state: FSMContext):
     else:
         await message.answer("Упс.. Кажется вы отправили не видео")
     await state.update_data(media_id=id)
+    await state.update_data(media_caption=message.caption)
     await state.set_state(admin.add_date_for_spam)
     await message.answer("Напишите дату, на которую хотите запланировать рассылку")
 
 @router.message(state=admin.add_date_for_spam)
 async def add_news(message: Message, state: FSMContext):
-    date = message.text
     try:
-        valid_date = datetime.strptime(date, '%m/%d/%Y')
-        await state.update_data(plan_data=valid_date)
+        datetime.strptime(message.text, '%d.%m.%Y')
+        await state.update_data(plan_data=message.text)
     except ValueError:
         await message.answer("Упс.. Кажется вы указали неверный формат даты, пожалуйста повторите попытку")
 
@@ -345,6 +345,7 @@ async def add_news(message: Message, state: FSMContext):
     coll = data['coll']
     date = data['plan_data']
     media_id = data['media_id']
+    caption = data['media_caption']
     if message.text == '1️⃣1️⃣:0️⃣0️⃣':
         time = '11:00'
     elif message.text == '1️⃣9️⃣:0️⃣0️⃣':
@@ -352,13 +353,13 @@ async def add_news(message: Message, state: FSMContext):
     else:
         await message.answer("Упс.. Кажется вы указали неверный формат времени, пожалуйста повторите попытку")
     dt_for_spam = date+'_'+time
-    await mongo_add_news(media_id, str(message.caption), dt_for_spam, coll=str(coll))
+    await mongo_add_news(media_id, str(caption), dt_for_spam, coll=str(coll))
     coll = data['coll']
     nmarkup = InlineKeyboardBuilder()
     nmarkup.button(text='Добавить новость', callback_data=str(coll))
     await message.answer("Новость запланирована, хотите добавить еще?", reply_markup=nmarkup.as_markup())
 
-@router.message(state=admin.add_news)
+@router.message(state=admin.add_news_spam)
 async def add_news(message: Message, state: FSMContext):
     data = await state.get_data()
     if message.content_type == 'photo':

@@ -746,7 +746,7 @@ async def menu(message: types.Message, state: FSMContext):
             media_id = message.photo[0].file_id
         except:
             await message.answer("Невижу медиа")
-    data = state.get_data()
+    data = await state.get_data()
     truth = data['ucranebool']
     text = message.html_text
     nmrkup = ReplyKeyboardBuilder()
@@ -994,6 +994,7 @@ async def add_media(query: types.CallbackQuery, state: FSMContext):
         await state.update_data(tag_media=query.data[3:])
         old_exposure = query.data.split()
         last_tag_numner = len(await data_getter(f"select name from assets where name like '%{old_exposure[-1]}%'"))
+        print(last_tag_numner)
         if last_tag_numner != 1:
             await query.message.delete()
             keyboard = range(1, last_tag_numner)
