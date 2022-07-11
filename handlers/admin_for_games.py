@@ -1,12 +1,13 @@
 from aiogram import Router, types, F
 from aiogram.dispatcher.fsm.context import FSMContext
-from aiogram.utils.keyboard import ReplyKeyboardBuilder
+from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
-from data_base.DBuse import sql_safe_update, data_getter
+from data_base.DBuse import sql_safe_update, data_getter, sql_safe_insert, sql_delete
 from filters.isAdmin import IsAdmin
-from keyboards.admin_keys import main_admin_keyboard, games_keyboard
+from keyboards.admin_keys import main_admin_keyboard, games_keyboard, admin_games_keyboard, app_admin_keyboard
 from log import logg
 from states.admin_states import admin
+from utilts import simple_media
 
 router = Router()
 router.message.filter(state=admin)
@@ -500,6 +501,261 @@ async def menu(message: types.Message, state: FSMContext):
                          reply_markup=games_keyboard(message.from_user.id))
     await state.set_state(admin.game_deleting)
 
+"""***************************************MASS MEDIA************************************************"""
+@router.message(IsAdmin(), (F.text == "Ложь других СМИ 🧮"))
+async def admin_home(message: types.Message, state: FSMContext):
+    await message.answer("Выберите интересующее вас действие", reply_markup=admin_games_keyboard())
+    await state.set_state(admin.mass_media_menu)
+
+
+@router.message(IsAdmin(), (F.text.contains('Добавить сюжет')), state=admin.mass_media_menu)
+async def admin_home(message: types.Message, state: FSMContext):
+    nmarkup = InlineKeyboardBuilder()
+    nmarkup.button(text='РИА Новости', callback_data='RIANEWS_media_ TCHANEL_WAR_exposure_')
+    nmarkup.button(text='Russia Today', callback_data='RUSSIATODAY_media_ RUSSIATODAY_exposure_')
+    nmarkup.button(text='Телеграм-канал: Война с фейками', callback_data='TCHANEL_WAR_media_ TCHANEL_WAR_exposure_')
+    nmarkup.button(text='ТАСС / Комсомольская правда..', callback_data='TACC_media_ TACC_exposure_')
+    nmarkup.button(text='Министерство обороны РФ', callback_data='MINISTRY_media_ MINISTRY_exposure_')
+    nmarkup.adjust(1, 1, 1, 1, 1)
+    await message.answer("Выберите источник, в который хотите добавить сюжет", reply_markup=nmarkup.as_markup())
+
+@router.callback_query(lambda call: "media" in call.data and "exposure" in call.data)
+async def add_media(query: types.CallbackQuery, state: FSMContext):
+    await state.clear()
+    if 'pop' not in query.data and 'edit' not in query.data:
+        await state.update_data(tag_media=query.data[3:])
+        await query.message.delete()
+        await query.message.answer('Загрузите медиа и напишите описание')
+        await state.set_state(admin.add_news)
+    elif 'pop' in query.data:
+        await state.update_data(tag_media=query.data[3:])
+        old_exposure = query.data.split()
+        last_tag_numner = len(await data_getter(f"select name from assets where name like '%{old_exposure[-1]}%'"))
+        if last_tag_numner != 1:
+            await query.message.delete()
+            keyboard = range(1, last_tag_numner)
+            nmarkup = ReplyKeyboardBuilder()
+            for button in keyboard:
+                nmarkup.row(types.KeyboardButton(text=button))
+                nmarkup.adjust(3)
+            await state.set_state(admin.mass_media_del)
+            await query.message.answer('Выберите номер сюжета', reply_markup=nmarkup.as_markup(resize_keyboard=True))
+        else:
+            await query.answer('Сюжеты в этом блоке отсутствуют')
+    elif 'edit' in query.data:
+        await state.update_data(tag_media=query.data[4:])
+        old_exposure = query.data.split()
+        last_tag_numner = len(await data_getter(f"select name from assets where name like '%{old_exposure[-1]}%'"))
+        if last_tag_numner != 1:
+            await query.message.delete()
+            keyboard = range(1, last_tag_numner)
+            nmarkup = ReplyKeyboardBuilder()
+            for button in keyboard:
+                nmarkup.row(types.KeyboardButton(text=button))
+                nmarkup.adjust(3)
+            await state.set_state(admin.mass_media_edit)
+            await query.message.answer('Выберите номер сюжета', reply_markup=nmarkup.as_markup(resize_keyboard=True))
+        else:
+            await query.answer('Сюжеты в этом блоке отсутствуют')
+
+
+
+
+
+@router.message(state=admin.add_news)
+async def admin_home(message: types.Message, state: FSMContext):
+    caption = message.caption
+    media = str()
+    try:
+        if message.content_type == 'photo':
+            media = message.photo[0].file_id
+            await message.answer_photo(media, caption=caption)
+        elif message.content_type == 'video':
+            media = message.video.file_id
+            await message.answer_photo(media, caption=caption)
+        await state.update_data(media_mass=media)
+        await state.update_data(caption_mass=caption)
+        await message.answer("Теперь отправьте мне опровержение этой новости")
+        await state.set_state(admin.mass_media_add_exposure)
+    except Exception as er:
+        print(er)
+        await message.answer("Упс.. Что-то пошло не так, пожалуйста повторите попытку")
+
+
+@router.message(state=admin.mass_media_add_exposure)
+async def admin_home(message: types.Message, state: FSMContext):
+    caption = message.caption
+    media = str()
+    try:
+        if message.content_type == 'photo':
+            media = message.photo[0].file_id
+            await message.answer_photo(media, caption=caption)
+        elif message.content_type == 'video':
+            media = message.video.file_id
+            await message.answer_photo(media, caption=caption)
+        await state.update_data(media_mass_exposure=media)
+        await state.update_data(caption_mass_exposure=caption)
+        await message.answer("Всё верно?", reply_markup=app_admin_keyboard())
+        await state.set_state(admin.mass_media_Done)
+    except Exception as er:
+        print(er)
+        await message.answer("Упс.. Что-то пошло не так, пожалуйста обратитесь к разработчиками")
+
+
+@router.message((F.text.contains('Отменить изменения')), state=admin.mass_media_Done)
+async def admin_home(message: types.Message, state: FSMContext):
+    await message.answer('Отмена..', reply_markup=admin_games_keyboard())
+
+
+@router.message((F.text.contains('Подтвердить')), state=admin.mass_media_Done)
+async def admin_home(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    tags = data['tag_media'].split()
+    old_media_tag = tags[0]
+    old_exposure_tag = tags[1]
+    new_media = data['media_mass']
+    new_caption = data['caption_mass']
+    new_caption_exposure = data['media_mass_exposure']
+    new_media_exposure = data['caption_mass_exposure']
+    last_tag_numner = len(await data_getter(f"select name from assets where name like '%{old_exposure_tag}%'"))
+    try:
+        await sql_safe_insert('assets', {'t_id': new_media, 'name': f"{old_media_tag}{last_tag_numner+1}"})
+        await sql_safe_insert('assets', {'t_id': new_media_exposure, 'name': f"{old_exposure_tag}{last_tag_numner+1}"})
+        await sql_safe_insert('texts', {'text': new_caption, 'name': f"{old_media_tag}{last_tag_numner+1}"})
+        await sql_safe_insert('texts', {'text': new_caption_exposure, 'name': f"{old_exposure_tag}{last_tag_numner+1}"})
+        await state.set_state(admin.mass_media_menu)
+        await message.answer("Сюжет был успешно добавлен в базу", reply_markup=admin_games_keyboard())
+    except:
+        await message.answer('Упс.. Что-то пошло не так, пожалуйста обратитесь к разработчиками')
+
+
+@router.message(IsAdmin(), (F.text.contains('Удалить сюжет')), state=admin.mass_media_menu)
+async def admin_home(message: types.Message, state: FSMContext):
+    await message.answer("Выберите интересующее вас действие", reply_markup=admin_games_keyboard())
+    nmarkup = InlineKeyboardBuilder()
+    nmarkup.button(text='РИА Новости', callback_data='popRIANEWS_media_ TCHANEL_WAR_exposure_')
+    nmarkup.button(text='Russia Today', callback_data='popRUSSIATODAY_media_ RUSSIATODAY_exposure_')
+    nmarkup.button(text='Телеграм-канал: Война с фейками', callback_data='popTCHANEL_WAR_media_ TCHANEL_WAR_exposure_')
+    nmarkup.button(text='ТАСС / Комсомольская правда..', callback_data='popTACC_media_ TACC_exposure_')
+    nmarkup.button(text='Министерство обороны РФ', callback_data='popMINISTRY_media_ MINISTRY_exposure_')
+    nmarkup.adjust(1, 1, 1, 1, 1)
+    await message.answer("Выберите источник, в котором хотите удалить сюжет", reply_markup=nmarkup.as_markup())
+
+
+@router.message(state=admin.mass_media_del)
+async def admin_home(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    user_input = message.text
+    data = data['tag_media'].split()
+    await message.answer('Сюжет лжи:')
+    await simple_media(message, f'{data[0]}{user_input}')
+    await message.answer('Сюжет правды:')
+    await simple_media(message, f'{data[1]}{user_input}')
+    await state.update_data(pop_media=f'{data[0]}{user_input}')
+    await state.update_data(pop_exposure=f'{data[1]}{user_input}')
+    await state.set_state(admin.mass_media_pop_Done)
+    await message.answer('Хотите удалить этот сюжет?', reply_markup=app_admin_keyboard())
+
+@router.message((F.text.contains('Подтвердить')), state=admin.mass_media_pop_Done)
+async def admin_home(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    pop_media = data['pop_media']
+    pop_exposure = data['pop_exposure']
+    try:
+        await sql_delete('assets', {'name': pop_media})
+        await sql_delete('assets', {'name': pop_exposure})
+        await sql_delete('texts', {'name': pop_media})
+        await sql_delete('texts', {'name': pop_exposure})
+        await state.set_state(admin.mass_media_menu)
+        await message.answer("Сюжет успешно удалён из базы", reply_markup=admin_games_keyboard())
+    except:
+        await message.answer("Упс.. Что-то пошло не так, пожалуйста обратитесь к разработчиками")
+
+
+@router.message(IsAdmin(), (F.text.contains('Редактировать сюжет')), state=admin.mass_media_menu)
+async def admin_home(message: types.Message, state: FSMContext):
+    nmarkup = InlineKeyboardBuilder()
+    nmarkup.button(text='РИА Новости', callback_data='editRIANEWS_media_ TCHANEL_WAR_exposure_')
+    nmarkup.button(text='Russia Today', callback_data='editRUSSIATODAY_media_ RUSSIATODAY_exposure_')
+    nmarkup.button(text='Телеграм-канал: Война с фейками', callback_data='editTCHANEL_WAR_media_ TCHANEL_WAR_exposure_')
+    nmarkup.button(text='ТАСС / Комсомольская правда..', callback_data='editTACC_media_ TACC_exposure_')
+    nmarkup.button(text='Министерство обороны РФ', callback_data='editMINISTRY_media_ MINISTRY_exposure_')
+    nmarkup.adjust(1, 1, 1, 1, 1)
+    await message.answer("Выберите источник, в котором хотите изменить сюжет", reply_markup=nmarkup.as_markup())
+
+
+
+@router.message(state=admin.mass_media_edit)
+async def admin_home(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    user_input = message.text
+    data = data['tag_media'].split()
+    await message.answer('Сюжет лжи:')
+    await simple_media(message, f'{data[0]}{user_input}')
+    await message.answer('Сюжет правды:')
+    await simple_media(message, f'{data[1]}{user_input}')
+    await state.update_data(edit_media=f'{data[0]}{user_input}')
+    await state.update_data(edit_exposure=f'{data[1]}{user_input}')
+    await state.set_state(admin.mass_media_edit_add)
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Отменить изменения"))
+    await message.answer('Если вы хотите обновить этот сюжет, то пришлите мне новую ложь c описанием', reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
+@router.message(state=admin.mass_media_edit_add)
+async def admin_home(message: types.Message, state: FSMContext):
+    try:
+        caption = message.caption
+        if message.content_type == 'photo':
+            media = message.photo[0].file_id
+            await message.answer_photo(media, caption=caption)
+        elif message.content_type == 'video':
+            media = message.video.file_id
+            await message.answer_photo(media, caption=caption)
+        await state.update_data(media_mass=media)
+        await state.update_data(caption_mass=caption)
+        await state.set_state(admin.mass_media_edit_add_exposure)
+        await message.answer("Теперь отправьте мне опровержение этой новости")
+
+    except:
+        await message.answer('Упс.. Что-то пошло не так, пожалуйста обратитесь к разработчиками')
+
+@router.message(state=admin.mass_media_edit_add_exposure)
+async def admin_home(message: types.Message, state: FSMContext):
+    caption = message.caption
+    media = str()
+    try:
+        if message.content_type == 'photo':
+            media = message.photo[0].file_id
+            await message.answer_photo(media, caption=caption)
+        elif message.content_type == 'video':
+            media = message.video.file_id
+            await message.answer_photo(media, caption=caption)
+        await state.update_data(media_mass_exposure=media)
+        await state.update_data(caption_mass_exposure=caption)
+        await message.answer("Всё верно?", reply_markup=app_admin_keyboard())
+        await state.set_state(admin.mass_media_edit_Done)
+    except:
+        await message.answer('Упс.. Что-то пошло не так, пожалуйста обратитесь к разработчиками')
+
+@router.message((F.text.contains('Подтвердить')), state=admin.mass_media_edit_Done)
+async def admin_home(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    tag_media = data['edit_media']
+    tag_exposure = data['edit_exposure']
+    new_media_id = data['media_mass']
+    new_caption = data['caption_mass']
+    new_media_exposure_id = data['media_mass_exposure']
+    new_caption_exposure = data['caption_mass_exposure']
+
+    try:
+        await sql_safe_update('assets', {'t_id': new_media_id}, {'name': tag_media})
+        await sql_safe_update('assets', {'t_id': new_media_exposure_id}, {'name': tag_exposure})
+        await sql_safe_update('texts', {'text': new_caption}, {'name': tag_media})
+        await sql_safe_update('texts', {'text': new_caption_exposure}, {'name': tag_exposure})
+        await state.set_state(admin.mass_media_menu)
+        await message.answer("Сюжет был успешно обновлён в базе", reply_markup=admin_games_keyboard())
+    except:
+        await message.answer('Упс.. Что-то пошло не так, пожалуйста обратитесь к разработчиками')
 # @router.message(IsAdmin(), state=admin.game_deleting)
 # async def menu(message: types.Message, state: FSMContext):
 #     await message
