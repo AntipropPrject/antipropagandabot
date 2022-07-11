@@ -1,6 +1,9 @@
+from typing import Union
+
 import psycopg2
 from psycopg2 import sql
 from bata import all_data
+from datetime import datetime
 import os
 from pandas import DataFrame, read_csv
 
@@ -33,6 +36,7 @@ async def safe_data_getter(safe_query, values_dict):
         return data
     except psycopg2.Error as error:
         return False
+
 
 async def sql_delete(table_name, condition_dict):
     try:
@@ -104,6 +108,94 @@ async def sql_safe_select_like(column1, column2, table_name, first_condition, se
         return False
 
 
+async def sql_select_row_like(tablename, rownumber, like_dict: dict):
+    try:
+        key = list(like_dict.keys())[0]
+        q = f"SELECT * FROM (SELECT *, row_number() over (ORDER BY {key}) FROM {tablename} WHERE " \
+            f"{key} like '{like_dict[key]}%') AS sub WHERE row_number = {rownumber};"
+        conn = all_data().get_postg()
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute(q)
+                data = cur.fetchall()
+        conn.close()
+        return data[0]
+    except (psycopg2.Error, IndexError) as error:
+        return False
+
+
+async def sql_games_row_selecter(tablename: str, row: int):
+    try:
+        if tablename == 'truthgame':
+            data = (await data_getter(f"""SELECT * FROM (Select truth, a.t_id as plot_media, t.text as plot_text, 
+                                             belivers, nonbelivers,
+                                             t2.text as rebb_text, a2.t_id as rebb_media,
+                                             ROW_NUMBER () OVER (ORDER BY id), id FROM public.{tablename}
+                                             left outer join assets a on a.name = {tablename}.asset_name
+                                             left outer join assets a2 on a2.name = {tablename}.reb_asset_name
+                                             left outer join texts t on {tablename}.text_name = t.name
+                                             left outer join texts t2 on {tablename}.rebuttal = t2.name)
+                                             AS sub WHERE row_number = {row}"""))[0]
+            keys = ('truth', 'plot_media', 'plot_text', 'belivers', 'nonbelivers',
+                    'rebb_text', 'rebb_media', 'ROW_NUMBER', 'id')
+        elif tablename == 'normal_game':
+            data = (await data_getter(f"""SELECT * FROM (Select id, assets.t_id as plot_media, texts.text as plot_text, 
+                                             belivers, nonbelivers,
+                                             ROW_NUMBER () OVER (ORDER BY id) FROM public.{tablename}
+                                             left outer join assets on assets.name = {tablename}.asset_name
+                                             left outer join texts on {tablename}.text_name = texts.name)
+                                             AS sub WHERE row_number = {row}"""))[0]
+            keys = ('id', 'plot_media', 'plot_text', 'belivers', 'nonbelivers', 'ROW_NUMBER')
+        elif tablename == 'ucraine_or_not_game':
+            data = (await data_getter(f"""SELECT * FROM (Select id, truth, assets.t_id as plot_media, texts.text as plot_text, 
+                                             belivers, nonbelivers,
+                                             ROW_NUMBER () OVER (ORDER BY id) FROM public.{tablename}
+                                             left outer join assets on assets.name = {tablename}.asset_name
+                                             left outer join texts on {tablename}.text_name = texts.name)
+                                             AS sub WHERE row_number = {row}"""))[0]
+            keys = ('id', 'truth', 'plot_media', 'plot_text', 'belivers', 'nonbelivers', 'ROW_NUMBER')
+        elif tablename == 'putin_lies':
+            data = (await data_getter(f"""SELECT * FROM (Select id, assets.t_id as plot_media, texts.text as plot_text, 
+                                             belivers, nonbelivers,
+                                             ROW_NUMBER () OVER (ORDER BY id) FROM public.{tablename}
+                                             left outer join assets on assets.name = {tablename}.asset_name
+                                             left outer join texts on {tablename}.text_name = texts.name)
+                                             AS sub WHERE row_number = {row}"""))[0]
+            keys = ('id', 'plot_media', 'plot_text', 'belivers', 'nonbelivers', 'ROW_NUMBER')
+        elif tablename == 'mistakeorlie':
+            data = (await data_getter(f"""SELECT * FROM (Select id, truth, assets.t_id as plot_media, texts.text as plot_text, 
+                                             belivers, nonbelivers,
+                                             ROW_NUMBER () OVER (ORDER BY id) FROM public.{tablename}
+                                             left outer join assets on assets.name = {tablename}.asset_name
+                                             left outer join texts on {tablename}.text_name = texts.name)
+                                             AS sub WHERE row_number = {row}"""))[0]
+            keys = ('id', 'truth', 'plot_media', 'plot_text', 'belivers', 'nonbelivers', 'ROW_NUMBER')
+        elif tablename == 'putin_old_lies':
+            data = (await data_getter(f"""SELECT * FROM (Select id, assets.t_id as plot_media, texts.text as plot_text, 
+                                             belivers, nonbelivers,
+                                             ROW_NUMBER () OVER (ORDER BY id) FROM public.{tablename}
+                                             left outer join assets on assets.name = {tablename}.asset_name
+                                             left outer join texts on {tablename}.text_name = texts.name)
+                                             AS sub WHERE row_number = {row}"""))[0]
+            keys = ('id', 'plot_media', 'plot_text', 'belivers', 'nonbelivers', 'ROW_NUMBER')
+        datadict = dict(zip(keys, data))
+        return datadict
+    except IndexError:
+        return False
+    except psycopg2.Error as error:
+        await logg.get_error(f"{error}", __file__)
+        return False
+
+
+async def sql_add_value(table_name, column, cond_dict):
+    que = ''
+    for key in cond_dict:
+        que = f'UPDATE {table_name} set {column} = {column} + 1 where {key} = {cond_dict[key]} RETURNING {column};'
+        print (que)
+    a = await data_getter(que)
+    print(a)
+
+
 async def poll_delete_value(key, value):
     try:
         return all_data().get_data_red().delete(value)
@@ -155,12 +247,85 @@ async def sql_safe_update(table_name, data_dict, condition_dict):
 
 
 """^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^MongoDB^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"""
+
+async def mongo_add_news(list_media: str, caption: str, coll=None):
+    try:
+        print(list_media)
+        print(caption)
+        client = all_data().get_mongo()
+        database = client['database']
+        if coll == 'add_main_news':
+            collection = database['spam_news_main']
+            spam_list = {'media': list_media, 'caption': caption}
+            collection.insert_one(spam_list)
+        elif coll == 'add_actual_news':
+            collection = database['spam_actual_news']
+            spam_list = {'media': list_media, 'caption': caption}
+            collection.insert_one(spam_list)
+        print('Done')
+    except Exception as error:
+        await logg.get_error(error)
+
+async def mongo_select_news(coll=None) -> [list, bool]:
+    try:
+
+        client = all_data().get_mongo()
+        database = client['database']
+        spam_list = []
+        if coll == 'main':
+            collection = database['spam_news_main']
+            for spam in collection.find():
+                spam_list.append(spam)
+        elif coll == 'actu':
+            collection = database['spam_actual_news']
+            for spam in collection.find():
+                spam_list.append(spam)
+        return spam_list
+
+    except Exception as error:
+        await logg.get_error(f"mongo_select_info | {error}", __file__)
+        return False
+
+async def mongo_pop_news(m_id: str, coll=None):
+    try:
+
+        client = all_data().get_mongo()
+        database = client['database']
+        if 'main' in coll:
+            collection = database['spam_news_main']
+            collection.delete_one({'media': {'$regex': m_id}})
+        elif 'actu' in coll:
+            collection = database['spam_actual_news']
+            collection.delete_one({'media': {'$regex': m_id}})
+        print('Delete')
+    except Exception as error:
+        await logg.get_error(f"mongo update | {error}", __file__)
+
+
+async def mongo_update_news(m_id: str, new_m_id: str, new_caption: str,  coll=None):
+    try:
+
+        client = all_data().get_mongo()
+        database = client['database']
+        if 'main' in coll:
+            collection = database['spam_news_main']
+            collection.replace_one({'media': {'$regex':  m_id}}, {"media": str(new_m_id), "caption": new_caption}, True)
+        elif 'actu' in coll:
+            collection = database['spam_actual_news']
+            collection.replace_one({'media': {'$regex': m_id}}, {"media": str(new_m_id), "caption": new_caption}, True)
+        print('Update')
+    except Exception as error:
+        await logg.get_error(f"mongo update | {error}", __file__)
+
 async def mongo_user_info(tg_id, username):
+    today = datetime.today()
+    today = today.strftime("%d-%m-%Y")
+    time = datetime.now().strftime("%H:%M")
     try:
         client = all_data().get_mongo()
         database = client['database']
         collection = database['userinfo']
-        user_answer = {'_id': int(tg_id), 'username': str(username)}
+        user_answer = {'_id': int(tg_id), 'username': str(username), 'datetime': f'{today}_{time}'}
         collection.insert_one(user_answer)
     except Exception as error:
         pass
@@ -175,7 +340,6 @@ async def mongo_select_info(tg_id):
         except:
             x = collection.find_one({"username": str(tg_id)})
         return x
-
     except Exception as error:
         await logg.get_error(f"mongo_select_info | {error}", __file__)
         return False
@@ -262,6 +426,20 @@ async def mongo_pop_admin(tg_id):
         collection.delete_one({'_id': int(tg_id)})
     except Exception as error:
         await logg.get_error(f"mongo_pop_admin | {error}", __file__)
+
+
+async def mongo_game_answer(user_id, game, number, answer_group, condict):
+    base = all_data().get_mongo()['database']
+    collection = base['user_games']
+    data = collection.find_one({'_id': user_id})
+    if data is None:
+        collection.insert_one({'_id': user_id, game: [number]})
+        await sql_add_value(game, answer_group, condict)
+    elif game not in data or number not in data[game]:
+        collection.update_one({'_id': user_id}, {'$push': {game: number}})
+        await sql_add_value(game, answer_group, condict)
+    else:
+        pass
 
 
 """^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^CSV_UPDATE^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"""

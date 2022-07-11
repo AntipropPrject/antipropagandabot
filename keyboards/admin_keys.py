@@ -13,7 +13,7 @@ def main_admin_keyboard(t_id=None):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Изменить медиа"))
     nmarkup.row(types.KeyboardButton(text="Изменить текст"))
-    nmarkup.row(types.KeyboardButton(text="Изменить игры"))
+    nmarkup.row(types.KeyboardButton(text="Игры 🎭"))
     if t_id in all_data().super_admins:
         nmarkup.row(types.KeyboardButton(text="Управление ботом"))
         nmarkup.row(types.KeyboardButton(text="Клонировать бота"))
@@ -23,6 +23,22 @@ def main_admin_keyboard(t_id=None):
     return nmarkup.as_markup(resize_keyboard=True, input_field_placeholder=random.choice(usless_list))
 
 
+def games_keyboard(t_id=None):
+    usless_list = ['Пожалуйста, не редактируйте текст напрямую в базе данных',
+                   'Никогда не угадаешь, где скрывалась опечатка']
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Ложь по тв 📺"))
+    nmarkup.row(types.KeyboardButton(text="Ложь других СМИ 🧮"))
+    nmarkup.row(types.KeyboardButton(text="Пропагандисты 💢"))
+    nmarkup.row(types.KeyboardButton(text="Игра в правду 🥸"))
+    nmarkup.row(types.KeyboardButton(text="Путин (Ложь) 🚮"))
+    nmarkup.row(types.KeyboardButton(text="Путин (Обещания) 🍜"))
+    nmarkup.row(types.KeyboardButton(text="Игра Абсурда 🗯"))
+    nmarkup.row(types.KeyboardButton(text="Игра Нацизма 💤"))
+    nmarkup.row(types.KeyboardButton(text="Возврат в главное меню"))
+    nmarkup.adjust(2)
+    return nmarkup.as_markup(resize_keyboard=True, input_field_placeholder=random.choice(usless_list))
+
 def redct_editors():
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text='Посмотреть редакторов'))
@@ -30,7 +46,6 @@ def redct_editors():
     markup.row(types.KeyboardButton(text='Удалить редактора'))
     markup.row(types.KeyboardButton(text='Назад'))
     return markup.as_markup(resize_keyboard=True)
-
 
 def redct_media():
     nmarkup = ReplyKeyboardBuilder()
@@ -49,6 +64,13 @@ def redct_text():
     nmarkup.row(types.KeyboardButton(text="Возврат в главное меню"))
     return nmarkup.as_markup(resize_keyboard=True)
 
+def game_keys():
+    nmrkup = ReplyKeyboardBuilder()
+    nmrkup.row(types.KeyboardButton(text="Добавить сюжет"))
+    nmrkup.row(types.KeyboardButton(text="Редактировать сюжет"))
+    nmrkup.add(types.KeyboardButton(text="Удалить сюжет"))
+    nmrkup.row(types.KeyboardButton(text="Назад"))
+    return nmrkup.as_markup(resize_keyboard=True)
 
 def redct_games():
     nmarkup = ReplyKeyboardBuilder()
@@ -69,6 +91,7 @@ async def settings_bot():
     nmarkup.row(types.KeyboardButton(text="Экспорт"))
     nmarkup.row(types.KeyboardButton(text="Импорт"))
     nmarkup.row(types.KeyboardButton(text="Статистика бота"))
+    nmarkup.row(types.KeyboardButton(text="Рассылка"))
     try:
         if '1' in status:
             nmarkup.row(types.KeyboardButton(text="Выключить тех. режим 🟢"))
@@ -93,6 +116,28 @@ def app_admin_keyboard():
     nmarkup.adjust(1, 1)
     return nmarkup.as_markup(resize_keyboard=True)
 
+def spam_admin_keyboard():
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Главные новости"))
+    nmarkup.row(types.KeyboardButton(text="Актуальные новости"))
+    nmarkup.row(types.KeyboardButton(text="Создать рассылку"))
+    nmarkup.row(types.KeyboardButton(text="Выключить рассылку 🟢"))
+    nmarkup.row(types.KeyboardButton(text="Возврат в главное меню"))
+    return nmarkup.as_markup(resize_keyboard=True)
 
 
+def red_spam_admin_keyboard():
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Добавить новость"))
+    nmarkup.row(types.KeyboardButton(text="Удалить новость"))
+    nmarkup.row(types.KeyboardButton(text="Создать рассылку"))
+    nmarkup.row(types.KeyboardButton(text="Назад"))
+    return nmarkup.as_markup(resize_keyboard=True)
 
+def admin_games_keyboard():
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Добавить сюжет"))
+    nmarkup.row(types.KeyboardButton(text="Удалить сюжет"))
+    nmarkup.row(types.KeyboardButton(text="Редактировать сюжет"))
+    nmarkup.row(types.KeyboardButton(text="Назад"))
+    return nmarkup.as_markup(resize_keyboard=True)

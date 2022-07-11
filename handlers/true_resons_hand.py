@@ -8,7 +8,8 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
-from data_base.DBuse import data_getter, sql_safe_select, sql_safe_update, redis_just_one_write, poll_write
+from data_base.DBuse import data_getter, sql_safe_select, sql_safe_update, redis_just_one_write, poll_write, \
+    sql_add_value, mongo_game_answer
 from data_base.DBuse import redis_delete_from_list
 from filters.MapFilters import OperationWar, WarReason
 from handlers import anti_prop_hand
@@ -26,12 +27,14 @@ class TruereasonsState(StatesGroup):
     game = State()
     final = State()
 
+
 flags = {"throttling_key": "True"}
 router = Router()
 router.message.filter(state=TruereasonsState)
 
 
-@router.message((F.text.contains('не')) & (F.text.contains('интересуюсь')) & (F.text.contains('политикой')), flags=flags)
+@router.message((F.text.contains('не')) & (F.text.contains('интересуюсь')) & (F.text.contains('политикой')),
+                flags=flags)
 async def reasons_true_reason_for_all(message: Message):
     await redis_just_one_write(f'Usrs: {message.from_user.id}: Politics:', 'Аполитичный')
     base_list = ("👪 Защитить русских в Донбассе", "🛡 Предотвратить вторжение на территорию России или ДНР/ЛНР",
@@ -51,7 +54,8 @@ async def reasons_king_of_info(message: Message, state: FSMContext):
     await anti_prop_hand.reasons_king_of_info(message, state)
 
 
-@router.message((F.text == "Подожди. Я так не говорил(а). С чего ты взял, что это ненастоящие цели? 🤷‍♂️"), flags=flags)
+@router.message((F.text == "Подожди. Я так не говорил(а). С чего ты взял, что это ненастоящие цели? 🤷‍♂️"),
+                flags=flags)
 async def reasons_king_of_info(message: Message):
     await redis_just_one_write(f'Usrs: {message.from_user.id}: Politics:', 'Сторонник войны')
     base_list = ("👪 Защитить русских в Донбассе", "🛡 Предотвратить вторжение на территорию России или ДНР/ЛНР",
@@ -158,7 +162,8 @@ async def reasons_demilitarism(message: Message):
 
 
 @router.message(
-    (F.text == 'Им наверху виднее 🤔') | (F.text == 'Я не знаю 🤷‍♀️') | (F.text.contains('хотел, как лучше')), flags=flags)
+    (F.text == 'Им наверху виднее 🤔') | (F.text == 'Я не знаю 🤷‍♀️') | (F.text.contains('хотел, как лучше')),
+    flags=flags)
 async def reasons_lie_no_more_1(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_lie_no_more_1'})
     nmarkup = ReplyKeyboardBuilder()
@@ -202,7 +207,8 @@ async def reasons_lie_no_more_1(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(WarReason(answer="🤯 Предотвратить секретные разработки: биологическое оружие / ядерное оружие"), flags=flags)
+@router.message(WarReason(answer="🤯 Предотвратить секретные разработки: биологическое оружие / ядерное оружие"),
+                flags=flags)
 async def reasons_biopigeons(message: Message):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Start_answers: Invasion:',
                                  "🤯 Предотвратить секретные разработки: биологическое оружие / ядерное оружие")
@@ -242,7 +248,8 @@ async def reasons_normal_game_start(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(((F.text == "Начнем! 🚀") | (F.text == "Продолжаем, давай еще! 👉")), state=TruereasonsState.game, flags=flags)
+@router.message(((F.text == "Начнем! 🚀") | (F.text == "Продолжаем, давай еще! 👉")), state=TruereasonsState.game,
+                flags=flags)
 async def reasons_normal_game_question(message: Message, state: FSMContext):
     try:
         count = (await state.get_data())['ngamecount']
@@ -252,10 +259,12 @@ async def reasons_normal_game_question(message: Message, state: FSMContext):
     print(f"В таблице {how_many_rounds} записей, а вот счетчик сейчас {count}")
     if count < how_many_rounds:
         count += 1
-        truth_data = (await data_getter("SELECT t_id, text, belivers, nonbelivers, rebuttal FROM public.normal_game "
-                                 "left outer join assets on asset_name = assets.name "
-                                 "left outer join texts ON text_name = texts.name "
-                                 f"where id = {count}"))[0]
+        truth_data = (await data_getter("SELECT * FROM (SELECT t_id, text, belivers, nonbelivers, rebuttal, "
+                                        " ROW_NUMBER () OVER (ORDER BY id)"
+                                        "FROM normal_game "
+                                        "left outer join assets on asset_name = assets.name "
+                                        "left outer join texts ON text_name = texts.name)"
+                                        f"AS sub WHERE row_number = {count}"))[0]
         await state.update_data(ngamecount=count, belive=truth_data[2], not_belive=truth_data[3])
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Это абсурд🤦🏼‍♀️"))
@@ -281,7 +290,8 @@ async def reasons_normal_game_question(message: Message, state: FSMContext):
             reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(((F.text == "Это абсурд🤦🏼‍♀️") | (F.text == "Это нормально👌")), state=TruereasonsState.game, flags=flags)
+@router.message(((F.text == "Это абсурд🤦🏼‍♀️") | (F.text == "Это нормально👌")), state=TruereasonsState.game,
+                flags=flags)
 async def reasons_normal_game_answer(message: Message, state: FSMContext):
     data = await state.get_data()
     END = bool(data['ngamecount'] == (await data_getter('SELECT COUNT(id) FROM public.normal_game'))[0][0])
@@ -291,12 +301,13 @@ async def reasons_normal_game_answer(message: Message, state: FSMContext):
         nmarkup.row(types.KeyboardButton(text="Достаточно, давай закончим 🙅"))
     else:
         nmarkup.row(types.KeyboardButton(text="Продолжим 🤝"))
-    base_update_dict = dict()
+    answer_group = str()
     if message.text == "Это абсурд🤦🏼‍♀️":
-        base_update_dict.update({'belivers': (data['belive'] + 1)})
+        answer_group = 'belivers'
     elif message.text == "Это нормально👌":
-        base_update_dict.update({'nonbelivers': (data['not_belive'] + 1)})
-    await sql_safe_update("normal_game", base_update_dict, {'id': data['ngamecount']})
+        answer_group = 'nonbelivers'
+    await mongo_game_answer(message.from_user.id, 'normal_game', data['ngamecount'],
+                            answer_group, {'id': data['ngamecount']})
     t_percentage = data['belive'] / (data['belive'] + data['not_belive'])
     await message.answer(
         f'Результаты других участников:\n🤦‍♂️ Это абсурд: {round(t_percentage * 100)}%'
@@ -317,7 +328,8 @@ async def reasons_real_reasons(message: Message, state: FSMContext):
     await simple_media(message, 'reasons_real_reasons', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Подожди, а какие тогда настоящие цели войны? 🎯"), state=TruereasonsState.final, flags=flags)
+@router.message((F.text == "Подожди, а какие тогда настоящие цели войны? 🎯"), state=TruereasonsState.final,
+                flags=flags)
 async def reasons_are_they_real(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_are_they_real'})
     nmarkup = ReplyKeyboardBuilder()
@@ -522,6 +534,7 @@ async def reasons_generation_z(message: Message):
 async def reasons_who_to_blame(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_who_to_blame'})
     await state.set_state(StateofPutin.main)
+    await mongo_update_stat(message.from_user.id, 'war_aims')
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Давай 🤝"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)

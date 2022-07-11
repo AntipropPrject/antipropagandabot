@@ -5,18 +5,43 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.dispatcher.fsm.state import StatesGroup, State
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
+
+from data_base.DBuse import mongo_select_info
 from handlers import true_resons_hand
+from handlers import stopwar_hand
 from handlers.true_resons_hand import reasons_who_to_blame
 from states.donbass_states import donbass_state
+from states.main_menu_states import MainMenuStates
+from handlers.main_menu_hand import mainmenu_really_menu
+from stats.stat import mongo_is_done
 
 flags = {"throttling_key": "True"}
 router = Router()
 
 
+@router.message(commands=['menu'], flags=flags)
+async def commands_start(message: types.Message, state: FSMContext):
+    if await mongo_is_done(message.from_user.id):
+        await state.set_state(MainMenuStates.main)
+        await mainmenu_really_menu(message, state)
+    else:
+        await message.answer('Эта команда будет доступна только после первого прохождения бота')
+
+
+@router.message(commands=["testend"], flags=flags)
+async def cmd_start(message: Message, state: FSMContext):
+    await state.set_state(stopwar_hand.StopWarState.main)
+
 
 @router.message(commands=["testnazi"], flags=flags)
 async def cmd_start(message: Message, state: FSMContext):
     await true_resons_hand.reasons_denazi(message, state)
+
+
+@router.message(commands=["mainskip69"], flags=flags)
+async def cmd_start(message: Message, state: FSMContext):
+    await state.set_state(MainMenuStates.main)
+    await mainmenu_really_menu(message, state)
 
 
 @router.message(commands=["teststrike"], flags=flags)

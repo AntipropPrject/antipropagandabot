@@ -3,7 +3,7 @@ from log import logg
 from bata import all_data
 
 
-async def day_count(get_count=False):
+async def day_count(get_count=False, count_delete=False):
     try:
         current_datetime = datetime.now()
         ch = current_datetime.hour
@@ -11,8 +11,7 @@ async def day_count(get_count=False):
         check_day_count = all_data().get_data_red().get('count: day_count:')
         if str(check_day_count) == "None":
             all_data().get_data_red().set('count: day_count:', '1')
-        if 300 <= int(f'{ch}{mn}') <= 359:
-            print("Удаление")
+        if count_delete == True:
             all_data().get_data_red().set('count: day_count:', '1')
 
         day_count = all_data().get_data_red().get('count: day_count:')

@@ -45,16 +45,15 @@ async def smi_statement(message: Message, state: FSMContext):
         count += 1
         try:
             truth_data = (await data_getter(
-                "SELECT truth, t_id, text, belivers, nonbelivers, rebuttal, asset_name FROM public.mistakeorlie "
+                "SELECT t_id, text, belivers, nonbelivers, rebuttal, asset_name, id FROM public.mistakeorlie "
                 "left outer join assets on asset_name = assets.name "
                 "left outer join texts ON text_name = texts.name "
                 f"where asset_name like '%{str(person_list[0])[-5:-1].strip()}%' and asset_name like '%{str(count)}%'"))[
                 0]
 
-            print('aaaaaa', truth_data)
             await state.update_data({f'{person_list[0]}_gamecount': count})
             await state.update_data(truth=truth_data[0], rebuttal=truth_data[5], belive=truth_data[3],
-                                    not_belive=truth_data[4], last_media=truth_data[6])
+                                    not_belive=truth_data[4], last_media=truth_data[6], gid=truth_data[7])
 
         except IndexError as er:
             await message.answer(text=f"Медиафайл не найден {er}")
@@ -88,15 +87,13 @@ async def smi_statement(message: Message, state: FSMContext):
 async def smi_statement_enough(message: Message, state: FSMContext):
     person_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
     data = await state.get_data()
-    base_update_dict = dict()
-    print(message.text)
+    answer_group = str()
     if message.text == "Случайная ошибка / Не ложь 👍":
-        base_update_dict = {'belivers': data['belive'] + 1}
-        print('Этому верит', base_update_dict)
+        answer_group = 'belivers'
     elif message.text == "Целенаправленная ложь 👎":
-        base_update_dict = {'nonbelivers': data['not_belive'] + 1}
-        print('Этому верит', base_update_dict)
-    await sql_safe_update("mistakeorlie", base_update_dict, {'asset_name': data['last_media']})
+        answer_group = 'nonbelivers'
+    await mongo_game_answer(message.from_user.id, 'mistakeorlie', data['gid'],
+                            answer_group, {'id': data['gid']})
     t_percentage = data['belive'] / (data['belive'] + data['not_belive'])
     nmarkup = ReplyKeyboardBuilder()
     try:
@@ -202,7 +199,7 @@ async def sme_statement_skip(message: Message, state=FSMContext):
 
     await message.answer(f"Я хотел показать вам еще, как {string} "
                          f"{lst_web_answers}, "
-                         "ну когда вы ещё увидите такую подборку в одном месте?Для нашей "
+                         "ну когда вы ещё увидите такую подборку в одном месте? Для нашей "
                          "дальнейшей беседы важно, чтобы мы "
                          "разобрались, кому можно верить, а кому нет.\n\n"
                          "Можно я все-таки покажу хотя бы один "

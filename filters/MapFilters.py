@@ -1,7 +1,10 @@
+from aiogram import Bot
 from aiogram.dispatcher.filters import BaseFilter
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message
 from typing import Union, Dict, Any
+
+import bata
 from data_base.DBuse import poll_get, redis_just_one_read
 from handlers import true_resons_hand
 from resources.all_polls import welc_message_one, nazizm, donbass_first_poll
@@ -79,7 +82,7 @@ class PplPropagandaFilter(BaseFilter):
     async def __call__(self, message: Message) -> Union[bool, Dict[str, Any]]:
         ppl_lies_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:')
         bad_ppl_lies = ("Дмитрий Песков", "Сергей Лавров",
-                        "Юрий Подоляка", "Владимир Соловьев", "Никита Михалков")
+                        "Маргарита Симоньян", "Владимир Соловьев", "Никита Михалков")
         for bad_lie in bad_ppl_lies:
             if bad_lie in ppl_lies_list:
                 return {'ppl_lies_list': ppl_lies_list}
@@ -123,7 +126,6 @@ class NaziFilter(BaseFilter):
     async def __call__(self, message: Message):
         list = await poll_get(f'Usrs: {message.from_user.id}: Nazi_answers: first_poll:')
         for thing in list:
-            print(thing, '|||', self.answer)
             if int(thing.find(self.answer)) != -1:
                 return True
         return False
@@ -141,10 +143,23 @@ class NotNaziFilter(BaseFilter):
     async def __call__(self, message: Message):
         nazi_answers = await poll_get(f'Usrs: {message.from_user.id}: Nazi_answers: first_poll:')
         if "🙅 Ничего из вышеперечисленного..." in nazi_answers and len(nazi_answers) == 1:
-            print('Ошибочка вышла, он не нацист')
             return True
         else:
             return False
+
+
+class SubscriberFilter(BaseFilter):
+    async def __call__(self, message: Message):
+        bot = bata.all_data().get_bot()
+        user_channel_status = await bot.get_chat_member(chat_id=bata.all_data().masterchannel,
+                                                        user_id=message.from_user.id)
+        await bot.session.close()
+        if user_channel_status.status not in {'left', 'banned', 'restricted'}:
+            return False
+        else:
+            return True
+
+
 
 
 

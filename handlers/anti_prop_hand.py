@@ -7,7 +7,7 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from bata import all_data
-from data_base.DBuse import poll_get, redis_just_one_read
+from data_base.DBuse import poll_get, redis_just_one_read, sql_select_row_like, sql_add_value, mongo_game_answer
 from data_base.DBuse import sql_safe_select, data_getter, sql_safe_update
 from filters.MapFilters import WebPropagandaFilter, TVPropagandaFilter, PplPropagandaFilter, PoliticsFilter
 from handlers import true_resons_hand
@@ -16,7 +16,7 @@ from resources.all_polls import web_prop
 from resources.all_polls import channels
 from states.antiprop_states import propaganda_victim
 from stats.stat import mongo_update_stat
-from utilts import simple_media
+from utilts import simple_media, dynamic_media_answer
 
 flags = {"throttling_key": "True"}
 router = Router()
@@ -168,7 +168,7 @@ async def antiprop_tv_first(message: Message, state: FSMContext):
         await state.update_data(first_tv_count=count)
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Видео посмотрел, что с ним не так? 🤔"))
-        await simple_media(message, f'tv_first_lie_{count}', nmarkup.as_markup(resize_keyboard=True))
+        await dynamic_media_answer(message, 'tv_first_lie_', count, nmarkup.as_markup(resize_keyboard=True))
     except TelegramBadRequest:
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал 🔄"))
@@ -184,7 +184,8 @@ async def antiprop_tv_24(message: Message, state: FSMContext):
         await state.update_data(rus24_tv_count=count)
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Видео посмотрел, что с ним не так? 🤔"))
-        await simple_media(message, f'tv_24_lie_{count}', nmarkup.as_markup(resize_keyboard=True))
+        await dynamic_media_answer(message, 'tv_24_lie_', count, nmarkup.as_markup(resize_keyboard=True))
+
     except TelegramBadRequest:
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал 🔄"))
@@ -200,7 +201,7 @@ async def antiprop_tv_HTB(message: Message, state: FSMContext):
         await state.update_data(HTB_tv_count=count)
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Видео посмотрел, что с ним не так? 🤔"))
-        await simple_media(message, f'tv_HTB_lie_{count}', nmarkup.as_markup(resize_keyboard=True))
+        await dynamic_media_answer(message, 'tv_HTB_lie_', count, nmarkup.as_markup(resize_keyboard=True))
     except TelegramBadRequest:
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал 🔄"))
@@ -216,7 +217,8 @@ async def antiprop_tv_star(message: Message, state: FSMContext):
         await state.update_data(Star_tv_count=count)
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Видео посмотрел, что с ним не так? 🤔"))
-        await simple_media(message, f'tv_star_lie_{count}', nmarkup.as_markup(resize_keyboard=True))
+        await dynamic_media_answer(message, 'tv_star_lie_', count, nmarkup.as_markup(resize_keyboard=True))
+
     except TelegramBadRequest:
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал 🔄"))
@@ -228,44 +230,44 @@ async def antiprop_tv_star(message: Message, state: FSMContext):
 async def russia_tv_first_reb(message: Message, state: FSMContext):
     count = (await state.get_data())['first_tv_count']
     nmarkup = ReplyKeyboardBuilder()
-    if await sql_safe_select('t_id', 'assets', {'name': f'tv_first_reb_{count + 1}'}) is not False:
+    if await sql_select_row_like('assets', count + 1, {'name': 'tv_first_lie_'}) is not False:
         nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет с 1 канала 📺"))
     nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал 🔄"))
     nmarkup.row(types.KeyboardButton(text="Достаточно, мне все понятно ✋"))
-    await simple_media(message, f'tv_first_reb_{count}', nmarkup.as_markup(resize_keyboard=True))
+    await dynamic_media_answer(message, 'tv_first_reb_', count, nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text.contains('что')) & F.text.contains('не так'), state=propaganda_victim.tv_russia24, flags=flags)
 async def tv_russia24_reb(message: Message, state: FSMContext):
     count = (await state.get_data())['rus24_tv_count']
     nmarkup = ReplyKeyboardBuilder()
-    if await sql_safe_select('t_id', 'assets', {'name': f'tv_24_reb_{count + 1}'}) is not False:
+    if await sql_select_row_like('assets', count + 1, {'name': 'tv_24_lie_'}) is not False:
         nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет c России 1 / 24 📺"))
     nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал 🔄"))
     nmarkup.row(types.KeyboardButton(text="Достаточно, мне все понятно ✋"))
-    await simple_media(message, f'tv_24_reb_{count}', nmarkup.as_markup(resize_keyboard=True))
+    await dynamic_media_answer(message, 'tv_24_reb_', count, nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text.contains('что')) & F.text.contains('не так'), state=propaganda_victim.tv_HTB, flags=flags)
 async def tv_HTB_reb(message: Message, state: FSMContext):
     count = (await state.get_data())['HTB_tv_count']
     nmarkup = ReplyKeyboardBuilder()
-    if await sql_safe_select('t_id', 'assets', {'name': f'tv_HTB_reb_{count + 1}'}) is not False:
+    if await sql_select_row_like('assets', count + 1, {'name': 'tv_HTB_lie_'}) is not False:
         nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет НТВ 📺"))
     nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал 🔄"))
     nmarkup.row(types.KeyboardButton(text="Достаточно, мне все понятно ✋"))
-    await simple_media(message, f'tv_HTB_reb_{count}', nmarkup.as_markup(resize_keyboard=True))
+    await dynamic_media_answer(message, 'tv_HTB_reb_', count, nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text.contains('что')) & F.text.contains('не так'), state=propaganda_victim.tv_star, flags=flags)
 async def tv_star_reb(message: Message, state: FSMContext):
     count = (await state.get_data())['Star_tv_count']
     nmarkup = ReplyKeyboardBuilder()
-    if await sql_safe_select('t_id', 'assets', {'name': f'tv_star_lie_{count + 1}'}) is not False:
+    if await sql_select_row_like('assets', count + 1, {'name': 'tv_star_lie_'}) is not False:
         nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет с телеканала Звезда 📺"))
     nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал 🔄"))
     nmarkup.row(types.KeyboardButton(text="Достаточно, мне все понятно ✋"))
-    await simple_media(message, f'tv_star_reb_{count}', nmarkup.as_markup(resize_keyboard=True))
+    await dynamic_media_answer(message, 'tv_star_reb_', count, nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text.contains('Достаточно') & (F.text.contains('понятно ✋'))), flags=flags)
@@ -599,10 +601,10 @@ async def revealing_the_news(message: Message, state: FSMContext):
             redis.delete(key)
         print(set(await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:')).isdisjoint(
             ("Дмитрий Песков", "Сергей Лавров",
-             "Юрий Подоляка", "Владимир Соловьев", "Никита Михалков")))
+             "Маргарита Симоньян", "Владимир Соловьев", "Никита Михалков")))
         if set(await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:')).isdisjoint(
                 ("Дмитрий Песков", "Сергей Лавров",
-                 "Юрий Подоляка", "Владимир Соловьев", "Никита Михалков")) is False:
+                 "Маргарита Симоньян", "Владимир Соловьев", "Никита Михалков")) is False:
             await antip_bad_people_lies(message, state)
         else:
             await antip_truth_game_start(message, state)
@@ -643,7 +645,7 @@ async def antip_web_exit_1(message: Message, state: FSMContext):
         return
     if set(await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:')).isdisjoint(
             ("Дмитрий Песков", "Сергей Лавров",
-             "Юрий Подоляка", "Владимир Соловьев", "Никита Михалков")) is False:
+             "Маргарита Симоньян", "Владимир Соловьев", "Никита Михалков")) is False:
         await antip_bad_people_lies(message, state)
     else:
         await antip_truth_game_start(message, state)
@@ -682,20 +684,22 @@ async def antip_truth_game_start_question(message: Message, state: FSMContext):
     except:
         count = 0
     how_many_rounds = (await data_getter("SELECT COUNT (*) FROM public.truthgame"))[0][0]
-    print(f"В таблице {how_many_rounds} записей, а вот счетчик сейчас {count}")
     if count < how_many_rounds:
         count += 1
-        truth_data = (await data_getter(f"""SELECT * FROM ( SELECT truth, t_id, text, belivers, nonbelivers,
-                                         rebuttal, reb_asset_name,
+        truth_data = (await data_getter(f"""SELECT * FROM (Select truth, a.t_id as plot_media, t.text as plot_text, 
+                                         belivers, nonbelivers,
+                                         t2.text as rebb_text, a2.t_id as rebb_media,
                                          ROW_NUMBER () OVER (ORDER BY id), id FROM public.truthgame
-                                         left outer join assets on asset_name = assets.name
-                                         left outer join texts ON text_name = texts.name)
+                                         left outer join assets a on a.name = truthgame.asset_name
+                                         left outer join assets a2 on a2.name = truthgame.reb_asset_name
+                                         left outer join texts t on truthgame.text_name = t.name
+                                         left outer join texts t2 on truthgame.rebuttal = t2.name)
                                          AS sub WHERE row_number = {count}"""))[0]
         await state.update_data(gamecount=count, truth=truth_data[0], rebuttal=truth_data[5], belive=truth_data[3],
-                                not_belive=truth_data[4], reb_media_tag=truth_data[6], game_id=truth_data[8])
+                                not_belive=truth_data[4], reb_media=truth_data[6], game_id=truth_data[8])
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Это правда ✅"))
-        nmarkup.row(types.KeyboardButton(text="Это ложь ❌"))
+        nmarkup.add(types.KeyboardButton(text="Это ложь ❌"))
         if truth_data[1] is not None:
             capt = ""
             if truth_data[2] is not None:
@@ -726,26 +730,26 @@ async def antip_truth_game_answer(message: Message, state: FSMContext):
         nmarkup.row(types.KeyboardButton(text="Достаточно, двигаемся дальше  🙅‍♀️"))
     else:
         nmarkup.row(types.KeyboardButton(text="🤝 Продолжим"))
-    base_update_dict, reality = dict(), str()
+    answer_group, reality = str(), str()
     if message.text == "Это правда ✅":
         if data['truth'] == True:
             reality = "Правильно! Это правда!"
         elif data['truth'] == False:
             reality = "Неверно! Это ложь!"
-        base_update_dict = {'belivers': data['belive'] + 1}
+        answer_group = 'belivers'
     elif message.text == "Это ложь ❌":
         if data['truth'] == True:
             reality = "Неверно! Это правда!"
         elif data['truth'] == False:
             reality = "Правильно! Это ложь!"
-        base_update_dict = {'nonbelivers': data['not_belive'] + 1}
+        answer_group = 'belivers'
+    await mongo_game_answer(message.from_user.id, 'truthgame', data['game_id'], answer_group, {'id': data['game_id']})
     t_percentage = data['belive'] / (data['belive'] + data['not_belive'])
     text = reality + f'\n\nРезультаты других участников:\n✅ <b>Правда:</b> {round(t_percentage * 100)}%\n' \
                      f'❌ <b>Ложь</b>: {round((100 - t_percentage * 100))}%' + '\n\nПодтверждение - ниже.'
     reb = data['rebuttal']
-    await sql_safe_update("truthgame", base_update_dict, {'id': data['game_id']})
-    media = await sql_safe_select('t_id', 'assets', {'name': data['reb_media_tag']})
-    if media is False:
+    media = data['reb_media']
+    if media is None:
         await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
         await message.answer(reb, disable_web_page_preview=True)
     else:

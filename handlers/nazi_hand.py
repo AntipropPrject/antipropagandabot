@@ -8,7 +8,8 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
-from data_base.DBuse import data_getter, poll_write, sql_safe_select, sql_safe_update, redis_delete_from_list, poll_get
+from data_base.DBuse import data_getter, poll_write, sql_safe_select, sql_safe_update, redis_delete_from_list, poll_get, \
+    sql_add_value, mongo_game_answer
 from filters.MapFilters import NaziFilter, RusHate_pr, NotNaziFilter, ManualFilters
 from handlers import true_resons_hand
 from resources.all_polls import nazizm, nazizm_pr
@@ -146,34 +147,28 @@ async def nazi_not_zombie(message: Message, state: FSMContext):
 async def nazi_how_many(message: Message, state: FSMContext):
     await state.set_state(NaziState.small_poll)
     text = await sql_safe_select("text", "texts", {"name": "nazi_how_many"})
-    question = 'Выберите один ответ'
-    await message.answer(text, disable_web_page_preview=True)
-    await message.answer_poll(question=question, options=nazizm_pr, is_anonymous=False,
-                              reply_markup=ReplyKeyboardRemove())
+    markup = ReplyKeyboardBuilder()
+    for option in nazizm_pr:
+        markup.row(types.KeyboardButton(text=option))
+    markup.adjust(2, 2)
+    await message.answer(text, disable_web_page_preview=True, reply_markup=markup.as_markup(resize_keyboard=True))
 
 
-@router.poll_answer(state=NaziState.small_poll, flags=flags)
-async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FSMContext):
-    data = await state.get_data()
+@router.message((F.text.in_(set(nazizm_pr))), state=NaziState.small_poll, flags=flags)
+async def poll_answer_handler(message: Message, bot: Bot, state: FSMContext):
     await state.set_state(NaziState.after_small_poll)
-    pr_answers = poll_answer.option_ids
-    for index in pr_answers:
-        answer = nazizm_pr[index]
-        first_poll_answers = await poll_get(f'Usrs: {poll_answer.user.id}: Nazi_answers: first_poll:')
-        await poll_write(f'Usrs: {poll_answer.user.id}: Nazi_answers: small_poll:', answer)
-        if answer == "📊 Менее 5%" and nazizm[0] not in first_poll_answers:
-            markup = ReplyKeyboardBuilder()
-            markup.row(types.KeyboardButton(text="Продолжай ⏳"))
-            text = await sql_safe_select("text", "texts", {"name": "nazi_piechart"})
-            media = await sql_safe_select('t_id', 'assets', {'name': 'nazi_piechart'})
-            await bot.send_photo(chat_id=poll_answer.user.id, photo=media, caption=text,
-                                 reply_markup=markup.as_markup(resize_keyboard=True))
-        else:
-            markup_1 = ReplyKeyboardBuilder()
-            markup_1.row(types.KeyboardButton(text="Хорошо, давай продолжим 👌"))
-            await bot.send_message(poll_answer.user.id,
-                                   'Спасибо, я запомнил ваш ответ. Позже в разговоре мы его обсудим',
-                                   reply_markup=markup_1.as_markup(resize_keyboard=True))
+    answer = message.text
+    first_poll_answers = await poll_get(f'Usrs: {message.from_user.id}: Nazi_answers: first_poll:')
+    await poll_write(f'Usrs: {message.from_user.id}: Nazi_answers: small_poll:', answer)
+    markup = ReplyKeyboardBuilder()
+    if answer == "📊 Менее 5%" and nazizm[0] not in first_poll_answers:
+        markup = ReplyKeyboardBuilder()
+        markup.row(types.KeyboardButton(text="Продолжай ⏳"))
+        await simple_media(message, 'nazi_piechart', markup.as_markup(resize_keyboard=True))
+    else:
+        markup.row(types.KeyboardButton(text="Хорошо, давай продолжим 👌"))
+        await message.answer('Спасибо, я запомнил ваш ответ. Позже в разговоре мы его обсудим.',
+                             reply_markup=markup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text.contains('Продолжай ⏳')), state=NaziState.after_small_poll, flags=flags)
@@ -293,7 +288,7 @@ async def nazi_second_poll(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжить"))
     await message.answer(text, disable_web_page_preview=True, reply_markup=ReplyKeyboardRemove())
-    await message.answer_poll(question='Попробуйте угадать!', options=['95%', '76%', '45%', '21%', '6%'],
+    await message.answer_poll(question='Попробуйте угадать!', type='quiz', options=['95%', '76%', '45%', '21%', '6%'],
                               is_anonymous=False, allows_multiple_answers=False, correct_option_id=1)
 
 
@@ -349,11 +344,11 @@ async def nazi_poll_is_cool(message: Message):
 async def nazi_vs_gopnics(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'nazi_vs_gopnics'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Понятно ✔️"))
+    nmarkup.row(types.KeyboardButton(text="Понятно  👌"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(RusHate_pr(), (F.text == "Понятно ✔️"), state=NaziState.rushate, flags=flags)
+@router.message(RusHate_pr(), (F.text == "Понятно  👌"), state=NaziState.rushate, flags=flags)
 async def nazi_very_little(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'nazi_very_little'})
     text2 = await sql_safe_select('text', 'texts', {'name': 'nazi_less_than_5'})
@@ -365,12 +360,12 @@ async def nazi_very_little(message: Message):
     await message.answer(text2, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Понятно ✔️"), state=NaziState.rushate, flags=flags)
+@router.message((F.text == "Понятно  👌"), state=NaziState.rushate, flags=flags)
 async def nazi_you_wrong(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'nazi_you_wrong'})
     answer_lower = ((await poll_get(f'Usrs: {message.from_user.id}: Nazi_answers: small_poll:'))[0]).lower
     text = text.replace('[[выбранный вариант ответа (с маленькой буквы)]]',
-                        ((await poll_get(f'Usrs: {message.from_user.id}: Nazi_answers: small_poll:'))[0]).lower())
+                        ((await poll_get(f'Usrs: {message.from_user.id}: Nazi_answers: small_poll:'))[0]).lower()[2:])
     text2 = await sql_safe_select('text', 'texts', {'name': 'nazi_less_than_5'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Я согласен(на), неонацизм на Украине - преувеличение 👌"))
@@ -490,15 +485,13 @@ async def country_game_question(message: Message, state: FSMContext):
     except:
         count = 0
     how_many_rounds = (await data_getter("SELECT COUNT (*) FROM public.ucraine_or_not_game"))[0][0]
-    print(f"В таблице {how_many_rounds} записей, а вот счетчик сейчас {count}")
     if count < how_many_rounds:
         count += 1
         truth_data = \
-            (await data_getter("SELECT t_id, text, belivers, nonbelivers, rebuttal, truth FROM public.ucraine_or_not_game "
+            (await data_getter("SELECT * FROM (SELECT t_id, text, belivers, nonbelivers, rebuttal, truth, "
+                               "ROW_NUMBER () OVER (ORDER BY id) FROM public.ucraine_or_not_game "
                         "left outer join assets on asset_name = assets.name "
-                        "left outer join texts ON text_name = texts.name "
-                        f"where id = {count}"))[0]
-        print(truth_data)
+                        f"left outer join texts ON text_name = texts.name) AS sub WHERE row_number = {count}"))[0]
         await state.update_data(ngamecount=count, belive=truth_data[2], not_belive=truth_data[3], rebutt=truth_data[4],
                                 truth=truth_data[5])
         nmarkup = ReplyKeyboardBuilder()
@@ -529,22 +522,22 @@ async def country_game_question(message: Message, state: FSMContext):
 @router.message(((F.text == "Это на Украине 🇺🇦") | (F.text == "Это в России 🇷🇺")), state=NaziState.game, flags=flags)
 async def country_game_answer(message: Message, state: FSMContext):
     data = await state.get_data()
-    print(data)
-    text, base_update_dict = "", dict()
+    text, answer_group = "", str()
     reality = data['truth']
     if message.text == "Это на Украине 🇺🇦":
         if reality is True:
             text = 'Правильно! Это на Украине!'
         if reality is False:
             text = 'Вы ошиблись! Это в России!'
-        base_update_dict.update({'belivers': (data['belive'] + 1)})
+        answer_group = 'belivers'
     elif message.text == "Это в России 🇷🇺":
         if reality is True:
             text = 'Вы ошиблись! Это на Украине!'
         if reality is False:
             text = 'Правильно! Это в России!'
-        base_update_dict.update({'nonbelivers': (data['not_belive'] + 1)})
-    await sql_safe_update("ucraine_or_not_game", base_update_dict, {'id': data['ngamecount']})
+        answer_group = 'nonbelivers'
+    await mongo_game_answer(message.from_user.id, 'ucraine_or_not_game', data['ngamecount'],
+                            answer_group, {'id': data['ngamecount']})
     t_percentage = data['belive'] / (data['belive'] + data['not_belive'])
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжаем, давай еще! 👉"))
