@@ -1025,7 +1025,7 @@ async def add_media(query: types.CallbackQuery, state: FSMContext):
 
 @router.message(state=admin.add_news)
 async def admin_home(message: types.Message, state: FSMContext):
-    caption = message.caption
+    caption = message.html_text
     media = str()
     try:
         if message.content_type == 'photo':
@@ -1045,7 +1045,7 @@ async def admin_home(message: types.Message, state: FSMContext):
 
 @router.message(state=admin.mass_media_add_exposure)
 async def admin_home(message: types.Message, state: FSMContext):
-    caption = message.caption
+    caption = message.html_text
     media = str()
     try:
         if message.content_type == 'photo':
@@ -1169,7 +1169,7 @@ async def admin_home(message: types.Message, state: FSMContext):
 @router.message(state=admin.mass_media_edit_add)
 async def admin_home(message: types.Message, state: FSMContext):
     try:
-        caption = message.caption
+        caption = message.html_text
         if message.content_type == 'photo':
             media = message.photo[0].file_id
             await message.answer_photo(media, caption=caption)
@@ -1187,7 +1187,7 @@ async def admin_home(message: types.Message, state: FSMContext):
 
 @router.message(state=admin.mass_media_edit_add_exposure)
 async def admin_home(message: types.Message, state: FSMContext):
-    caption = message.caption
+    caption = message.html_text
     media = str()
     try:
         if message.content_type == 'photo':
