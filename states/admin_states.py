@@ -2,6 +2,8 @@ from aiogram.dispatcher.fsm.state import StatesGroup, State
 
 
 class admin(StatesGroup):
+    tv_lie_upd_text = State()
+    tv_lie_upd_text_or_media = State()
     tv_lie_upd = State()
     tv_lie_del_apply = State()
     tv_lie_del = State()

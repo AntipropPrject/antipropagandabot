@@ -826,6 +826,15 @@ async def admin_home(message: types.Message, state: FSMContext):
 
 @router.message(IsAdmin(),(F.text == "Редактировать сюжет"),  state=admin.tv_lie_lobby)
 async def menu(message: types.Message, state: FSMContext):
+    mnrkup = ReplyKeyboardBuilder()
+    mnrkup.row(types.KeyboardButton("Редактировать подпись(текст)"))
+    mnrkup.row(types.KeyboardButton("Перезалить видео или фото"))
+    await message.answer('что именно нуждается в редактировании?')
+    await state.set_state(admin.tv_lie_upd_text_or_media)
+
+
+@router.message(IsAdmin(),(F.text == "Редактировать подпись(текст)"),  state=admin.tv_lie_upd_text_or_media)
+async def menu(message: types.Message, state: FSMContext):
     data = await state.get_data()
     tag = data['tv_channel']
     postgresdata = await data_getter(
@@ -834,7 +843,22 @@ async def menu(message: types.Message, state: FSMContext):
     for i in postgresdata:
         nmrkup.row(types.KeyboardButton(text=f'{i[0]}'))
     await message.answer(
-        "Сюжеты идут по порядку в паре с опровержением. Утверждение сожержит в теге lie, опровержение сожержит reb. Ваша задача выбрать сюжет, который хотите перезалить (Если вы хотите поменять текст, это можно сделать в меню admin/Изменить текст/Редактировать текст по такому же тегу!!! ",
+        "Сюжеты идут по порядку в паре с опровержением. Утверждение сожержит в теге lie, опровержение содержит reb. Ваша задача выбрать сюжет, в котором вы хотите поменять текст  ",
+        reply_markup=nmrkup.as_markup(resize_keyboard=True))
+    await state.set_state(admin.tv_lie_upd_text)
+
+
+@router.message(IsAdmin(),(F.text == "Перезалить видео или фото"),  state=admin.tv_lie_upd_text_or_media)
+async def menu(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    tag = data['tv_channel']
+    postgresdata = await data_getter(
+        f"select name from assets where name like '%{tag}%' order by name asc")
+    nmrkup = ReplyKeyboardBuilder()
+    for i in postgresdata:
+        nmrkup.row(types.KeyboardButton(text=f'{i[0]}'))
+    await message.answer(
+        "Сюжеты идут по порядку в паре с опровержением. Утверждение сожержит в теге lie, опровержение сожержит reb. Ваша задача выбрать сюжет, который хотите перезалить  ",
         reply_markup=nmrkup.as_markup(resize_keyboard=True))
     await state.set_state(admin.tv_lie_upd)
 
@@ -843,6 +867,10 @@ async def admin_home(message: types.Message, state: FSMContext):
     from handlers.new_admin_hand import edit_media
     await edit_media(message, state)
 
+@router.message(IsAdmin(), state=admin.tv_lie_upd_text)
+async def admin_home(message: types.Message, state: FSMContext):
+    from handlers.new_admin_hand import text_edit_text_tag
+    await text_edit_text_tag(message, state)
 
 @router.message(IsAdmin(), state=admin.tv_lie_del_apply)
 async def admin_home(message: types.Message, state: FSMContext):
