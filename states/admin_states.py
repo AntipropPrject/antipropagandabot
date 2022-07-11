@@ -2,6 +2,11 @@ from aiogram.dispatcher.fsm.state import StatesGroup, State
 
 
 class admin(StatesGroup):
+    putin_game_old_lies_upd = State()
+    putin_game_old_lies_del_apply = State()
+    putin_game_old_lies_del = State()
+    putin_game_old_lies_add = State()
+    putin_game_old_lies_ = State()
     tv_lie_upd_text = State()
     tv_lie_upd_text_or_media = State()
     tv_lie_upd = State()
