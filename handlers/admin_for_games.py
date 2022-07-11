@@ -39,6 +39,7 @@ async def admin_home(message: types.Message, state: FSMContext):
                          reply_markup=nmrkup.as_markup(resize_keyboard=True))
     await state.set_state(admin.addingMistakeOrLie)
 
+
 @router.message(IsAdmin(), state=admin.addingMistakeOrLie)
 async def menu(message: types.Message, state: FSMContext):
     await state.update_data(surnameOfPerson=message.text)
@@ -46,6 +47,7 @@ async def menu(message: types.Message, state: FSMContext):
         "Что вы хотите сделать?",
         reply_markup=game_keys())
     await state.set_state(admin.addingMistakeOrLie_adding)
+
 
 @router.message(IsAdmin(), (F.text == "Добавить сюжет"), state=admin.addingMistakeOrLie_adding)
 async def menu(message: types.Message, state: FSMContext):
@@ -93,21 +95,24 @@ async def menu(message: types.Message, state: FSMContext):
                          reply_markup=nmrkup.as_markup(resize_keyboard=True))
     await state.clear()
 
+
 @router.message(IsAdmin(), (F.text == "Удалить сюжет"), state=admin.addingMistakeOrLie_adding)
 async def menu(message: types.Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username,
                           "Ошибка или ложь(пропагандисты) - удаление")
     data = await state.get_data()
     tag = data['surnameOfPerson']
-    postgresdata = await data_getter(f"select asset_name from mistakeorlie where asset_name like '%{tag}%' order by asset_name asc")
+    postgresdata = await data_getter(
+        f"select asset_name from mistakeorlie where asset_name like '%{tag}%' order by asset_name asc")
     nmrkup = ReplyKeyboardBuilder()
     for i in postgresdata:
-        nmrkup.row(types.KeyboardButton(text=f'{i[0]}'))
+        nmrkup.row(types.KeyboardButton(text=i[0]))
     await message.answer(
         "Выберете сюжет, они идут по порядку",
         reply_markup=nmrkup.as_markup(resize_keyboard=True))
 
     await state.set_state(admin.addingMistakeOrLie_deleting)
+
 
 @router.message(IsAdmin(), state=admin.addingMistakeOrLie_deleting)
 async def admin_home(message: types.Message, state: FSMContext):
@@ -127,9 +132,10 @@ async def admin_home(message: types.Message, state: FSMContext):
                                    reply_markup=nmrkup.as_markup(resize_keyboard=True))
     await state.set_state(admin.addingMistakeOrLie_deleting_apply)
 
+
 @router.message(IsAdmin(), state=admin.addingMistakeOrLie_deleting_apply)
 async def admin_home(message: types.Message, state: FSMContext):
-    data =await state.get_data()
+    data = await state.get_data()
     media_id = data['media_to_delete']
     nmrkup = ReplyKeyboardBuilder()
     nmrkup.row(types.KeyboardButton(text="Назад"))
@@ -141,6 +147,80 @@ async def admin_home(message: types.Message, state: FSMContext):
         await message.answer("Вернемся назад", reply_markup=nmrkup.as_markup())
     else:
         await message.answer("Что-то не так, попробуйте нажать /start и снова зайти в админку")
+    await state.clear()
+
+
+@router.message(IsAdmin(), (F.text == "Редактировать сюжет"), state=admin.addingMistakeOrLie_adding)
+async def admin_truthgame_update(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    leng = await data_getter(
+        f"SELECT asset_name FROM mistakeorlie where assete_name like '%{data['surnameOfPerson']}%'")
+    nmrkup = ReplyKeyboardBuilder()
+    for i in leng:
+        nmrkup.row(types.KeyboardButton(text=i[0]))
+    await message.answer("Выберите сюжет, который вы хотели бы изменить",
+                         reply_markup=nmrkup.as_markup(resize_keyboard=True))
+    await state.set_state(admin.addingMistakeOrLie_upd)
+
+
+@router.message(IsAdmin(), (F.text == "Редактировать сюжет"), state=admin.addingMistakeOrLie_upd)
+async def admin_truthgame_update(message: types.Message, state: FSMContext):
+    await state.update_data(tag=message.text)
+    nmrkup = ReplyKeyboardBuilder()
+    nmrkup.row(types.KeyboardButton(text="Да, я хочу отредактировать этот сюжет полностью(и текст и медиа)"))
+    nmrkup.row(types.KeyboardButton(text="Я хочу отредактировать только текст"))
+    nmrkup.row(types.KeyboardButton(text="Назад"))
+    media_id = await data_getter(f"select t_id from assets where name='{message.text}'")
+    caption = await data_getter((f"select rebuttal from mistakeorlie where asset_name='{message.text}'"))
+    try:
+        await message.answer_photo(media_id[0][0], caption=caption, reply_markup=nmrkup.as_markup(resize_keyboard=True))
+    except:
+        await message.answer_video(media_id[0][0], caption=caption, reply_markup=nmrkup.as_markup(resize_keyboard=True))
+    await state.set_state(admin.addingMistakeOrLie_upd_text_or_media)
+
+
+@router.message(IsAdmin(), state=admin.addingMistakeOrLie_upd_text_or_media)
+async def admin_truthgame_update(message: types.Message, state: FSMContext):
+    nmrkup = ReplyKeyboardBuilder()
+    nmrkup.row(types.KeyboardButton(text="Назад"))
+    if message.text == "Да, я хочу отредактировать этот сюжет полностью(и текст и медиа)":
+        await message.answer("Пришлите новый видеофаил с подписью(тесктом)",
+                             reply_markup=nmrkup.as_markup(resize_keyboard=True))
+        await state.set_state(admin.addingMistakeOrLie_upd_text_and_media)
+    elif message.text == "Я хочу отредактировать только текст":
+        await message.answer("Пришлите текст", reply_markup=nmrkup.as_markup(resize_keyboard=True))
+        await state.set_state(admin.addingMistakeOrLie_upd_text_only)
+    else:
+        print('do nothing')
+
+
+@router.message(IsAdmin(), state=admin.addingMistakeOrLie_upd_text_only)
+async def admin_truthgame_update(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    tag = data['tag']
+    text = message.html_text
+    await data_getter(f"update mistakeorlie set rebuttal='{text}' where asset_name='{tag}'")
+    nmrkup = ReplyKeyboardBuilder()
+    nmrkup.row(types.KeyboardButton(text="Назад"))
+    await message.answer(f"Удалось обновить текст {tag}")
+    await state.clear()
+
+
+@router.message(IsAdmin(), state=admin.addingMistakeOrLie_upd_text_and_media)
+async def admin_truthgame_update(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    tag = data['tag']
+    text = message.html_text
+    try:
+        media_id = message.video.file_id
+    except:
+        media_id = message.photo[-1].file_id
+
+    await data_getter(f"update assets set t_id='{media_id}' where name='{tag}'")
+    await data_getter(f"update mistakeorlie set rebuttal='{text}' where asset_name='{tag}'")
+    nmrkup = ReplyKeyboardBuilder()
+    nmrkup.row(types.KeyboardButton(text="Назад"))
+    await message.answer("Удалось обновить медиа и текст ")
     await state.clear()
 
 
@@ -538,7 +618,7 @@ async def admin_home(message: types.Message, state: FSMContext):
 
 @router.message(IsAdmin(), state=admin.putin_game_del_apply)
 async def admin_home(message: types.Message, state: FSMContext):
-    data =await state.get_data()
+    data = await state.get_data()
     media_id = data['media_to_delete']
     nmrkup = ReplyKeyboardBuilder()
     nmrkup.row(types.KeyboardButton(text="Назад"))
@@ -560,7 +640,7 @@ async def admin_home(message: types.Message, state: FSMContext):
     for i in postgresdata:
         nmarkup.row(types.KeyboardButton(text=i[0]))
     await message.answer("Выберите номер сюжета(они представлены по порядку), который вы хотите редактировать",
-                             reply_markup=nmarkup.as_markup())
+                         reply_markup=nmarkup.as_markup())
     await state.set_state(admin.putin_game_upd)
 
 
@@ -592,7 +672,6 @@ async def admin_home(message: types.Message, state: FSMContext):
         asset = message.video.file_id
     if message.text == "Нет":
         await message.answer("Ну тогда смело жмите назад", reply_markup=nmrkup.as_markup())
-
 
     text = message.html_text
 
@@ -664,6 +743,7 @@ async def menu(message: types.Message, state: FSMContext):
                          reply_markup=nmrkup.as_markup(resize_keyboard=True))
     await state.clear()
 
+
 @router.message(IsAdmin(), (F.text.contains('Удалить сюжет')), state=admin.putin_game_old_lies)
 async def admin_home(message: types.Message, state: FSMContext):
     await message.answer("Выберите номер сюжета(они представлены по порядку), который вы хотите удалить",
@@ -691,9 +771,10 @@ async def admin_home(message: types.Message, state: FSMContext):
                                    reply_markup=nmrkup.as_markup(resize_keyboard=True))
     await state.set_state(admin.putin_game_old_lies_del_apply)
 
+
 @router.message(IsAdmin(), state=admin.putin_game_del_apply)
 async def admin_home(message: types.Message, state: FSMContext):
-    data =await state.get_data()
+    data = await state.get_data()
     media_id = data['media_to_delete']
     nmrkup = ReplyKeyboardBuilder()
     nmrkup.row(types.KeyboardButton(text="Назад"))
@@ -707,9 +788,9 @@ async def admin_home(message: types.Message, state: FSMContext):
         await message.answer("Что-то не так, попробуйте нажать /start и снова зайти в админку")
     await state.clear()
 
+
 @router.message(IsAdmin(), (F.text.contains('Редактировать сюжет')), state=admin.putin_game_old_lies)
 async def admin_home(message: types.Message, state: FSMContext):
-
     nmarkup = ReplyKeyboardBuilder()
     postgresdata = await data_getter(f"select asset_name from putin_lies")
     for i in postgresdata:
@@ -718,6 +799,7 @@ async def admin_home(message: types.Message, state: FSMContext):
     await message.answer("Выберите номер сюжета(они представлены по порядку), который вы хотите редактировать",
                          reply_markup=nmarkup.as_markup())
     await state.set_state(admin.putin_game_old_lies_upd)
+
 
 @router.message(IsAdmin(), state=admin.putin_game_old_lies_upd)
 async def admin_home(message: types.Message, state: FSMContext):
@@ -734,6 +816,7 @@ async def admin_home(message: types.Message, state: FSMContext):
                                    reply_markup=nmrkup.as_markup(resize_keyboard=True))
     await state.set_state(admin.putin_game_old_lies_upd_aplly)
 
+
 @router.message(IsAdmin(), state=admin.putin_game_old_lies_upd_aplly)
 async def admin_home(message: types.Message, state: FSMContext):
     nmrkup = ReplyKeyboardBuilder()
@@ -747,7 +830,6 @@ async def admin_home(message: types.Message, state: FSMContext):
     if message.text == "Нет":
         await message.answer("Ну тогда смело жмите назад", reply_markup=nmrkup.as_markup())
 
-
     text = message.html_text
 
     if tag:
@@ -758,7 +840,6 @@ async def admin_home(message: types.Message, state: FSMContext):
     else:
         await message.answer("Что-то не так, попробуйте нажать /start и снова зайти в админку")
     await state.clear()
-
 
 
 @router.message(IsAdmin(), (F.text == "Игра Абсурда 🗯"))
@@ -845,7 +926,7 @@ async def menu(message: types.Message, state: FSMContext):
             media_id = message.photo[0].file_id
         except:
             await message.answer("Невижу медиа")
-    data =await state.get_data()
+    data = await state.get_data()
     truth = data['ucranebool']
     text = message.html_text
     nmrkup = ReplyKeyboardBuilder()
@@ -886,6 +967,7 @@ async def admin_home(message: types.Message, state: FSMContext):
                          reply_markup=nmrkup.as_markup(resize_keyboard=True))
     await state.set_state(admin.tv_lie)
 
+
 @router.message(IsAdmin(), state=admin.tv_lie)
 async def menu(message: types.Message, state: FSMContext):
     await state.update_data(tv_channel=message.text)
@@ -894,7 +976,8 @@ async def menu(message: types.Message, state: FSMContext):
         reply_markup=game_keys())
     await state.set_state(admin.tv_lie_lobby)
 
-@router.message(IsAdmin(),(F.text == "Удалить сюжет"),  state=admin.tv_lie_lobby)
+
+@router.message(IsAdmin(), (F.text == "Удалить сюжет"), state=admin.tv_lie_lobby)
 async def menu(message: types.Message, state: FSMContext):
     data = await state.get_data()
     tag = data['tv_channel']
@@ -908,6 +991,7 @@ async def menu(message: types.Message, state: FSMContext):
         reply_markup=nmrkup.as_markup(resize_keyboard=True))
     await state.set_state(admin.tv_lie_del)
 
+
 @router.message(IsAdmin(), state=admin.tv_lie_del)
 async def admin_home(message: types.Message, state: FSMContext):
     await state.update_data(media_to_delete=message.text)
@@ -916,14 +1000,17 @@ async def admin_home(message: types.Message, state: FSMContext):
     nmrkup.row(types.KeyboardButton(text="Нет"))
     media_id = await data_getter(f"select t_id from assets where name = '{message.text}'")
     try:
-        await message.answer_video(video=media_id[0][0], caption="Посмотрите внимательно. Этот сюжет вы хотите удалить?",
+        await message.answer_video(video=media_id[0][0],
+                                   caption="Посмотрите внимательно. Этот сюжет вы хотите удалить?",
                                    reply_markup=nmrkup.as_markup(resize_keyboard=True))
     except:
-        await message.answer_photo(photo=media_id[0][0], caption="Посмотрите внимательно. Этот сюжет вы хотите удалить?",
+        await message.answer_photo(photo=media_id[0][0],
+                                   caption="Посмотрите внимательно. Этот сюжет вы хотите удалить?",
                                    reply_markup=nmrkup.as_markup(resize_keyboard=True))
     await state.set_state(admin.tv_lie_del_apply)
 
-@router.message(IsAdmin(),(F.text == "Редактировать сюжет"),  state=admin.tv_lie_lobby)
+
+@router.message(IsAdmin(), (F.text == "Редактировать сюжет"), state=admin.tv_lie_lobby)
 async def menu(message: types.Message, state: FSMContext):
     mnrkup = ReplyKeyboardBuilder()
     mnrkup.row(types.KeyboardButton(text="Редактировать подпись(текст)"))
@@ -932,7 +1019,7 @@ async def menu(message: types.Message, state: FSMContext):
     await state.set_state(admin.tv_lie_upd_text_or_media)
 
 
-@router.message(IsAdmin(),(F.text == "Редактировать подпись(текст)"),  state=admin.tv_lie_upd_text_or_media)
+@router.message(IsAdmin(), (F.text == "Редактировать подпись(текст)"), state=admin.tv_lie_upd_text_or_media)
 async def menu(message: types.Message, state: FSMContext):
     data = await state.get_data()
     tag = data['tv_channel']
@@ -947,7 +1034,7 @@ async def menu(message: types.Message, state: FSMContext):
     await state.set_state(admin.tv_lie_upd_text)
 
 
-@router.message(IsAdmin(),(F.text == "Перезалить видео или фото"),  state=admin.tv_lie_upd_text_or_media)
+@router.message(IsAdmin(), (F.text == "Перезалить видео или фото"), state=admin.tv_lie_upd_text_or_media)
 async def menu(message: types.Message, state: FSMContext):
     data = await state.get_data()
     tag = data['tv_channel']
@@ -961,15 +1048,18 @@ async def menu(message: types.Message, state: FSMContext):
         reply_markup=nmrkup.as_markup(resize_keyboard=True))
     await state.set_state(admin.tv_lie_upd)
 
+
 @router.message(IsAdmin(), state=admin.tv_lie_upd)
 async def admin_home(message: types.Message, state: FSMContext):
     from handlers.new_admin_hand import edit_media
     await edit_media(message, state)
 
+
 @router.message(IsAdmin(), state=admin.tv_lie_upd_text)
 async def admin_home(message: types.Message, state: FSMContext):
     from handlers.new_admin_hand import text_edit_text_tag
     await text_edit_text_tag(message, state)
+
 
 @router.message(IsAdmin(), state=admin.tv_lie_del_apply)
 async def admin_home(message: types.Message, state: FSMContext):
@@ -988,9 +1078,9 @@ async def admin_home(message: types.Message, state: FSMContext):
         await message.answer("Что-то не так, попробуйте нажать /start и снова зайти в админку")
     await state.clear()
 
-@router.message(IsAdmin(),(F.text == "Добавить сюжет"),  state=admin.tv_lie_lobby)
-async def menu(message: types.Message, state: FSMContext):
 
+@router.message(IsAdmin(), (F.text == "Добавить сюжет"), state=admin.tv_lie_lobby)
+async def menu(message: types.Message, state: FSMContext):
     nmrkup = ReplyKeyboardBuilder()
     nmrkup.row(types.KeyboardButton(text="Назад"))
     await message.answer(
