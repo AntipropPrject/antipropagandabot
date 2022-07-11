@@ -262,7 +262,7 @@ async def stopwar_lets_fight(message: Message, bot: Bot):
         await message.answer(text_3, reply_markup=nmarkup.as_markup(resize_keyboard=True),
                              disable_web_page_preview=True)
         m_id = bot_message.message_id
-        a = await bot.pin_chat_message(chat_id=message.from_user.id, message_id=m_id, disable_notification=True)
+        await bot.pin_chat_message(chat_id=message.from_user.id, message_id=m_id, disable_notification=True)
         while sec:
             m, s = divmod(sec, 60)
             sec_t = '{:02d}:{:02d}'.format(m, s)
@@ -270,7 +270,7 @@ async def stopwar_lets_fight(message: Message, bot: Bot):
             await bot.edit_message_text(chat_id=message.from_user.id, message_id=m_id, text=f'{sec_t}')
             await asyncio.sleep(1)
             sec -= 1
-
+        await mongo_update_stat(message.from_user.id, 'end')
         await message.answer('Таймер вышел. Вы можете перейти в главное меню.'
                              ' Но если у вас есть ещё с кем поделиться ссылкой на меня'
                              ' — обязательно сделайте это!', reply_markup=markup.as_markup(resize_keyboard=True))
@@ -304,7 +304,6 @@ async def stopwar_share_blindly(message: Message, bot: Bot, state: FSMContext):
         text = await sql_safe_select('text', 'texts', {'name': 'stopwar_bulk_forwarding'})
         await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     else:
-        await mongo_update_stat(message.from_user.id, 'end')
         await message.answer('Таймер вышел. Вы можете перейти в главное меню.'
                              ' Но если у вас есть ещё с кем поделиться ссылкой на меня'
                              ' — обязательно сделайте это!', reply_markup=nmarkup.as_markup(resize_keyboard=True))

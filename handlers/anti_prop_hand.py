@@ -880,6 +880,7 @@ async def war_point_now(message: Message, state: FSMContext):
 async def reasons_lets_figure(message: Message, state: FSMContext):
     await state.set_state(true_resons_hand.TruereasonsState.main)
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_lets_figure'})
+    await mongo_update_stat(message.from_user.id, 'antiprop')
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Давай попробуем 👌"))
     nmarkup.row(types.KeyboardButton(text="Я не интересуюсь политикой 😐"))
@@ -892,6 +893,7 @@ async def reasons_lets_figure(message: Message, state: FSMContext):
         F.text.contains('Продолжим 🇷🇺🇺🇦')), flags=flags)
 async def reasons_king_of_info(message: Message, state: FSMContext):
     await state.set_state(true_resons_hand.TruereasonsState.main)
+    await mongo_update_stat(message.from_user.id, 'antiprop')
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_king_of_info'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Хорошо 👌"))
