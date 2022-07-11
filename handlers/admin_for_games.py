@@ -891,7 +891,7 @@ async def admin_home(message: types.Message, state: FSMContext):
 
 @router.message(IsAdmin(),(F.text == "Добавить сюжет"),  state=admin.tv_lie_lobby)
 async def menu(message: types.Message, state: FSMContext):
-    await state.update_data(tv_channel=message.text)
+
     nmrkup = ReplyKeyboardBuilder()
     nmrkup.row(types.KeyboardButton(text="Назад"))
     await message.answer(
