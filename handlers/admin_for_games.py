@@ -793,7 +793,7 @@ async def admin_home(message: types.Message, state: FSMContext):
 @router.message(IsAdmin(), (F.text.contains('Редактировать сюжет')), state=admin.putin_game_old_lies)
 async def admin_home(message: types.Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
-    postgresdata = await data_getter(f"select asset_name from putin_lies")
+    postgresdata = await data_getter(f"select asset_name from putin_old_lies")
     for i in postgresdata:
         nmarkup.row(types.KeyboardButton(text=i[0]))
 
