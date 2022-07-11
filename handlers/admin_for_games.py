@@ -997,7 +997,7 @@ async def add_media(query: types.CallbackQuery, state: FSMContext):
         print(last_tag_numner)
         if last_tag_numner != 1:
             await query.message.delete()
-            keyboard = range(1, last_tag_numner)
+            keyboard = range(1, last_tag_numner+1)
             nmarkup = ReplyKeyboardBuilder()
             for button in keyboard:
                 nmarkup.row(types.KeyboardButton(text=button))
@@ -1012,7 +1012,7 @@ async def add_media(query: types.CallbackQuery, state: FSMContext):
         last_tag_numner = len(await data_getter(f"select name from assets where name like '%{old_exposure[-1]}%'"))
         if last_tag_numner != 1:
             await query.message.delete()
-            keyboard = range(1, last_tag_numner)
+            keyboard = range(1, last_tag_numner+1)
             nmarkup = ReplyKeyboardBuilder()
             for button in keyboard:
                 nmarkup.row(types.KeyboardButton(text=button))
