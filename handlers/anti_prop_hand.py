@@ -742,7 +742,7 @@ async def antip_truth_game_answer(message: Message, state: FSMContext):
             reality = "Неверно! Это правда!"
         elif data['truth'] == False:
             reality = "Правильно! Это ложь!"
-        answer_group = 'belivers'
+        answer_group = 'nonbelivers'
     await mongo_game_answer(message.from_user.id, 'truthgame', data['game_id'], answer_group, {'id': data['game_id']})
     t_percentage = data['belive'] / (data['belive'] + data['not_belive'])
     text = reality + f'\n\nРезультаты других участников:\n✅ <b>Правда:</b> {round(t_percentage * 100)}%\n' \
