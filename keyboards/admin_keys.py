@@ -73,6 +73,13 @@ def redct_text():
     nmarkup.row(types.KeyboardButton(text="Возврат в главное меню"))
     return nmarkup.as_markup(resize_keyboard=True)
 
+def game_keys():
+    nmrkup = ReplyKeyboardBuilder()
+    nmrkup.row(types.KeyboardButton(text="Добавить сюжет"))
+    nmrkup.row(types.KeyboardButton(text="Редактировать сюжет"))
+    nmrkup.add(types.KeyboardButton(text="Удалить сюжет"))
+    nmrkup.row(types.KeyboardButton(text="Назад"))
+    return nmrkup.as_markup(resize_keyboard=True)
 
 def redct_games():
     nmarkup = ReplyKeyboardBuilder()
