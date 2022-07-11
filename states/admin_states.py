@@ -2,6 +2,19 @@ from aiogram.dispatcher.fsm.state import StatesGroup, State
 
 
 class admin(StatesGroup):
+    nazi_game_upd_apply = State()
+    nazi_game_upd = State()
+    nazi_game_del_apply = State()
+    nazi_game_del = State()
+    nazi_game_lobby_add = State()
+    nazi_game_lobby = State()
+    normal_game_upd_apply = State()
+    normal_game_upd = State()
+    normal_game_ = State()
+    normal_game_del_apply = State()
+    normal_game_del = State()
+    normal_game_add = State()
+    normal_game_lobby = State()
     addingMistakeOrLie_upd_text_only = State()
     addingMistakeOrLie_upd_text_and_media = State()
     addingMistakeOrLie_upd_text_or_media = State()
