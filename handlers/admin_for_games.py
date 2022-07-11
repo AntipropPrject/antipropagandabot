@@ -117,10 +117,10 @@ async def admin_home(message: types.Message, state: FSMContext):
     nmrkup.row(types.KeyboardButton(text="Нет"))
     media_id = await data_getter(f"select t_id from assets where name = '{message.text}'")
     try:
-        await message.answer_video(media_id, caption="Посмотрите внимательно. Это сюжет вы хотите удалить?",
+        await message.answer_video(media_id[0], caption="Посмотрите внимательно. Это сюжет вы хотите удалить?",
                                    reply_markup=nmrkup.as_markup(resize_keyboard=True))
     except:
-        await message.answer_photo(media_id, caption="Посмотрите внимательно. Это сюжет вы хотите удалить?",
+        await message.answer_photo(media_id[0], caption="Посмотрите внимательно. Это сюжет вы хотите удалить?",
                                    reply_markup=nmrkup.as_markup(resize_keyboard=True))
     await state.set_state(admin.addingMistakeOrLie_deleting_apply)
 
@@ -525,10 +525,10 @@ async def admin_home(message: types.Message, state: FSMContext):
     nmrkup.row(types.KeyboardButton(text="Нет"))
     media_id = await data_getter(f"select t_id from assets where name = '{message.text}'")
     try:
-        await message.answer_video(media_id, caption="Посмотрите внимательно. Это сюжет вы хотите удалить?",
+        await message.answer_video(media_id[0], caption="Посмотрите внимательно. Это сюжет вы хотите удалить?",
                                    reply_markup=nmrkup.as_markup(resize_keyboard=True))
     except:
-        await message.answer_photo(media_id, caption="Посмотрите внимательно. Это сюжет вы хотите удалить?",
+        await message.answer_photo(media_id[0], caption="Посмотрите внимательно. Это сюжет вы хотите удалить?",
                                    reply_markup=nmrkup.as_markup(resize_keyboard=True))
     await state.set_state(admin.putin_game_del_apply)
 
@@ -568,11 +568,11 @@ async def admin_home(message: types.Message, state: FSMContext):
     nmrkup.row(types.KeyboardButton(text="Нет"))
     media_id = await data_getter(f"select t_id from assets where name = '{message.text}'")
     try:
-        await message.answer_video(media_id,
+        await message.answer_video(media_id[0],
                                    caption="Посмотрите внимательно. Это сюжет вы хотите редактировать? \nЕсли да, тогда отправьте новый сюжет с необходимой разметкой. Если нет, нажмите нет ",
                                    reply_markup=nmrkup.as_markup(resize_keyboard=True))
     except:
-        await message.answer_photo(media_id, caption="Посмотрите внимательно. Это сюжет вы хотите редактировать?",
+        await message.answer_photo(media_id[0], caption="Посмотрите внимательно. Это сюжет вы хотите редактировать?",
                                    reply_markup=nmrkup.as_markup(resize_keyboard=True))
     await state.set_state(admin.putin_game_upd_apply)
 
@@ -817,10 +817,10 @@ async def admin_home(message: types.Message, state: FSMContext):
     nmrkup.row(types.KeyboardButton(text="Нет"))
     media_id = await data_getter(f"select t_id from assets where name = '{message.text}'")
     try:
-        await message.answer_video(media_id, caption="Посмотрите внимательно. Этот сюжет вы хотите удалить?",
+        await message.answer_video(video=media_id[0], caption="Посмотрите внимательно. Этот сюжет вы хотите удалить?",
                                    reply_markup=nmrkup.as_markup(resize_keyboard=True))
     except:
-        await message.answer_photo(media_id, caption="Посмотрите внимательно. Этот сюжет вы хотите удалить?",
+        await message.answer_photo(photo=media_id[0], caption="Посмотрите внимательно. Этот сюжет вы хотите удалить?",
                                    reply_markup=nmrkup.as_markup(resize_keyboard=True))
     await state.set_state(admin.tv_lie_del_apply)
 
