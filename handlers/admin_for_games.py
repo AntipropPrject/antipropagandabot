@@ -129,7 +129,7 @@ async def admin_home(message: types.Message, state: FSMContext):
 
 @router.message(IsAdmin(), state=admin.addingMistakeOrLie_deleting_apply)
 async def admin_home(message: types.Message, state: FSMContext):
-    data = state.get_data()
+    data =await state.get_data()
     media_id = data['media_to_delete']
     nmrkup = ReplyKeyboardBuilder()
     nmrkup.row(types.KeyboardButton(text="Назад"))
@@ -538,7 +538,7 @@ async def admin_home(message: types.Message, state: FSMContext):
 
 @router.message(IsAdmin(), state=admin.putin_game_del_apply)
 async def admin_home(message: types.Message, state: FSMContext):
-    data = state.get_data()
+    data =await state.get_data()
     media_id = data['media_to_delete']
     nmrkup = ReplyKeyboardBuilder()
     nmrkup.row(types.KeyboardButton(text="Назад"))
@@ -749,7 +749,7 @@ async def menu(message: types.Message, state: FSMContext):
             media_id = message.photo[0].file_id
         except:
             await message.answer("Невижу медиа")
-    data = state.get_data()
+    data =await state.get_data()
     truth = data['ucranebool']
     text = message.html_text
     nmrkup = ReplyKeyboardBuilder()
@@ -877,7 +877,7 @@ async def admin_home(message: types.Message, state: FSMContext):
 
 @router.message(IsAdmin(), state=admin.tv_lie_del_apply)
 async def admin_home(message: types.Message, state: FSMContext):
-    data = state.get_data()
+    data = await state.get_data()
     media_id = data['media_to_delete']
     nmrkup = ReplyKeyboardBuilder()
     nmrkup.row(types.KeyboardButton(text="Назад"))
