@@ -387,7 +387,6 @@ async def admin_truthgame_update(message: types.Message, state: FSMContext):
 async def admin_truthgame_update_select(message: types.Message, state: FSMContext):
     number = int(message.text)
     nmrkup = ReplyKeyboardBuilder()
-    nmrkup.row(types.KeyboardButton(text="Да, отредактировать этот сюжет"))
     nmrkup.row(types.KeyboardButton(text="Назад"))
     data = (await data_getter(f'SELECT * FROM (SELECT *, row_number() over (ORDER BY id) FROM truthgame) '
                               f'AS GG WHERE row_number = {number}'))[0]
