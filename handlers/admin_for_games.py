@@ -1023,7 +1023,6 @@ async def admin_home(message: types.Message, state: FSMContext):
 
 @router.message(IsAdmin(), state=admin.nazi_game_lobby_add)
 async def menu(message: types.Message, state: FSMContext):
-    if message.text.lower() == 'true' or message.text.lower() == 'false':
         await logg.admin_logs(message.from_user.id, message.from_user.username,
                               "Украина или нет - редактирование")
         await state.clear()
@@ -1034,8 +1033,7 @@ async def menu(message: types.Message, state: FSMContext):
             reply_markup=nmrkup.as_markup(resize_keyboard=True))
         await state.update_data(ucranebool=message.text)
         await state.set_state(admin.ucraine_or_not_media)
-    else:
-        await message.answer("Что-то пошло не так, отправьте либо True либо False")
+
 
 
 @router.message(IsAdmin(), state=admin.ucraine_or_not_media)
