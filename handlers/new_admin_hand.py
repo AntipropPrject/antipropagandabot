@@ -43,9 +43,9 @@ async def admin_home(message: types.Message, state: FSMContext):
 
 
 @router.message(state=admin.home)
-async def admin_home(message: types.Message, state: FSMContext):
+async def admin_home_main_menu(message: types.Message, state: FSMContext):
     await state.clear()
-    await message.answer("Добро пожаловать в режим администрации. Что вам угодно сегодня?",
+    await message.answer("Добро пожаловать в меню",
                          reply_markup=main_admin_keyboard(message.from_user.id))
     await state.set_state(admin.menu)
 
@@ -83,7 +83,7 @@ async def reset(message: Message, state: FSMContext):
                              reply_markup=middle_admin_keyboard())
     else:
         await state.set_state(admin.home)
-        await message.answer('Хорошо, вернемся в меню', reply_markup=main_admin_keyboard(message.from_user.id))
+        await admin_home_main_menu(message, state)
 
 
 
@@ -126,7 +126,7 @@ async def reset(message: Message, state: FSMContext):
         await message.answer('Выберите интересующий вас пункт меню', reply_markup=spam_admin_keyboard())
     else:
         await state.set_state(admin.home)
-        await message.answer('Хорошо, вернемся в меню', reply_markup=main_admin_keyboard(message.from_user.id))
+        await admin_home_main_menu(message, state)
 
 
 @router.message(IsAdmin(), (F.text == "Выйти"))
@@ -858,7 +858,7 @@ async def import_csv(message: types.Message, state: FSMContext):
         await message.answer("Неправильное название архива")
 
 
-@router.callback_query()
+@router.callback_query(lambda call: 'backup' in call.data)
 async def import_csv(query: types.CallbackQuery, state: FSMContext):
     file = query.data
     path = 'export_to_csv/backups'

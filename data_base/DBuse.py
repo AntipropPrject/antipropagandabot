@@ -37,6 +37,7 @@ async def safe_data_getter(safe_query, values_dict):
     except psycopg2.Error as error:
         return False
 
+
 async def sql_delete(table_name, condition_dict):
     try:
 
