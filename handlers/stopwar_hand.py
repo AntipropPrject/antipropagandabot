@@ -149,7 +149,7 @@ async def stopwar_lets_fight(message: Message):
 
 @router.message((F.text == "Объясни 🤔") | (F.text == "Нет, власти всё равно будут делать, что хотят 🙅‍♂️"), flags=flags)
 async def stopwar_lets_fight(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'stopwar_The_government_does_everything'})
+    text = await sql_safe_select('text', 'texts', {'name': 'stopwar_The'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Какие аргументы? 🤔"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
