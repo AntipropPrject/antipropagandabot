@@ -252,7 +252,7 @@ async def stopwar_lets_fight(message: Message, bot: Bot):
         bot_message = await message.answer('5:00')
 
         text_1 = await sql_safe_select('text', 'texts', {'name': 'stopwar_hello_world'})
-        text_2 = await sql_safe_select('text', 'texts', {'name': 'stopwar_I_told_you_everything'})
+        text_2 = await sql_safe_select('text', 'texts', {'name': 'stopwar_send_me'})
         text_3 = await sql_safe_select('text', 'texts', {'name': 'stopwar_send_the_message'})
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Какие советы? 🤔"))
