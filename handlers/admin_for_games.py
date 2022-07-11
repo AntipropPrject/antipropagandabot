@@ -164,7 +164,7 @@ async def admin_truthgame_update(message: types.Message, state: FSMContext):
     await state.set_state(admin.addingMistakeOrLie_upd)
 
 
-@router.message(IsAdmin(), (F.text == "Редактировать сюжет"), state=admin.addingMistakeOrLie_upd)
+@router.message(IsAdmin(), state=admin.addingMistakeOrLie_upd)
 async def admin_truthgame_update(message: types.Message, state: FSMContext):
     await state.update_data(tag=message.text)
     nmrkup = ReplyKeyboardBuilder()
