@@ -52,8 +52,8 @@ async def smi_statement(message: Message, state: FSMContext):
                 0]
             print(truth_data)
             await state.update_data({f'{person_list[0]}_gamecount': count})
-            await state.update_data(truth=truth_data[0], rebuttal=truth_data[5], belive=truth_data[3],
-                                    not_belive=truth_data[4], last_media=truth_data[6], gid=truth_data[7])
+            await state.update_data(rebuttal=truth_data[5], belive=truth_data[3],
+                                    not_belive=truth_data[4], last_media=truth_data[6])
 
         except IndexError as er:
             await message.answer(text=f"Медиафайл не найден {er}")
@@ -61,20 +61,20 @@ async def smi_statement(message: Message, state: FSMContext):
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Целенаправленная ложь 👎"))
         nmarkup.row(types.KeyboardButton(text="Случайная ошибка / Не ложь 👍"))
-        if truth_data[1] is not None:
+        if truth_data[0] is not None:
             capt = ""
-            if truth_data[5] is not None:
-                capt = truth_data[5]
+            if truth_data[4] is not None:
+                capt = truth_data[4]
             try:
-                await message.answer_video(truth_data[1], caption=capt,
+                await message.answer_video(truth_data[0], caption=capt,
                                            reply_markup=nmarkup.as_markup(resize_keyboard=True), parse_mode="HTML"
                                            )
             except:
-                await message.answer_photo(truth_data[1], caption=capt,
+                await message.answer_photo(truth_data[0], caption=capt,
                                            reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
         else:
-            await message.answer(truth_data[2], reply_markup=nmarkup.as_markup(resize_keyboard=True))
+            await message.answer(truth_data[4], reply_markup=nmarkup.as_markup(resize_keyboard=True))
     else:
 
         # await message.answer(
