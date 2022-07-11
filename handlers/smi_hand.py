@@ -50,7 +50,7 @@ async def smi_statement(message: Message, state: FSMContext):
                 "left outer join texts ON text_name = texts.name "
                 f"where asset_name like '%{str(person_list[0])[-5:-1].strip()}%' and asset_name like '%{str(count)}%'"))[
                 0]
-
+            print(truth_data)
             await state.update_data({f'{person_list[0]}_gamecount': count})
             await state.update_data(truth=truth_data[0], rebuttal=truth_data[5], belive=truth_data[3],
                                     not_belive=truth_data[4], last_media=truth_data[6], gid=truth_data[7])
