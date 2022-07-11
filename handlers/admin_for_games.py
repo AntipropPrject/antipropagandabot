@@ -817,18 +817,18 @@ async def admin_home(message: types.Message, state: FSMContext):
     nmrkup.row(types.KeyboardButton(text="Нет"))
     media_id = await data_getter(f"select t_id from assets where name = '{message.text}'")
     try:
-        await message.answer_video(media_id, caption="Посмотрите внимательно. Это сюжет вы хотите удалить?",
+        await message.answer_video(media_id, caption="Посмотрите внимательно. Этот сюжет вы хотите удалить?",
                                    reply_markup=nmrkup.as_markup(resize_keyboard=True))
     except:
-        await message.answer_photo(media_id, caption="Посмотрите внимательно. Это сюжет вы хотите удалить?",
+        await message.answer_photo(media_id, caption="Посмотрите внимательно. Этот сюжет вы хотите удалить?",
                                    reply_markup=nmrkup.as_markup(resize_keyboard=True))
     await state.set_state(admin.tv_lie_del_apply)
 
 @router.message(IsAdmin(),(F.text == "Редактировать сюжет"),  state=admin.tv_lie_lobby)
 async def menu(message: types.Message, state: FSMContext):
     mnrkup = ReplyKeyboardBuilder()
-    mnrkup.row(types.KeyboardButton("Редактировать подпись(текст)"))
-    mnrkup.row(types.KeyboardButton("Перезалить видео или фото"))
+    mnrkup.row(types.KeyboardButton(text="Редактировать подпись(текст)"))
+    mnrkup.row(types.KeyboardButton(text="Перезалить видео или фото"))
     await message.answer('что именно нуждается в редактировании?', reply_markup=mnrkup.as_markup(resize_keyboard=True))
     await state.set_state(admin.tv_lie_upd_text_or_media)
 
