@@ -20,7 +20,7 @@ router.message.filter(state=admin)
 
 
 @router.message(IsAdmin(), (F.text == 'Игры 🎭'), state=admin.menu)
-async def admin_home(message: types.Message, state: FSMContext):
+async def admin_home_games(message: types.Message, state: FSMContext):
     await state.clear()
     await state.set_state(admin.menu)
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Вошел в режим редактирования игр")
@@ -330,6 +330,8 @@ async def admin_truthgame_delete(message: types.Message, state: FSMContext):
     nmrkup = ReplyKeyboardBuilder()
     for i in range(leng):
         nmrkup.row(types.KeyboardButton(text=i + 1))
+    nmrkup.adjust(3)
+    nmrkup.row(types.KeyboardButton(text='Назад'))
     await message.answer("Выберите сюжет, который вы хотели бы удалить",
                          reply_markup=nmrkup.as_markup(resize_keyboard=True))
     await state.set_state(admin.truthgame_deletion)
@@ -374,6 +376,8 @@ async def admin_truthgame_update(message: types.Message, state: FSMContext):
     nmrkup = ReplyKeyboardBuilder()
     for i in range(leng):
         nmrkup.row(types.KeyboardButton(text=i + 1))
+    nmrkup.adjust(3)
+    nmrkup.row(types.KeyboardButton(text='Назад'))
     await message.answer("Выберите сюжет, который вы хотели бы изменить",
                          reply_markup=nmrkup.as_markup(resize_keyboard=True))
     await state.set_state(admin.truthgame_update)
@@ -385,7 +389,6 @@ async def admin_truthgame_update(message: types.Message, state: FSMContext):
 async def admin_truthgame_update_select(message: types.Message, state: FSMContext):
     number = int(message.text)
     nmrkup = ReplyKeyboardBuilder()
-    nmrkup.row(types.KeyboardButton(text="Да, отредактировать этот сюжет"))
     nmrkup.row(types.KeyboardButton(text="Назад"))
     data = (await data_getter(f'SELECT * FROM (SELECT *, row_number() over (ORDER BY id) FROM truthgame) '
                               f'AS GG WHERE row_number = {number}'))[0]
@@ -1162,7 +1165,7 @@ async def admin_home(message: types.Message, state: FSMContext):
     await state.clear()
 
 @router.message(IsAdmin(), (F.text == "Ложь по тв 📺"))
-async def admin_home(message: types.Message, state: FSMContext):
+async def admin_gam_tv(message: types.Message, state: FSMContext):
     await state.clear()
     await logg.admin_logs(message.from_user.id, message.from_user.username,
                           "Ложь по тв")
@@ -1171,7 +1174,8 @@ async def admin_home(message: types.Message, state: FSMContext):
     nmrkup.row(types.KeyboardButton(text="tv_HTB"))
     nmrkup.row(types.KeyboardButton(text="tv_star"))
     nmrkup.row(types.KeyboardButton(text="tv_24"))
-
+    nmrkup.adjust(2,2)
+    nmrkup.row(types.KeyboardButton(text="Назад"))
     await message.answer("Выберете телеканал",
                          reply_markup=nmrkup.as_markup(resize_keyboard=True))
     await state.set_state(admin.tv_lie)
