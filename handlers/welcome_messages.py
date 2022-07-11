@@ -352,7 +352,7 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
         nmarkap = ReplyKeyboardBuilder()
         nmarkap.row(types.KeyboardButton(text="Мне интересно 👌"))
         nmarkap.add(types.KeyboardButton(text="Ну давай... 🤨"))
-        nmarkap.row(types.KeyboardButton(text="ыЧто такое пропаганда? 🤔"))
+        nmarkap.row(types.KeyboardButton(text="Что такое пропаганда? 🤔"))
         await bot.send_message(poll_answer.user.id, text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
     else:
         markup = ReplyKeyboardBuilder()
