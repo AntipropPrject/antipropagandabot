@@ -76,3 +76,6 @@ class admin(StatesGroup):
     mass_media_edit_add = State()
     mass_media_edit_add_exposure = State()
     mass_media_edit_Done = State()
+    add_media_actula_spam = State()
+    add_time_for_spam = State()
+    add_date_for_spam = State()
