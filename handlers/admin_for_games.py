@@ -829,7 +829,7 @@ async def menu(message: types.Message, state: FSMContext):
     mnrkup = ReplyKeyboardBuilder()
     mnrkup.row(types.KeyboardButton("Редактировать подпись(текст)"))
     mnrkup.row(types.KeyboardButton("Перезалить видео или фото"))
-    await message.answer('что именно нуждается в редактировании?')
+    await message.answer('что именно нуждается в редактировании?', reply_markup=mnrkup.as_markup(resize_keyboard=True))
     await state.set_state(admin.tv_lie_upd_text_or_media)
 
 
