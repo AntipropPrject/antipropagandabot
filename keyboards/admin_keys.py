@@ -135,3 +135,11 @@ def red_spam_admin_keyboard():
     nmarkup.row(types.KeyboardButton(text="Создать рассылку"))
     nmarkup.row(types.KeyboardButton(text="Назад"))
     return nmarkup.as_markup(resize_keyboard=True)
+
+def admin_games_keyboard():
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Добавить сюжет"))
+    nmarkup.row(types.KeyboardButton(text="Удалить сюжет"))
+    nmarkup.row(types.KeyboardButton(text="Редактировать сюжет"))
+    nmarkup.row(types.KeyboardButton(text="Назад"))
+    return nmarkup.as_markup(resize_keyboard=True)

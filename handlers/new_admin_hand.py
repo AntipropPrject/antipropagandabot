@@ -858,7 +858,7 @@ async def import_csv(message: types.Message, state: FSMContext):
         await message.answer("Неправильное название архива")
 
 
-@router.callback_query()
+@router.callback_query(lambda call: 'backup' in call.data)
 async def import_csv(query: types.CallbackQuery, state: FSMContext):
     file = query.data
     path = 'export_to_csv/backups'
