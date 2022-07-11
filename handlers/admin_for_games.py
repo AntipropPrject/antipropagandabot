@@ -153,8 +153,9 @@ async def admin_home(message: types.Message, state: FSMContext):
 @router.message(IsAdmin(), (F.text == "Редактировать сюжет"), state=admin.addingMistakeOrLie_adding)
 async def admin_truthgame_update(message: types.Message, state: FSMContext):
     data = await state.get_data()
+    tag = data['surnameofperson']
     leng = await data_getter(
-        f"SELECT asset_name FROM mistakeorlie where assete_name like '%{data['surnameOfPerson']}%'")
+        f"select asset_name from mistakeorlie where asset_name like '%{tag}%' order by asset_name asc")
     nmrkup = ReplyKeyboardBuilder()
     for i in leng:
         nmrkup.row(types.KeyboardButton(text=i[0]))
