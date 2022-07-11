@@ -1424,6 +1424,7 @@ async def add_media(query: types.CallbackQuery, state: FSMContext):
         await state.update_data(tag_media=query.data[3:])
         old_exposure = query.data.split()
         last_tag_numner = len(await data_getter(f"select name from assets where name like '%{old_exposure[-1]}%'"))
+        print(last_tag_numner)
         if last_tag_numner != 1:
             await query.message.delete()
             keyboard = range(1, last_tag_numner)
@@ -1454,7 +1455,7 @@ async def add_media(query: types.CallbackQuery, state: FSMContext):
 
 @router.message(state=admin.add_news)
 async def admin_home(message: types.Message, state: FSMContext):
-    caption = message.caption
+    caption = message.html_text
     media = str()
     try:
         if message.content_type == 'photo':
@@ -1474,7 +1475,7 @@ async def admin_home(message: types.Message, state: FSMContext):
 
 @router.message(state=admin.mass_media_add_exposure)
 async def admin_home(message: types.Message, state: FSMContext):
-    caption = message.caption
+    caption = message.html_text
     media = str()
     try:
         if message.content_type == 'photo':
@@ -1598,7 +1599,7 @@ async def admin_home(message: types.Message, state: FSMContext):
 @router.message(state=admin.mass_media_edit_add)
 async def admin_home(message: types.Message, state: FSMContext):
     try:
-        caption = message.caption
+        caption = message.html_text
         if message.content_type == 'photo':
             media = message.photo[0].file_id
             await message.answer_photo(media, caption=caption)
@@ -1616,7 +1617,7 @@ async def admin_home(message: types.Message, state: FSMContext):
 
 @router.message(state=admin.mass_media_edit_add_exposure)
 async def admin_home(message: types.Message, state: FSMContext):
-    caption = message.caption
+    caption = message.html_text
     media = str()
     try:
         if message.content_type == 'photo':

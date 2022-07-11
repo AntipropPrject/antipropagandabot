@@ -301,8 +301,7 @@ async def stopwar_share_blindly(message: Message, bot: Bot, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
     if timer != '00:01':
-        text = await sql_safe_select('text', 'texts', {'name': 'stopwar_bulk_forwarding'})
-        await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+        await simple_media(message, 'stopwar_bulk_forwarding', reply_markup=nmarkup.as_markup(resize_keyboard=True))
     else:
         await mongo_update_stat(message.from_user.id, 'end')
         await message.answer('Таймер вышел. Вы можете перейти в главное меню.'

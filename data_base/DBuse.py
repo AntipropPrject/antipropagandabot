@@ -248,7 +248,7 @@ async def sql_safe_update(table_name, data_dict, condition_dict):
 
 """^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^MongoDB^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"""
 
-async def mongo_add_news(list_media: str, caption: str, coll=None):
+async def mongo_add_news(list_media: str, caption: str, datetime: str, coll=None):
     try:
         print(list_media)
         print(caption)
@@ -260,7 +260,7 @@ async def mongo_add_news(list_media: str, caption: str, coll=None):
             collection.insert_one(spam_list)
         elif coll == 'add_actual_news':
             collection = database['spam_actual_news']
-            spam_list = {'media': list_media, 'caption': caption}
+            spam_list = {'media': list_media, 'caption': caption, 'datetime': datetime}
             collection.insert_one(spam_list)
         print('Done')
     except Exception as error:
