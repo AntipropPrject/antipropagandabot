@@ -348,10 +348,11 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
     await state.set_state(propaganda_victim.start)
     if await redis_just_one_read(f'Usrs: {poll_answer.user.id}: INFOState:') == 'Жертва пропаганды':
         text = await sql_safe_select("text", "texts", {"name": "antip_only_facts"})
+        await redis_just_one_write(f'Usrs: {poll_answer.user.id}: INFOState:', 'Жертва пропаганды')
         nmarkap = ReplyKeyboardBuilder()
         nmarkap.row(types.KeyboardButton(text="Мне интересно 👌"))
         nmarkap.add(types.KeyboardButton(text="Ну давай... 🤨"))
-        nmarkap.row(types.KeyboardButton(text="Что такое пропаганда? 🤔"))
+        nmarkap.row(types.KeyboardButton(text="ыЧто такое пропаганда? 🤔"))
         await bot.send_message(poll_answer.user.id, text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
     else:
         markup = ReplyKeyboardBuilder()

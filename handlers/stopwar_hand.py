@@ -149,7 +149,7 @@ async def stopwar_lets_fight(message: Message):
 
 @router.message((F.text == "Объясни 🤔") | (F.text == "Нет, власти всё равно будут делать, что хотят 🙅‍♂️"), flags=flags)
 async def stopwar_lets_fight(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'stopwar_The_government_does_everything'})
+    text = await sql_safe_select('text', 'texts', {'name': 'stopwar_The'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Какие аргументы? 🤔"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
@@ -252,7 +252,7 @@ async def stopwar_lets_fight(message: Message, bot: Bot):
         bot_message = await message.answer('5:00')
 
         text_1 = await sql_safe_select('text', 'texts', {'name': 'stopwar_hello_world'})
-        text_2 = await sql_safe_select('text', 'texts', {'name': 'stopwar_I_told_you_everything'})
+        text_2 = await sql_safe_select('text', 'texts', {'name': 'stopwar_send_me'})
         text_3 = await sql_safe_select('text', 'texts', {'name': 'stopwar_send_the_message'})
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Какие советы? 🤔"))
@@ -262,7 +262,7 @@ async def stopwar_lets_fight(message: Message, bot: Bot):
         await message.answer(text_3, reply_markup=nmarkup.as_markup(resize_keyboard=True),
                              disable_web_page_preview=True)
         m_id = bot_message.message_id
-        a = await bot.pin_chat_message(chat_id=message.from_user.id, message_id=m_id, disable_notification=True)
+        await bot.pin_chat_message(chat_id=message.from_user.id, message_id=m_id, disable_notification=True)
         while sec:
             m, s = divmod(sec, 60)
             sec_t = '{:02d}:{:02d}'.format(m, s)
@@ -270,7 +270,7 @@ async def stopwar_lets_fight(message: Message, bot: Bot):
             await bot.edit_message_text(chat_id=message.from_user.id, message_id=m_id, text=f'{sec_t}')
             await asyncio.sleep(1)
             sec -= 1
-
+        await mongo_update_stat(message.from_user.id, 'end')
         await message.answer('Таймер вышел. Вы можете перейти в главное меню.'
                              ' Но если у вас есть ещё с кем поделиться ссылкой на меня'
                              ' — обязательно сделайте это!', reply_markup=markup.as_markup(resize_keyboard=True))
@@ -303,7 +303,6 @@ async def stopwar_share_blindly(message: Message, bot: Bot, state: FSMContext):
     if timer != '00:01':
         await simple_media(message, 'stopwar_bulk_forwarding', reply_markup=nmarkup.as_markup(resize_keyboard=True))
     else:
-        await mongo_update_stat(message.from_user.id, 'end')
         await message.answer('Таймер вышел. Вы можете перейти в главное меню.'
                              ' Но если у вас есть ещё с кем поделиться ссылкой на меня'
                              ' — обязательно сделайте это!', reply_markup=nmarkup.as_markup(resize_keyboard=True))

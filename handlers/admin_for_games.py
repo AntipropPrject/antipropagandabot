@@ -661,7 +661,7 @@ async def admin_home(message: types.Message, state: FSMContext):
                                    caption="Посмотрите внимательно. Это сюжет вы хотите редактировать? \nЕсли да, тогда отправьте новый сюжет с необходимой разметкой. Если нет, нажмите нет ",
                                    reply_markup=nmrkup.as_markup(resize_keyboard=True))
     except:
-        await message.answer_photo(media_id[0][0], caption="Посмотрите внимательно. Это сюжет вы хотите редактировать?",
+        await message.answer_photo(media_id[0][0], caption="Посмотрите внимательно. Это сюжет вы хотите редактировать? \nЕсли да, тогда отправьте новый сюжет с необходимой разметкой. Если нет, нажмите нет",
                                    reply_markup=nmrkup.as_markup(resize_keyboard=True))
     await state.set_state(admin.putin_game_upd_apply)
 
@@ -818,7 +818,7 @@ async def admin_home(message: types.Message, state: FSMContext):
                                    caption="Посмотрите внимательно. Это сюжет вы хотите редактировать? \nЕсли да, тогда отправьте новый сюжет с необходимой разметкой. Если нет, нажмите нет ",
                                    reply_markup=nmrkup.as_markup(resize_keyboard=True))
     except:
-        await message.answer_photo(media_id[0][0], caption="Посмотрите внимательно. Это сюжет вы хотите редактировать?",
+        await message.answer_photo(media_id[0][0], caption="Посмотрите внимательно. Это сюжет вы хотите редактировать? \nЕсли да, тогда отправьте новый сюжет с необходимой разметкой. Если нет, нажмите нет",
                                    reply_markup=nmrkup.as_markup(resize_keyboard=True))
     await state.set_state(admin.putin_game_old_lies_upd_aplly)
 
@@ -964,6 +964,7 @@ async def admin_home(message: types.Message, state: FSMContext):
 async def admin_home(message: types.Message, state: FSMContext):
     await state.update_data(media_to_update=message.text)
     nmrkup = ReplyKeyboardBuilder()
+
     nmrkup.row(types.KeyboardButton(text="Нет"))
     media_id = await data_getter(f"select t_id from assets where name = '{message.text}'")
     try:
@@ -971,7 +972,7 @@ async def admin_home(message: types.Message, state: FSMContext):
                                    caption="Посмотрите внимательно. Это сюжет вы хотите редактировать? \nЕсли да, тогда отправьте новый сюжет с необходимой разметкой. Если нет, нажмите нет ",
                                    reply_markup=nmrkup.as_markup(resize_keyboard=True))
     except:
-        await message.answer_photo(media_id[0][0], caption="Посмотрите внимательно. Это сюжет вы хотите редактировать?",
+        await message.answer_photo(media_id[0][0], caption="Посмотрите внимательно. Это сюжет вы хотите редактировать? \nЕсли да, тогда отправьте новый сюжет с необходимой разметкой. Если нет, нажмите нет",
                                    reply_markup=nmrkup.as_markup(resize_keyboard=True))
     await state.set_state(admin.normal_game_upd_apply)
 
@@ -1126,6 +1127,7 @@ async def admin_home(message: types.Message, state: FSMContext):
 async def admin_home(message: types.Message, state: FSMContext):
     await state.update_data(media_to_update=message.text)
     nmrkup = ReplyKeyboardBuilder()
+
     nmrkup.row(types.KeyboardButton(text="Нет"))
     media_id = await data_getter(f"select t_id from assets where name = '{message.text}'")
     try:
@@ -1133,7 +1135,7 @@ async def admin_home(message: types.Message, state: FSMContext):
                                    caption="Посмотрите внимательно. Это сюжет вы хотите редактировать? \nЕсли да, тогда отправьте новый сюжет с необходимой разметкой. Если нет, нажмите нет ",
                                    reply_markup=nmrkup.as_markup(resize_keyboard=True))
     except:
-        await message.answer_photo(media_id[0][0], caption="Посмотрите внимательно. Это сюжет вы хотите редактировать?",
+        await message.answer_photo(media_id[0][0], caption="Посмотрите внимательно. Это сюжет вы хотите редактировать? \nЕсли да, тогда отправьте новый сюжет с необходимой разметкой. Если нет, нажмите нет",
                                    reply_markup=nmrkup.as_markup(resize_keyboard=True))
     await state.set_state(admin.nazi_game_upd_apply)
 
