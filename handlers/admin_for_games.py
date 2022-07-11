@@ -719,7 +719,7 @@ async def admin_home(message: types.Message, state: FSMContext):
                          reply_markup=nmarkup.as_markup())
     await state.set_state(admin.putin_game_old_lies_upd)
 
-@router.message(IsAdmin(), state=admin.putin_game_upd)
+@router.message(IsAdmin(), state=admin.putin_game_old_lies_upd)
 async def admin_home(message: types.Message, state: FSMContext):
     await state.update_data(media_to_update=message.text)
     nmrkup = ReplyKeyboardBuilder()
@@ -732,7 +732,32 @@ async def admin_home(message: types.Message, state: FSMContext):
     except:
         await message.answer_photo(media_id[0][0], caption="Посмотрите внимательно. Это сюжет вы хотите редактировать?",
                                    reply_markup=nmrkup.as_markup(resize_keyboard=True))
-    await state.set_state(admin.putin_game_upd_apply)
+    await state.set_state(admin.putin_game_old_lies_upd_aplly)
+
+@router.message(IsAdmin(), state=admin.putin_game_old_lies_upd_aplly)
+async def admin_home(message: types.Message, state: FSMContext):
+    nmrkup = ReplyKeyboardBuilder()
+    nmrkup.row(types.KeyboardButton(text="Назад"))
+    data = await state.get_data()
+    tag = data['media_to_update']
+    try:
+        asset = message.photo[-1].file_id
+    except:
+        asset = message.video.file_id
+    if message.text == "Нет":
+        await message.answer("Ну тогда смело жмите назад", reply_markup=nmrkup.as_markup())
+
+
+    text = message.html_text
+
+    if tag:
+        await data_getter(f"update assets set t_id = '{asset}' where name = '{tag}; commit;'")
+        await data_getter(f"update texts set text = '{text}' where name = '{tag}'; commit;")
+        await message.answer(f"Медиа и текст под тегом <b>{tag}</b> изменено ", parse_mode='html',
+                             reply_markup=nmrkup.as_markup())
+    else:
+        await message.answer("Что-то не так, попробуйте нажать /start и снова зайти в админку")
+    await state.clear()
 
 
 
