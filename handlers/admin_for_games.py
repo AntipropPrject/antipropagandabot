@@ -174,9 +174,9 @@ async def admin_truthgame_update(message: types.Message, state: FSMContext):
     media_id = await data_getter(f"select t_id from assets where name='{message.text}'")
     caption = await data_getter((f"select rebuttal from mistakeorlie where asset_name='{message.text}'"))
     try:
-        await message.answer_photo(media_id[0][0], caption=caption, reply_markup=nmrkup.as_markup(resize_keyboard=True))
+        await message.answer_photo(media_id[0][0], caption=caption[0][0], reply_markup=nmrkup.as_markup(resize_keyboard=True))
     except:
-        await message.answer_video(media_id[0][0], caption=caption, reply_markup=nmrkup.as_markup(resize_keyboard=True))
+        await message.answer_video(media_id[0][0], caption=caption[0][0], reply_markup=nmrkup.as_markup(resize_keyboard=True))
     await state.set_state(admin.addingMistakeOrLie_upd_text_or_media)
 
 
