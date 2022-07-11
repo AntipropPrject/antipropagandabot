@@ -4,6 +4,7 @@ import os
 import shutil
 import zipfile
 from asyncio import sleep
+from datetime import datetime
 
 import pymongo
 from aiogram import Router, F, Bot
@@ -21,6 +22,7 @@ from data_base.DBuse import sql_safe_select, sql_safe_update, sql_safe_insert, m
 from day_func import day_count
 from export_to_csv.pg_mg import backin
 from filters.isAdmin import IsAdmin, IsSudo, isKamaga
+from handlers.admin_for_games import admin_home_games, admin_truthgame, admin_gam_tv
 from keyboards.admin_keys import main_admin_keyboard, middle_admin_keyboard, app_admin_keyboard, redct_text, \
     redct_media, redct_games, settings_bot, redct_editors, spam_admin_keyboard, red_spam_admin_keyboard
 from keyboards.new_admin_kb import secretrebornkb
@@ -95,7 +97,31 @@ async def reset(message: Message, state: FSMContext):
     print(stt)
     await state.clear()
     print(stt)
-    if 'media' in str(stt):
+    if stt == 'admin:update_news':
+        await state.set_state(admin.spam_menu)
+        await message.answer('Выберите интересующий вас пункт меню', reply_markup=spam_admin_keyboard())
+    elif stt == 'admin:add_news':
+        await state.set_state(admin.spam_menu)
+        await message.answer('Выберите интересующий вас пункт меню', reply_markup=spam_admin_keyboard())
+    elif stt == 'admin:spam_menu':
+        await state.set_state(admin.spam_menu)
+        await message.answer('Выберите интересующий вас пункт меню', reply_markup=spam_admin_keyboard())
+    elif stt in ('admin:mass_media_menu', 'admin:truthgame', 'admin:tv_lie'):
+        await admin_home_games(message, state)
+    elif 'admin:truthgame_' in stt:
+        await admin_truthgame(message, state)
+    elif 'admin:tv_lie_' in stt:
+        await admin_gam_tv(message, state)
+    elif 'admin:editors_menu' in str(stt):
+        await state.set_state(admin.edit_context)
+        await message.answer("Выберите интересующий вас пункт меню", reply_markup=await settings_bot())
+    elif 'admin:import_menu' in str(stt):
+        await state.set_state(admin.edit_context)
+        await message.answer("Выберите интересующий вас пункт меню", reply_markup=await settings_bot())
+    elif 'admin:import_csv' in str(stt):
+        await state.set_state(admin.edit_context)
+        await message.answer("Выберите интересующий вас пункт меню", reply_markup=await settings_bot())
+    elif 'media' in str(stt):
         await message.answer("Выберите интересующий вас пункт меню", reply_markup=redct_media())
         await state.set_state(admin.edit_context)
     elif 'text' in str(stt):
@@ -107,24 +133,6 @@ async def reset(message: Message, state: FSMContext):
     elif 'bot' in str(stt):
         await message.answer("Выберите интересующий вас пункт меню", reply_markup=await settings_bot())
         await state.set_state(admin.edit_context)
-    elif 'admin:editors_menu' in str(stt):
-        await state.set_state(admin.edit_context)
-        await message.answer("Выберите интересующий вас пункт меню", reply_markup=await settings_bot())
-    elif 'admin:import_menu' in str(stt):
-        await state.set_state(admin.edit_context)
-        await message.answer("Выберите интересующий вас пункт меню", reply_markup=await settings_bot())
-    elif 'admin:import_csv' in str(stt):
-        await state.set_state(admin.edit_context)
-        await message.answer("Выберите интересующий вас пункт меню", reply_markup=await settings_bot())
-    elif stt == 'admin:update_news':
-        await state.set_state(admin.spam_menu)
-        await message.answer('Выберите интересующий вас пункт меню', reply_markup=spam_admin_keyboard())
-    elif stt == 'admin:add_news':
-        await state.set_state(admin.spam_menu)
-        await message.answer('Выберите интересующий вас пункт меню', reply_markup=spam_admin_keyboard())
-    elif stt == 'admin:spam_menu':
-        await state.set_state(admin.spam_menu)
-        await message.answer('Выберите интересующий вас пункт меню', reply_markup=spam_admin_keyboard())
     else:
         await state.set_state(admin.home)
         await admin_home_main_menu(message, state)
@@ -225,13 +233,14 @@ async def sadmins(message: Message, state: FSMContext):
             if count == count_for_button:
                 nmarkup.button(text='Добавить новость', callback_data=f'add_actual_news')
             nmarkup.adjust(2)
-
+            print(1)
             try:
                 await message.answer_photo(photo=media, caption=spam['caption'],
                                            reply_markup=nmarkup.as_markup())
             except:
                 await message.answer_video(video=media, caption=spam['caption'],
                                            reply_markup=nmarkup.as_markup())
+            print(2)
             await asyncio.sleep(0.1)
     else:
         nmarkup = InlineKeyboardBuilder()
@@ -257,17 +266,18 @@ async def sadmins(message: Message, state: FSMContext):
 
 @router.callback_query(lambda call: call.data=="add_main_news" or call.data=="add_actual_news")
 async def add_news(query: types.CallbackQuery, state: FSMContext):
-    await state.set_state(admin.add_news)
     await state.update_data(coll=str(query.data))
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text='Назад'))
     if str(query.data) == 'add_main_news':
+        await state.set_state(admin.add_news_spam)
         await query.message.answer(
                 'Чтобы добавить главную новость'
                 ' -- отправьте мне медиафайл'
                 ' в одном сообщении и напишите описание', reply_markup=markup.as_markup(resize_keyboard=True)
         )
     elif str(query.data) == 'add_actual_news':
+        await state.set_state(admin.add_media_actula_spam)
         await query.message.answer(
                 'Чтобы добавить актуальную новость'
                 ' -- отправьте мне медиафайл'
@@ -308,8 +318,56 @@ async def update_news(message: Message, state: FSMContext):
     await state.set_state(admin.spam_menu)
     await message.answer("Вы успешно изменили новость", reply_markup=spam_admin_keyboard())
 
+@router.message(state=admin.add_media_actula_spam)
+async def add_news(message: Message, state: FSMContext):
+    data = await state.get_data()
+    if message.content_type == 'photo':
+        id = message.photo[0].file_id
+    elif message.content_type == 'video':
+        id = message.video.file_id
+    else:
+        await message.answer("Упс.. Кажется вы отправили не видео")
+    await state.update_data(media_id=id)
+    await state.update_data(media_caption=message.caption)
+    await state.set_state(admin.add_date_for_spam)
+    await message.answer("Напишите дату, на которую хотите запланировать рассылку")
 
-@router.message(state=admin.add_news)
+@router.message(state=admin.add_date_for_spam)
+async def add_news(message: Message, state: FSMContext):
+    try:
+        datetime.strptime(message.text, '%d.%m.%Y')
+        await state.update_data(plan_data=message.text)
+    except ValueError:
+        await message.answer("Упс.. Кажется вы указали неверный формат даты, пожалуйста повторите попытку")
+
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="1️⃣1️⃣:0️⃣0️⃣"))
+    nmarkup.row(types.KeyboardButton(text="1️⃣9️⃣:0️⃣0️⃣"))
+    nmarkup.adjust(2)
+    await state.set_state(admin.add_time_for_spam)
+    await message.answer("Выберите время для рассылки", reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
+@router.message(state=admin.add_time_for_spam)
+async def add_news(message: Message, state: FSMContext):
+    data = await state.get_data()
+    coll = data['coll']
+    date = data['plan_data']
+    media_id = data['media_id']
+    caption = data['media_caption']
+    if message.text == '1️⃣1️⃣:0️⃣0️⃣':
+        time = '11:00'
+    elif message.text == '1️⃣9️⃣:0️⃣0️⃣':
+        time = '19:00'
+    else:
+        await message.answer("Упс.. Кажется вы указали неверный формат времени, пожалуйста повторите попытку")
+    dt_for_spam = date+'_'+time
+    await mongo_add_news(media_id, str(caption), dt_for_spam, coll=str(coll))
+    coll = data['coll']
+    nmarkup = InlineKeyboardBuilder()
+    nmarkup.button(text='Добавить новость', callback_data=str(coll))
+    await message.answer("Новость запланирована, хотите добавить еще?", reply_markup=nmarkup.as_markup())
+
+@router.message(state=admin.add_news_spam)
 async def add_news(message: Message, state: FSMContext):
     data = await state.get_data()
     if message.content_type == 'photo':
