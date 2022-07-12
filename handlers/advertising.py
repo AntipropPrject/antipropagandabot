@@ -16,7 +16,7 @@ bot = data.get_bot()
 async def start_spam(date):
     client = all_data().get_mongo()
     database = client['database']
-    actual_collection = database['userinfo']
+    userinfo = database['userinfo']
     all_mass_media_main = database['spam_news_main']
     all_main_media = []  # список всех новостей
     list_for_spam = []  # Лист для рассылки
@@ -26,11 +26,11 @@ async def start_spam(date):
         all_main_media.append(media['_id'])
 
     # все у кого прошло 24ч после окончания прохождения
-    for i in actual_collection.find({'datetime_end': {'$lt': datetime.utcnow() - timedelta(days=1)}}):
+    for i in userinfo.find({'datetime_end': {'$lt': datetime.utcnow()-timedelta(days=1)}}):
         list_for_spam.append({i['_id']: i['viewed_news']})
 
     datet = datetime.strptime(date, '%Y.%m.%d %H:%M')
-    # date = datetime.strptime('2022.07.12 11:00', '%Y.%m.%d %H:%M')
+    #date = datetime.strptime('2022.07.12 11:00', '%Y.%m.%d %H:%M')
     await send_spam(all_main_media, list_for_spam, datet)
 
 
