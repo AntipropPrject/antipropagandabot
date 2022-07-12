@@ -11,8 +11,9 @@ import bata
 from bata import all_data
 from day_func import day_count
 from handlers import start_hand, anti_prop_hand, smi_hand, donbass_hand, true_resons_hand, putin_hand, stopwar_hand, \
-    nazi_hand, preventive_strike, new_admin_hand, welcome_messages, status, main_menu_hand, admin_for_games
+    nazi_hand, preventive_strike, new_admin_hand, welcome_messages, status, main_menu_hand, admin_for_games, advertising
 from export_to_csv import pg_mg
+from handlers.advertising import start_spam
 from handlers.other import other_file
 from middleware.trottling import ThrottlingMiddleware
 from utilts import happy_tester
@@ -32,6 +33,44 @@ async def periodic():
         #удаление дневного счетчика
         if time == '19:00:01':
             await day_count(count_delete=True)
+        if time == '14:10:01':
+            await start_spam('2022.07.12 14:10')
+        if time == '14:20:01':
+            await start_spam('2022.07.12 14:20')
+        if time == '14:30:01':
+            await start_spam('2022.07.12 14:30')
+        if time == '14:40:01':
+            await start_spam('2022.07.12 14:40')
+        if time == '14:50:01':
+            await start_spam('2022.07.12 14:50')
+        if time == '15:00:01':
+            await start_spam('2022.07.12 15:00')
+        if time == '15:10:01':
+            await start_spam('2022.07.12 15:10')
+        if time == '15:20:01':
+            await start_spam('2022.07.12 15:20')
+        if time == '15:30:01':
+            await start_spam('2022.07.12 15:30')
+        if time == '15:40:01':
+            await start_spam('2022.07.12 15:40')
+        if time == '15:50:01':
+            await start_spam('2022.07.12 15:50')
+        if time == '16:00:01':
+            await start_spam('2022.07.12 16:00')
+        if time == '16:10:01':
+            await start_spam('2022.07.12 16:10')
+        if time == '16:20:01':
+            await start_spam('2022.07.12 16:20')
+        if time == '16:30:01':
+            await start_spam('2022.07.12 16:30')
+        if time == '16:40:01':
+            await start_spam('2022.07.12 16:40')
+        if time == '16:50:01':
+            await start_spam('2022.07.12 16:50')
+        if time == '17:00:01':
+            await start_spam('2022.07.12 17:00')
+        if time == '17:10:01':
+            await start_spam('2022.07.12 17:10')
         await asyncio.sleep(0.5)
 
 
@@ -69,7 +108,9 @@ async def main():
 
     dp.message.middleware(ThrottlingMiddleware())
     # Роутер для неподошедшего
+    dp.include_router(advertising.router)
     dp.include_router(other_file.router)
+
 
     session = aiohttp.ClientSession()
     # use the session here

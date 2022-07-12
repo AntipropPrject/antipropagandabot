@@ -269,6 +269,7 @@ async def add_news(query: types.CallbackQuery, state: FSMContext):
     await state.update_data(coll=str(query.data))
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text='Назад'))
+    print(query.data)
     if str(query.data) == 'add_main_news':
         await state.set_state(admin.add_news_spam)
         await query.message.answer(
@@ -335,7 +336,7 @@ async def add_news(message: Message, state: FSMContext):
 @router.message(state=admin.add_date_for_spam)
 async def add_news(message: Message, state: FSMContext):
     try:
-        datetime.strptime(message.text, '%d.%m.%Y')
+        datetime.strptime(message.text, '%Y.%m.%d')
         await state.update_data(plan_data=message.text)
     except ValueError:
         await message.answer("Упс.. Кажется вы указали неверный формат даты, пожалуйста повторите попытку")
@@ -345,7 +346,7 @@ async def add_news(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="1️⃣9️⃣:0️⃣0️⃣"))
     nmarkup.adjust(2)
     await state.set_state(admin.add_time_for_spam)
-    await message.answer("Выберите время для рассылки", reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer("Выберите время для рассылки в формате: YYYY.MM.DD", reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 @router.message(state=admin.add_time_for_spam)
 async def add_news(message: Message, state: FSMContext):
@@ -359,9 +360,10 @@ async def add_news(message: Message, state: FSMContext):
     elif message.text == '1️⃣9️⃣:0️⃣0️⃣':
         time = '19:00'
     else:
-        await message.answer("Упс.. Кажется вы указали неверный формат времени, пожалуйста повторите попытку")
-    dt_for_spam = date+'_'+time
-    await mongo_add_news(media_id, str(caption), dt_for_spam, coll=str(coll))
+        time = message.text
+    dt_for_spam = date + ' ' + time
+    date = datetime.strptime(dt_for_spam, '%Y.%m.%d %H:%M')
+    await mongo_add_news(media_id, str(caption), date, coll=str(coll))
     coll = data['coll']
     nmarkup = InlineKeyboardBuilder()
     nmarkup.button(text='Добавить новость', callback_data=str(coll))
