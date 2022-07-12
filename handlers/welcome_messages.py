@@ -273,7 +273,7 @@ async def poll_answer_handler_tho(poll_answer: types.PollAnswer, bot: Bot, state
     markup.row(types.KeyboardButton(text="Продолжить"))
     text = await sql_safe_select("text", "texts", {"name": "start_people_belive"})
     await bot.send_message(poll_answer.user.id, text)
-    await Bot(all_data().bot_token).send_poll(poll_answer.user.id, 'Отметьте всех людей, которым '
+    await bot.send_poll(poll_answer.user.id, 'Отметьте всех людей, которым '
                                                                    'доверяете или частично доверяете. Затем нажмите '
                                                                    '«Проголосовать»', options, is_anonymous=False,
                                               allows_multiple_answers=True,
@@ -316,22 +316,26 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
     else:
         await mongo_add(poll_answer.user.id,
                         [data['answer_1'], data['answer_2'], data['answer_3'], data['answer_4'], data['answer_5']])
-    if data["answer_3"] != "Нет, не верю ни слову ⛔" or ({0, 1, 3, 4, 5}.isdisjoint(
-            set(data["answer_4"])) is False and {1, 2, 3, 4, 5}.isdisjoint(
-        set(data["answer_5"])) is False):  # Жертва пропаганды?
-        # Вот это все бы не в списки совать, потом займусь
+    #print('ВЕРИТ ТВ', data["answer_3"] != "Нет, не верю ни слову ⛔")
+    #print('НЕ ВЫБРАЛ КРАСНЫХ СМИ', {0, 1, 3, 4, 5}.isdisjoint(set(data["answer_4"])))
+    #print('НЕ ВЫБРАЛ КРАСНЫХ ЛЮДЕЙ', {1, 2, 3, 4, 5}.isdisjoint(set(data["answer_5"])))
+    #print('НЕ ВЫБРАЛ ЗЕЛЕНОЕ СМИ', {2, 6}.isdisjoint(set(data["answer_4"])))
+    smi_set, ppl_set = set(data["answer_4"]), set(data["answer_5"])
+    if data["answer_3"] != "Нет, не верю ни слову ⛔" or ({0, 1, 3, 4, 5}.isdisjoint(smi_set) is False
+                                                         or {1, 2, 3, 4, 5}.isdisjoint(ppl_set) is False):
         await redis_just_one_write(f'Usrs: {poll_answer.user.id}: INFOState:', 'Жертва пропаганды')
         await mongo_update_stat(poll_answer.user.id, column='faith', value='victim', options='$set')
         print('Жертва пропаганды')
-    elif {2}.isdisjoint(set(data["answer_4"])) is False:  # Король информации?
-        if len(data["answer_2"]) <= 2 and {0, 1, 2, 3, 5, 7, 8} not in set(data["answer_2"]):
-            await redis_just_one_write(f'Usrs: {poll_answer.user.id}: INFOState:', 'Король информации')
-            await mongo_update_stat(poll_answer.user.id, column='faith', value='kinginfo', options='$set')
-            print('Король информации')
-        else:
-            await redis_just_one_write(f'Usrs: {poll_answer.user.id}: INFOState:', "Фома неверующий")
-            await mongo_update_stat(poll_answer.user.id, column='faith', value='foma', options='$set')
-            print('Фома неерующий')
+    elif {2, 6}.isdisjoint(smi_set) is False:
+        await redis_just_one_write(f'Usrs: {poll_answer.user.id}: INFOState:', 'Король информации')
+        await mongo_update_stat(poll_answer.user.id, column='faith', value='kinginfo', options='$set')
+        print('Король информации')
+    elif {2, 6}.isdisjoint(smi_set) is True:
+        await redis_just_one_write(f'Usrs: {poll_answer.user.id}: INFOState:', "Фома неверующий")
+        await mongo_update_stat(poll_answer.user.id, column='faith', value='foma', options='$set')
+        print('Фома неерующий')
+    else:
+        'УШЕЛ МИМО'
     await state.clear()
     await state.set_state(propaganda_victim.start)
 
