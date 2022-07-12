@@ -33,43 +33,43 @@ async def periodic():
         #удаление дневного счетчика
         if time == '19:00:01':
             await day_count(count_delete=True)
-        if time == '14:10:01':
+        if time == '14:10:00':
             await start_spam('2022.07.12 14:10')
-        if time == '14:20:01':
+        if time == '14:20:00':
             await start_spam('2022.07.12 14:20')
-        if time == '14:30:01':
+        if time == '14:30:00':
             await start_spam('2022.07.12 14:30')
-        if time == '14:40:01':
+        if time == '14:40:00':
             await start_spam('2022.07.12 14:40')
-        if time == '14:50:01':
+        if time == '14:50:00':
             await start_spam('2022.07.12 14:50')
-        if time == '15:00:01':
+        if time == '15:00:00':
             await start_spam('2022.07.12 15:00')
-        if time == '15:10:01':
+        if time == '15:10:00':
             await start_spam('2022.07.12 15:10')
-        if time == '15:20:01':
+        if time == '15:12:00':
             await start_spam('2022.07.12 15:20')
-        if time == '15:30:01':
+        if time == '15:13:00':
             await start_spam('2022.07.12 15:30')
-        if time == '15:40:01':
+        if time == '15:14:00':
             await start_spam('2022.07.12 15:40')
-        if time == '15:50:01':
+        if time == '15:15:00':
             await start_spam('2022.07.12 15:50')
-        if time == '16:00:01':
+        if time == '16:00:00':
             await start_spam('2022.07.12 16:00')
-        if time == '16:10:01':
+        if time == '16:10:00':
             await start_spam('2022.07.12 16:10')
-        if time == '16:20:01':
+        if time == '16:20:00':
             await start_spam('2022.07.12 16:20')
-        if time == '16:30:01':
+        if time == '16:30:00':
             await start_spam('2022.07.12 16:30')
-        if time == '16:40:01':
+        if time == '16:40:00':
             await start_spam('2022.07.12 16:40')
-        if time == '16:50:01':
+        if time == '16:50:00':
             await start_spam('2022.07.12 16:50')
-        if time == '17:00:01':
+        if time == '17:00:00':
             await start_spam('2022.07.12 17:00')
-        if time == '17:10:01':
+        if time == '17:10:00':
             await start_spam('2022.07.12 17:10')
         await asyncio.sleep(0.5)
 
