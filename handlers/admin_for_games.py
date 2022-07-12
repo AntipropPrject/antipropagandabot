@@ -883,7 +883,7 @@ async def menu(message: types.Message, state: FSMContext):
     text = message.html_text
     nmrkup = ReplyKeyboardBuilder()
     nmrkup.row(types.KeyboardButton(text="Назад"))
-    postgressdata = await data_getter(f"select name from assets1 where name like '%normal_game%'" )
+    postgressdata = await data_getter(f"select name from assets where name like '%normal_game%'")
     count = len(postgressdata) + 1
     await logg.admin_logs(message.from_user.id, message.from_user.username,
                           f"Игра в нормальность - Запись в базу данных \n {media_id} , normal_game_{count}")

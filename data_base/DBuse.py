@@ -3,7 +3,7 @@ from typing import Union
 import psycopg2
 from psycopg2 import sql
 from bata import all_data
-from datetime import datetime, timedelta
+from datetime import datetime
 import os
 from pandas import DataFrame, read_csv
 
@@ -248,7 +248,7 @@ async def sql_safe_update(table_name, data_dict, condition_dict):
 
 """^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^MongoDB^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"""
 
-async def mongo_add_news(list_media: str, caption: str, datetime=None, coll=None):
+async def mongo_add_news(list_media: str, caption: str, datetime: str, coll=None):
     try:
         print(list_media)
         print(caption)
@@ -318,11 +318,14 @@ async def mongo_update_news(m_id: str, new_m_id: str, new_caption: str,  coll=No
         await logg.get_error(f"mongo update | {error}", __file__)
 
 async def mongo_user_info(tg_id, username):
+    today = datetime.today()
+    today = today.strftime("%d-%m-%Y")
+    time = datetime.now().strftime("%H:%M")
     try:
         client = all_data().get_mongo()
         database = client['database']
         collection = database['userinfo']
-        user_answer = {'_id': int(tg_id), 'username': str(username), 'datetime': datetime.utcnow(), 'viewed_news': []}
+        user_answer = {'_id': int(tg_id), 'username': str(username), 'datetime': f'{today}_{time}'}
         collection.insert_one(user_answer)
     except Exception as error:
         pass
@@ -370,12 +373,12 @@ async def mongo_select(tg_id):
         await logg.get_error(f"mongo_select | {error}", __file__)
 
 
-async def mongo_update_viewed_news(tg_id, value):
+async def mongo_update(tg_id, value_dict):
     try:
         client = all_data().get_mongo()
         database = client['database']
-        collection = database['userinfo']
-        collection.update_one({'_id': int(tg_id)}, {"$push": {"viewed_news": value}}, True)
+        collection = database['useranswer']
+        collection.update_one({'_id': int(tg_id)}, {"$push": {"other_answer": value_dict}}, True)
     except Exception as error:
         await logg.get_error(f"mongo update | {error}", __file__)
 
