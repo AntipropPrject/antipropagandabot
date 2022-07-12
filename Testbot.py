@@ -30,13 +30,18 @@ async def periodic():
     print('periodic function has been started')
     while True:
         time = datetime.now().strftime("%H:%M:%S")
+        date = datetime.now().strftime('%Y.%m.%d')
         #удаление дневного счетчика
-        if time == '19:00:01':
+        if time == '21:00:01':
             await day_count(count_delete=True)
 
-        await start_spam('2022.07.12 11:00')
+        if time == '08:00:01':
+            await start_spam(f'{date} 11:00')
 
-        await asyncio.sleep(180)
+        if time == '16:00:01':
+            await start_spam(f'{date} 19:00')
+
+        await asyncio.sleep(1)
 
 
 
