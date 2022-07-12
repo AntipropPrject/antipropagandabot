@@ -62,10 +62,13 @@ async def send_spam(all_main_media, list_for_spam, date):
                 await bot.send_message(list(user_for_spam.keys())[0], 'SPAM XA-XA-XA')
                 media = actual_mass_media.find_one({'datetime': {'$eq': date}})
                 try:
-                    await bot.send_photo(list(user_for_spam.keys())[0], photo=media['media'], caption=media['caption'])
-                except:
-                    await bot.send_video(list(user_for_spam.keys())[0], photo=media['media'], caption=media['caption'])
-                await mongo_update_viewed_news(list(user_for_spam.keys())[0], list_not_view[0])
+                    try:
+                        await bot.send_photo(list(user_for_spam.keys())[0], photo=media['media'], caption=media['caption'])
+                    except:
+                        await bot.send_video(list(user_for_spam.keys())[0], photo=media['media'], caption=media['caption'])
+                except Exception as er:
+                    print(er)
+
             else:
                 print(news_in_user)
                 print(all_main_media)
@@ -78,9 +81,13 @@ async def send_spam(all_main_media, list_for_spam, date):
                 if len(list_not_view) != 0:
                     media = main_mass_media.find_one({'_id': list_not_view[0]})
                     try:
-                        await bot.send_photo(list(user_for_spam.keys())[0], photo=media['media'], caption=media['caption'])
-                    except:
-                        await bot.send_video(list(user_for_spam.keys())[0], photo=media['media'], caption=media['caption'])
+                        try:
+                            await bot.send_photo(list(user_for_spam.keys())[0], photo=media['media'], caption=media['caption'])
+                        except:
+                            await bot.send_video(list(user_for_spam.keys())[0], photo=media['media'], caption=media['caption'])
+                    except Exception as er:
+                        print(er)
+
                     await mongo_update_viewed_news(list(user_for_spam.keys())[0], list_not_view[0])
                 else:
                     print("Тут ошибка. Лист list_not_view - пустой")
