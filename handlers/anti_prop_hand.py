@@ -314,6 +314,7 @@ async def antip_another_tv(message: Message, state: FSMContext):
         nmarkup.row(types.KeyboardButton(text='Звезда 📺'))
     if await sql_select_row_like('assets', bigdata["HTB_tv_count"] + 1, {'name': "tv_HTB_lie_"}):
         nmarkup.add(types.KeyboardButton(text='НТВ 📺'))
+    nmarkup.adjust(2)
     nmarkup.row(types.KeyboardButton(text="Достаточно, мне все понятно ✋"))
     text = await sql_safe_select('text', 'texts', {'name': 'antip_lies_for_you'})
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
