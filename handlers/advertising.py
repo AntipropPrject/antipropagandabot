@@ -40,11 +40,11 @@ async def send_spam(all_main_media, list_for_spam, date):
     main_mass_media = database['spam_news_main']
     actual_mass_media = database['spam_actual_news']
     for user_for_spam in list_for_spam:
+        user_id = list(user_for_spam.keys())[0]
         for news_in_user in user_for_spam.values():
             if all_data().get_data_red().get(f"user_last_answer: {list(user_for_spam.keys())[0]}:") != '1':
                 #  если юзер посмотрел все главные новости
                 if len(news_in_user) >= len(all_main_media):
-                    user_id = list(user_for_spam.keys())[0]
                     media = actual_mass_media.find_one({'datetime': {'$eq': date}})
                     caption = media['caption']
                     try:
@@ -102,7 +102,7 @@ async def latecomers_check_user(user_id, news_in_user, all_main_media, date):
             await latecomers(user_id, news_in_user, all_main_media, date)
             break
         count -= 1
-        await asyncio.sleep(900)
+        await asyncio.sleep(300)
 
 
 # функция опоздавших
