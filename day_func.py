@@ -11,13 +11,12 @@ async def day_count(get_count=False, count_delete=False):
         check_day_count = all_data().get_data_red().get('count: day_count:')
         if str(check_day_count) == "None":
             all_data().get_data_red().set('count: day_count:', '1')
-        if count_delete == True:
+        if count_delete:
             all_data().get_data_red().set('count: day_count:', '1')
 
         day_count = all_data().get_data_red().get('count: day_count:')
-        if get_count == False:
+        if not get_count:
             try:
-
                 all_data().get_data_red().set('count: day_count:', f'{int(day_count) + 1}')
             except Exception as er:
                 await logg.get_error(er)
@@ -28,7 +27,3 @@ async def day_count(get_count=False, count_delete=False):
 
     except Exception as er:
         await logg.get_error(er)
-
-
-
-
