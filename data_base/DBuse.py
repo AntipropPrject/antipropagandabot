@@ -318,11 +318,15 @@ async def mongo_update_news(m_id: str, new_m_id: str, new_caption: str,  coll=No
         await logg.get_error(f"mongo update | {error}", __file__)
 
 async def mongo_user_info(tg_id, username):
+    today = datetime.today()
+    today = today.strftime("%d-%m-%Y")
+    time = datetime.now().strftime("%H:%M")
+
     try:
         client = all_data().get_mongo()
         database = client['database']
         collection = database['userinfo']
-        user_answer = {'_id': int(tg_id), 'username': str(username), 'datetime': datetime.utcnow(), 'viewed_news': []}
+        user_answer = {'_id': int(tg_id), 'username': str(username), 'datetime': f'{today}_{time}', 'datetime_end': None, 'viewed_news': []}
         collection.insert_one(user_answer)
     except Exception as error:
         pass
@@ -379,6 +383,14 @@ async def mongo_update_viewed_news(tg_id, value):
     except Exception as error:
         await logg.get_error(f"mongo update | {error}", __file__)
 
+async def mongo_update_end(tg_id):
+    try:
+        client = all_data().get_mongo()
+        database = client['database']
+        collection = database['userinfo']
+        collection.update_one({'_id': int(tg_id)}, {'datetime_end': datetime.utcnow()}, True)
+    except Exception as error:
+        await logg.get_error(f"mongo update | {error}", __file__)
 
 async def mongo_pop(tg_id, value_dict):
     try:
