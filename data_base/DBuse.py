@@ -388,7 +388,7 @@ async def mongo_update_end(tg_id):
         client = all_data().get_mongo()
         database = client['database']
         collection = database['userinfo']
-        collection.update_one({'_id': int(tg_id)}, {'datetime_end': datetime.utcnow()}, True)
+        collection.update_one({'_id': int(tg_id)}, {'$set': {'datetime_end': datetime.utcnow()}}, True)
     except Exception as error:
         await logg.get_error(f"mongo update | {error}", __file__)
 
