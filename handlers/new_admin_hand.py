@@ -399,12 +399,15 @@ async def add_news(message: Message, state: FSMContext):
         id = message.photo[0].file_id
         await mongo_add_news(id, str(message.caption), coll=str(coll))
         await state.set_state(admin.spam_menu)
-        await message.answer('Новость добавлена, хотите добавить еще одну?', reply_markup=nmarkup.as_markup())
+        await message.answer("Новость добавлена", reply_markup=spam_admin_keyboard())
+        await message.answer('Хотите добавить еще одну?', reply_markup=nmarkup.as_markup())
     elif message.content_type == 'video':
         id = message.video.file_id
         await mongo_add_news(id, str(message.caption), coll=str(coll))
         await state.set_state(admin.spam_menu)
-        await message.answer('Новость добавлена, хотите добавить еще одну?', reply_markup=nmarkup.as_markup())
+
+        await message.answer("Новость добавлена", reply_markup=spam_admin_keyboard())
+        await message.answer('Хотите добавить еще одну?', reply_markup=nmarkup.as_markup())
     else:
         await message.answer("Упс.. Кажется вы отправили не медиа, пожалуйста повторите попытку")
 
