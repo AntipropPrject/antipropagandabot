@@ -375,7 +375,8 @@ async def add_news(message: Message, state: FSMContext):
         coll = data['coll']
         nmarkup = InlineKeyboardBuilder()
         nmarkup.button(text='Добавить новость', callback_data=str(coll))
-        await message.answer("Новость запланирована, хотите добавить еще?", reply_markup=nmarkup.as_markup())
+        await message.answer("Новость запланирована", reply_markup=spam_admin_keyboard())
+        await message.answer("Хотите добавить еще?", reply_markup=nmarkup.as_markup())
     elif message.text == '1️⃣9️⃣:0️⃣0️⃣':
         time = '19:00'
         dt_for_spam = date + ' ' + time
@@ -384,7 +385,8 @@ async def add_news(message: Message, state: FSMContext):
         coll = data['coll']
         nmarkup = InlineKeyboardBuilder()
         nmarkup.button(text='Добавить новость', callback_data=str(coll))
-        await message.answer("Новость запланирована, хотите добавить еще?", reply_markup=nmarkup.as_markup())
+        await message.answer("Новость запланирована", reply_markup=spam_admin_keyboard())
+        await message.answer("Хотите добавить еще?", reply_markup=nmarkup.as_markup())
     else:
         await message.answer("Ошибка, вы указали неверный формат даты, пожулуйста повторите попытку")
 
