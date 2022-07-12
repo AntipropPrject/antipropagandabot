@@ -302,22 +302,25 @@ async def antip_crossed_boy_3(message: Message):
     await message.answer(text2, reply_markup=antip_killme_kb(), disable_web_page_preview=True)
 
 
+# переделаю
 @router.message((F.text.contains('другой телеканал')) | (F.text.contains('посмотреть еще')), flags=flags)
 async def antip_another_tv(message: Message, state: FSMContext):
     bigdata = await state.get_data()
     nmarkup = ReplyKeyboardBuilder()
-    if await sql_select_row_like('assets', bigdata["first_tv_count"] + 1, {'name': "tv_first_lie_"}):
+    if await sql_safe_select('t_id', 'assets', {'name': f'tv_first_lie_{bigdata["first_tv_count"] + 1}'}) is not False:
         nmarkup.row(types.KeyboardButton(text='1 канал 📺'))
-    if await sql_select_row_like('assets', bigdata["rus24_tv_count"] + 1, {'name': "tv_24_lie_"}):
+    if await sql_safe_select('t_id', 'assets', {'name': f'tv_24_lie_{bigdata["rus24_tv_count"] + 1}'}) is not False:
         nmarkup.add(types.KeyboardButton(text='Россия 1 / 24 📺'))
-    if await sql_select_row_like('assets', bigdata["Star_tv_count"] + 1, {'name': "tv_star_lie_"}):
+    if await sql_safe_select('t_id', 'assets', {'name': f'tv_star_lie_{bigdata["Star_tv_count"] + 1}'}) is not False:
         nmarkup.row(types.KeyboardButton(text='Звезда 📺'))
-    if await sql_select_row_like('assets', bigdata["HTB_tv_count"] + 1, {'name': "tv_HTB_lie_"}):
+    if await sql_safe_select('t_id', 'assets', {'name': f'tv_HTB_lie_{bigdata["HTB_tv_count"] + 1}'}) is not False:
         nmarkup.add(types.KeyboardButton(text='НТВ 📺'))
-    nmarkup.adjust(2)
     nmarkup.row(types.KeyboardButton(text="Достаточно, мне все понятно ✋"))
     text = await sql_safe_select('text', 'texts', {'name': 'antip_lies_for_you'})
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+
 
 
 @router.message(WebPropagandaFilter(), (
