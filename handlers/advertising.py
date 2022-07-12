@@ -1,29 +1,16 @@
 import asyncio
 from datetime import datetime, timedelta
-from typing import List, Union
-from aiogram import Router, F
-from aiogram import types
-from aiogram.dispatcher.fsm.context import FSMContext
+
+from aiogram import Router
 from aiogram.exceptions import TelegramBadRequest
-from aiogram.types import Message, ReplyKeyboardRemove
-from aiogram.utils.keyboard import ReplyKeyboardBuilder
+
 from bata import all_data
-from data_base.DBuse import poll_get, redis_just_one_read, mongo_update_viewed_news
-from data_base.DBuse import sql_safe_select, data_getter, sql_safe_update
-from filters.MapFilters import WebPropagandaFilter, TVPropagandaFilter, PplPropagandaFilter, PoliticsFilter
-from handlers import true_resons_hand
-from keyboards.map_keys import antip_why_kb, antip_killme_kb
-from resources.all_polls import web_prop
-from resources.all_polls import channels
-from states.antiprop_states import propaganda_victim
-from stats.stat import mongo_update_stat
-from utilts import simple_media
+from data_base.DBuse import mongo_update_viewed_news
 from log import logg
 
-router=Router()
+router = Router()
 data = all_data()
 bot = data.get_bot()
-
 
 
 async def start_spam(date):
@@ -39,12 +26,12 @@ async def start_spam(date):
         all_main_media.append(media['_id'])
 
     # все у кого прошло 24ч после окончания прохождения
-    for i in actual_collection.find({'datetime_end': {'$lt': datetime.utcnow()-timedelta(days=1)}}):
+    for i in actual_collection.find({'datetime_end': {'$lt': datetime.utcnow() - timedelta(days=1)}}):
         list_for_spam.append({i['_id']: i['viewed_news']})
 
     datet = datetime.strptime(date, '%Y.%m.%d %H:%M')
-    #date = datetime.strptime('2022.07.12 11:00', '%Y.%m.%d %H:%M')
-    await send_spam( all_main_media, list_for_spam, datet)
+    # date = datetime.strptime('2022.07.12 11:00', '%Y.%m.%d %H:%M')
+    await send_spam(all_main_media, list_for_spam, datet)
 
 
 async def send_spam(all_main_media, list_for_spam, date):
@@ -54,46 +41,44 @@ async def send_spam(all_main_media, list_for_spam, date):
     actual_mass_media = database['spam_actual_news']
     for user_for_spam in list_for_spam:
         for news_in_user in user_for_spam.values():
-            if all_data().get_data_red().get(f"user_last_answer: {list(user_for_spam.keys())[0]}:") == '1':
+            if all_data().get_data_red().get(f"user_last_answer: {list(user_for_spam.keys())[0]}:") != '1':
                 #  если юзер посмотрел все главные новости
                 if len(news_in_user) >= len(all_main_media):
                     user_id = list(user_for_spam.keys())[0]
                     media = actual_mass_media.find_one({'datetime': {'$eq': date}})
                     caption = media['caption']
                     try:
-                        if str(caption) != 'none':
+                        if str(caption) != 'None':
                             try:
                                 await bot.send_photo(user_id, photo=media['media'], caption=caption)
-                            except:
+                            except TelegramBadRequest:
                                 await bot.send_video(user_id, video=media['media'], caption=caption)
                         else:
                             try:
                                 await bot.send_photo(user_id, photo=media['media'])
-                            except:
+                            except TelegramBadRequest:
                                 await bot.send_video(user_id, video=media['media'])
                     except Exception as er:
                         await logg.get_error(er)
-
                 else:
                     # лист главных новостей по порядку
                     list_not_view = []
                     for not_view in all_main_media:
                         if not_view not in news_in_user:
                             list_not_view.append(not_view)
-                            print("Новость не просмотрена")
                     if len(list_not_view) != 0:
                         media = main_mass_media.find_one({'_id': list_not_view[0]})
                         caption = media['caption']
                         try:
-                            if str(caption) != 'none':
+                            if str(caption) != 'None':
                                 try:
                                     await bot.send_photo(user_id, photo=media['media'], caption=media['caption'])
-                                except:
+                                except TelegramBadRequest:
                                     await bot.send_video(user_id, video=media['media'], caption=media['caption'])
                             else:
                                 try:
                                     await bot.send_photo(user_id, photo=media['media'])
-                                except:
+                                except TelegramBadRequest:
                                     await bot.send_video(user_id, video=media['media'])
 
                         except Exception as er:
@@ -113,11 +98,12 @@ async def send_spam(all_main_media, list_for_spam, date):
 async def latecomers_check_user(user_id, news_in_user, all_main_media, date):
     count = 5
     while count != 0:
-        if all_data().get_data_red().get(f"user_last_answer: {user_id}:") == '1':
+        if all_data().get_data_red().get(f"user_last_answer: {user_id}:") != '1':
             await latecomers(user_id, news_in_user, all_main_media, date)
             break
         count -= 1
         await asyncio.sleep(900)
+
 
 # функция опоздавших
 async def latecomers(user_id, news_in_user, all_main_media, date):
@@ -147,7 +133,6 @@ async def latecomers(user_id, news_in_user, all_main_media, date):
         for not_view in all_main_media:
             if not_view not in news_in_user:
                 list_not_view.append(not_view)
-                print("Новость не просмотрена")
         if len(list_not_view) != 0:
             media = main_mass_media.find_one({'_id': list_not_view[0]})
             caption = media['caption']
@@ -155,12 +140,12 @@ async def latecomers(user_id, news_in_user, all_main_media, date):
                 if str(caption) != 'none':
                     try:
                         await bot.send_photo(user_id, photo=media['media'], caption=media['caption'])
-                    except:
+                    except TelegramBadRequest:
                         await bot.send_video(user_id, video=media['media'], caption=media['caption'])
                 else:
                     try:
                         await bot.send_photo(user_id, photo=media['media'])
-                    except:
+                    except TelegramBadRequest:
                         await bot.send_video(user_id, video=media['media'])
 
             except Exception as er:
@@ -169,4 +154,3 @@ async def latecomers(user_id, news_in_user, all_main_media, date):
             await mongo_update_viewed_news(user_id, list_not_view[0])
         else:
             await logg.get_error('Тут ошибка. Лист list_not_view - пустой')
-
