@@ -115,15 +115,15 @@ async def latecomers(user_id, news_in_user, all_main_media, date):
         media = actual_mass_media.find_one({'datetime': {'$eq': date}})
         caption = media['caption']
         try:
-            if str(caption) != 'none':
+            if str(caption) != 'None':
                 try:
                     await bot.send_photo(user_id, photo=media['media'], caption=caption)
-                except:
+                except TelegramBadRequest:
                     await bot.send_video(user_id, video=media['media'], caption=caption)
             else:
                 try:
                     await bot.send_photo(user_id, photo=media['media'])
-                except:
+                except TelegramBadRequest:
                     await bot.send_video(user_id, video=media['media'])
         except Exception as er:
             await logg.get_error(er)
@@ -137,7 +137,7 @@ async def latecomers(user_id, news_in_user, all_main_media, date):
             media = main_mass_media.find_one({'_id': list_not_view[0]})
             caption = media['caption']
             try:
-                if str(caption) != 'none':
+                if str(caption) != 'None':
                     try:
                         await bot.send_photo(user_id, photo=media['media'], caption=media['caption'])
                     except TelegramBadRequest:
