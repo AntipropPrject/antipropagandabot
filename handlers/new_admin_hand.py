@@ -360,7 +360,7 @@ async def add_news(message: Message, state: FSMContext):
     elif message.text == '1️⃣9️⃣:0️⃣0️⃣':
         time = '19:00'
     else:
-        await message.answer("Упс.. Кажется вы указали неверный формат времени, пожалуйста повторите попытку")
+        time = message.text
     dt_for_spam = date + ' ' + time
     date = datetime.strptime(dt_for_spam, '%Y.%m.%d %H:%M')
     await mongo_add_news(media_id, str(caption), date, coll=str(coll))
