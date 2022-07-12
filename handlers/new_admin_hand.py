@@ -258,6 +258,7 @@ async def sadmins(message: Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Выключить рассылку'")
     await message.answer("Запланированная рассылка была включена (не работает)")
 
+#1
 @router.message(IsSudo(), (F.text == 'Выключить рассылку 🟢'), state=admin.spam_menu)
 async def sadmins(message: Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Выключить рассылку'")
