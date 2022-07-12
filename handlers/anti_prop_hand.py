@@ -110,7 +110,7 @@ async def antip_all_no_TV(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_all_no_TV'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Пропустим этот шаг 👉"))
-    nmarkup.row(types.KeyboardButton(text="Покажи ложь на ТВ -- мне интересно посмотреть! 📺"))
+    nmarkup.row(types.KeyboardButton(text="Покажи ложь на ТВ — мне интересно посмотреть! 📺"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
@@ -302,25 +302,22 @@ async def antip_crossed_boy_3(message: Message):
     await message.answer(text2, reply_markup=antip_killme_kb(), disable_web_page_preview=True)
 
 
-# переделаю
 @router.message((F.text.contains('другой телеканал')) | (F.text.contains('посмотреть еще')), flags=flags)
 async def antip_another_tv(message: Message, state: FSMContext):
     bigdata = await state.get_data()
     nmarkup = ReplyKeyboardBuilder()
-    if await sql_safe_select('t_id', 'assets', {'name': f'tv_first_lie_{bigdata["first_tv_count"] + 1}'}) is not False:
+    if await sql_select_row_like('assets', bigdata["first_tv_count"] + 1, {'name': "tv_first_lie_"}):
         nmarkup.row(types.KeyboardButton(text='1 канал 📺'))
-    if await sql_safe_select('t_id', 'assets', {'name': f'tv_24_lie_{bigdata["rus24_tv_count"] + 1}'}) is not False:
+    if await sql_select_row_like('assets', bigdata["rus24_tv_count"] + 1, {'name': "tv_24_lie_"}):
         nmarkup.add(types.KeyboardButton(text='Россия 1 / 24 📺'))
-    if await sql_safe_select('t_id', 'assets', {'name': f'tv_star_lie_{bigdata["Star_tv_count"] + 1}'}) is not False:
+    if await sql_select_row_like('assets', bigdata["Star_tv_count"] + 1, {'name': "tv_star_lie_"}):
         nmarkup.row(types.KeyboardButton(text='Звезда 📺'))
-    if await sql_safe_select('t_id', 'assets', {'name': f'tv_HTB_lie_{bigdata["HTB_tv_count"] + 1}'}) is not False:
+    if await sql_select_row_like('assets', bigdata["HTB_tv_count"] + 1, {'name': "tv_HTB_lie_"}):
         nmarkup.add(types.KeyboardButton(text='НТВ 📺'))
+    nmarkup.adjust(2)
     nmarkup.row(types.KeyboardButton(text="Достаточно, мне все понятно ✋"))
     text = await sql_safe_select('text', 'texts', {'name': 'antip_lies_for_you'})
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
-
-
-
 
 
 @router.message(WebPropagandaFilter(), (
@@ -742,7 +739,7 @@ async def antip_truth_game_answer(message: Message, state: FSMContext):
             reality = "Неверно! Это правда!"
         elif data['truth'] == False:
             reality = "Правильно! Это ложь!"
-        answer_group = 'belivers'
+        answer_group = 'nonbelivers'
     await mongo_game_answer(message.from_user.id, 'truthgame', data['game_id'], answer_group, {'id': data['game_id']})
     t_percentage = data['belive'] / (data['belive'] + data['not_belive'])
     text = reality + f'\n\nРезультаты других участников:\n✅ <b>Правда:</b> {round(t_percentage * 100)}%\n' \
@@ -880,6 +877,7 @@ async def war_point_now(message: Message, state: FSMContext):
 async def reasons_lets_figure(message: Message, state: FSMContext):
     await state.set_state(true_resons_hand.TruereasonsState.main)
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_lets_figure'})
+    await mongo_update_stat(message.from_user.id, 'antiprop')
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Давай попробуем 👌"))
     nmarkup.row(types.KeyboardButton(text="Я не интересуюсь политикой 😐"))
@@ -892,6 +890,7 @@ async def reasons_lets_figure(message: Message, state: FSMContext):
         F.text.contains('Продолжим 🇷🇺🇺🇦')), flags=flags)
 async def reasons_king_of_info(message: Message, state: FSMContext):
     await state.set_state(true_resons_hand.TruereasonsState.main)
+    await mongo_update_stat(message.from_user.id, 'antiprop')
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_king_of_info'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Хорошо 👌"))

@@ -16,7 +16,7 @@ async def mongo_stat(tg_id):
         pass
 
 
-async def mongo_update_stat(tg_id, column, options='$inc', value=1):
+async def mongo_update_stat(tg_id, column, options='$set', value=1):
     try:
         collection_stat.update_one({'_id': int(tg_id)}, {options: {column: value}})
     except Exception as error:
