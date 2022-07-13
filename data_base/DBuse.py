@@ -3,7 +3,7 @@ from typing import Union
 import psycopg2
 from psycopg2 import sql
 from bata import all_data
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 from pandas import DataFrame, read_csv
 
@@ -248,7 +248,7 @@ async def sql_safe_update(table_name, data_dict, condition_dict):
 
 """^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^MongoDB^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"""
 
-async def mongo_add_news(list_media: str, caption: str, datetime: str, coll=None):
+async def mongo_add_news(list_media: str, caption: str, datetime=None, coll=None):
     try:
         print(list_media)
         print(caption)
@@ -374,12 +374,12 @@ async def mongo_select(tg_id):
         await logg.get_error(f"mongo_select | {error}", __file__)
 
 
-async def mongo_update(tg_id, value_dict):
+async def mongo_update_viewed_news(tg_id, value):
     try:
         client = all_data().get_mongo()
         database = client['database']
-        collection = database['useranswer']
-        collection.update_one({'_id': int(tg_id)}, {"$push": {"other_answer": value_dict}}, True)
+        collection = database['userinfo']
+        collection.update_one({'_id': int(tg_id)}, {"$push": {"viewed_news": value}}, True)
     except Exception as error:
         await logg.get_error(f"mongo update | {error}", __file__)
 

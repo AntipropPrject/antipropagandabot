@@ -2,7 +2,7 @@ import asyncio
 from datetime import datetime, timedelta
 
 from aiogram import Router
-from aiogram.exceptions import TelegramBadRequest
+from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError
 
 from bata import all_data
 from data_base.DBuse import mongo_update_viewed_news
@@ -58,8 +58,8 @@ async def send_spam(all_main_media, list_for_spam, date):
                                 await bot.send_photo(user_id, photo=media['media'])
                             except TelegramBadRequest:
                                 await bot.send_video(user_id, video=media['media'])
-                    except Exception as er:
-                        await logg.get_error(er)
+                    except TelegramForbiddenError as er:
+                        await logg.get_error(f'{er}')
                 else:
                     # лист главных новостей по порядку
                     list_not_view = []
@@ -81,8 +81,8 @@ async def send_spam(all_main_media, list_for_spam, date):
                                 except TelegramBadRequest:
                                     await bot.send_video(user_id, video=media['media'])
 
-                        except Exception as er:
-                            await logg.get_error(er)
+                        except TelegramForbiddenError as er:
+                            await logg.get_error(f'{er}')
 
                         await mongo_update_viewed_news(user_id, list_not_view[0])
                     else:
@@ -125,8 +125,8 @@ async def latecomers(user_id, news_in_user, all_main_media, date):
                     await bot.send_photo(user_id, photo=media['media'])
                 except TelegramBadRequest:
                     await bot.send_video(user_id, video=media['media'])
-        except Exception as er:
-            await logg.get_error(er)
+        except TelegramForbiddenError as er:
+            await logg.get_error(f'{er}')
     else:
         # лист главных новостей по порядку
         list_not_view = []
@@ -147,9 +147,8 @@ async def latecomers(user_id, news_in_user, all_main_media, date):
                         await bot.send_photo(user_id, photo=media['media'])
                     except TelegramBadRequest:
                         await bot.send_video(user_id, video=media['media'])
-
-            except Exception as er:
-                await logg.get_error(er)
+            except TelegramForbiddenError as er:
+                await logg.get_error(f'{er}')
 
             await mongo_update_viewed_news(user_id, list_not_view[0])
         else:
