@@ -276,7 +276,7 @@ async def poll_answer_handler_tho(poll_answer: types.PollAnswer, bot: Bot, state
     markup.row(types.KeyboardButton(text="Продолжить"))
     text = await sql_safe_select("text", "texts", {"name": "start_people_belive"})
     await bot.send_message(poll_answer.user.id, text)
-    await Bot(all_data().bot_token).send_poll(poll_answer.user.id, 'Отметьте всех людей, которым '
+    await bot.send_poll(poll_answer.user.id, 'Отметьте всех людей, которым '
                                                                    'доверяете или частично доверяете. Затем нажмите '
                                                                    '«Проголосовать»', options, is_anonymous=False,
                                               allows_multiple_answers=True,
