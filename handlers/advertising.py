@@ -46,20 +46,21 @@ async def send_spam(all_main_media, list_for_spam, date):
                 #  если юзер посмотрел все главные новости
                 if len(news_in_user) >= len(all_main_media):
                     media = actual_mass_media.find_one({'datetime': {'$eq': date}})
-                    caption = media['caption']
-                    try:
-                        if str(caption) != 'None':
-                            try:
-                                await bot.send_photo(user_id, photo=media['media'], caption=caption)
-                            except TelegramBadRequest:
-                                await bot.send_video(user_id, video=media['media'], caption=caption)
-                        else:
-                            try:
-                                await bot.send_photo(user_id, photo=media['media'])
-                            except TelegramBadRequest:
-                                await bot.send_video(user_id, video=media['media'])
-                    except TelegramForbiddenError as er:
-                        await logg.get_error(f'{er}')
+                    if media is not None:
+                        caption = media['caption']
+                        try:
+                            if str(caption) != 'None':
+                                try:
+                                    await bot.send_photo(user_id, photo=media['media'], caption=caption)
+                                except TelegramBadRequest:
+                                    await bot.send_video(user_id, video=media['media'], caption=caption)
+                            else:
+                                try:
+                                    await bot.send_photo(user_id, photo=media['media'])
+                                except TelegramBadRequest:
+                                    await bot.send_video(user_id, video=media['media'])
+                        except TelegramForbiddenError as er:
+                            await logg.get_error(f'{er}')
                 else:
                     # лист главных новостей по порядку
                     list_not_view = []
@@ -68,23 +69,24 @@ async def send_spam(all_main_media, list_for_spam, date):
                             list_not_view.append(not_view)
                     if len(list_not_view) != 0:
                         media = main_mass_media.find_one({'_id': list_not_view[0]})
-                        caption = media['caption']
-                        try:
-                            if str(caption) != 'None':
-                                try:
-                                    await bot.send_photo(user_id, photo=media['media'], caption=media['caption'])
-                                except TelegramBadRequest:
-                                    await bot.send_video(user_id, video=media['media'], caption=media['caption'])
-                            else:
-                                try:
-                                    await bot.send_photo(user_id, photo=media['media'])
-                                except TelegramBadRequest:
-                                    await bot.send_video(user_id, video=media['media'])
+                        if media is not None:
+                            caption = media['caption']
+                            try:
+                                if str(caption) != 'None':
+                                    try:
+                                        await bot.send_photo(user_id, photo=media['media'], caption=media['caption'])
+                                    except TelegramBadRequest:
+                                        await bot.send_video(user_id, video=media['media'], caption=media['caption'])
+                                else:
+                                    try:
+                                        await bot.send_photo(user_id, photo=media['media'])
+                                    except TelegramBadRequest:
+                                        await bot.send_video(user_id, video=media['media'])
 
-                        except TelegramForbiddenError as er:
-                            await logg.get_error(f'{er}')
+                            except TelegramForbiddenError as er:
+                                await logg.get_error(f'{er}')
 
-                        await mongo_update_viewed_news(user_id, list_not_view[0])
+                            await mongo_update_viewed_news(user_id, list_not_view[0])
                     else:
                         await logg.get_error("Тут ошибка. Лист list_not_view - пустой")
 
@@ -113,20 +115,21 @@ async def latecomers(user_id, news_in_user, all_main_media, date):
     actual_mass_media = database['spam_actual_news']
     if len(news_in_user) >= len(all_main_media):
         media = actual_mass_media.find_one({'datetime': {'$eq': date}})
-        caption = media['caption']
-        try:
-            if str(caption) != 'None':
-                try:
-                    await bot.send_photo(user_id, photo=media['media'], caption=caption)
-                except TelegramBadRequest:
-                    await bot.send_video(user_id, video=media['media'], caption=caption)
-            else:
-                try:
-                    await bot.send_photo(user_id, photo=media['media'])
-                except TelegramBadRequest:
-                    await bot.send_video(user_id, video=media['media'])
-        except TelegramForbiddenError as er:
-            await logg.get_error(f'{er}')
+        if media is not None:
+            caption = media['caption']
+            try:
+                if str(caption) != 'None':
+                    try:
+                        await bot.send_photo(user_id, photo=media['media'], caption=caption)
+                    except TelegramBadRequest:
+                        await bot.send_video(user_id, video=media['media'], caption=caption)
+                else:
+                    try:
+                        await bot.send_photo(user_id, photo=media['media'])
+                    except TelegramBadRequest:
+                        await bot.send_video(user_id, video=media['media'])
+            except TelegramForbiddenError as er:
+                await logg.get_error(f'{er}')
     else:
         # лист главных новостей по порядку
         list_not_view = []
@@ -135,21 +138,22 @@ async def latecomers(user_id, news_in_user, all_main_media, date):
                 list_not_view.append(not_view)
         if len(list_not_view) != 0:
             media = main_mass_media.find_one({'_id': list_not_view[0]})
-            caption = media['caption']
-            try:
-                if str(caption) != 'None':
-                    try:
-                        await bot.send_photo(user_id, photo=media['media'], caption=media['caption'])
-                    except TelegramBadRequest:
-                        await bot.send_video(user_id, video=media['media'], caption=media['caption'])
-                else:
-                    try:
-                        await bot.send_photo(user_id, photo=media['media'])
-                    except TelegramBadRequest:
-                        await bot.send_video(user_id, video=media['media'])
-            except TelegramForbiddenError as er:
-                await logg.get_error(f'{er}')
+            if media is not None:
+                caption = media['caption']
+                try:
+                    if str(caption) != 'None':
+                        try:
+                            await bot.send_photo(user_id, photo=media['media'], caption=media['caption'])
+                        except TelegramBadRequest:
+                            await bot.send_video(user_id, video=media['media'], caption=media['caption'])
+                    else:
+                        try:
+                            await bot.send_photo(user_id, photo=media['media'])
+                        except TelegramBadRequest:
+                            await bot.send_video(user_id, video=media['media'])
+                except TelegramForbiddenError as er:
+                    await logg.get_error(f'{er}')
 
-            await mongo_update_viewed_news(user_id, list_not_view[0])
+                await mongo_update_viewed_news(user_id, list_not_view[0])
         else:
             await logg.get_error('Тут ошибка. Лист list_not_view - пустой')
