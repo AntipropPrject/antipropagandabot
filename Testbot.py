@@ -23,19 +23,17 @@ storage = RedisStorage.from_url(data.redis_url)
 dp = Dispatcher(storage)
 
 
+
+
 async def periodic():
     print('periodic function has been started')
     while True:
-        c_time = datetime.now().strftime("%H:%M:%S")
-        date = datetime.now().strftime('%Y.%m.%d')
+        time = datetime.now().strftime("%H:%M:%S")
         #удаление дневного счетчика
-        if c_time == '21:00:01':
+        if time == '19:00:01':
             await day_count(count_delete=True)
-        if c_time == '08:00:01':
-            await start_spam(f'{date} 11:00')
-        if c_time == '16:00:01':
-            await start_spam(f'{date} 19:00')
-        await asyncio.sleep(1)
+        await asyncio.sleep(0.5)
+
 
 
 async def main():

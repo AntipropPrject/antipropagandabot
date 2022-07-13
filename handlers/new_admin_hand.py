@@ -258,7 +258,6 @@ async def sadmins(message: Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Выключить рассылку'")
     await message.answer("Запланированная рассылка была включена (не работает)")
 
-#1
 @router.message(IsSudo(), (F.text == 'Выключить рассылку 🟢'), state=admin.spam_menu)
 async def sadmins(message: Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Выключить рассылку'")
@@ -313,51 +312,40 @@ async def update_news(message: Message, state: FSMContext):
     caption= message.caption
     if message.content_type == 'photo':
         id = message.photo[0].file_id
-        await mongo_update_news(m_id=data['media_id'], new_m_id=id, new_caption=caption, coll=data['coll'])
-        await state.set_state(admin.spam_menu)
-        await message.answer("Вы успешно изменили новость", reply_markup=spam_admin_keyboard())
     elif message.content_type == 'video':
         id = message.video.file_id
-        await mongo_update_news(m_id=data['media_id'], new_m_id=id, new_caption=caption, coll=data['coll'])
-        await state.set_state(admin.spam_menu)
-        await message.answer("Вы успешно изменили новость", reply_markup=spam_admin_keyboard())
-    else:
-        await message.answer("Упс.. Кажется вы отправили не медиа, пожалуйста повторите попытку")
+    await mongo_update_news(m_id=data['media_id'], new_m_id=id, new_caption=caption, coll=data['coll'])
+    await state.set_state(admin.spam_menu)
+    await message.answer("Вы успешно изменили новость", reply_markup=spam_admin_keyboard())
 
 @router.message(state=admin.add_media_actula_spam)
 async def add_news(message: Message, state: FSMContext):
     data = await state.get_data()
     if message.content_type == 'photo':
         id = message.photo[0].file_id
-        await state.update_data(media_id=id)
-        await state.update_data(media_caption=message.caption)
-        await state.set_state(admin.add_date_for_spam)
-        await message.answer("Напишите дату, на которую хотите запланировать рассылку в формате: YYYY.MM.DD")
     elif message.content_type == 'video':
         id = message.video.file_id
-        await state.update_data(media_id=id)
-        await state.update_data(media_caption=message.caption)
-        await state.set_state(admin.add_date_for_spam)
-        await message.answer("Напишите дату, на которую хотите запланировать рассылку в формате: YYYY.MM.DD")
     else:
-        await message.answer("Упс.. Кажется вы отправили не медиа, пожалуйста повторите попытку")
-
-
+        await message.answer("Упс.. Кажется вы отправили не видео")
+    await state.update_data(media_id=id)
+    await state.update_data(media_caption=message.caption)
+    await state.set_state(admin.add_date_for_spam)
+    await message.answer("Напишите дату, на которую хотите запланировать рассылку")
 
 @router.message(state=admin.add_date_for_spam)
 async def add_news(message: Message, state: FSMContext):
     try:
         datetime.strptime(message.text, '%d.%m.%Y')
         await state.update_data(plan_data=message.text)
-        nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(types.KeyboardButton(text="1️⃣1️⃣:0️⃣0️⃣"))
-        nmarkup.row(types.KeyboardButton(text="1️⃣9️⃣:0️⃣0️⃣"))
-        nmarkup.adjust(2)
-        await state.set_state(admin.add_time_for_spam)
-        await message.answer("Выберите время для рассылки", reply_markup=nmarkup.as_markup(resize_keyboard=True))
     except ValueError:
         await message.answer("Упс.. Кажется вы указали неверный формат даты, пожалуйста повторите попытку")
 
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="1️⃣1️⃣:0️⃣0️⃣"))
+    nmarkup.row(types.KeyboardButton(text="1️⃣9️⃣:0️⃣0️⃣"))
+    nmarkup.adjust(2)
+    await state.set_state(admin.add_time_for_spam)
+    await message.answer("Выберите время для рассылки", reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 @router.message(state=admin.add_time_for_spam)
 async def add_news(message: Message, state: FSMContext):
@@ -368,50 +356,30 @@ async def add_news(message: Message, state: FSMContext):
     caption = data['media_caption']
     if message.text == '1️⃣1️⃣:0️⃣0️⃣':
         time = '11:00'
-        dt_for_spam = date + ' ' + time
-        date = datetime.strptime(dt_for_spam, '%Y.%m.%d %H:%M')
-        await mongo_add_news(media_id, str(caption), date, coll=str(coll))
-        coll = data['coll']
-        nmarkup = InlineKeyboardBuilder()
-        nmarkup.button(text='Добавить новость', callback_data=str(coll))
-        await message.answer("Новость запланирована", reply_markup=spam_admin_keyboard())
-        await message.answer("Хотите добавить еще?", reply_markup=nmarkup.as_markup())
     elif message.text == '1️⃣9️⃣:0️⃣0️⃣':
         time = '19:00'
-        dt_for_spam = date + ' ' + time
-        date = datetime.strptime(dt_for_spam, '%Y.%m.%d %H:%M')
-        await mongo_add_news(media_id, str(caption), date, coll=str(coll))
-        coll = data['coll']
-        nmarkup = InlineKeyboardBuilder()
-        nmarkup.button(text='Добавить новость', callback_data=str(coll))
-        await message.answer("Новость запланирована", reply_markup=spam_admin_keyboard())
-        await message.answer("Хотите добавить еще?", reply_markup=nmarkup.as_markup())
     else:
-        await message.answer("Ошибка, вы указали неверный формат даты, пожулуйста повторите попытку")
-
-
+        await message.answer("Упс.. Кажется вы указали неверный формат времени, пожалуйста повторите попытку")
+    dt_for_spam = date+'_'+time
+    await mongo_add_news(media_id, str(caption), dt_for_spam, coll=str(coll))
+    coll = data['coll']
+    nmarkup = InlineKeyboardBuilder()
+    nmarkup.button(text='Добавить новость', callback_data=str(coll))
+    await message.answer("Новость запланирована, хотите добавить еще?", reply_markup=nmarkup.as_markup())
 
 @router.message(state=admin.add_news_spam)
 async def add_news(message: Message, state: FSMContext):
     data = await state.get_data()
+    if message.content_type == 'photo':
+        id = message.photo[0].file_id
+    elif message.content_type == 'video':
+        id = message.video.file_id
     coll = data['coll']
     nmarkup = InlineKeyboardBuilder()
     nmarkup.button(text='Добавить новость', callback_data=str(coll))
-    if message.content_type == 'photo':
-        id = message.photo[0].file_id
-        await mongo_add_news(id, str(message.caption), coll=str(coll))
-        await state.set_state(admin.spam_menu)
-        await message.answer("Новость добавлена", reply_markup=spam_admin_keyboard())
-        await message.answer('Хотите добавить еще одну?', reply_markup=nmarkup.as_markup())
-    elif message.content_type == 'video':
-        id = message.video.file_id
-        await mongo_add_news(id, str(message.caption), coll=str(coll))
-        await state.set_state(admin.spam_menu)
-
-        await message.answer("Новость добавлена", reply_markup=spam_admin_keyboard())
-        await message.answer('Хотите добавить еще одну?', reply_markup=nmarkup.as_markup())
-    else:
-        await message.answer("Упс.. Кажется вы отправили не медиа, пожалуйста повторите попытку")
+    await mongo_add_news(id, str(message.caption), coll=str(coll))
+    await state.set_state(admin.spam_menu)
+    await message.answer('Новость добавлена, хотите добавить еще одну?', reply_markup=nmarkup.as_markup())
 
 
 

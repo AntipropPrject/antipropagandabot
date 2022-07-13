@@ -12,8 +12,7 @@ from handlers.main_menu_hand import mainmenu_really_menu
 from handlers.welcome_messages import commands_restart
 
 from data_base.DBuse import sql_safe_select, redis_just_one_write, redis_just_one_read, mongo_user_info, \
-    mongo_select_info, mongo_update_end
-from log import logg
+    mongo_select_info
 from states.main_menu_states import MainMenuStates
 from stats.stat import mongo_update_stat
 from utilts import simple_media
@@ -238,6 +237,7 @@ async def stopwar_lets_fight(message: Message, bot: Bot):
         usertime = datetime.strptime(date_start, "%d-%m-%Y %H:%M")
         time_bot = datetime.strptime(datetime.strftime(datetime.now(), "%d-%m-%Y %H:%M"), "%d-%m-%Y %H:%M") - usertime
         str_date = str(time_bot)[:-3].replace('days', '').replace("day", '')
+        print(time_bot)
         days_pr = ''
         if int(time_bot.days) == 1:
             days_pr = 'день,'
@@ -250,20 +250,17 @@ async def stopwar_lets_fight(message: Message, bot: Bot):
         markup = ReplyKeyboardBuilder()
         markup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
         bot_message = await message.answer('5:00')
-        act_time = str_date.replace(',', days_pr)
+
         text_1 = await sql_safe_select('text', 'texts', {'name': 'stopwar_hello_world'})
         text_2 = await sql_safe_select('text', 'texts', {'name': 'stopwar_send_me'})
         text_3 = await sql_safe_select('text', 'texts', {'name': 'stopwar_send_the_message'})
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Какие советы? 🤔"))
         nmarkup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
-        try:
-            await message.answer(text_1.replace('[YY:YY]', act_time), disable_web_page_preview=True)
-            await message.answer(text_2, disable_web_page_preview=True)
-            await message.answer(text_3, reply_markup=nmarkup.as_markup(resize_keyboard=True),
-                                 disable_web_page_preview=True)
-        except Exception as er:
-            await logg.get_error(er)
+        await message.answer(text_1.replace('[YY:YY]', str_date.replace(',', days_pr)), disable_web_page_preview=True)
+        await message.answer(text_2, disable_web_page_preview=True)
+        await message.answer(text_3, reply_markup=nmarkup.as_markup(resize_keyboard=True),
+                             disable_web_page_preview=True)
         m_id = bot_message.message_id
         await bot.pin_chat_message(chat_id=message.from_user.id, message_id=m_id, disable_notification=True)
         while sec:
@@ -274,8 +271,6 @@ async def stopwar_lets_fight(message: Message, bot: Bot):
             await asyncio.sleep(1)
             sec -= 1
         await mongo_update_stat(message.from_user.id, 'end')
-        await mongo_update_end(message.from_user.id)
-        await asyncio.sleep(1)
         await message.answer('Таймер вышел. Вы можете перейти в главное меню.'
                              ' Но если у вас есть ещё с кем поделиться ссылкой на меня'
                              ' — обязательно сделайте это!', reply_markup=markup.as_markup(resize_keyboard=True))
