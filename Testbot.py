@@ -34,7 +34,8 @@ async def periodic():
             await day_count(count_delete=True)
         if c_time == '08:00:01':
             await start_spam(f'{date} 11:00')
-        await start_spam(f'{date} 18:10')
+        if c_time == '16:00:01':
+            await start_spam(f'{date} 19:00')
         await asyncio.sleep(1)
 
 
