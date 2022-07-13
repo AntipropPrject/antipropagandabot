@@ -224,32 +224,15 @@ async def backin():
                 );
                 ''')
 
-    cur.execute('''ALTER TABLE public.truthgame
-             ADD CONSTRAINT truthgame_fk
-              FOREIGN KEY (asset_name)
-               REFERENCES public.assets("name");''')
-    cur.execute('''ALTER TABLE public.truthgame
-             ADD CONSTRAINT truthgame_fk_1
-              FOREIGN KEY (text_name)
-               REFERENCES public.texts("name");''')
-    cur.execute('''ALTER TABLE public.truthgame
-             ADD CONSTRAINT truthgame_fk_2
-              FOREIGN KEY (reb_asset_name)
-               REFERENCES public.assets("name");''')
-    cur.execute('''ALTER TABLE public.truthgame
-             ADD CONSTRAINT rebbuttal_text_fk
-              FOREIGN KEY (rebuttal)
-               REFERENCES public.texts("name");''')
-    logg.get_info("table Truthgame is created".upper())
 
     cur.execute('''CREATE TABLE public.mistakeorlie(
                             "id" int4 NOT NULL,
-                            truth bool NOT NULL,
                             asset_name varchar NULL,
-                            text_name varchar NULL,
                             belivers int4 NOT NULL,
                             nonbelivers int4 NOT NULL,
                             rebuttal varchar NULL,
+                            text_name varchar NULL,
+                            truth boolean NULL,
                             CONSTRAINT mistakeorlie_pk PRIMARY KEY (id)
                            );''')
 
