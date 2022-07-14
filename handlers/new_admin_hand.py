@@ -31,7 +31,7 @@ from log.logg import get_error
 
 from states.admin_states import admin
 from stats.stat import mongo_select_stat, mongo_select_stat_all_user
-from utilts import Phoenix, simple_media
+from utilts import Phoenix
 
 router = Router()
 

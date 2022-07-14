@@ -1,6 +1,5 @@
 import asyncio
 import os
-import shutil
 from datetime import datetime
 import psycopg2
 from aiogram.dispatcher.fsm.context import FSMContext

@@ -1,5 +1,4 @@
 import asyncio
-
 from aiogram import Router, F
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
@@ -7,9 +6,7 @@ from aiogram.dispatcher.fsm.state import StatesGroup, State
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-
-from data_base.DBuse import data_getter, sql_safe_select, sql_safe_update, redis_just_one_write, poll_write, \
-    sql_add_value, mongo_game_answer
+from data_base.DBuse import data_getter, sql_safe_select, redis_just_one_write, poll_write, mongo_game_answer
 from data_base.DBuse import redis_delete_from_list
 from filters.MapFilters import OperationWar, WarReason
 from handlers import anti_prop_hand

@@ -1,17 +1,13 @@
 import asyncio
-from datetime import datetime, timedelta
-
+from datetime import datetime
 from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.dispatcher.fsm.state import StatesGroup, State
-from aiogram.types import Message, ReplyKeyboardRemove
+from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-
 from handlers.main_menu_hand import mainmenu_really_menu
-from handlers.welcome_messages import commands_restart
-
-from data_base.DBuse import sql_safe_select, redis_just_one_write, redis_just_one_read, mongo_user_info, \
+from data_base.DBuse import sql_safe_select, redis_just_one_write, redis_just_one_read, \
     mongo_select_info, mongo_update_end
 from log import logg
 from states.main_menu_states import MainMenuStates

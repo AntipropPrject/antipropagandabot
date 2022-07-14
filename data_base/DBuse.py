@@ -1,12 +1,7 @@
-from typing import Union
-
 import psycopg2
 from psycopg2 import sql
 from bata import all_data
-from datetime import datetime, timedelta
-import os
-from pandas import DataFrame, read_csv
-
+from datetime import datetime
 from log import logg
 
 """^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^PostgreSQL^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"""
@@ -41,10 +36,8 @@ async def safe_data_getter(safe_query, values_dict):
 async def sql_delete(table_name, condition_dict):
     try:
 
-
-        safe_query = sql.SQL("DELETE from {} WHERE {} = {};").format(sql.Identifier(table_name),
-                                                                     sql.SQL(', ').join(map(sql.Identifier,
-                                                                                            condition_dict)), sql.SQL(", ").join(map(sql.Placeholder, condition_dict)))
+        safe_query = sql.SQL("DELETE from {} WHERE {} = {};").format(sql.Identifier(table_name), sql.SQL(', ').join(
+            map(sql.Identifier, condition_dict)), sql.SQL(", ").join(map(sql.Placeholder, condition_dict)))
         conn = all_data().get_postg()
         with conn:
             with conn.cursor() as cur:
@@ -69,7 +62,7 @@ async def sql_safe_select(column, table_name, condition_dict):
                                                                                  sql.SQL(", ").join(map(sql.Placeholder,
                                                                                                         condition_dict)),
                                                                                  col_names=sql.SQL(',').join(
-                                                                                     ident_list))
+                                                                                         ident_list))
         conn = all_data().get_postg()
         with conn:
             with conn.cursor() as cur:
@@ -136,8 +129,9 @@ async def sql_games_row_selecter(tablename: str, row: int):
                                              left outer join texts t on {tablename}.text_name = t.name
                                              left outer join texts t2 on {tablename}.rebuttal = t2.name)
                                              AS sub WHERE row_number = {row}"""))[0]
-            keys = ('truth', 'plot_media', 'plot_text', 'belivers', 'nonbelivers',
-                    'rebb_text', 'rebb_media', 'ROW_NUMBER', 'id')
+            keys = (
+            'truth', 'plot_media', 'plot_text', 'belivers', 'nonbelivers', 'rebb_text', 'rebb_media', 'ROW_NUMBER',
+            'id')
         elif tablename == 'normal_game':
             data = (await data_getter(f"""SELECT * FROM (Select id, assets.t_id as plot_media, texts.text as plot_text, 
                                              belivers, nonbelivers,
@@ -191,7 +185,7 @@ async def sql_add_value(table_name, column, cond_dict):
     que = ''
     for key in cond_dict:
         que = f'UPDATE {table_name} set {column} = {column} + 1 where {key} = {cond_dict[key]} RETURNING {column};'
-        print (que)
+        print(que)
     a = await data_getter(que)
     print(a)
 
@@ -212,7 +206,7 @@ async def sql_safe_insert(table_name, data_dict):
             with conn.cursor() as cur:
                 cur.execute(safe_query, data_dict)
         conn.close()
-        #postgresql_csv_dump(table_name)
+        # postgresql_csv_dump(table_name)
         return True
     except psycopg2.Error as error:
         await logg.get_error(f"{error}", __file__)
@@ -238,7 +232,7 @@ async def sql_safe_update(table_name, data_dict, condition_dict):
             with conn.cursor() as cur:
                 cur.execute(safe_query, data_dict)
         conn.close()
-        #postgresql_csv_dump(table_name)
+        # postgresql_csv_dump(table_name)
         return "Complete"
     except AssertionError as error:
         logg.get_info(f"{error}")
@@ -247,6 +241,7 @@ async def sql_safe_update(table_name, data_dict, condition_dict):
 
 
 """^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^MongoDB^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"""
+
 
 async def mongo_add_news(list_media: str, caption: str, datetime=None, coll=None):
     try:
@@ -265,6 +260,7 @@ async def mongo_add_news(list_media: str, caption: str, datetime=None, coll=None
         print('Done')
     except Exception as error:
         await logg.get_error(error)
+
 
 async def mongo_select_news(coll=None) -> [list, bool]:
     try:
@@ -286,6 +282,7 @@ async def mongo_select_news(coll=None) -> [list, bool]:
         await logg.get_error(f"mongo_select_info | {error}", __file__)
         return False
 
+
 async def mongo_pop_news(m_id: str, coll=None):
     try:
 
@@ -302,20 +299,21 @@ async def mongo_pop_news(m_id: str, coll=None):
         await logg.get_error(f"mongo update | {error}", __file__)
 
 
-async def mongo_update_news(m_id: str, new_m_id: str, new_caption: str,  coll=None):
+async def mongo_update_news(m_id: str, new_m_id: str, new_caption: str, coll=None):
     try:
 
         client = all_data().get_mongo()
         database = client['database']
         if 'main' in coll:
             collection = database['spam_news_main']
-            collection.replace_one({'media': {'$regex':  m_id}}, {"media": str(new_m_id), "caption": new_caption}, True)
+            collection.replace_one({'media': {'$regex': m_id}}, {"media": str(new_m_id), "caption": new_caption}, True)
         elif 'actu' in coll:
             collection = database['spam_actual_news']
             collection.replace_one({'media': {'$regex': m_id}}, {"media": str(new_m_id), "caption": new_caption}, True)
         print('Update')
     except Exception as error:
         await logg.get_error(f"mongo update | {error}", __file__)
+
 
 async def mongo_user_info(tg_id, username):
     today = datetime.today()
@@ -326,10 +324,12 @@ async def mongo_user_info(tg_id, username):
         client = all_data().get_mongo()
         database = client['database']
         collection = database['userinfo']
-        user_answer = {'_id': int(tg_id), 'username': str(username), 'datetime': f'{today}_{time}', 'datetime_end': None, 'viewed_news': []}
+        user_answer = {'_id': int(tg_id), 'username': str(username), 'datetime': f'{today}_{time}',
+                       'datetime_end': None, 'viewed_news': []}
         collection.insert_one(user_answer)
     except Exception as error:
         pass
+
 
 async def mongo_select_info(tg_id):
     try:
@@ -383,6 +383,7 @@ async def mongo_update_viewed_news(tg_id, value):
     except Exception as error:
         await logg.get_error(f"mongo update | {error}", __file__)
 
+
 async def mongo_update_end(tg_id):
     try:
         client = all_data().get_mongo()
@@ -391,6 +392,7 @@ async def mongo_update_end(tg_id):
         collection.update_one({'_id': int(tg_id)}, {'$set': {'datetime_end': datetime.utcnow()}}, True)
     except Exception as error:
         await logg.get_error(f"mongo update | {error}", __file__)
+
 
 async def mongo_pop(tg_id, value_dict):
     try:
@@ -453,7 +455,6 @@ async def mongo_game_answer(user_id, game, number, answer_group, condict):
 
 """^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^CSV_UPDATE^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"""
 
-
 '''def pandas_csv_add(table_name, new_values_dict):
     try:
         dtframe = DataFrame([new_values_dict.values()], columns=new_values_dict.keys())
@@ -489,7 +490,6 @@ def postgresql_csv_dump(table_name):
     except Exception as error:
         logg.get_error(f"{error}", __file__)'''
 
-
 """^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^DATA_REDIS^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"""
 
 
@@ -507,7 +507,7 @@ async def redis_delete_from_list(key, item):
         await logg.get_error(f"{error}", __file__)
 
 
-#Одинаковая функция, лол
+# Одинаковая функция, лол
 async def redis_pop(key):
     try:
         all_data().get_data_red().lpop(key)
@@ -521,12 +521,12 @@ async def poll_write(key, value):
     except Exception as error:
         await logg.get_error(f"{error}", __file__)
 
+
 async def redis_lpush(key, value):
     try:
         all_data().get_data_red().lpush(key, value)
     except Exception as error:
         await logg.get_error(f"{error}", __file__)
-
 
 
 async def redis_key_exists(key):
