@@ -29,16 +29,9 @@ async def smi_statement(message: Message, state: FSMContext):
         await state.update_data({f'{person_list[0]}_gamecount': 0})
         count = 0
 
-    try:
-        how_many_rounds = (await data_getter(
+    how_many_rounds = (await data_getter(
             f"SELECT COUNT (*) FROM public.mistakeorlie where asset_name like '%{str(person_list[0])[-5:-1].strip()}%'"))[
             0][0]
-    except:
-        errmarkup = ReplyKeyboardBuilder()
-        errmarkup.rows(types.KeyboardButton(text="Переход к игре в правду"))
-        await message.answer(
-            "У Надо продумать, что будет если закончились материалы и при этом нет больше красных личностей? ")
-        # Todo send user on truthgame
 
     print(f"В таблице {how_many_rounds} записей, а вот счетчик сейчас {count}")
     if count < how_many_rounds:
@@ -53,7 +46,7 @@ async def smi_statement(message: Message, state: FSMContext):
             print(truth_data)
             await state.update_data({f'{person_list[0]}_gamecount': count})
             await state.update_data(rebuttal=truth_data[5], belive=truth_data[2],
-                                    not_belive=truth_data[3], last_media=truth_data[5], gid=truth_data[6] )
+                                    not_belive=truth_data[3], last_media=truth_data[5], gid=truth_data[6])
 
         except IndexError as er:
             await message.answer(text=f"Медиафайл не найден {er}")
@@ -96,11 +89,16 @@ async def smi_statement_enough(message: Message, state: FSMContext):
                             answer_group, {'id': data['gid']})
     t_percentage = data['belive'] / (data['belive'] + data['not_belive'])
     nmarkup = ReplyKeyboardBuilder()
-    try:
+
+    how_many_rounds = (await data_getter(
+        f"SELECT COUNT (*) FROM public.mistakeorlie where asset_name like '%{str(person_list[0])[-5:-1].strip()}%'"))[
+        0][0]
+    count = data[f'{person_list[0]}_gamecount']
+    if count < how_many_rounds:
         nmarkup.row(types.KeyboardButton(text=f"{person_list[0]} - послушаем его еще! 🗣"))
-        nmarkup.row(types.KeyboardButton(text="Достаточно 🤚"))
-    except IndexError as er:
-        print(er)
+
+    nmarkup.row(types.KeyboardButton(text="Достаточно 🤚"))
+
     await message.answer(
         f'А вот что думаютдругие мои собеседники:\n👍Случайная ошибка: {round(t_percentage * 100)}%\n👎 Целенаправленная ложь: {round(100 - t_percentage * 100)}%',
         reply_markup=nmarkup.as_markup(resize_keyboard=True))
@@ -210,6 +208,5 @@ async def sme_statement_skip(message: Message, state=FSMContext):
 async def skipskip(message: Message, state=FSMContext):
     redis = all_data().get_data_red()
     redis.delete(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:')
-
 
     await antip_web_exit_1(message, state)
