@@ -171,6 +171,7 @@ async def smi_statement_poll(message: Message, state: FSMContext):
         message_text = message.text
         trimed = message_text.rstrip(message_text[-1])
         print(trimed)
+        print(list_to_customize)
         print(list_to_customize.__contains__(trimed))
         if list_to_customize.__contains__(trimed):
             await state.update_data({f'{trimed}_gamecount': 0})
