@@ -1,5 +1,3 @@
-import asyncio
-
 from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
@@ -7,7 +5,7 @@ from aiogram.types import ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from bata import all_data
 from data_base.DBuse import poll_write, sql_safe_select, mongo_add, mongo_select, redis_just_one_write, mongo_user_info, \
-    mongo_select_info, redis_just_one_read, mongo_update_viewed_news
+    mongo_select_info, redis_just_one_read
 from day_func import day_count
 from resources.all_polls import web_prop, welc_message_one
 from states import welcome_states
@@ -26,6 +24,7 @@ async def commands_start(message: types.Message, state: FSMContext):  # Перв
     user_id = message.from_user.id
     old = await mongo_select_info(message.from_user.id)
     #if old is None:
+    await day_count()
     await mongo_stat(user_id)
     await mongo_user_info(user_id, message.from_user.username)
     await state.clear()
@@ -318,10 +317,6 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
     else:
         await mongo_add(poll_answer.user.id,
                         [data['answer_1'], data['answer_2'], data['answer_3'], data['answer_4'], data['answer_5']])
-    #print('ВЕРИТ ТВ', data["answer_3"] != "Нет, не верю ни слову ⛔")
-    #print('НЕ ВЫБРАЛ КРАСНЫХ СМИ', {0, 1, 3, 4, 5}.isdisjoint(set(data["answer_4"])))
-    #print('НЕ ВЫБРАЛ КРАСНЫХ ЛЮДЕЙ', {1, 2, 3, 4, 5}.isdisjoint(set(data["answer_5"])))
-    #print('НЕ ВЫБРАЛ ЗЕЛЕНОЕ СМИ', {2, 6}.isdisjoint(set(data["answer_4"])))
     smi_set, ppl_set = set(data["answer_4"]), set(data["answer_5"])
     if data["answer_3"] != "Нет, не верю ни слову ⛔" or ({0, 1, 3, 4, 5}.isdisjoint(smi_set) is False
                                                          or {1, 2, 3, 4, 5}.isdisjoint(ppl_set) is False):

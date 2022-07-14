@@ -31,7 +31,7 @@ from log.logg import get_error
 
 from states.admin_states import admin
 from stats.stat import mongo_select_stat, mongo_select_stat_all_user
-from utilts import Phoenix, simple_media
+from utilts import Phoenix
 
 router = Router()
 
@@ -270,7 +270,6 @@ async def add_news(query: types.CallbackQuery, state: FSMContext):
     await state.update_data(coll=str(query.data))
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text='Назад'))
-    print(query.data)
     if str(query.data) == 'add_main_news':
         await state.set_state(admin.add_news_spam)
         await query.message.answer(
@@ -348,7 +347,7 @@ async def add_news(message: Message, state: FSMContext):
 @router.message(state=admin.add_date_for_spam)
 async def add_news(message: Message, state: FSMContext):
     try:
-        datetime.strptime(message.text, '%Y.%m.%d')
+        datetime.strptime(message.text, '%d.%m.%Y')
         await state.update_data(plan_data=message.text)
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="1️⃣1️⃣:0️⃣0️⃣"))

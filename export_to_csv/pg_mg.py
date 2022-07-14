@@ -1,6 +1,5 @@
 import asyncio
 import os
-import shutil
 from datetime import datetime
 import psycopg2
 from aiogram.dispatcher.fsm.context import FSMContext
@@ -224,6 +223,7 @@ async def backin():
                 );
                 ''')
     logg.get_info("table Truthgame is created".upper())
+
 
     cur.execute('''CREATE TABLE public.mistakeorlie(
                             "id" int4 NOT NULL,

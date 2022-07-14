@@ -1,18 +1,13 @@
-import psycopg2
 from aiogram import Router, types, F
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
-
-from data_base.DBuse import sql_safe_update, data_getter, sql_safe_insert, sql_select_row_like, sql_games_row_selecter, \
-    sql_delete
-from data_base.DBuse import sql_safe_update, data_getter, sql_safe_insert, sql_delete
+from data_base.DBuse import sql_safe_update, data_getter, sql_safe_insert, sql_delete, sql_games_row_selecter
 from filters.isAdmin import IsAdmin
-
-from keyboards.admin_keys import main_admin_keyboard, games_keyboard, admin_games_keyboard, app_admin_keyboard, \
+from keyboards.admin_keys import games_keyboard, admin_games_keyboard, app_admin_keyboard, \
     game_keys
 from log import logg
 from states.admin_states import admin
-from utilts import dynamic_media_answer, game_answer
+from utilts import game_answer
 from utilts import simple_media
 
 router = Router()
@@ -883,7 +878,7 @@ async def menu(message: types.Message, state: FSMContext):
     text = message.html_text
     nmrkup = ReplyKeyboardBuilder()
     nmrkup.row(types.KeyboardButton(text="Назад"))
-    postgressdata = await data_getter(f"select name from assets1 where name like '%normal_game%'" )
+    postgressdata = await data_getter(f"select name from assets where name like '%normal_game%'")
     count = len(postgressdata) + 1
     await logg.admin_logs(message.from_user.id, message.from_user.username,
                           f"Игра в нормальность - Запись в базу данных \n {media_id} , normal_game_{count}")

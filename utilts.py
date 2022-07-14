@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Union
 import os
 from aiogram import Bot
-from aiogram.exceptions import TelegramBadRequest, TelegramNetworkError
+from aiogram.exceptions import TelegramBadRequest, TelegramNetworkError, TelegramForbiddenError
 from aiogram.types import Message, ReplyKeyboardRemove, InlineKeyboardMarkup, ReplyKeyboardMarkup, ForceReply, \
     FSInputFile, InputFile
 
@@ -50,8 +50,8 @@ async def simple_media(message: Message, tag: str,
 
 
 async def game_answer(message: Message, telegram_media_id: Union[int, InputFile] = None, text: str = None,
-                       reply_markup: Union[InlineKeyboardMarkup, ReplyKeyboardMarkup,
-                                           ReplyKeyboardRemove, ForceReply, None] = None):
+                      reply_markup: Union[InlineKeyboardMarkup, ReplyKeyboardMarkup,
+                                          ReplyKeyboardRemove, ForceReply, None] = None):
     if telegram_media_id is not None:
         try:
             return await message.answer_photo(telegram_media_id, caption=text, reply_markup=reply_markup)
@@ -63,6 +63,25 @@ async def game_answer(message: Message, telegram_media_id: Union[int, InputFile]
                 print(error)
     else:
         await message.answer(text, reply_markup=reply_markup, disable_web_page_preview=True)
+
+
+async def bot_send_spam(bot: Bot, user_id: Union[int, str], telegram_media_id: Union[int, InputFile] = None, text: str = None,
+                        reply_markup: Union[InlineKeyboardMarkup, ReplyKeyboardMarkup,
+                                            ReplyKeyboardRemove, ForceReply, None] = None):
+    try:
+        if telegram_media_id is not None:
+            try:
+                return await bot.send_photo(user_id, photo=telegram_media_id, caption=text, reply_markup=reply_markup)
+            except TelegramBadRequest as error:
+                print(error)
+                try:
+                    return await bot.send_video(user_id, video=telegram_media_id, caption=text, reply_markup=reply_markup)
+                except TelegramBadRequest as error:
+                    print(error)
+        else:
+            await bot.send_message(user_id, text=text, reply_markup=reply_markup, disable_web_page_preview=True)
+    except TelegramForbiddenError as er:
+        await logg.get_error(f'{er}')
 
 
 async def dynamic_media_answer(message: Message, similarity_tag: str, row_number: int,
@@ -83,37 +102,37 @@ class Phoenix:
 
     @staticmethod
     async def feather(message: Message, tag: str):
-                """
+        """
                 This function used when you need to reclaim media for the new bot token FROM DISK.\n
                 After single usage, telegram id for this media will be in database.\n
                 It uses mp4 format for video and jpg format for photo.
                 """
-                media = await sql_safe_select("t_id", "assets", {"name": tag})
+        media = await sql_safe_select("t_id", "assets", {"name": tag})
+        try:
+            msg = await message.answer_video(FSInputFile(f'resources/media/{tag}.mp4'))
+            if media is False:
+                await sql_safe_insert('assets', {'t_id': msg.video.file_id, 'name': tag})
+            else:
+                await sql_safe_update('assets', {'t_id': msg.video.file_id}, {'name': tag})
+        except (TelegramNetworkError, TelegramBadRequest):
+            try:
                 try:
-                    msg = await message.answer_video(FSInputFile(f'resources/media/{tag}.mp4'))
-                    if media is False:
-                        await sql_safe_insert('assets', {'t_id': msg.video.file_id, 'name': tag})
-                    else:
-                        await sql_safe_update('assets', {'t_id': msg.video.file_id}, {'name': tag})
-                except (TelegramNetworkError, TelegramBadRequest):
-                    try:
-                        try:
-                            msg = await message.answer_photo(FSInputFile(f'resources/media/{tag}.png'))
-                        except TelegramNetworkError:
-                            msg = await message.answer_photo(FSInputFile(f'resources/media/{tag}.jpg'))
-                        if media is False:
-                            await sql_safe_insert('assets', {'t_id': msg.photo[-1].file_id, 'name': tag})
-                        else:
-                            await sql_safe_update('assets', {'t_id': msg.photo[-1].file_id}, {'name': tag})
-                    except TelegramNetworkError:
-                        await logg.get_error(f'Cant find ||{tag}|| file at "resources/media/" !')
-                        await message.answer(f'Не удалось получить с диска {tag}')
-                    else:
-                        print(f'Successfully retrieved photo {tag}.png from disk')
+                    msg = await message.answer_photo(FSInputFile(f'resources/media/{tag}.png'))
+                except TelegramNetworkError:
+                    msg = await message.answer_photo(FSInputFile(f'resources/media/{tag}.jpg'))
+                if media is False:
+                    await sql_safe_insert('assets', {'t_id': msg.photo[-1].file_id, 'name': tag})
                 else:
-                    print(f'Successfully retrieved video {tag}.mp4 from disk')
-                finally:
-                    print(f'There was no {tag} name')
+                    await sql_safe_update('assets', {'t_id': msg.photo[-1].file_id}, {'name': tag})
+            except TelegramNetworkError:
+                await logg.get_error(f'Cant find ||{tag}|| file at "resources/media/" !')
+                await message.answer(f'Не удалось получить с диска {tag}')
+            else:
+                print(f'Successfully retrieved photo {tag}.png from disk')
+        else:
+            print(f'Successfully retrieved video {tag}.mp4 from disk')
+        finally:
+            print(f'There was no {tag} name')
 
     @staticmethod
     async def rebirth(message: Message):
@@ -126,7 +145,6 @@ class Phoenix:
                 continue
         await message.answer('Это все медиа в базе данных. Для всех медиа, '
                              'для которых не было выдана ошибка, теги теперь привязаны к этому боту.')
-
 
     @staticmethod
     async def fire(message: Message, bot: Bot):
@@ -151,8 +169,8 @@ class Phoenix:
                 else:
                     print(f'photo {name[0]} was downloaded')
             await asyncio.sleep(1)
-        await message.answer('Все имеющиеся в базе медиа, для которых удалось найти валидный тег, были сохрнены в папку /resources/media директории бота')
-
+        await message.answer(
+            'Все имеющиеся в базе медиа, для которых удалось найти валидный тег, были сохрнены в папку /resources/media директории бота')
 
 
 async def happy_tester(bot):
@@ -176,7 +194,8 @@ async def happy_tester(bot):
             string = string + '\n' + str(count) + '. ' + comm
             space_string = space_string + '\n' + str(count) + '. ' + comm[:comm.find("||")]
         try:
-            await bot.send_message(bata.all_data().commichannel, f'[{datetime.now().strftime("%H:%M")}] Bot @{botname} is up, detected new commits:\n {string}')
+            await bot.send_message(bata.all_data().commichannel,
+                                   f'[{datetime.now().strftime("%H:%M")}] Bot @{botname} is up, detected new commits:\n {string}')
             await s_bot.send_message('general', f'Bot @{botname} is up, detected new commits:\n {space_string}')
         except TelegramBadRequest:
             print(f'BOT NOT IN CHANNEL AND THIS MESSAGE NEED TO BE IN LOGS')
