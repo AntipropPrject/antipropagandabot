@@ -4,7 +4,6 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-
 from data_base.DBuse import poll_write, sql_safe_select, poll_get, redis_delete_from_list
 from filters.MapFilters import DonbassOptionsFilter
 from handlers.true_resons_hand import TruereasonsState

@@ -1,5 +1,4 @@
 import asyncio
-
 from aiogram import Router, F
 from aiogram import types, Bot
 from aiogram.dispatcher.fsm.context import FSMContext
@@ -7,10 +6,8 @@ from aiogram.dispatcher.fsm.state import StatesGroup, State
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-
-from data_base.DBuse import data_getter, poll_write, sql_safe_select, sql_safe_update, redis_delete_from_list, poll_get, \
-    sql_add_value, mongo_game_answer
-from filters.MapFilters import NaziFilter, RusHate_pr, NotNaziFilter, ManualFilters
+from data_base.DBuse import data_getter, poll_write, sql_safe_select, redis_delete_from_list, poll_get, mongo_game_answer
+from filters.MapFilters import NaziFilter, RusHate_pr, NotNaziFilter
 from handlers import true_resons_hand
 from resources.all_polls import nazizm, nazizm_pr
 from utilts import simple_media

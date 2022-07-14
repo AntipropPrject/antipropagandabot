@@ -5,7 +5,6 @@ from aiogram.dispatcher.fsm.state import StatesGroup, State
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-
 from data_base.DBuse import sql_safe_select, sql_select_row_like
 from filters.MapFilters import ManualFilters
 from handlers import true_resons_hand

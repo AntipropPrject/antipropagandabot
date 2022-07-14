@@ -1,12 +1,10 @@
 import csv
-from aiogram import Router, F
+from aiogram import Router
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.dispatcher.fsm.state import StatesGroup, State
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-
-from data_base.DBuse import mongo_select_info
 from handlers import true_resons_hand
 from handlers import stopwar_hand
 from handlers.true_resons_hand import reasons_who_to_blame

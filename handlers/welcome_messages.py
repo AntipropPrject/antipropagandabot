@@ -1,5 +1,3 @@
-import asyncio
-
 from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
