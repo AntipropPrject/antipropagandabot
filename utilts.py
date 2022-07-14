@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Union
 import os
 from aiogram import Bot
-from aiogram.exceptions import TelegramBadRequest, TelegramNetworkError
+from aiogram.exceptions import TelegramBadRequest, TelegramNetworkError, TelegramForbiddenError
 from aiogram.types import Message, ReplyKeyboardRemove, InlineKeyboardMarkup, ReplyKeyboardMarkup, ForceReply, \
     FSInputFile, InputFile
 
@@ -68,17 +68,20 @@ async def game_answer(message: Message, telegram_media_id: Union[int, InputFile]
 async def bot_send_spam(bot: Bot, user_id: Union[int, str], telegram_media_id: Union[int, InputFile] = None, text: str = None,
                         reply_markup: Union[InlineKeyboardMarkup, ReplyKeyboardMarkup,
                                             ReplyKeyboardRemove, ForceReply, None] = None):
-    if telegram_media_id is not None:
-        try:
-            return await bot.send_photo(user_id, photo=telegram_media_id, caption=text, reply_markup=reply_markup)
-        except TelegramBadRequest as error:
-            print(error)
+    try:
+        if telegram_media_id is not None:
             try:
-                return await bot.send_video(user_id, video=telegram_media_id, caption=text, reply_markup=reply_markup)
+                return await bot.send_photo(user_id, photo=telegram_media_id, caption=text, reply_markup=reply_markup)
             except TelegramBadRequest as error:
                 print(error)
-    else:
-        await bot.send_message(user_id, text=text, reply_markup=reply_markup, disable_web_page_preview=True)
+                try:
+                    return await bot.send_video(user_id, video=telegram_media_id, caption=text, reply_markup=reply_markup)
+                except TelegramBadRequest as error:
+                    print(error)
+        else:
+            await bot.send_message(user_id, text=text, reply_markup=reply_markup, disable_web_page_preview=True)
+    except TelegramForbiddenError as er:
+        await logg.get_error(f'{er}')
 
 
 async def dynamic_media_answer(message: Message, similarity_tag: str, row_number: int,
