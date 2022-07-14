@@ -22,7 +22,10 @@ async def smi_statement(message: Message, state: FSMContext):
     person_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
 
     data = await state.get_data()
-    person_vewed_list = list(data['person_viewed'])
+    try:
+        person_vewed_list = list(data['person_viewed'])
+    except:
+        print('not_viewed contains nothing ')
     for person in person_vewed_list:
         message_text = message.text
         trimed = message_text.rstrip(message_text[-1])
