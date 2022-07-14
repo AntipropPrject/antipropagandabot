@@ -27,6 +27,8 @@ async def smi_statement(message: Message, state: FSMContext):
         for person in person_vewed_list:
             message_text = message.text
             trimed = message_text.rstrip(message_text[-1])
+            print(trimed)
+            print(person == trimed)
             if person == trimed:
                 await state.update_data({f'{person_list[0]}_gamecount': 0})
     except:
