@@ -24,13 +24,14 @@ async def smi_statement(message: Message, state: FSMContext):
     data = await state.get_data()
     try:
         person_vewed_list = list(data['person_viewed'])
+        for person in person_vewed_list:
+            message_text = message.text
+            trimed = message_text.rstrip(message_text[-1])
+            if person == trimed:
+                await state.update_data({f'{person_list[0]}_gamecount': 0})
     except:
         print('not_viewed contains nothing ')
-    for person in person_vewed_list:
-        message_text = message.text
-        trimed = message_text.rstrip(message_text[-1])
-        if person == trimed:
-            await state.update_data({f'{person_list[0]}_gamecount': 0})
+
 
     print(person_list)
 
