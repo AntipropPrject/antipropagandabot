@@ -19,8 +19,16 @@ messageDict = dict()
 @router.message(commands=["testsmi"], flags=flags)
 async def smi_statement(message: Message, state: FSMContext):
     messageDict.update({message.from_user.id: message})
-
     person_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
+
+    data = await state.get_data()
+    person_vewed_list = list(data['person_viewed'])
+    for person in person_vewed_list:
+        message_text = message.text
+        trimed = message_text.rstrip(message_text[-1])
+        if person == trimed:
+            await state.update_data({f'{person_list[0]}_gamecount': 0})
+
     print(person_list)
 
     try:
@@ -69,7 +77,7 @@ async def smi_statement(message: Message, state: FSMContext):
         else:
             await message.answer(truth_data[4], reply_markup=nmarkup.as_markup(resize_keyboard=True))
     else:
-
+        await state.update_data(person_viewed=person_list[0])
         # await message.answer(
         #     "Ой, у меня закончились примеры",
         #     reply_markup=nmarkup.as_markup())
