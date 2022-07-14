@@ -173,7 +173,7 @@ async def smi_statement_poll(message: Message, state: FSMContext):
         print(trimed)
         print(list_to_customize)
         print(list_to_customize.__contains__(trimed))
-        if list_to_customize.__contains__(trimed):
+        if not list_to_customize.__contains__(trimed):
             await state.update_data({f'{trimed}_gamecount': 0})
         list_to_customize.remove(trimed)
     except:
