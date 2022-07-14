@@ -22,17 +22,17 @@ async def smi_statement(message: Message, state: FSMContext):
     person_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
 
     data = await state.get_data()
-    try:
-        person_vewed_list = list(data['person_viewed'])
-        for person in person_vewed_list:
-            message_text = message.text
-            trimed = message_text.rstrip(message_text[-1])
-            print(trimed)
-            print(person == trimed)
-            if person == trimed:
-                await state.update_data({f'{person_list[0]}_gamecount': 0})
-    except:
-        print('not_viewed contains nothing ')
+    # try:
+    #     person_vewed_list = list(data['person_viewed'])
+    #     for person in person_vewed_list:
+    #         message_text = message.text
+    #         trimed = message_text.rstrip(message_text[-1])
+    #         print(trimed)
+    #         print(person == trimed)
+    #         if person == trimed:
+    #             await state.update_data({f'{person_list[0]}_gamecount': 0})
+    # except:
+    #     print('not_viewed contains nothing ')
 
 
     print(person_list)
@@ -170,6 +170,10 @@ async def smi_statement_poll(message: Message, state: FSMContext):
     try:
         message_text = message.text
         trimed = message_text.rstrip(message_text[-1])
+        print(trimed)
+        print(list_to_customize.__contains__(trimed))
+        if list_to_customize.__contains__(trimed):
+            await state.update_data({f'{trimed}_gamecount': 0})
         list_to_customize.remove(trimed)
     except:
         print('дубликатов нет')
