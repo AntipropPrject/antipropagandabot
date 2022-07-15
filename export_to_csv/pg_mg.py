@@ -5,7 +5,6 @@ import psycopg2
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import FSInputFile
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-
 from bata import all_data
 import pandas
 from aiogram import Router, F
