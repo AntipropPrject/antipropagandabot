@@ -197,7 +197,7 @@ async def admin_truthgame_update(message: types.Message, state: FSMContext):
     data = await state.get_data()
     tag = data['tag']
     text = message.html_text
-    await data_getter(f"update mistakeorlie set rebuttal='{text}' where asset_name='{tag}'")
+    await data_getter(f"update mistakeorlie set rebuttal='{text}' where asset_name='{tag}'; commit;")
     nmrkup = ReplyKeyboardBuilder()
     nmrkup.row(types.KeyboardButton(text="Назад"))
     await message.answer(f"Удалось обновить текст {tag}")
@@ -214,8 +214,8 @@ async def admin_truthgame_update(message: types.Message, state: FSMContext):
     except:
         media_id = message.photo[-1].file_id
 
-    await data_getter(f"update assets set t_id='{media_id}' where name='{tag}'")
-    await data_getter(f"update mistakeorlie set rebuttal='{text}' where asset_name='{tag}'")
+    await data_getter(f"update assets set t_id='{media_id}' where name='{tag}'; commit;")
+    await data_getter(f"update mistakeorlie set rebuttal='{text}' where asset_name='{tag}'; commit;")
     nmrkup = ReplyKeyboardBuilder()
     nmrkup.row(types.KeyboardButton(text="Назад"))
     await message.answer("Удалось обновить медиа и текст ")
@@ -350,7 +350,7 @@ async def admin_truthgame_delete(message: types.Message, state: FSMContext):
 async def admin_truthgame_delete(message: types.Message, state: FSMContext):
     data = await state.get_data()
     deletion_data = (await data_getter(f'DELETE FROM truthgame WHERE id = {data["id"]} RETURNING '
-                                       f'asset_name, text_name, rebuttal, reb_asset_name'))[0]
+                                       f'asset_name, text_name, rebuttal, reb_asset_name; commit;'))[0]
     print(deletion_data)
     if deletion_data[0] is not None:
         await sql_delete('assets', {'name': deletion_data[0]})
@@ -469,7 +469,7 @@ async def menu(message: types.Message, state: FSMContext):
     nmrkup.row(types.KeyboardButton(text="Назад"))
     dick = {'truth': isTrue, 'belivers': 1, 'nonbelivers': 1}
     deletion_data = (await data_getter(f'DELETE FROM truthgame WHERE id = {data["id"]} RETURNING '
-                                       f'asset_name, text_name, rebuttal, reb_asset_name'))[0]
+                                       f'asset_name, text_name, rebuttal, reb_asset_name; commit;'))[0]
     print(deletion_data)
     if deletion_data[0] is not None:
         await sql_delete('assets', {'name': deletion_data[0]})
