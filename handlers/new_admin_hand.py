@@ -310,7 +310,7 @@ async def update_news(message: Message, state: FSMContext):
     data = await state.get_data()
     print(data['media_id'])
     print(data['coll'])
-    caption= message.caption
+    caption= message.html_text
     if message.content_type == 'photo':
         id = message.photo[0].file_id
         await mongo_update_news(m_id=data['media_id'], new_m_id=id, new_caption=caption, coll=data['coll'])
@@ -330,13 +330,13 @@ async def add_news(message: Message, state: FSMContext):
     if message.content_type == 'photo':
         id = message.photo[0].file_id
         await state.update_data(media_id=id)
-        await state.update_data(media_caption=message.caption)
+        await state.update_data(media_caption=message.html_text)
         await state.set_state(admin.add_date_for_spam)
         await message.answer("Напишите дату, на которую хотите запланировать рассылку в формате: YYYY.MM.DD")
     elif message.content_type == 'video':
         id = message.video.file_id
         await state.update_data(media_id=id)
-        await state.update_data(media_caption=message.caption)
+        await state.update_data(media_caption=message.html_text)
         await state.set_state(admin.add_date_for_spam)
         await message.answer("Напишите дату, на которую хотите запланировать рассылку в формате: YYYY.MM.DD")
     else:
@@ -347,7 +347,7 @@ async def add_news(message: Message, state: FSMContext):
 @router.message(state=admin.add_date_for_spam)
 async def add_news(message: Message, state: FSMContext):
     try:
-        datetime.strptime(message.text, '%d.%m.%Y')
+        datetime.strptime(message.text, '%Y.%m.%d')
         await state.update_data(plan_data=message.text)
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="1️⃣1️⃣:0️⃣0️⃣"))
@@ -399,13 +399,13 @@ async def add_news(message: Message, state: FSMContext):
     nmarkup.button(text='Добавить новость', callback_data=str(coll))
     if message.content_type == 'photo':
         id = message.photo[0].file_id
-        await mongo_add_news(id, str(message.caption), coll=str(coll))
+        await mongo_add_news(id, str(message.html_text), coll=str(coll))
         await state.set_state(admin.spam_menu)
         await message.answer("Новость добавлена", reply_markup=spam_admin_keyboard())
         await message.answer('Хотите добавить еще одну?', reply_markup=nmarkup.as_markup())
     elif message.content_type == 'video':
         id = message.video.file_id
-        await mongo_add_news(id, str(message.caption), coll=str(coll))
+        await mongo_add_news(id, str(message.html_text), coll=str(coll))
         await state.set_state(admin.spam_menu)
 
         await message.answer("Новость добавлена", reply_markup=spam_admin_keyboard())
