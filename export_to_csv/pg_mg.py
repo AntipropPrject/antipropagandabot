@@ -21,7 +21,37 @@ router = Router()
 
 
 @router.message(IsSudo(), F.text.contains('Экспорт') | F.text.contains('Создать копию'))
-async def mongo_export_to_file(message: types.Message, state: FSMContext):
+async def export(message: types.Message, state: FSMContext):
+    await mongo_export_to_file()
+    today = datetime.today()
+    today = today.strftime("%d-%m-%Y")
+    current_datetime = datetime.now()
+    ch = current_datetime.hour
+    mn = current_datetime.minute
+    try:
+        await message.answer_document(FSInputFile(f"export_to_csv/backups/backup-{today}-{ch}-{mn}.zip"),
+                                      caption=f"Type: backup base\n\n"
+                                              f"Date: {today}\n"
+                                              f"Time: {ch}:{mn} (UTC)")
+        await asyncio.sleep(0.1)
+        await message.answer_document(FSInputFile(f'log/logs/Log-{today}.log'), caption=f"Type: logs\n\n"
+                                                                                        f"Date: {today}\n"
+                                                                                        f"Time: {ch}:{mn} (UTC)")
+
+        if message.text == 'Создать копию':
+            nmarkup = ReplyKeyboardBuilder()
+            nmarkup.row(types.KeyboardButton(text="Назад"))
+            await message.answer("Теперь вы можете продолжить восстановление\n\n"
+                                 "Отправьте мне backup архив для восстановления базы.",
+                                 reply_markup=nmarkup.as_markup(resize_keyboard=True))
+            await state.set_state(admin.import_csv)
+    except:
+        await message.answer("Файл не успел отправиться, возможно стоит доработать эту функцию")
+
+
+
+
+async def mongo_export_to_file():
     today = datetime.today()
     today = today.strftime("%d-%m-%Y")
     current_datetime = datetime.now()
@@ -29,11 +59,30 @@ async def mongo_export_to_file(message: types.Message, state: FSMContext):
     mn = current_datetime.minute
     client = all_data().get_mongo()
     database = client['database']
-    collection = database['userinfo']
+    collection_1 = database['userinfo']
+    collection_2 = database['statistics']
+    collection_3 = database['admins']
+    collection_4 = database['spam_actual_news']
+    collection_5 = database['spam_news_main']
+    collection_6 = database['user_games']
+    collection_7 = database['useranswer']
     # make an API call to the MongoDB server
-    mongo_docs = collection.find()
+    mongo_docs_1 = collection_1.find()
+    mongo_docs_2 = collection_2.find()
+    mongo_docs_3 = collection_3.find()
+    mongo_docs_4 = collection_4.find()
+    mongo_docs_5 = collection_5.find()
+    mongo_docs_6 = collection_6.find()
+    mongo_docs_7 = collection_7.find()
     # Convert the mongo docs to a DataFrame
-    docs = pandas.DataFrame(mongo_docs)
+    docs_1 = pandas.DataFrame(mongo_docs_1)
+    docs_2 = pandas.DataFrame(mongo_docs_2)
+    docs_3 = pandas.DataFrame(mongo_docs_3)
+    docs_4 = pandas.DataFrame(mongo_docs_4)
+    docs_5 = pandas.DataFrame(mongo_docs_5)
+    docs_6 = pandas.DataFrame(mongo_docs_6)
+    docs_7 = pandas.DataFrame(mongo_docs_7)
+
     path = 'export_to_csv/backups'
     path_mongo = 'export_to_csv/backups/MongoDB'
     path_pg = 'export_to_csv/backups/PostgreSQL'
@@ -51,9 +100,29 @@ async def mongo_export_to_file(message: types.Message, state: FSMContext):
         await logg.get_error(er)
     # compute the output file directory and name
     output_dir_mongo = os.path.join('export_to_csv', 'backups', 'MongoDB')
-    output_file = os.path.join(output_dir_mongo, 'Mongo_user-' + today + '.csv')
-    docs.to_csv(output_file, ",", index=False)  # CSV delimited by commas
-    export_zip.write(output_file)
+    output_file_1 = os.path.join(output_dir_mongo, 'Mongo_user-' + today + '.csv')
+    output_file_2 = os.path.join(output_dir_mongo, 'Mongo_statistics-' + today + '.csv')
+    output_file_3 = os.path.join(output_dir_mongo, 'Mongo_admins-' + today + '.csv')
+    output_file_4 = os.path.join(output_dir_mongo, 'Mongo_spam_actual_news-' + today + '.csv')
+    output_file_5 = os.path.join(output_dir_mongo, 'Mongo_spam_news_main-' + today + '.csv')
+    output_file_6 = os.path.join(output_dir_mongo, 'Mongo_user_games-' + today + '.csv')
+    output_file_7 = os.path.join(output_dir_mongo, 'Mongo_useranswer-' + today + '.csv')
+
+    docs_1.to_csv(output_file_1, ",", index=False)
+    export_zip.write(output_file_1)
+    docs_2.to_csv(output_file_2, ",", index=False)
+    export_zip.write(output_file_2)
+    docs_3.to_csv(output_file_3, ",", index=False)
+    export_zip.write(output_file_3)
+    docs_4.to_csv(output_file_4, ",", index=False)
+    export_zip.write(output_file_4)
+    docs_5.to_csv(output_file_5, ",", index=False)
+    export_zip.write(output_file_5)
+    docs_6.to_csv(output_file_6, ",", index=False)
+    export_zip.write(output_file_6)
+    docs_7.to_csv(output_file_7, ",", index=False)
+    export_zip.write(output_file_7)
+
     conn = all_data().get_postg()
     with conn:
         with conn.cursor() as cur:
@@ -140,27 +209,10 @@ async def mongo_export_to_file(message: types.Message, state: FSMContext):
         filelist = [f for f in os.listdir(mydir_PostgreSQL) if f.endswith(".csv")]
         for f in filelist:
             os.remove(os.path.join(mydir_PostgreSQL, f))
-    except:
-        pass
+    except Exception as er:
+        await logg.get_error(f"ЭКСПОРТ: {er}")
     export_zip.close()
 
-    try:
-        await message.answer_document(FSInputFile(f"export_to_csv/backups/backup-{today}-{ch}-{mn}.zip"), caption=f"Type: backup base\n\n"
-                                                                                                    f"Date: {today}\n"
-                                                                                                    f"Time: {ch}:{mn} (UTC)")
-        await asyncio.sleep(0.1)
-        await message.answer_document(FSInputFile(f'log/logs/Log-{today}.log'), caption=f"Type: logs\n\n"
-                                                                                        f"Date: {today}\n"
-                                                                                        f"Time: {ch}:{mn} (UTC)")
-
-        if message.text == 'Создать копию':
-            nmarkup = ReplyKeyboardBuilder()
-            nmarkup.row(types.KeyboardButton(text="Назад"))
-            await message.answer("Теперь вы можете продолжить восстановление\n\n"
-                                 "Отправьте мне backup архив для восстановления базы.", reply_markup=nmarkup.as_markup(resize_keyboard=True))
-            await state.set_state(admin.import_csv)
-    except:
-        await message.answer("Файл не успел отправиться, возможно стоит доработать эту функцию")
 
 async def backin():
     con = all_data().get_postg()
@@ -328,7 +380,6 @@ async def backin():
     # backin CSV
     try:
         csv_file_name = path_in + 'PostgreSQL/assets.csv'
-        print(csv_file_name)
         sql = "COPY assets FROM STDIN DELIMITER ',' CSV HEADER"
         cur.copy_expert(sql, open(csv_file_name, "r"))
     except Exception as error:

@@ -1,15 +1,12 @@
 import asyncio
-import time
-from asyncio import events
 from datetime import datetime
-
 from aiogram import Dispatcher
 from aiogram.client.session import aiohttp
 from aiogram.dispatcher.fsm.storage.redis import RedisStorage
-
 import bata
 from bata import all_data
 from day_func import day_count
+from export_to_csv.pg_mg import mongo_export_to_file
 from handlers import start_hand, anti_prop_hand, smi_hand, donbass_hand, true_resons_hand, putin_hand, stopwar_hand, \
     nazi_hand, preventive_strike, new_admin_hand, welcome_messages, status, main_menu_hand, admin_for_games
 from export_to_csv import pg_mg
@@ -32,10 +29,14 @@ async def periodic():
         #удаление дневного счетчика
         if c_time == '21:00:01':
             await day_count(count_delete=True)
+        if c_time == '07:00:01':
+            await mongo_export_to_file()
         if c_time == '08:00:01':
             await start_spam(f'{date} 11:00')
         if c_time == '16:00:01':
             await start_spam(f'{date} 19:00')
+        if c_time == '19:00:01':
+            await mongo_export_to_file()
         await asyncio.sleep(1)
 
 
