@@ -99,7 +99,7 @@ async def antip_all_yes_TV(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_all_yes_TV'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message(TVPropagandaFilter(option="Скорее нет"), ((F.text == "Хорошо 👌") |
