@@ -34,7 +34,6 @@ async def smi_statement(message: Message, state: FSMContext):
     # except:
     #     print('not_viewed contains nothing ')
 
-
     print(person_list)
 
     try:
@@ -44,8 +43,12 @@ async def smi_statement(message: Message, state: FSMContext):
         count = 0
 
     how_many_rounds = (await data_getter(
-            f"SELECT COUNT (*) FROM public.mistakeorlie where asset_name like '%{str(person_list[0])[-5:-1].strip()}%'"))[
-            0][0]
+        f"SELECT COUNT (*) FROM public.mistakeorlie where asset_name like '%{str(person_list[0])[-5:-1].strip()}%'"))[
+        0][0]
+    try:
+        how_many_rounds_redis = (await state.get_data())[f'{person_list[0]}_howmanyrounds']
+    except:
+        await state.update_data({f'{person_list[0]}_howmanyrounds': how_many_rounds})
 
     print(f"В таблице {how_many_rounds} записей, а вот счетчик сейчас {count}")
     if count < how_many_rounds:
@@ -132,7 +135,13 @@ async def smi_statement_enough(message: Message, state: FSMContext):
 
 @router.message((F.text == "Достаточно 🤚"), flags=flags)
 async def sme_statement_start_over(message: Message, state: FSMContext):
-    await redis_delete_first_item(f"Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:")
+    person_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
+    person = person_list[0]
+    data = await state.get_data()
+    print(data[f"{person}_howmanyrounds"])
+    print(data[f"{person}_gamecount"])
+    if data[f"{person}_howmanyrounds"] == data[f"{person}_gamecount"]:
+        await redis_delete_first_item(f"Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:")
     person_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
     print(person_list)
 
@@ -142,7 +151,7 @@ async def sme_statement_start_over(message: Message, state: FSMContext):
         await antip_truth_game_start(message, state)
     else:
         nmarkup = ReplyKeyboardBuilder()
-        options = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons_newpoll:')
+        options = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
         for person in options:
             nmarkup.row(types.KeyboardButton(text=f'{person}🗣'))
             nmarkup.adjust(2)
@@ -199,6 +208,7 @@ async def sme_statement_skip(message: Message, state=FSMContext):
     data = await state.get_data()
 
     not_viewed = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
+
     try:
         next_channel = str(not_viewed[0])
     except:
