@@ -16,3 +16,15 @@ class Status(BaseFilter):
                 return False
         except:
             return False
+
+class Status_spam(BaseFilter):
+    async def __call__(self, message: Message) -> bool:
+        status = await redis_just_one_read('Usrs: admins: spam: status:')
+        try:
+            if '1' in status:
+                return True
+
+            else:
+                return False
+        except:
+            return False

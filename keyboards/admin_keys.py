@@ -116,12 +116,22 @@ def app_admin_keyboard():
     nmarkup.adjust(1, 1)
     return nmarkup.as_markup(resize_keyboard=True)
 
-def spam_admin_keyboard():
+async def spam_admin_keyboard():
+    try:
+        status = await redis_just_one_read('Usrs: admins: spam: status:')
+    except:
+        pass
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Главные новости"))
     nmarkup.row(types.KeyboardButton(text="Актуальные новости"))
     nmarkup.row(types.KeyboardButton(text="Создать рассылку"))
-    nmarkup.row(types.KeyboardButton(text="Выключить рассылку 🟢"))
+    try:
+        if '1' in status:
+            nmarkup.row(types.KeyboardButton(text="Выключить рассылку 🟢"))
+        else:
+            nmarkup.row(types.KeyboardButton(text="Включить рассылку 🔴"))
+    except:
+        nmarkup.row(types.KeyboardButton(text="Включить рассылку 🔴"))
     nmarkup.row(types.KeyboardButton(text="Возврат в главное меню"))
     return nmarkup.as_markup(resize_keyboard=True)
 

@@ -5,6 +5,7 @@ from aiogram.client.session import aiohttp
 from aiogram.dispatcher.fsm.storage.redis import RedisStorage
 import bata
 from bata import all_data
+from data_base.DBuse import redis_just_one_read
 from day_func import day_count
 from export_to_csv.pg_mg import mongo_export_to_file
 from handlers import start_hand, anti_prop_hand, smi_hand, donbass_hand, true_resons_hand, putin_hand, stopwar_hand, \
@@ -24,6 +25,10 @@ dp = Dispatcher(storage)
 async def periodic():
     print('periodic function has been started')
     while True:
+        try:
+            status_spam = await redis_just_one_read('Usrs: admins: spam: status:')
+        except:
+            pass
         c_time = datetime.now().strftime("%H:%M:%S")
         date = datetime.now().strftime('%Y.%m.%d')
         #удаление дневного счетчика
@@ -31,10 +36,11 @@ async def periodic():
             await day_count(count_delete=True)
         if c_time == '07:00:01':
             await mongo_export_to_file()
-        if c_time == '08:00:01':
-            await start_spam(f'{date} 11:00')
-        if c_time == '16:00:01':
-            await start_spam(f'{date} 19:00')
+        if status_spam == '1':
+            if c_time == '08:00:01':
+                await start_spam(f'{date} 11:00')
+            if c_time == '16:00:01':
+                await start_spam(f'{date} 19:00')
         if c_time == '19:00:01':
             await mongo_export_to_file()
         await asyncio.sleep(1)
