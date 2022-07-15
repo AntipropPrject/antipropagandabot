@@ -211,6 +211,7 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FS
     markup.row(types.KeyboardButton(text="Да, полностью доверяю ✅"),
                types.KeyboardButton(text="Нет, не верю ни слову ⛔"))
     markup.row(types.KeyboardButton(text="Скорее да 👍"), types.KeyboardButton(text="Скорее нет 👎"))
+    markup.row(types.KeyboardButton(text="Не знаю, потому что не смотрю ни новости по ТВ, ни их интернет-версию 🤷‍♂"))
 
     text = await sql_safe_select("text", "texts", {"name": "start_belive_TV"})
     await bot.send_message(chat_id=poll_answer.user.id, text=text,
@@ -222,7 +223,7 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FS
 async def message_8(message: types.Message, state: FSMContext):
     text = message.text
     if text == "Да, полностью доверяю ✅" or text == "Скорее да 👍" or \
-            text == "Скорее нет 👎" or text == "Нет, не верю ни слову ⛔":
+            text == "Скорее нет 👎" or text == "Нет, не верю ни слову ⛔" or text == "Не знаю, потому что не смотрю ни новости по ТВ, ни их интернет-версию 🤷‍♂":
         # сохранение 3 вопроса
         await poll_write(f'Usrs: {message.from_user.id}: Start_answers: tv:', message.text)
         await state.update_data(option_3=web_prop)

@@ -64,6 +64,7 @@ class TVPropagandaFilter(BaseFilter):
         return False
 
 
+
 class WebPropagandaFilter(BaseFilter):
 
     async def __call__(self, message: Message) -> Union[bool, Dict[str, Any]]:

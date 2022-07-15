@@ -84,6 +84,14 @@ async def antiprop_rather_yes_start(message: Message):
     nmarkup.row(types.KeyboardButton(text="Ну удиви меня 🤔"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
+@router.message(TVPropagandaFilter(option="Не знаю, потому что не смотрю ни новости по ТВ, ни их интернет-версию 🤷‍♂"), ((F.text == "Хорошо 👌") |
+                (F.text.contains('явная ложь')) | (F.text.contains('Не знаю, давай'))))
+async def antiprop_rather_yes_start_no_tv(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'antiprop_rather_yes_start_no_tv'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Пропустим этот шаг 👉"))
+    nmarkup.row(types.KeyboardButton(text="Покажи ложь на ТВ - мне интересно посмотреть! 📺"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 @router.message(TVPropagandaFilter(option="Да, полностью доверяю"), ((F.text == "Хорошо 👌") |
                 (F.text.contains('явная ложь')) | (F.text.contains('Не знаю, давай'))))
