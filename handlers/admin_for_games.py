@@ -1487,11 +1487,11 @@ async def admin_home(message: types.Message, state: FSMContext):
         print(er)
         await message.answer("Упс.. Что-то пошло не так, пожалуйста обратитесь к разработчиками")
 
-
-@router.message((F.text.contains('Отменить изменения')), state=admin.mass_media_Done)
+@router.message((F.text.contains('Отменить изменения')), state=(admin.mass_media_Done, admin.mass_media_pop_Done, admin.mass_media_edit_add))
 async def admin_home(message: types.Message, state: FSMContext):
+    await state.clear()
+    await state.set_state(admin.mass_media_menu)
     await message.answer('Отмена..', reply_markup=admin_games_keyboard())
-
 
 @router.message((F.text.contains('Подтвердить')), state=admin.mass_media_Done)
 async def admin_home(message: types.Message, state: FSMContext):
