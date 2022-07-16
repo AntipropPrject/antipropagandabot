@@ -13,7 +13,7 @@ class all_data():
         self.super_admins = [5429649862, 5177494340, 5581082758, 5316104187, 784006905]
         self.THROTTLE_TIME = 0.8
         self.commichannel = -1001704405613
-
+        self.masterchannel = -1001665168587
 # фывфывфдв
     def get_bot(self):
         return Bot(self.bot_token, parse_mode="HTML")

@@ -171,7 +171,7 @@ async def reasons_lie_no_more_1(message: Message):
 @router.message((F.text.contains('размещение военных баз')), flags=flags)
 async def reasons_lie_no_more_2(message: Message):
     await poll_write(f'Usrs: {message.from_user.id}: Start_answers: Invasion:',
-                     "💂 Предотвратить размещение военных баз НАТО в Украине")
+                     "💂 Предотвратить размещение военных баз НАТО на Украине")
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_lie_no_more_2'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Продолжим 👌'))
@@ -188,7 +188,7 @@ async def reasons_lie_no_more_3(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(WarReason(answer="💂 Предотвратить размещение военных баз НАТО в Украине"), flags=flags)
+@router.message(WarReason(answer="💂 Предотвратить размещение военных баз НАТО на Украине"), flags=flags)
 async def reasons_big_bad_nato(message: Message):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Start_answers: Invasion:', welc_message_one[8])
     nmarkup = ReplyKeyboardBuilder()
@@ -496,7 +496,7 @@ async def reasons_why_support_war(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(((F.text.contains('не нужна эта война...')) | (F.text == "Я не знаю...😨")),
+@router.message(((F.text.contains('не нужна эта война...🙅')) | (F.text == "Я не знаю...😨")),
                 state=TruereasonsState.final, flags=flags)
 async def reasons_now_he_normal(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_now_he_normal'})
@@ -513,7 +513,7 @@ async def reasons_now_he_normal(message: Message, state: FSMContext):
 async def reasons_he_needs_war(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Покажи текст песни 📝"))
-    nmarkup.row(types.KeyboardButton(text="Я передумал(а), мне не нужна эта война..."))
+    nmarkup.row(types.KeyboardButton(text="Я передумал(а), мне не нужна эта война...🙅"))
     await simple_media(message, 'reasons_he_needs_war', nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -522,7 +522,7 @@ async def reasons_generation_z(message: Message):
     await simple_media(message, 'reasons_generation_Z', ReplyKeyboardRemove())
     await asyncio.sleep(4)
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Я передумал(а), мне не нужна эта война..."))
+    nmarkup.row(types.KeyboardButton(text="Я передумал(а), мне не нужна эта война...🙅"))
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_generation_Z_1'})
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
