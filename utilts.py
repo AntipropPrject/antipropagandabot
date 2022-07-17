@@ -55,8 +55,7 @@ async def game_answer(message: Message, telegram_media_id: Union[int, InputFile]
     if telegram_media_id is not None:
         try:
             return await message.answer_photo(telegram_media_id, caption=text, reply_markup=reply_markup)
-        except TelegramBadRequest as error:
-            print(error)
+        except TelegramBadRequest:
             try:
                 return await message.answer_video(telegram_media_id, caption=text, reply_markup=reply_markup)
             except TelegramBadRequest as error:
