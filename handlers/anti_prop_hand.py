@@ -332,55 +332,44 @@ async def antip_not_only_TV(message: Message, web_lies_list: List[str], state: F
     answer_id_str = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: ethernet_id:')
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Покажи новость 👀"))
-    lies_list = web_lies_list
-    answer_id_int = []
-
-    all_answers = web_prop.copy()
-    for i in answer_id_str:
-        answer_id_int.append(int(i))  # числа ответов пользователя
+    all_answers_user = web_lies_list.copy()
     try:
-        answer_id_int.remove(2)
-        lies_list.remove('Meduza / BBC / Радио Свобода / Медиазона / Настоящее время / Популярная Политика')
-        all_answers.remove('Meduza / BBC / Радио Свобода / Медиазона / Настоящее время / Популярная Политика')
+        all_answers_user.remove('Meduza / BBC / Радио Свобода / Медиазона / Настоящее время / Популярная Политика')
     except:
         pass
     try:
-        answer_id_int.remove(7)
-        lies_list.remove('Википедия')
-        all_answers.remove("Википедия")
+        all_answers_user.remove("Википедия")
     except:
         pass
     try:
-        answer_id_int.remove(6)
-        lies_list.remove('Яндекс.Новости')
-        all_answers.remove("Яндекс.Новости")
+        all_answers_user.remove("Яндекс")
     except:
         pass
     try:
-        answer_id_int.remove(8)
-        lies_list.remove('Никому из них...')
-        all_answers.remove("Никому из них...")
+        all_answers_user.remove("Никому из них...")
     except:
         pass
 
-    await state.update_data(all_answers=all_answers)  # Все ответы опроса
-    await state.update_data(answers_int=answer_id_int)  # Все ответы пользователя индексы
-    await state.update_data(answers_str=lies_list)  # Все ответы пользователя строки
-    channel = lies_list[0]
-    #antip_not_only_TV
+    await state.update_data(RIANEWS_c=0)
+    await state.update_data(RUSSIATODAY_c=0)
+    await state.update_data(TCHANEL_WAR_c=0)
+    await state.update_data(TACC_c=0)
+    await state.update_data(MINISTRY_c=0)
+    await state.update_data(count_news=0)
+    await state.update_data(all_answers_user=all_answers_user)  # Список ответов пользователя
+    channel = all_answers_user[0]
     text = await sql_safe_select('text', 'texts', {'name': 'antip_not_only_TV'})
     text = text.replace('[[первый красный источник]]', channel)
     text = text.replace('[[ещё раз название источника]]', channel)
-
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 async def keyboard_for_next_chanel(text):
     markup = ReplyKeyboardBuilder()
     if text:
-        markup.row(types.KeyboardButton(text=text))
+        markup.row(types.KeyboardButton(text=text + ' 👀'))
     markup.row(types.KeyboardButton(text="Достаточно, мне все понятно 🤚"))
-    return markup
+    return markup.as_markup(resize_keyboard=True)
 
 
 async def keyboard_for_all_chanel(lst_kb):
@@ -390,20 +379,44 @@ async def keyboard_for_all_chanel(lst_kb):
         markup.row(types.KeyboardButton(text=button + ' 👀'))
         markup.adjust(2)
     markup.row(types.KeyboardButton(text='Хватит, пропустим остальные источники 🙅‍♂️'))
-    return markup
+    return markup.as_markup(resize_keyboard=True)
 
 
-async def check_name(tag):
-    try:
-        conn = all_data().get_postg()
-        with conn:
-            with conn.cursor() as cur:
-                cur.execute(f"SELECT t_id from public.assets WHERE name = '{tag}';")
-                data = cur.fetchall()
-        conn.close()
-        return data[0]
-    except:
-        return False
+async def get_tag(viewed_channel) -> str:
+    if 'РИА Новости' in viewed_channel:
+        return 'RIANEWS'
+    elif 'Russia Today' in viewed_channel:
+        return 'RUSSIATODAY'
+    elif 'Телеграм-канал: Война' in viewed_channel:
+        return 'TCHANEL_WAR'
+    elif 'ТАСС / Комсомольская правда' in viewed_channel:
+        return 'TACC'
+    elif 'Министерство' in viewed_channel:
+        return 'MINISTRY'
+
+
+async def get_count(tag: str, state) -> int:
+    data = await state.get_data()
+    if 'RIANEWS' == tag:
+        count = data['RIANEWS_c']
+        await state.update_data(RIANEWS_c=count + 1)
+        return count
+    elif 'RUSSIATODAY' == tag:
+        count = data['RUSSIATODAY_c']
+        await state.update_data(RUSSIATODAY_c=count + 1)
+        return count
+    elif 'TCHANEL_WAR' == tag:
+        count = data['TCHANEL_WAR_c']
+        await state.update_data(TCHANEL_WAR_c=count + 1)
+        return count
+    elif 'TACC' == tag:
+        count = data['TACC_c']
+        await state.update_data(TACC_c=count + 1)
+        return count
+    elif 'MINISTRY' == tag:
+        count = data['MINISTRY_c']
+        await state.update_data(MINISTRY_c=count + 1)
+        return count
 
 
 @router.message(((F.text.contains('Покажи новость 👀')) | (F.text.contains('РИА Новости 👀')) | (
@@ -415,187 +428,77 @@ async def check_name(tag):
         F.text.contains('еще')), flags=flags)  # вход в цикл
 async def show_the_news(message: types.Message, state: FSMContext):
     data = await state.get_data()
+    all_answers_user = data['all_answers_user']
+    markup = ReplyKeyboardBuilder()
+    markup.row(types.KeyboardButton(text='Новость посмотрел(а). Что с ней не так? 🤔'))
     if message.text == 'Покажи новость 👀':
-        markup = ReplyKeyboardBuilder()
-        markup.row(types.KeyboardButton(text="Новость посмотрел(а). Что с ней не так? 🤔"))
-        # получить самый первый источник из списка выбранных каналов
-        user_answer_str = data['answers_str']
-        one_channel = channels[channels.index(user_answer_str[0])]  # получаю первый канал из ответа пользователя
-        await state.update_data(count_news_ria=1)  # Ставлю счетчик на 0 для первой новости
-        await state.update_data(count_news_rt=1)
-        await state.update_data(count_news_tch=1)
-        await state.update_data(count_news_tacc=1)
-        await state.update_data(count_news_minst=1)
-        if one_channel == web_prop[0]:
-            tag_media = 'RIANEWS_media_'
-        elif one_channel == web_prop[1]:
-            tag_media = 'RUSSIATODAY_media_'
-        elif one_channel == web_prop[3]:
-            tag_media = 'TCHANEL_WAR_media_'
-        elif one_channel == web_prop[4]:
-            tag_media = 'TACC_media_'
-        elif one_channel == web_prop[5]:
-            tag_media = 'MINISTRY_media_'
-        await simple_media(message, tag_media + "1",
-                           reply_markup=markup.as_markup(resize_keyboard=True))  # Получаю id видео
-        await state.update_data(viewed_channel=user_answer_str[0])  # передаю канал для разоблачения
-        await state.update_data(all_viwed=[user_answer_str[0]])  # записываю просмотренный источник
+        tag = await get_tag(all_answers_user[0])
+        news = await data_getter(f"SELECT name FROM assets WHERE name LIKE '{tag}_media_%'")
+        count = await get_count(tag, state)
+        await state.update_data(viewed_channel=all_answers_user[0])
+        await state.update_data(actual_count=count)
+        await simple_media(message, news[count][0], reply_markup=markup.as_markup(resize_keyboard=True))
     elif message.text != 'Хорошо, давай вернемся и посмотрим 👀':
-        markup = ReplyKeyboardBuilder()
-        markup.row(types.KeyboardButton(text="Новость посмотрел(а). Что с ней не так? 🤔"))
+        tag = await get_tag(message.text)
+        news = await data_getter(f"SELECT name FROM assets WHERE name LIKE '{tag}_media_%'")
+        count = await get_count(tag, state)
         await state.update_data(viewed_channel=message.text[:-2])
-        other_channel = message.text[:-2]
-        if other_channel == web_prop[0]:
-            tag_media = 'RIANEWS_media_'
-            new_data = data['count_news_ria']
-        elif other_channel == web_prop[1]:
-            tag_media = 'RUSSIATODAY_media_'
-            new_data = data['count_news_rt']
-        elif other_channel == web_prop[3]:
-            tag_media = 'TCHANEL_WAR_media_'
-            new_data = data['count_news_tch']
-        elif other_channel == web_prop[4]:
-            tag_media = 'TACC_media_'
-            new_data = data['count_news_tacc']
-        elif other_channel == web_prop[5]:
-            tag_media = 'MINISTRY_media_'
-            new_data = data['count_news_minst']
-        if other_channel != 'Хватит, пропустим остальные источники 🙅‍♂️':
-            viewed = data["all_viwed"]
-
-            viewed.append(other_channel)
-            await state.update_data(all_viwed=list(set(viewed)))  # Список просмотренных источников
-
-
-        await simple_media(message, tag_media + str(new_data), reply_markup=markup.as_markup(resize_keyboard=True))
-
+        await state.update_data(actual_count=count)
+        await simple_media(message, news[count][0], reply_markup=markup.as_markup(resize_keyboard=True))
     elif message.text == 'Хорошо, давай вернемся и посмотрим 👀':
-        markup = ReplyKeyboardBuilder()
-        markup.row(types.KeyboardButton(text="Новость посмотрел(а). Что с ней не так? 🤔"))
-        other_channel = data['not_viewed_chanel']
-        tag_media = ''
-        if other_channel == web_prop[0]:
-            tag_media = 'RIANEWS_media_'
-            new_data = data['count_news_ria']
-        elif other_channel == web_prop[1]:
-            tag_media = 'RUSSIATODAY_media_'
-            new_data = data['count_news_rt']
-        elif other_channel == web_prop[3]:
-            tag_media = 'TCHANEL_WAR_media_'
-            new_data = data['count_news_tch']
-        elif other_channel == web_prop[4]:
-            tag_media = 'TACC_media_'
-            new_data = data['count_news_tacc']
-        elif other_channel == web_prop[5]:
-            tag_media = 'MINISTRY_media_'
-            new_data = data['count_news_minst']
-        await state.update_data(viewed_channel=other_channel)
-        if other_channel != 'Хватит, пропустим остальные источники 🙅‍♂️':
-            viewed = data["all_viwed"]
-            viewed.append(other_channel)
-            await state.update_data(all_viwed=list(set(viewed)))  # Список просмотренных источников
-        await simple_media(message, tag_media + str(new_data), reply_markup=markup.as_markup(resize_keyboard=True))
-    else:
-        await message.answer('Неправильная команда')
-        await poll_get(f'Usrs: {message.from_user.id}: Start_answers: ethernet:')
+        not_viewed_chanel = data['not_viewed_chanel']
+        tag = await get_tag(not_viewed_chanel)
+        news = await data_getter(f"SELECT name FROM assets WHERE name LIKE '{tag}_media_%'")
+        count = await get_count(tag, state)
+        await state.update_data(viewed_channel=not_viewed_chanel)
+        await state.update_data(actual_count=count)
+        await simple_media(message, news[count][0], reply_markup=markup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text.contains('Новость посмотрел(а). Что с ней не так? 🤔')), flags=flags)
 async def revealing_the_news(message: types.Message, state: FSMContext):
     data = await state.get_data()
-    viewed_channel = data['viewed_channel']  # Просматриваемый канал  менять эту дату для следующих каналов
-
-    tag_exposure = ''
-    if viewed_channel == web_prop[0]:
-        tag_exposure = 'RIANEWS_exposure_'
-        count_news = data['count_news_ria']
-    elif viewed_channel == web_prop[1]:
-        tag_exposure = 'RUSSIATODAY_exposure_'
-        count_news = data['count_news_rt']
-    elif viewed_channel == web_prop[3]:
-        tag_exposure = 'TCHANEL_WAR_exposure_'
-        count_news = data['count_news_tch']
-    elif viewed_channel == web_prop[4]:
-        tag_exposure = 'TACC_exposure_'
-        count_news = data['count_news_tacc']
-    elif viewed_channel == web_prop[5]:
-        tag_exposure = 'MINISTRY_exposure_'
-        count_news = data['count_news_minst']
-    check_end = await check_name(tag_exposure + str(count_news + 1))
-    if check_end is not False:  # Проверка если новости закончились
-        if str(viewed_channel) != 'Министерство обороны РФ':
-            markup = await keyboard_for_next_chanel(f"Покажи еще новость с {viewed_channel} 👀")
-        else:
-            markup = await keyboard_for_next_chanel(f"Покажи еще новость от Министерства обороны РФ 👀")
-        await simple_media(message, tag_exposure + str(count_news), reply_markup=markup.as_markup(resize_keyboard=True))
+    count = data['actual_count']
+    all_answers_user = data['all_answers_user']
+    viewed_channel = data['viewed_channel']  # Просматриваемый канал  менять это для следующих каналов
+    tag = await get_tag(viewed_channel)
+    news_exposure = await data_getter(f"SELECT name FROM assets WHERE name LIKE '{tag}_exposure_%'")
+    if len(news_exposure) > count+1:
+        keyboard = await keyboard_for_next_chanel(f'Покажи еще новость с {viewed_channel}')
+        await simple_media(message, news_exposure[count][0], reply_markup=keyboard)
     else:
-        all_channel = data['answers_str']
-        all_view = data['all_viwed']
-        all_view.remove(viewed_channel)
-        all_channel.remove(viewed_channel)
-
-        await state.update_data(answers_str=all_channel)
-        await state.update_data(all_viwed=all_view)
+        all_answers_user.remove(viewed_channel)
+        await state.update_data(all_answers_user=all_answers_user)
+        count_news = data['count_news']
+        await state.update_data(count_news=count_news + 1)  # просмотренные каналы
         markup = ReplyKeyboardBuilder()
-        markup.row(types.KeyboardButton(text="Достаточно, мне все понятно 🤚"))
-        await simple_media(message, tag_exposure + str(count_news), reply_markup=markup.as_markup(resize_keyboard=True))
+        markup.row(types.KeyboardButton(text='Достаточно, мне все понятно 🤚'))
+        await simple_media(message, news_exposure[count][0], reply_markup=markup.as_markup(resize_keyboard=True))
 
 
 @router.message(text_contains=('Покажи', 'еще', 'новость'), content_types=types.ContentType.TEXT, text_ignore_case=True,
                 flags=flags)
 async def show_more(message: types.Message, state: FSMContext):
     data = await state.get_data()
-    viewed_channel = data['viewed_channel']  # Просматриваемый канал
-    tag_media = ''
-    if viewed_channel == web_prop[0]:
-        tag_media = 'RIANEWS_media_'
-        new_data = data['count_news_ria'] + 1
-        await state.update_data(count_news_ria=new_data)
-    elif viewed_channel == web_prop[1]:
-        tag_media = 'RUSSIATODAY_media_'
-        new_data = data['count_news_rt'] + 1
-        await state.update_data(count_news_rt=new_data)
-    elif viewed_channel == web_prop[3]:
-        tag_media = 'TCHANEL_WAR_media_'
-        new_data = data['count_news_tch'] + 1
-        await state.update_data(count_news_tch=new_data)
-    elif viewed_channel == web_prop[4]:
-        tag_media = 'TACC_media_'
-        new_data = data['count_news_tacc'] + 1
-        await state.update_data(count_news_tacc=new_data)
-    elif viewed_channel == web_prop[5]:
-        tag_media = 'MINISTRY_media_'
-        new_data = data['count_news_minst'] + 1
-        await state.update_data(count_news_minst=new_data)
+    viewed_channel = data['viewed_channel']  # Просматриваемый канал  менять это для следующих каналов
+    tag = await get_tag(viewed_channel)
+    count = await get_count(tag, state)
+    actual_count = data['actual_count']
+    await state.update_data(actual_count=actual_count+1)
+    news_media = await data_getter(f"SELECT name FROM assets WHERE name LIKE '{tag}_media_%'")
     markup = ReplyKeyboardBuilder()
-    markup.row(types.KeyboardButton(text="Новость посмотрел(а). Что с ней не так? 🤔"))
-    await simple_media(message, tag_media + str(new_data), reply_markup=markup.as_markup(resize_keyboard=True))
+    markup.row(types.KeyboardButton(text='Новость посмотрел(а). Что с ней не так? 🤔'))
+    await simple_media(message, news_media[count][0], reply_markup=markup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text.contains('Достаточно, мне все понятно 🤚')), flags=flags)
 async def revealing_the_news(message: Message, state: FSMContext):
     data = await state.get_data()
-    if len(data['answers_str']) - len(data['all_viwed']) != 0:
-        viewed_channel = data['viewed_channel']
-        if viewed_channel == web_prop[0]:
-            new_data = data['count_news_ria'] + 1
-            await state.update_data(count_news_ria=new_data)
-        elif viewed_channel == web_prop[1]:
-            new_data = data['count_news_rt'] + 1
-            await state.update_data(count_news_rt=new_data)
-        elif viewed_channel == web_prop[3]:
-            new_data = data['count_news_tch'] + 1
-            await state.update_data(count_news_tch=new_data)
-        elif viewed_channel == web_prop[4]:
-            new_data = data['count_news_tacc'] + 1
-            await state.update_data(count_news_tacc=new_data)
-        elif viewed_channel == web_prop[5]:
-            new_data = data['count_news_minst'] + 1
-            await state.update_data(count_news_minst=new_data)
-
-        markup = await keyboard_for_all_chanel(data['answers_str'])
+    if data['count_news'] != 5:
+        all_answers_user = data['all_answers_user']
+        markup = await keyboard_for_all_chanel(all_answers_user)
         text = await sql_safe_select('text', 'texts', {'name': 'antip_another_web_lie'})
-        await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+        await message.answer(text, reply_markup=markup)
     else:
         redis = all_data().get_data_red()
         for key in redis.scan_iter(f"Usrs: {message.from_user.id}: Start_answers: ethernet:*"):
@@ -614,16 +517,16 @@ async def revealing_the_news(message: Message, state: FSMContext):
 @router.message((F.text.contains('Хватит, пропустим остальные источники 🙅‍♂️')), flags=flags)
 async def skip_web(message: Message, state: FSMContext):
     data = await state.get_data()
-    answer_channel = data['answers_str']  # Все выбранные источники
-    all_viwed = data['all_viwed']  # Все просмотренные источники
-    not_viewed = list(set(answer_channel) - set(all_viwed))
+    answer_channel = data['all_answers_user']  # Все выбранные источники
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text='Хорошо, давай вернемся и посмотрим 👀'))
     markup.row(types.KeyboardButton(text='Не надо, я и так знаю, что они врут 😒'))
     markup.row(types.KeyboardButton(text='Не надо, я всё равно буду доверять им 👍'))
-    lst_web_answers = str(', '.join(not_viewed))
-    next_channel = str(not_viewed[0])
-    await state.update_data(not_viewed_chanel=not_viewed[0])
+    lst_web_answers = str(', '.join(answer_channel))
+    next_channel = answer_channel[0]
+    if next_channel == 'Министерство обороны РФ':
+        next_channel = 'Министерства обороны РФ'
+    await state.update_data(not_viewed_chanel=answer_channel[0])
     await message.answer("Я хотел показать вам еще, как врут "
                          f"{lst_web_answers}, ведь вы "
                          "отметили, что доверяете им. Для нашей "
