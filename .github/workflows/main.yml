@@ -24,4 +24,4 @@ jobs:
             cd antipropagandabot
             git pull
             sleep 5
-            docker docker restart 92dc5d4cc46f
+            docker restart 92dc5d4cc46f
