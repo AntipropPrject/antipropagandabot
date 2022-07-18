@@ -204,8 +204,11 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FS
     options = await state.get_data()
     lst_options = options["option_1"]
     lst_answers = poll_answer.option_ids
+    lst = []
     for index in lst_answers:
+        lst.append(lst_options[index])
         await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: Invasion:', lst_options[index])
+    await state.update_data(ans_lst_2=lst)
     await state.update_data(answer_2=lst_answers)
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Да, полностью доверяю ✅"),
@@ -267,10 +270,10 @@ async def poll_answer_handler_tho(poll_answer: types.PollAnswer, bot: Bot, state
     lst = []
     for index in lst_answers:
         lst.append(lst_options[index])
-        await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: ethernet_id:', int(index))
         await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: ethernet:', lst_options[index])
     await state.update_data(answer_4=poll_answer.option_ids)
     await state.update_data(option_4=options)
+    await state.update_data(ans_lst_4=lst)
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Продолжить"))
     text = await sql_safe_select("text", "texts", {"name": "start_people_belive"})
@@ -309,6 +312,7 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
         else:
             await redis_just_one_write(f'Usrs: {poll_answer.user.id}: Start_answers: LovePutin', 'True')
     await state.update_data(answer_5=poll_answer.option_ids)
+    await state.update_data(ans_lst_5=lst)
     text = await sql_safe_select("text", "texts", {"name": "start_thank_you"})
     await bot.send_message(poll_answer.user.id, text)
     data = await state.get_data()
@@ -317,7 +321,7 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
         print("Пользователь уже есть в базе")
     else:
         await mongo_add(poll_answer.user.id,
-                        [data['answer_1'], data['answer_2'], data['answer_3'], data['answer_4'], data['answer_5']])
+                        [data['answer_1'], data['ans_lst_2'], data['answer_3'], data['ans_lst_4'], data['ans_lst_5']])
     smi_set, ppl_set = set(data["answer_4"]), set(data["answer_5"])
     if (data["answer_3"] != "Нет, не верю ни слову ⛔" and data["answer_3"] != "Не знаю, потому что не смотрю ни новости по ТВ, ни их интернет-версию 🤷‍♂") or ({0, 2, 3, 4, 5, 7}.isdisjoint(smi_set) is False
                                                          or {1, 2, 3, 4, 5}.isdisjoint(ppl_set) is False):
