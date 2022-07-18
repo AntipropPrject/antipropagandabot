@@ -732,7 +732,6 @@ async def antip_look_at_it_yourself(message: Message, state: FSMContext):
     await simple_media(message, 'antip_look_at_it_yourself')
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Давай"))
-    await simple_media(message, 'antip_look_at_it_yourself')
     await message.answer("У меня есть анекдот", reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
