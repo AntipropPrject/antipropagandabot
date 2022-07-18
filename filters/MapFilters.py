@@ -64,7 +64,6 @@ class TVPropagandaFilter(BaseFilter):
         return False
 
 
-
 class WebPropagandaFilter(BaseFilter):
 
     async def __call__(self, message: Message) -> Union[bool, Dict[str, Any]]:
@@ -135,7 +134,7 @@ class WarReason(BaseFilter):
 
 class PutinFilter(BaseFilter):
     async def __call__(self, message: Message):
-        if await redis_just_one_read('Usrs: 5306348087: Start_answers: LovePutin') == 'True':
+        if redis_check(f'Usrs: {message.from_user.id}: Start_answers: LovePutin'):
             return True
         else:
             return False
