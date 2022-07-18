@@ -527,14 +527,12 @@ async def skip_web(message: Message, state: FSMContext):
     next_channel = answer_channel[0]
     if next_channel == 'Министерство обороны РФ':
         next_channel = 'Министерства обороны РФ'
+    text = await sql_safe_select('text', 'texts', {'name': 'antip_maybe_just_one'})
+    print(lst_web_answers)
+    text = text.replace('[[список неотсмотренных красных источников через запятую]]', lst_web_answers)
+    text = text.replace('[[название следующего непросмотренного красного источника]]', next_channel)
     await state.update_data(not_viewed_chanel=answer_channel[0])
-    await message.answer("Я хотел показать вам еще, как врут "
-                         f"{lst_web_answers}, ведь вы "
-                         "отметили, что доверяете им. Для нашей "
-                         "дальнейшей беседы важно, чтобы мы "
-                         "разобрались, кому можно верить, а кому нет.\n\n"
-                         "Можно я все-таки покажу хотя бы один "
-                         f"сюжет от {next_channel}?", reply_markup=markup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text.contains('Не надо')), flags=flags)
