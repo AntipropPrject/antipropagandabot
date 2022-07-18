@@ -15,13 +15,13 @@ jobs:
 
       - uses: appleboy/ssh-action@master
         with:
-          host: 16.170.208.192
+          host: ${{ secrets.TEST_IP }}
           username: ${{ secrets.AMAZON_USERNAME }}
           key: ${{ secrets.SSHKEY }}
       
           script: |
-            sudo su
-            cd /root/antipropagandabot/
+            sudo su -
+            cd /antipropagandabot/
             git pull
             sleep 5
             docker docker restart 92dc5d4cc46f
