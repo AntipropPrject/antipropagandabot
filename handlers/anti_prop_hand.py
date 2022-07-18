@@ -776,19 +776,17 @@ async def antip_propaganda_here_too(message: Message, state: FSMContext):
 
 @router.message((F.text == "Что за источник? 🤔"), state=propaganda_victim.yandex, flags=flags)
 async def antip_they_lie_to_you(message: Message, state: FSMContext):
-    text = await sql_safe_select('text', 'texts', {'name': 'antip_they_lie_to_you'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Думаю, что знаю! ☝️"))
     nmarkup.add(types.KeyboardButton(text="Я не знаю  🤷‍♀️"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await simple_media(message, 'antip_they_lie_to_you', nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text.contains('знаю')), state=propaganda_victim.yandex, flags=flags)
 async def antip_yandex(message: Message, state: FSMContext):
-    text = await sql_safe_select('text', 'texts', {'name': 'antip_yandex'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await simple_media(message, 'antip_yandex', nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text == "Продолжай ⏳"), state=propaganda_victim.yandex, flags=flags)
@@ -828,10 +826,10 @@ async def antip_clear_and_cool(message: Message, state: FSMContext):
 
 @router.message((F.text == "Продолжай ⏳"), state=propaganda_victim.wiki, flags=flags)
 async def antip_look_at_it_yourself(message: Message, state: FSMContext):
-    text = await sql_safe_select('text', 'texts', {'name': 'antip_look_at_it_yourself'})
-    await message.answer(text, disable_web_page_preview=True)
+    await simple_media(message, 'antip_look_at_it_yourself')
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Давай"))
+    await simple_media(message, 'antip_look_at_it_yourself')
     await message.answer("У меня есть анекдот", reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
