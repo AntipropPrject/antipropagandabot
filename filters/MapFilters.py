@@ -82,7 +82,7 @@ class YandexPropagandaFilter(BaseFilter):
 
     async def __call__(self, message: Message) -> Union[bool, Dict[str, Any]]:
         web_lies_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: ethernet:')
-        if "Яндекс.Новости" in web_lies_list:
+        if "Яндекс" in web_lies_list:
             print('Верит яндексу')
             return True
         else:
