@@ -774,7 +774,7 @@ async def antip_anecdote(message: Message, state: FSMContext):
 async def antip_emoji(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Конечно! 🙂"))
-    nmarkup.add(types.KeyboardButton(text="Ну давай 🤮"))
+    nmarkup.add(types.KeyboardButton(text="Ну, давай 🤨"))
     nmarkup.row(types.KeyboardButton(text="Подожди! А украинскую пропаганду ты показать не хочешь? Как-то однобоко. 🤔"))
     await message.answer("Можно вопрос?", reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
@@ -784,11 +784,11 @@ async def antip_after_anecdote_log(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_after_anecdote_log'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Конечно! 🙂"))
-    nmarkup.row(types.KeyboardButton(text="Ну давай 🤮"))
+    nmarkup.row(types.KeyboardButton(text="Ну, давай 🤨"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.in_({"Конечно! 🙂", "Ну давай 🤮"})), flags=flags)
+@router.message((F.text.in_({"Конечно! 🙂", "Ну, давай 🤨"})), flags=flags)
 async def antip_do_you_agree(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_do_you_agree'})
     nmarkup = ReplyKeyboardBuilder()
