@@ -9,7 +9,8 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from bata import all_data
 from data_base.DBuse import poll_get, redis_just_one_read, sql_select_row_like, sql_add_value, mongo_game_answer
 from data_base.DBuse import sql_safe_select, data_getter, sql_safe_update
-from filters.MapFilters import WebPropagandaFilter, TVPropagandaFilter, PplPropagandaFilter, PoliticsFilter
+from filters.MapFilters import WebPropagandaFilter, TVPropagandaFilter, PplPropagandaFilter, PoliticsFilter, WikiFilter, \
+    YandexPropagandaFilter
 from handlers import true_resons_hand
 from keyboards.map_keys import antip_why_kb, antip_killme_kb
 from resources.all_polls import web_prop
@@ -666,6 +667,77 @@ async def antip_truth_game_answer(message: Message, state: FSMContext):
         await message.answer('У меня закончились сюжеты. Спасибо за игру🤝')
 
 
+@router.message(YandexPropagandaFilter(), ((F.text == "Пропустим игру 🙅‍♀️") | (F.text == '🤝 Продолжим')
+     | (F.text == 'Достаточно, двигаемся дальше  🙅‍♀️')), flags=flags)
+async def antip_propaganda_here_too(message: Message, state: FSMContext):
+    await state.set_state(propaganda_victim.yandex)
+    text = await sql_safe_select('text', 'texts', {'name': 'antip_propaganda_here_too'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Что за источник? 🤔"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message((F.text == "Что за источник? 🤔"), state=propaganda_victim.yandex, flags=flags)
+async def antip_they_lie_to_you(message: Message, state: FSMContext):
+    text = await sql_safe_select('text', 'texts', {'name': 'antip_they_lie_to_you'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Думаю, что знаю! ☝️"))
+    nmarkup.add(types.KeyboardButton(text="Я не знаю  🤷‍♀️"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message((F.text.contains('знаю')), state=propaganda_victim.yandex, flags=flags)
+async def antip_yandex(message: Message, state: FSMContext):
+    text = await sql_safe_select('text', 'texts', {'name': 'antip_yandex'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message((F.text == "Продолжай ⏳"), state=propaganda_victim.yandex, flags=flags)
+async def antip_yandex_rupor(message: Message, state: FSMContext):
+    text = await sql_safe_select('text', 'texts', {'name': 'antip_yandex_rupor'})
+    await message.answer(text, disable_web_page_preview=True)
+    if 'Википедия' not in await poll_get(f'Usrs: {message.from_user.id}: Start_answers: ethernet:'):
+        await antip_why_not_wiki(message, state)
+    else:
+        nmarkup = ReplyKeyboardBuilder()
+        nmarkup.row(types.KeyboardButton(text="Давай"))
+        await message.answer("У меня есть анекдот", reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
+
+@router.message(WikiFilter(), ((F.text == "Пропустим игру 🙅‍♀️") | (F.text == '🤝 Продолжим')
+     | (F.text == 'Достаточно, двигаемся дальше  🙅‍♀️')), flags=flags)
+async def antip_why_not_wiki(message: Message, state: FSMContext):
+    await state.set_state(propaganda_victim.wiki)
+    text = await sql_safe_select('text', 'texts', {'name': 'antip_why_not_wiki'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Там статьи может редактировать любой человек ✍️"))
+    nmarkup.row(types.KeyboardButton(text="Википедия — проект Запада 🇺🇸"))
+    nmarkup.add(types.KeyboardButton(text="Не пользуюсь / Не слышал(а) 🤷‍♀️"))
+    nmarkup.row(types.KeyboardButton(text="Случайно, вообще я доверяю Википедии 👌"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message(((F.text.contains('редактировать')) | (F.text.contains('проект'))
+                 | (F.text.contains('Не слышал')) | (F.text.contains('я доверяю'))),
+                state=propaganda_victim.wiki, flags=flags)
+async def antip_clear_and_cool(message: Message, state: FSMContext):
+    text = await sql_safe_select('text', 'texts', {'name': 'antip_clear_and_cool'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message((F.text == "Продолжай ⏳"), state=propaganda_victim.wiki, flags=flags)
+async def antip_look_at_it_yourself(message: Message, state: FSMContext):
+    text = await sql_safe_select('text', 'texts', {'name': 'antip_look_at_it_yourself'})
+    await message.answer(text, disable_web_page_preview=True)
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Давай"))
+    await message.answer("У меня есть анекдот", reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
+
 @router.message(
     (F.text == "Пропустим игру 🙅‍♀️") | (F.text == '🤝 Продолжим') | (F.text == 'Достаточно, двигаемся дальше  🙅‍♀️'),
     flags=flags)
@@ -704,8 +776,18 @@ async def antip_anecdote(message: Message, state: FSMContext):
 async def antip_emoji(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Конечно! 🙂"))
-    nmarkup.row(types.KeyboardButton(text="Ну давай 🤮"))
+    nmarkup.add(types.KeyboardButton(text="Ну давай 🤮"))
+    nmarkup.row(types.KeyboardButton(text="Подожди! А украинскую пропаганду ты показать не хочешь? Как-то однобоко. 🤔"))
     await message.answer("Можно вопрос?", reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
+
+@router.message((F.text == "Подожди! А украинскую пропаганду ты показать не хочешь? Как-то однобоко. 🤔"), flags=flags)
+async def antip_after_anecdote_log(message: Message, state: FSMContext):
+    text = await sql_safe_select('text', 'texts', {'name': 'antip_after_anecdote_log'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Конечно! 🙂"))
+    nmarkup.row(types.KeyboardButton(text="Ну давай 🤮"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text.in_({"Конечно! 🙂", "Ну давай 🤮"})), flags=flags)

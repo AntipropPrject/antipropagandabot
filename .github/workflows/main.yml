@@ -2,7 +2,11 @@ name: deploy to a server on push
 
 on:
   push:
-    branches: [ master ]
+    branches: 
+      - '!new_dev'
+      - '!master'
+    tags:
+      - 1.*
 
 jobs:
   deploy-to-server:
@@ -11,8 +15,8 @@ jobs:
 
       - uses: appleboy/ssh-action@master
         with:
-          host: ec2-16-170-206-95.eu-north-1.compute.amazonaws.com
-          username: ec2-user
+          host: 16.170.208.192
+          username: ${{ secrets.AMAZON_USERNAME }}
           key: ${{ secrets.SSHKEY }}
       
           script: |

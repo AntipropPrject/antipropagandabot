@@ -78,6 +78,28 @@ class WebPropagandaFilter(BaseFilter):
         return False
 
 
+class YandexPropagandaFilter(BaseFilter):
+
+    async def __call__(self, message: Message) -> Union[bool, Dict[str, Any]]:
+        web_lies_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: ethernet:')
+        if "Яндекс.Новости" in web_lies_list:
+            print('Верит яндексу')
+            return True
+        else:
+            return False
+
+
+class WikiFilter(BaseFilter):
+
+    async def __call__(self, message: Message) -> Union[bool, Dict[str, Any]]:
+        web_lies_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: ethernet:')
+        if "Википедия" not in web_lies_list:
+            print('Не верит википедии')
+            return True
+        else:
+            return False
+
+
 class PplPropagandaFilter(BaseFilter):
 
     async def __call__(self, message: Message) -> Union[bool, Dict[str, Any]]:
