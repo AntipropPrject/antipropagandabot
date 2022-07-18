@@ -106,6 +106,9 @@ async def reset(message: Message, state: FSMContext):
     elif stt == 'admin:spam_menu':
         await state.set_state(admin.spam_menu)
         await message.answer('Выберите интересующий вас пункт меню', reply_markup=await spam_admin_keyboard())
+    if stt == 'admin:mediais_back':
+        await state.set_state(admin.secretreborn)
+        await message.answer('Вы все еще в опасном меню', reply_markup=secretrebornkb())
     elif stt in ('admin:mass_media_menu', 'admin:truthgame', 'admin:tv_lie'):
         await admin_home_games(message, state)
     elif 'admin:truthgame_' in stt:
@@ -1047,6 +1050,42 @@ async def secretreborn(message: types.Message):
         'Процесс восстановления медиа завершен.\nДля ненайденных тегов выведены ошибки. Либо добавьте медиа под этими именами на диск...\n\n'
         '      ...либо просто игнорируйте это, если уверены, что этот тег нигде не используется.',
         reply_markup=secretrebornkb())
+
+
+@router.message((F.text == 'Получить все медиа'), state=admin.secretreborn)
+async def secretreborn(message: types.Message, bot: Bot, state: FSMContext):
+    await message.answer('Отправка медиа начата. Ничего не трогайте, пока вам не вернут клавиатуру.',
+                         reply_markup=ReplyKeyboardRemove())
+    await Phoenix.roost(message, bot)
+    await message.answer('Это все медиа из базы, которые удалось отправить. Перешлите их нужному боту.',
+                         reply_markup=secretrebornkb())
+
+
+@router.message((F.text == 'Принять медиа'), state=admin.secretreborn)
+async def secretreborn(message: types.Message, bot: Bot, state: FSMContext):
+    await state.set_state(admin.mediais_back)
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Назад"))
+    await message.answer('Отправьте мне все медиа между чертами, полученные в другом боте',
+                         reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
+
+@router.message(state=admin.mediais_back)
+async def secretreborn2(message: types.Message, bot: Bot, state: FSMContext):
+    media_id = str()
+    if message.photo is not None:
+        media_id = message.photo[-1].file_id
+    elif message.video is not None:
+        media_id = message.video.file_id
+    if media_id:
+        if await sql_safe_select('t_id', 'assets', {'name': message.caption}):
+            await sql_safe_update('assets', {'t_id': media_id}, {'name': message.caption})
+            print(f'Обновлено медиа под тегом {message.caption}')
+        else:
+            await sql_safe_insert('assets', {'t_id': media_id, 'name': message.caption})
+            print(f'Создано новое медиа под тегом {message.caption}')
+    else:
+        await message.answer('Перешлите мне медиа из другого бота, или нажмите кнопку "Назад".')
 
 
 @router.message((F.text == 'Вернуться в менее опасное место'), state=admin.secretreborn)

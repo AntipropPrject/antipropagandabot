@@ -55,8 +55,7 @@ async def game_answer(message: Message, telegram_media_id: Union[int, InputFile]
     if telegram_media_id is not None:
         try:
             return await message.answer_photo(telegram_media_id, caption=text, reply_markup=reply_markup)
-        except TelegramBadRequest as error:
-            print(error)
+        except TelegramBadRequest:
             try:
                 return await message.answer_video(telegram_media_id, caption=text, reply_markup=reply_markup)
             except TelegramBadRequest as error:
@@ -171,6 +170,22 @@ class Phoenix:
             await asyncio.sleep(1)
         await message.answer(
             'Все имеющиеся в базе медиа, для которых удалось найти валидный тег, были сохрнены в папку /resources/media директории бота')
+
+    @staticmethod
+    async def roost(message: Message, bot: Bot):
+        await message.answer('----------------------ПОСЛЕ ЭТОЙ ЧЕРТЫ МЕДИА----------------------')
+        all_media = await data_getter('SELECT * FROM assets;')
+        for media in all_media:
+            try:
+                await bot.send_video(message.from_user.id, media[0], caption=media[1])
+                await asyncio.sleep(0.5)
+            except TelegramBadRequest:
+                try:
+                    await bot.send_photo(message.from_user.id, media[0], caption=media[1])
+                    await asyncio.sleep(0.5)
+                except TelegramBadRequest:
+                    print(f'There no {media[0]} name')
+        await message.answer('----------------------ЭТО ЧЕРТА, ЗА КОТОРОЙ КОНЧАЮТСЯ МЕДИА----------------------')
 
 
 async def happy_tester(bot):
