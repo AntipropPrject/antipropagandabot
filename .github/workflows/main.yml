@@ -21,8 +21,8 @@ jobs:
       
           script: |
             sudo service docker start
-            cd antipropagandabot/
+            sudo su
+            cd /root/antipropagandabot/
             git pull
             sleep 5
-            docker compose build
-            docker compose up
+            docker docker restart 92dc5d4cc46f
