@@ -2,7 +2,9 @@ name: deploy to a server on push
 
 on:
   push:
-    branches: [ master ]
+    branches: [ test ]
+  tags:
+    - 1.*
 
 jobs:
   deploy-to-server:
@@ -14,11 +16,15 @@ jobs:
           host: ${{ secrets.TEST_SERVER }}
           username: ${{ secrets.AMAZON_USERNAME }}
           key: ${{ secrets.SSHKEY }}
+          G_USERNAME: ${{ secrets.GIT_USERNAME }}
+          G_TOKEN: ${{ secrets.GIT_TOKEN }}
       
           script: |
             sudo service docker start
             cd antipropagandabot/
             git pull
+            echo $G_USERNAME
+            echo $G_TOKEN
             sleep 5
             docker compose build
             docker compose up
