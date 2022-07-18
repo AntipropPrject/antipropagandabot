@@ -80,7 +80,7 @@ class WebPropagandaFilter(BaseFilter):
 class YandexPropagandaFilter(BaseFilter):
 
     async def __call__(self, message: Message) -> Union[bool, Dict[str, Any]]:
-        if redis_check(f'Usrs: {message.from_user.id}: Start_answers: Yandex'):
+        if await redis_check(f'Usrs: {message.from_user.id}: Start_answers: Yandex'):
             print('Верит яндексу')
             return True
         else:
@@ -90,7 +90,7 @@ class YandexPropagandaFilter(BaseFilter):
 class WikiFilter(BaseFilter):
 
     async def __call__(self, message: Message) -> Union[bool, Dict[str, Any]]:
-        if redis_check(f'Usrs: {message.from_user.id}: Start_answers: NotWiki'):
+        if await redis_check(f'Usrs: {message.from_user.id}: Start_answers: NotWiki'):
             print('Не верит википедии')
             return True
         else:
@@ -134,7 +134,7 @@ class WarReason(BaseFilter):
 
 class PutinFilter(BaseFilter):
     async def __call__(self, message: Message):
-        if redis_check(f'Usrs: {message.from_user.id}: Start_answers: LovePutin'):
+        if await redis_check(f'Usrs: {message.from_user.id}: Start_answers: LovePutin'):
             return True
         else:
             return False
