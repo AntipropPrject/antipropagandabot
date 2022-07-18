@@ -60,7 +60,7 @@ async def main():
     dp.include_router(pg_mg.router)
     dp.include_router(new_admin_hand.router)
     dp.include_router(admin_for_games.router)
-    dp.include_router(handlers.admin_for_games.mistakeorlie.router)
+    dp.include_router(mistakeorlie.router)
 
     dp.include_router(status.router)
     dp.include_router(start_hand.router)
