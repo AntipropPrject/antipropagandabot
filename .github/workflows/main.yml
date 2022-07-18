@@ -16,7 +16,7 @@ jobs:
       - uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.TEST_IP }}
-          username: ${{ secrets.AMAZON_USERNAME }}
+          username: ec2-user
           key: ${{ secrets.SSHKEY }}
       
           script: |
