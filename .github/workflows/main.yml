@@ -20,7 +20,6 @@ jobs:
           key: ${{ secrets.SSHKEY }}
       
           script: |
-            sudo service docker start
             sudo su
             cd /root/antipropagandabot/
             git pull
