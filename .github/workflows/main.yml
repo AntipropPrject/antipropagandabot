@@ -2,9 +2,10 @@ name: deploy to a server on push
 
 on:
   push:
-    branches: [ test ]
-  tags:
-    - 1.*
+    branches: 
+      - test
+    tags:
+      - 1.*
 
 jobs:
   deploy-to-server:
