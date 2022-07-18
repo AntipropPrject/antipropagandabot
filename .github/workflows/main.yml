@@ -11,8 +11,8 @@ jobs:
 
       - uses: appleboy/ssh-action@master
         with:
-          host: ec2-16-170-206-95.eu-north-1.compute.amazonaws.com
-          username: ec2-user
+          host: ${{ secrets.TEST_SERVER }}
+          username: ${{ secrets.AMAZON_USERNAME }}
           key: ${{ secrets.SSHKEY }}
       
           script: |
