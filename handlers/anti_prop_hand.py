@@ -504,10 +504,8 @@ async def revealing_the_news(message: Message, state: FSMContext):
     else:
         redis = all_data().get_data_red()
         for key in redis.scan_iter(f"Usrs: {message.from_user.id}: Start_answers: ethernet:*"):
-            redis.delete(key)
-        print(set(await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:')).isdisjoint(
-            ("Дмитрий Песков", "Сергей Лавров",
-             "Маргарита Симоньян", "Владимир Соловьев", "Никита Михалков")))
+            if key != "Яндекс" or key != "Википедия":
+                redis.delete(key)
         if set(await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:')).isdisjoint(
                 ("Дмитрий Песков", "Сергей Лавров",
                  "Маргарита Симоньян", "Владимир Соловьев", "Никита Михалков")) is False:
@@ -542,11 +540,10 @@ async def skip_web(message: Message, state: FSMContext):
 async def antip_web_exit_1(message: Message, state: FSMContext):
     redis = all_data().get_data_red()
     for key in redis.scan_iter(f"Usrs: {message.from_user.id}: Start_answers: ethernet:"):
-        redis.delete(key)
-    print(f"{await state.get_state()} asdwdqdwqsdqad")
+        if key != "Яндекс" or key != "Википедия":
+            redis.delete(key)
     if await state.get_state() == "propaganda_victim:options":
         await antip_truth_game_start(message, state)
-
         redis.delete(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:')
         return
     if set(await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:')).isdisjoint(
