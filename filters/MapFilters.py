@@ -5,7 +5,7 @@ from aiogram.types import Message
 from typing import Union, Dict, Any
 
 import bata
-from data_base.DBuse import poll_get, redis_just_one_read
+from data_base.DBuse import poll_get, redis_just_one_read, redis_check
 from handlers import true_resons_hand
 from resources.all_polls import welc_message_one, nazizm, donbass_first_poll
 
@@ -81,8 +81,7 @@ class WebPropagandaFilter(BaseFilter):
 class YandexPropagandaFilter(BaseFilter):
 
     async def __call__(self, message: Message) -> Union[bool, Dict[str, Any]]:
-        web_lies_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: ethernet:')
-        if "Яндекс" in web_lies_list:
+        if redis_check(f'Usrs: {message.from_user.id}: Start_answers: Yandex'):
             print('Верит яндексу')
             return True
         else:
@@ -92,8 +91,7 @@ class YandexPropagandaFilter(BaseFilter):
 class WikiFilter(BaseFilter):
 
     async def __call__(self, message: Message) -> Union[bool, Dict[str, Any]]:
-        web_lies_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: ethernet:')
-        if "Википедия" not in web_lies_list:
+        if redis_check(f'Usrs: {message.from_user.id}: Start_answers: NotWiki'):
             print('Не верит википедии')
             return True
         else:

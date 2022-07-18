@@ -301,6 +301,7 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
     lst_answers = poll_answer.option_ids
     lst = []
     for index in lst_answers:
+        print(lst_options[index])
         lst.append(lst_options[index])
         await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust:', lst_options[index])
         if lst_options[index] != "Владимир Путин":
@@ -311,6 +312,7 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
                                  lst_options[index])
         else:
             await redis_just_one_write(f'Usrs: {poll_answer.user.id}: Start_answers: LovePutin', 'True')
+
     await state.update_data(answer_5=poll_answer.option_ids)
     await state.update_data(ans_lst_5=lst)
     text = await sql_safe_select("text", "texts", {"name": "start_thank_you"})
@@ -327,6 +329,10 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
                                                          or {1, 2, 3, 4, 5}.isdisjoint(ppl_set) is False):
         await redis_just_one_write(f'Usrs: {poll_answer.user.id}: INFOState:', 'Жертва пропаганды')
         await mongo_update_stat(poll_answer.user.id, column='faith', value='victim', options='$set')
+        if {0}.isdisjoint(smi_set) is False:
+            await redis_just_one_write(f'Usrs: {poll_answer.user.id}: Start_answers: Yandex', 1)
+        if {1}.isdisjoint(smi_set):
+            await redis_just_one_write(f'Usrs: {poll_answer.user.id}: Start_answers: NotWiki', 1)
         print('Жертва пропаганды')
     elif {1, 6}.isdisjoint(smi_set) is False:
         await redis_just_one_write(f'Usrs: {poll_answer.user.id}: INFOState:', 'Король информации')

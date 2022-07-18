@@ -694,7 +694,7 @@ async def antip_yandex(message: Message, state: FSMContext):
 async def antip_yandex_rupor(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_yandex_rupor'})
     await message.answer(text, disable_web_page_preview=True)
-    if 'Википедия' not in await poll_get(f'Usrs: {message.from_user.id}: Start_answers: ethernet:'):
+    if redis_check(f'Usrs: {message.from_user.id}: Start_answers: NotWiki'):
         await antip_why_not_wiki(message, state)
     else:
         nmarkup = ReplyKeyboardBuilder()
