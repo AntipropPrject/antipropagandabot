@@ -16,12 +16,15 @@ jobs:
       - uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.TEST_IP }}
-          username: ec2-user
+          username: ${{ secrets.AMAZON_USERNAME }}
           key: ${{ secrets.SSHKEY }}
       
           script: |
+            ls
             sudo su -
+            ls
             cd antipropagandabot
+            ls
             git pull
             sleep 5
             docker restart 92dc5d4cc46f
