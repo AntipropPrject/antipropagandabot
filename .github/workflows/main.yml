@@ -22,6 +22,6 @@ jobs:
           script: |
             echo WELCOME
             cd antipropagandabot
-            git pull
-            docker restart c808154bfd70
+            sudo -S git pull
+            sudo -S docker restart c808154bfd70
 
