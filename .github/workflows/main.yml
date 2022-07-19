@@ -5,7 +5,6 @@ on:
     branches: 
       - '!new_dev'
       - '!master'
-      - test
     tags:
       - 1.*
 
