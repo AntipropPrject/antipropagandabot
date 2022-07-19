@@ -13,12 +13,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: ssh pipeline 1
-        uses: cross-the-world/ssh-pipeline@master
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.TEST_SERVER }}
           user: ${{ secrets.AMAZON_USERNAME }}
-          key: ${{ secrets.SECRET_KEY }}
-          port: 22
+          key: ${{ secrets.SSH_KEY }}
           connect_timeout: 10s
           script: |
             ls -la
