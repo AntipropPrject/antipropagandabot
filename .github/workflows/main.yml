@@ -17,7 +17,7 @@ jobs:
         with:
           host: ${{ secrets.TEST_SERVER }}
           user: ${{ secrets.AMAZON_USERNAME }}
-          pass: ${{ secrets.SECRET_KEY }}
+          key: ${{ secrets.SECRET_KEY }}
           port: 22
           connect_timeout: 10s
           script: |
