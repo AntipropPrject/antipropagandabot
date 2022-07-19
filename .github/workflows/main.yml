@@ -22,9 +22,9 @@ jobs:
           script: |
             ls -la
             echo WELCOME
-            sudo su -
+            sudo su
+            cd /root
             ls -la
-            cd root
             cd antipropagandabot
             git pull
 
