@@ -24,6 +24,7 @@ jobs:
             echo WELCOME
             sudo su -
             ls -la
+            cd root
             cd antipropagandabot
             git pull
 
