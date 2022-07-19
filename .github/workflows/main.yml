@@ -15,9 +15,9 @@ jobs:
       - name: ssh pipeline 1
         uses: appleboy/ssh-action@master
         with:
-          host: 16.170.208.192
-          username: ${{ secrets.AMAZON_USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
+          host: ${{ secrets.TEST_IP }}
+          username: ec2-user
+          key: ${{ secrets.SSHKEY }}
           connect_timeout: 10s
           script: |
             ls -la
