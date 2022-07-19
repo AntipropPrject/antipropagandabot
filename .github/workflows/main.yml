@@ -5,6 +5,7 @@ on:
     branches: 
       - '!new_dev'
       - '!master'
+      - test
     tags:
       - 1.*
 
@@ -23,5 +24,5 @@ jobs:
             echo WELCOME
             cd antipropagandabot
             sudo -S git pull
-            sudo -S docker restart c808154bfd70
+            sudo -S docker restart d0a862c42dfb
 
