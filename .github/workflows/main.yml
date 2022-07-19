@@ -12,19 +12,18 @@ jobs:
   deploy-to-server:
     runs-on: ubuntu-latest
     steps:
-
-      - uses: appleboy/ssh-action@master
+      - name: ssh pipeline 1
+        uses: cross-the-world/ssh-pipeline@master
         with:
-          host: ${{ secrets.TEST_IP }}
-          username: ${{ secrets.AMAZON_USERNAME }}
-          key: ${{ secrets.SSHKEY }}
-      
+          host: ${{ secrets.TEST_SERVER }}
+          user: ${{ secrets.AMAZON_USERNAME }}
+          pass: ${{ secrets.SECRET_KEY }}
+          connect_timeout: 10s
           script: |
-            ls
+            ls -la
+            echo WELCOME
             sudo su -
-            ls
+            ls -la
             cd antipropagandabot
-            ls
             git pull
-            sleep 5
-            docker restart 92dc5d4cc46f
+
