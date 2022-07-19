@@ -17,7 +17,7 @@ jobs:
         with:
           host: 16.170.208.192
           username: ${{ secrets.AMAZON_USERNAME }}
-          key: ${{ secrets.SECRET_KEY }}
+          key: ${{ secrets.SSH_KEY }}
           connect_timeout: 10s
           script: |
             ls -la
