@@ -575,6 +575,8 @@ async def redis_just_one_read(key):
 
 async def redis_check(key):
     try:
-        return all_data().get_data_red().exists(key)
+        a = all_data().get_data_red().exists(key)
+        print(key, a)
+        return a
     except Exception as error:
         await logg.get_error(f"{error}", __file__)
