@@ -20,11 +20,8 @@ jobs:
           key: ${{ secrets.SSHKEY }}
           connect_timeout: 10s
           script: |
-            ls -la
             echo WELCOME
-            sudo su
-            cd /root
-            ls -la
             cd antipropagandabot
             git pull
+            docker restart c808154bfd70
 
