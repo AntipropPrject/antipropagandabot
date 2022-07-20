@@ -21,7 +21,9 @@ class ThrottlingMiddleware(BaseMiddleware):
             data: Dict[str, Any],
     ) -> Any:
         throttling_key = get_flag(data, "throttling_key")
-        all_data().get_data_red().set(f"user_last_answer: {event.from_user.id}:", "1", 280)
+        redis = all_data().get_data_red()
+        redis.set(f"user_last_answer: {event.from_user.id}:", "1", 280)
+        redis.set(f"involvement", "1", 1)
         if throttling_key is not None and throttling_key in self.caches:
             if event.chat.id in self.caches[throttling_key]:
                 return
