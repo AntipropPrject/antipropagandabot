@@ -8,6 +8,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from data_base.DBuse import sql_safe_select, sql_select_row_like
 from filters.MapFilters import ManualFilters
 from handlers import true_resons_hand
+from stats.stat import mongo_update_stat
 from utilts import simple_media, dynamic_media_answer
 
 
@@ -114,6 +115,7 @@ async def prevent_strike_hitler_did_it(message: Message, state: FSMContext):
 @router.message(F.text.contains('продолжим'), flags=flags)
 async def prevent_strike_end_point(message: Message, state: FSMContext):
     await state.set_state(true_resons_hand.TruereasonsState.main)
+    await mongo_update_stat(message.from_user.id, 'prevent_strike')
     ManualFilters(message, state)
 
 
@@ -145,6 +147,7 @@ async def prevent_strike_memes(message: Message, state: FSMContext):
         await state.update_data(lgamecount=count)
         if isEND is False:
             await state.set_state(true_resons_hand.TruereasonsState.main)
+            await mongo_update_stat(message.from_user.id, 'prevent_strike')
             text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_oh_stop_it'})
             await message.answer(text)
     except TelegramBadRequest:  # Это бессмысленный экцепт, можно потом убрать
