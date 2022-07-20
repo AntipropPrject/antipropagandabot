@@ -277,14 +277,13 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
                                  people_prop[index])
         else:
             await redis_just_one_write(f'Usrs: {poll_answer.user.id}: Start_answers: LovePutin', 'True')
-    await state.update_data(ans_lst_5=lst_str)
     text = await sql_safe_select("text", "texts", {"name": "start_thank_you"})
     await bot.send_message(poll_answer.user.id, text)
     await mongo_update_stat(poll_answer.user.id, 'start')
     if await mongo_select(poll_answer.user.id):  # можно поставить счетчик повторных обращений
         print("Пользователь уже есть в базе")
     else:
-        await mongo_add(poll_answer.user.id, [data['answer_1'], data['ans_lst_2'], data['answer_3'], data['ans_lst_4'], data['ans_lst_5']])
+        await mongo_add(poll_answer.user.id, [data['answer_1'], data['ans_lst_2'], data['answer_3'], data['ans_lst_4'], lst_str])
     answer_4, answer_5 = set(data["answer_4"]), set(poll_answer.option_ids)
     if (data["answer_3"] != "Нет, не верю ни слову ⛔"
         and data["answer_3"] != "Не знаю, потому что не смотрю ни новости по ТВ, ни их интернет-версию 🤷‍♂") \

@@ -123,6 +123,7 @@ async def stopwar_just_a_scene(message: Message):
     nmarkup.row(types.KeyboardButton(text="А что главное?"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
+
 @router.message(commands=['end'], flags=flags)
 @router.message((F.text == "А что главное?"), flags=flags)
 async def stopwar_end_it_now(message: Message):
@@ -134,14 +135,11 @@ async def stopwar_end_it_now(message: Message):
 
 @router.message((F.text == "Что ты предлагаешь ❓ ❓ ❓"), flags=flags)
 async def stopwar_lets_fight(message: Message):
-
-
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Объясни 🤔"))
     nmarkup.row(types.KeyboardButton(text="Нет, власти всё равно будут делать, что хотят 🙅‍♂️"))
     nmarkup.row(types.KeyboardButton(text="Да, согласен(а), это остановит войну 🕊"))
     await simple_media(message, 'stopwar_lets_fight', reply_markup=nmarkup.as_markup(resize_keyboard=True))
-
 
 
 @router.message((F.text == "Объясни 🤔") | (F.text == "Нет, власти всё равно будут делать, что хотят 🙅‍♂️"), flags=flags)
@@ -151,6 +149,7 @@ async def stopwar_lets_fight(message: Message):
     nmarkup.row(types.KeyboardButton(text="Какие аргументы? 🤔"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
+
 @router.message((F.text == "Какие аргументы? 🤔"), flags=flags)
 async def stopwar_lets_fight(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_first_manipulation_argument'})
@@ -158,6 +157,7 @@ async def stopwar_lets_fight(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="Следующий аргумент 👉"))
     await state.set_state(StopWarState.arg_1)
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
 
 @router.message((F.text == "Следующий аргумент 👉"), state=StopWarState.arg_1, flags=flags)
 async def stopwar_lets_fight(message: Message, state: FSMContext):
@@ -167,6 +167,7 @@ async def stopwar_lets_fight(message: Message, state: FSMContext):
     await state.set_state(StopWarState.arg_2)
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
+
 @router.message((F.text == "Следующий аргумент 👉"), state=StopWarState.arg_2, flags=flags)
 async def manipulation_argument(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_third_manipulation_argument'})
@@ -174,6 +175,7 @@ async def manipulation_argument(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="Следующий аргумент 👉"))
     await state.set_state(StopWarState.arg_3)
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
 
 @router.message((F.text == "Следующий аргумент 👉"), state=StopWarState.arg_3, flags=flags)
 async def manipulation_argument(message: Message, state: FSMContext):
@@ -184,6 +186,7 @@ async def manipulation_argument(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="Я так и знал(а). Правдобот, ты — проект США 🇺🇸 и хочешь развалить Россию"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
+
 @router.message((F.text == "Перевороты и революция — это страшно и я не хочу этого 💔"), flags=flags)
 async def stopwar_I_understand_you_fear(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_I_understand_you_fear'})
@@ -191,6 +194,7 @@ async def stopwar_I_understand_you_fear(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
     await state.set_state(StopWarState.next_1)
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
 
 @router.message((F.text == "Продолжай ⏳"), state=StopWarState.next_1, flags=flags)
 async def stopwar_like_this_in_a_revolution(message: Message, state: FSMContext):
@@ -200,6 +204,7 @@ async def stopwar_like_this_in_a_revolution(message: Message, state: FSMContext)
     nmarkup.row(types.KeyboardButton(text="Ну не знаю... 🤷‍♀️"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
+
 @router.message((F.text == "Я так и знал(а). Правдобот, ты — проект США 🇺🇸 и хочешь развалить Россию"), flags=flags)
 async def stopwar_made_a_big_team(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_made_a_big_team'})
@@ -208,15 +213,13 @@ async def stopwar_made_a_big_team(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="Да, закончим разговор, прощай! 👆"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
+
 @router.message((F.text == "Да, закончим разговор, прощай! 👆"), flags=flags)
 async def stopwar_I_told_you_everything(message: Message, bot: Bot, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_I_told_you_everything'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Я передумал(а). Важно, чтобы россияне поняли — война им не нужна 🕊"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
-
-
-
 
 
 @router.message(((F.text.contains('Я передумал(а). Важно, чтобы россияне поняли — война им не нужна 🕊')) |
@@ -307,6 +310,7 @@ async def stopwar_share_blindly(message: Message, bot: Bot, state: FSMContext):
         await message.answer('Таймер вышел. Вы можете перейти в главное меню.'
                              ' Но если у вас есть ещё с кем поделиться ссылкой на меня'
                              ' — обязательно сделайте это!', reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
 
 @router.message((F.text == "Перейти в главное меню 👇"), flags=flags)
 async def main_menu(message: Message, state: FSMContext):
