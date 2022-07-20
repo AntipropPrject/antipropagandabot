@@ -869,7 +869,7 @@ async def import_csv(message: types.Message, state: FSMContext):
         await message.answer("Вы можете сделать backup прямо с сервера"
                              " или загрузить файл восстановления самостоятельно",
                              reply_markup=nmarkup.as_markup(resize_keyboard=True))
-    elif "0" in status:
+    else:
         await message.answer("Вы должны включить технический режим 🔴'")
 
 
