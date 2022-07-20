@@ -10,6 +10,7 @@ from data_base.DBuse import data_getter, poll_write, sql_safe_select, redis_dele
 from filters.MapFilters import NaziFilter, RusHate_pr, NotNaziFilter
 from handlers import true_resons_hand
 from resources.all_polls import nazizm, nazizm_pr
+from stats.stat import mongo_update_stat
 from utilts import simple_media
 
 
@@ -565,6 +566,7 @@ async def putin_game2_are_you_sure(message: Message, state: FSMContext):
 async def putin_in_the_past(message: Message, state: FSMContext):
     await state.clear()
     await state.set_state(true_resons_hand.TruereasonsState.main)
+    await mongo_update_stat(message.from_user.id, 'nazi')
     text = await sql_safe_select('text', 'texts', {'name': 'nazi_finish'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжим 👌"))
