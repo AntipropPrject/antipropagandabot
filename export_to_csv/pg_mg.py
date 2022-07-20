@@ -277,14 +277,13 @@ async def backin():
 
 
     cur.execute('''CREATE TABLE public.mistakeorlie(
-                            "id" int4 NOT NULL,
+                            "id" int4 NULL,
                             asset_name varchar NULL,
                             belivers int4 NOT NULL,
                             nonbelivers int4 NOT NULL,
                             rebuttal varchar NULL,
                             text_name varchar NULL,
-                            truth boolean NULL,
-                            CONSTRAINT mistakeorlie_pk PRIMARY KEY (id)
+                            truth boolean NULL
                            );''')
 
     cur.execute('''ALTER TABLE public.mistakeorlie
