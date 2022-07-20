@@ -13,18 +13,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: ssh pipeline 1
-        uses: cross-the-world/ssh-pipeline@master
+        uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.TEST_SERVER }}
-          user: ${{ secrets.AMAZON_USERNAME }}
-          key: ${{ secrets.SECRET_KEY }}
-          port: 22
+          host: ${{ secrets.TEST_IP }}
+          username: ec2-user
+          key: ${{ secrets.SSHKEY }}
           connect_timeout: 10s
           script: |
-            ls -la
             echo WELCOME
-            sudo su -
-            ls -la
             cd antipropagandabot
-            git pull
+            sudo -S git pull
+            sudo -S docker restart antiprop_Aiogrammwebhook
 
