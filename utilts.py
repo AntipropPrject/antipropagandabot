@@ -7,6 +7,7 @@ from aiogram import Bot
 from aiogram.exceptions import TelegramBadRequest, TelegramNetworkError, TelegramForbiddenError
 from aiogram.types import Message, ReplyKeyboardRemove, InlineKeyboardMarkup, ReplyKeyboardMarkup, ForceReply, \
     FSInputFile, InputFile
+import re
 
 import aiohttp
 import bata
@@ -191,23 +192,44 @@ class Phoenix:
 async def happy_tester(bot):
     redis = bata.all_data().get_data_red()
     g = git.Git(os.getcwd())
+    #Вот это форматирование создает проблемы, его надо бы убрать
     loginfo = g.log('--pretty=format:%s || %an')
     old_log_set = redis.smembers('LastCommies')
     new_log_set = set([commname for commname in loginfo.split('\n') if commname.find('OTPOR-') != -1])
     redis.sadd('LastCommies', *new_log_set)
     diff = new_log_set - old_log_set
     botname = (await bot.get_me()).username
+    print(botname)
 
-    s_bot = SpaceBot('https://otporproject.jetbrains.space', '2dd6e561-edfe-414a-9a5b-b01114d46b9c',
-                     'c428a143d05f4512ec5275b8ae190627b71441627f5f7bd975f1021d83ad36aa')
-    await s_bot.auth()
+    s_bot = await SpaceBot.rise('https://otporproject.jetbrains.space', '2dd6e561-edfe-414a-9a5b-b01114d46b9c',
+                     'c428a143d05f4512ec5275b8ae190627b71441627f5f7bd975f1021d83ad36aa', 'OTPOR')
+
 
     if len(diff) != 0:
         string, space_string, count = '', '', 0
+
         for comm in diff:
             count += 1
             string = string + '\n' + str(count) + '. ' + comm
             space_string = space_string + '\n' + str(count) + '. ' + comm[:comm.find("||")]
+            if botname == 'AntipropStage_bot':
+                try:
+                    cool = comm.replace('OTPOR-T-', '')[:comm.replace('OTPOR-T-', "").find('||')]
+                    iss_numbers = (int(x) for x in re.split('-| ', cool) if x != '')
+                    for number in iss_numbers:
+                        await s_bot.update_issue_tag('BugTracking', number, 'TEST SERVER')
+                        await s_bot.update_issue_tag('New Fetures', number, 'TEST SERVER')
+                except ValueError:
+                    print('Use commits name templates!')
+            elif botname == 'Russia_Ukraine_Bot':
+                try:
+                    cool = comm.replace('OTPOR-T-', '')[:comm.replace('OTPOR-T-', "").find('||')]
+                    iss_numbers = (int(x) for x in re.split('-| ', cool) if x != '')
+                    for number in iss_numbers:
+                        await s_bot.update_issue_tag('BugTracking', number, 'PROD SERVER')
+                        await s_bot.update_issue_tag('New Fetures', number, 'PROD SERVER')
+                except ValueError:
+                    print('Use commits name templates!')
         try:
             await bot.send_message(bata.all_data().commichannel,
                                    f'[{datetime.now().strftime("%H:%M")}] Bot @{botname} is up, detected new commits:\n {string}')
