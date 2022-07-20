@@ -3,9 +3,10 @@ from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
+
 from bata import all_data
-from data_base.DBuse import poll_write, sql_safe_select, mongo_add, mongo_select, redis_just_one_write, mongo_user_info,\
-    mongo_select_info, redis_just_one_read
+from data_base.DBuse import poll_write, sql_safe_select, mongo_add, mongo_select, redis_just_one_write,\
+    mongo_user_info, redis_just_one_read
 from day_func import day_count
 from resources.all_polls import web_prop, welc_message_one, people_prop
 from states import welcome_states
@@ -19,8 +20,8 @@ router = Router()
 @router.message(commands=['start', 'help'], state='*', flags=flags)
 async def commands_start(message: types.Message, state: FSMContext):  # Первое сообщение
     user_id = message.from_user.id
-    old = await mongo_select_info(message.from_user.id)
-    #if old is None:
+    # old = await mongo_select_info(message.from_user.id)
+    # if old is None:
     await day_count()
     await mongo_stat(user_id)
     await mongo_user_info(user_id, message.from_user.username)
@@ -35,11 +36,11 @@ async def commands_start(message: types.Message, state: FSMContext):  # Перв
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     await state.set_state(welcome_states.start_dialog.dialogue_1)
 
-    #else:
+    # else:
     #    await message.answer("Извините, этого бота можно проходить только один раз")
 
 
-@router.message(commands=['restart'], state='*', flags=flags)
+'''@router.message(commands=['restart'], state='*', flags=flags)
 async def commands_restart(message: types.Message, state: FSMContext):  # Первое сообщение
 
     user_id = message.from_user.id
@@ -54,7 +55,7 @@ async def commands_restart(message: types.Message, state: FSMContext):  # Пер
     markup.row(types.KeyboardButton(text="А с чего мне тебе верить? 🤔"))
     text = await sql_safe_select("text", "texts", {"name": "start_hello"})
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
-    await state.set_state(welcome_states.start_dialog.dialogue_1)
+    await state.set_state(welcome_states.start_dialog.dialogue_1)'''
 
 
 @router.message(welcome_states.start_dialog.dialogue_1, text_contains='верить', content_types=types.ContentType.TEXT,
@@ -89,7 +90,8 @@ async def message_2(message: types.Message, state: FSMContext):
     await state.set_state(welcome_states.start_dialog.dialogue_4)
 
 
-@router.message(welcome_states.start_dialog.dialogue_4, (F.text == '1️⃣ Специальная военная операция (СВО)'), flags=flags)
+@router.message(welcome_states.start_dialog.dialogue_4, (F.text == '1️⃣ Специальная военная операция (СВО)'),
+                flags=flags)
 async def message_3(message: types.Message, state: FSMContext):  # Начало опроса
     await poll_write(f'Usrs: {message.from_user.id}: Start_answers: Is_it_war:', message.text)
     markup = ReplyKeyboardBuilder()
@@ -118,7 +120,7 @@ async def start_lets_start_2(message: types.Message, state: FSMContext):  # На
 
 
 @router.message(welcome_states.start_dialog.dialogue_5, (F.text == "Стоп! Правильно «в Украине»! ☝️"), flags=flags)
-async def start_lets_start_2(message: types.Message, state: FSMContext):
+async def start_lets_start_2(message: types.Message):
     text = await sql_safe_select("text", "texts", {"name": "start_is_it_correct"})
     markup = ReplyKeyboardBuilder()
     markup.add(types.KeyboardButton(text="Задавай 👌"))
@@ -152,7 +154,7 @@ async def message_5(message: types.Message, state: FSMContext):
                                                  welcome_states.start_dialog.dialogue_7), flags=flags)
 async def poll_filler(message: types.Message):
     await message.answer('Чтобы продолжить — отметьте варианты выше и нажмите «ГОЛОСОВАТЬ» или «VOTE»',
-                               reply_markup=ReplyKeyboardRemove(), disable_web_page_preview=True)
+                         reply_markup=ReplyKeyboardRemove(), disable_web_page_preview=True)
 
 
 @router.message(welcome_states.start_dialog.dialogue_5, text_contains=('Хорошо', 'свои', 'вопросы'),
@@ -174,7 +176,7 @@ async def message_6to7(message: types.Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="Покажи варианты ✍"))
     text = await sql_safe_select("text", "texts", {"name": "start_russia_goal"})
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
-    if message.text == "Начал(а) интересоваться после 24 февраля 🇷🇺🇺🇦" or message.text == "Скорее да  🙂" or\
+    if message.text == "Начал(а) интересоваться после 24 февраля 🇷🇺🇺🇦" or message.text == "Скорее да  🙂" or \
             message.text == "Скорее нет  🙅‍♂":
         await state.set_state(welcome_states.start_dialog.dialogue_extrafix)
         await poll_write(f'Usrs: {message.from_user.id}: Start_answers: interest_in_politics:',
@@ -203,7 +205,8 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FS
     await state.update_data(ans_lst_2=lst_str)
     await state.update_data(answer_2=lst_answers)
     markup = ReplyKeyboardBuilder()
-    markup.row(types.KeyboardButton(text="Да, полностью доверяю ✅"), types.KeyboardButton(text="Нет, не верю ни слову ⛔"))
+    markup.row(types.KeyboardButton(text="Да, полностью доверяю ✅"),
+               types.KeyboardButton(text="Нет, не верю ни слову ⛔"))
     markup.row(types.KeyboardButton(text="Скорее да 👍"), types.KeyboardButton(text="Скорее нет 👎"))
     markup.row(types.KeyboardButton(text="Не знаю, потому что не смотрю ни новости по ТВ, ни их интернет-версию 🤷‍♂"))
     text = await sql_safe_select("text", "texts", {"name": "start_belive_TV"})
@@ -215,14 +218,15 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FS
 async def message_8(message: types.Message, state: FSMContext):
     m_text = message.text
     if m_text == "Да, полностью доверяю ✅" or m_text == "Скорее да 👍" or \
-            m_text == "Скорее нет 👎" or m_text == "Нет, не верю ни слову ⛔" or\
+            m_text == "Скорее нет 👎" or m_text == "Нет, не верю ни слову ⛔" or \
             m_text == "Не знаю, потому что не смотрю ни новости по ТВ, ни их интернет-версию 🤷‍♂":
         await poll_write(f'Usrs: {message.from_user.id}: Start_answers: tv:', m_text)
         await state.update_data(answer_3=m_text)
         markup = ReplyKeyboardBuilder()
         markup.row(types.KeyboardButton(text="Покажи варианты ✍️"))
         text = await sql_safe_select("text", "texts", {"name": "start_internet_belive"})
-        await message.answer(text=text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+        await message.answer(text=text, reply_markup=markup.as_markup(resize_keyboard=True),
+                             disable_web_page_preview=True)
         await state.set_state(welcome_states.start_dialog.button_next)
     else:
         await message.answer("Неправильный ответ, вы можете выбрать вариант ответа на клавиатуре",
@@ -271,10 +275,10 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
         lst_str.append(people_prop[index])
         await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust:', people_prop[index])
         if people_prop[index] != "Владимир Путин" and people_prop[index] != "Никому из них...":
-                await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:',
-                                 people_prop[index])
-                await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons_newpoll:',
-                                 people_prop[index])
+            await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons:',
+                             people_prop[index])
+            await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons_newpoll:',
+                             people_prop[index])
         else:
             await redis_just_one_write(f'Usrs: {poll_answer.user.id}: Start_answers: LovePutin', 'True')
     text = await sql_safe_select("text", "texts", {"name": "start_thank_you"})
@@ -283,7 +287,8 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
     if await mongo_select(poll_answer.user.id):  # можно поставить счетчик повторных обращений
         print("Пользователь уже есть в базе")
     else:
-        await mongo_add(poll_answer.user.id, [data['answer_1'], data['ans_lst_2'], data['answer_3'], data['ans_lst_4'], lst_str])
+        await mongo_add(poll_answer.user.id,
+                        [data['answer_1'], data['ans_lst_2'], data['answer_3'], data['ans_lst_4'], lst_str])
     answer_4, answer_5 = set(data["answer_4"]), set(poll_answer.option_ids)
     if (data["answer_3"] != "Нет, не верю ни слову ⛔"
         and data["answer_3"] != "Не знаю, потому что не смотрю ни новости по ТВ, ни их интернет-версию 🤷‍♂") \
@@ -337,20 +342,6 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
         text = await sql_safe_select("text", "texts", {"name": "antip_all_no_TV"})
         await bot.send_message(poll_answer.user.id, text, reply_markup=markup.as_markup(resize_keyboard=True),
                                disable_web_page_preview=True)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 """    if data["answer_3"] == "Нет, не верю ни слову ⛔":
