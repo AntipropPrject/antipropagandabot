@@ -40,7 +40,7 @@ async def commands_start(message: types.Message, state: FSMContext):  # Перв
     #    await message.answer("Извините, этого бота можно проходить только один раз")
 
 
-'''@router.message(commands=['restart'], state='*', flags=flags)
+@router.message(commands=['restart'], state='*', flags=flags)
 async def commands_restart(message: types.Message, state: FSMContext):  # Первое сообщение
 
     user_id = message.from_user.id
@@ -55,7 +55,7 @@ async def commands_restart(message: types.Message, state: FSMContext):  # Пер
     markup.row(types.KeyboardButton(text="А с чего мне тебе верить? 🤔"))
     text = await sql_safe_select("text", "texts", {"name": "start_hello"})
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
-    await state.set_state(welcome_states.start_dialog.dialogue_1)'''
+    await state.set_state(welcome_states.start_dialog.dialogue_1)
 
 
 @router.message(welcome_states.start_dialog.dialogue_1, text_contains='верить', content_types=types.ContentType.TEXT,
@@ -279,7 +279,7 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
                              people_prop[index])
             await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: who_to_trust_persons_newpoll:',
                              people_prop[index])
-        else:
+        elif people_prop[index] == "Владимир Путин":
             await redis_just_one_write(f'Usrs: {poll_answer.user.id}: Start_answers: LovePutin', 'True')
     text = await sql_safe_select("text", "texts", {"name": "start_thank_you"})
     await bot.send_message(poll_answer.user.id, text)

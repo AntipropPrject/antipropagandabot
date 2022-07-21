@@ -7,6 +7,7 @@ database = client['database']
 collection_stat = database['statistics']
 collection_stat_all = database['userinfo']
 
+
 async def mongo_stat(tg_id):
     try:
         user_answer = {'_id': int(tg_id), 'come': 1,  'start': 0, 'antiprop': 0, 'donbass': 0,
