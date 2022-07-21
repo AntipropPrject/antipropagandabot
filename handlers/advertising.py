@@ -24,7 +24,7 @@ async def start_spam(datet):
     for n in main_news_base:
         main_news_ids.append(n['_id'])
 
-    for user in userinfo.find({'datetime_end': {'$lt': datetime.utcnow() - timedelta(days=1)}}):
+    async for user in userinfo.find({'datetime_end': {'$lt': datetime.utcnow() - timedelta(days=1)}}):
         if all_data().get_data_red().get(f"user_last_answer: {user['_id']}:") != '1':
             asyncio.create_task(news_for_user(user, main_news_base, today_actual, main_news_ids))
             print("Задача для спама создана")

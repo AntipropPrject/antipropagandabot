@@ -1,6 +1,7 @@
 from aiogram import Bot
 import psycopg2
 from redis import from_url
+import motor.motor_asyncio
 import pymongo
 
 
@@ -10,7 +11,7 @@ class all_data():
         self.postgres_data = 'dbname=antiprop_db user=postgres password=postgres'
         self.mongodb_data = 'mongodb://localhost:27017'
         self.bot_token = '5442636780:AAGpX8nFiJMqhzHeNwYHOA82IK40Srtsqe8'
-        self.super_admins = [5429649862, 5177494340, 5581082758, 5316104187, 784006905]
+        self.super_admins = [5429649862, 5177494340, 5581082758, 5316104187, 784006905, 5597084736, 5441287748]
         self.THROTTLE_TIME = 0.8
         self.commichannel = -1001704405613
         self.masterchannel = -1001665168587
@@ -22,7 +23,7 @@ class all_data():
         return psycopg2.connect(database="postgres", user="postgres", password="postgres", host="localhost", port=5431)
 
     def get_mongo(self):
-        return pymongo.MongoClient(host=self.mongodb_data, username='mongoOTPOR', password='mongoOTPOR')
+        return motor.motor_asyncio.AsyncIOMotorClient(username="mongoOTPOR", password="mongoOTPOR", host="localhost", port=27017)
 
     def get_red(self):
         return from_url(self.redis_url, decode_responses=True)

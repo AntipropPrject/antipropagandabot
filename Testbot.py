@@ -26,10 +26,8 @@ dp = Dispatcher(storage)
 async def periodic():
     print('periodic function has been started')
     while True:
-        try:
-            status_spam = await redis_just_one_read('Usrs: admins: spam: status:')
-        except:
-            pass
+
+        status_spam = await redis_just_one_read('Usrs: admins: spam: status:')
         c_time = datetime.now().strftime("%H:%M:%S")
         date = datetime.now().strftime('%Y.%m.%d')
         #удаление дневного счетчика
