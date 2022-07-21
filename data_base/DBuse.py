@@ -446,10 +446,10 @@ async def mongo_game_answer(user_id, game, number, answer_group, condict):
     collection = base['user_games']
     data = collection.find_one({'_id': user_id})
     if data is None:
-        collection.insert_one({'_id': user_id, game: [number]})
+        await collection.insert_one({'_id': user_id, game: [number]})
         await sql_add_value(game, answer_group, condict)
     elif game not in data or number not in data[game]:
-        collection.update_one({'_id': user_id}, {'$push': {game: number}})
+        await collection.update_one({'_id': user_id}, {'$push': {game: number}})
         await sql_add_value(game, answer_group, condict)
     else:
         pass
