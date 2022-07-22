@@ -26,6 +26,8 @@ services:
     container_name: antiprop_redis
     ports:
       - "2342:2342"
+    volumes:
+      - ./storage/redis/data:/data
     command: --port 2342
 
   web:
