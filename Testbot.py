@@ -80,11 +80,11 @@ async def periodic():
 
 
 def main():
-    bot_info = await bot.get_me()
+    bot_info = bot.get_me()
     print(f"Hello, i'm {bot_info.first_name} | {bot_info.username}")
 
     if bata.Check_tickets is True:
-        await happy_tester(bot)
+        happy_tester(bot)
     else:
         print('Tickets checking is disabled, so noone will know...')
     # Технические роутеры
@@ -121,7 +121,7 @@ def main():
     # periodic function
     asyncio.create_task(periodic())
 
-    await session.close()
+    session.close()
     # await dp.start_polling(bot)
     dp.startup.register(on_startup)
     dp.shutdown.register(on_shutdown)
