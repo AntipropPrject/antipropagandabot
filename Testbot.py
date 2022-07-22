@@ -25,7 +25,6 @@ data = all_data()
 bot = data.get_bot()
 storage = RedisStorage.from_url(data.redis_url)
 dp = Dispatcher(storage)
-bot_info = await  bot.get_me()
 
 async def on_startup(dispatcher: Dispatcher) -> None:
     webhook = await bot.get_webhook_info()
@@ -59,6 +58,7 @@ def configure_app(dp, bot) -> web.Application:
 
 async def periodic():
     print('periodic function has been started')
+
     while True:
 
         status_spam = await redis_just_one_read('Usrs: admins: spam: status:')
@@ -79,12 +79,13 @@ async def periodic():
         await asyncio.sleep(1)
 
 
-def main():
+async def main():
+    bot_info = await  bot.get_me()
 
     print(f"Hello, i'm {bot_info.first_name} | {bot_info.username}")
 
     if bata.Check_tickets is True:
-        happy_tester(bot)
+        await happy_tester(bot)
     else:
         print('Tickets checking is disabled, so noone will know...')
     # Технические роутеры
@@ -121,7 +122,7 @@ def main():
     # periodic function
     asyncio.create_task(periodic())
 
-    session.close()
+    await session.close()
     # await dp.start_polling(bot)
     dp.startup.register(on_startup)
     dp.shutdown.register(on_shutdown)
