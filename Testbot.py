@@ -30,8 +30,10 @@ async def on_startup(dispatcher: Dispatcher) -> None:
     webhook = await bot.get_webhook_info()
     if webhook is not None:
         await bot.delete_webhook(drop_pending_updates=True)
+        await bot.set_webhook("https://kamaga777123.xyz/")
     else:
         await bot.set_webhook("https://kamaga777123.xyz/")
+
 
     webhook = await bot.get_webhook_info()
 
