@@ -25,7 +25,7 @@ data = all_data()
 bot = data.get_bot()
 storage = RedisStorage.from_url(data.redis_url)
 dp = Dispatcher(storage)
-
+bot_info = await  bot.get_me()
 
 async def on_startup(dispatcher: Dispatcher) -> None:
     webhook = await bot.get_webhook_info()
@@ -80,7 +80,7 @@ async def periodic():
 
 
 def main():
-    bot_info = bot.get_me()
+
     print(f"Hello, i'm {bot_info.first_name} | {bot_info.username}")
 
     if bata.Check_tickets is True:
