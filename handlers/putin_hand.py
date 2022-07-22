@@ -2,6 +2,7 @@ from aiogram import Router, F
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.dispatcher.fsm.state import StatesGroup, State
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
@@ -29,7 +30,7 @@ async def putin_love_putin(message: Message, state: FSMContext):
     await state.set_state(StateofPutin.main)
 
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Согласен, кто, если не Путин? 🤷‍♂️"))
+    nmarkup.row(types.KeyboardButton(text="Согласен(а), кто, если не Путин? 🤷‍♂️"))
     nmarkup.row(types.KeyboardButton(text="Нет, не согласен 🙅‍♂️"))
     await simple_media(message, tag='putin_love_putin', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
@@ -59,9 +60,9 @@ async def putin_big_love_putin(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(
-    (F.text == "Согласен, кто, если не Путин? 🤷‍♂️") | (F.text == "Не лучший президент, но кто, если не Путин? 🤷‍♂️"),
-    flags=flags)
+@router.message((F.text == "Согласен(а), кто, если не Путин? 🤷‍♂️") |
+                (F.text == "Не лучший президент, но кто, если не Путин? 🤷‍♂️"),
+                flags=flags)
 async def putin_only_one(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'putin_only_one'})
     nmarkup = ReplyKeyboardBuilder()
@@ -125,7 +126,7 @@ async def putin_game1_question(message: Message, state: FSMContext):
             try:
                 await message.answer_video(truth_data[0], caption=capt,
                                            reply_markup=nmarkup.as_markup(resize_keyboard=True))
-            except:
+            except TelegramBadRequest:
                 await message.answer_photo(truth_data[0], caption=capt,
                                            reply_markup=nmarkup.as_markup(resize_keyboard=True))
         else:
@@ -223,14 +224,14 @@ async def putin_game2_question(message: Message, state: FSMContext):
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.add(types.KeyboardButton(text="Виноват 👎"))
         nmarkup.add(types.KeyboardButton(text="Не виноват 👍"))
-        if truth_data[0] != None:
+        if truth_data[0] is not None:
             capt = ""
-            if truth_data[1] != None:
+            if truth_data[1] is not None:
                 capt = truth_data[1]
             try:
                 await message.answer_video(truth_data[0], caption=capt,
                                            reply_markup=nmarkup.as_markup(resize_keyboard=True))
-            except:
+            except TelegramBadRequest:
                 await message.answer_photo(truth_data[0], caption=capt,
                                            reply_markup=nmarkup.as_markup(resize_keyboard=True))
         else:
@@ -270,7 +271,7 @@ async def putin_game2_answer(message: Message, state: FSMContext):
         await message.answer('Спасибо за игру 🤝 Давайте подведем итоги.')
 
 
-@router.message(((F.text == "Достаточно ✋")), state=StateofPutin.game2, flags=flags)
+@router.message((F.text == "Достаточно ✋"), state=StateofPutin.game2, flags=flags)
 async def putin_game2_are_you_sure(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Нет, давай продолжим 👉"))

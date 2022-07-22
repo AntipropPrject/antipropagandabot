@@ -8,7 +8,6 @@ from bata import all_data
 THROTTLE_TIME = all_data().get_THROTTLE_TIME()
 
 
-
 class ThrottlingMiddleware(BaseMiddleware):
     caches = {
         "True": TTLCache(maxsize=10_000, ttl=THROTTLE_TIME)
