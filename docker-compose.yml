@@ -37,6 +37,8 @@ services:
     depends_on:
       - db
     network_mode: host
+    ports:
+      - "1443:1443"
     env_file:
       - .env
 
