@@ -474,7 +474,7 @@ async def reasons_open_eyes(message: Message, state: FSMContext):
 async def reasons_pause(message: Message, state: FSMContext):
     await state.set_state(TruereasonsState.final)
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Нет, мне не нужна эта война... 🙅‍♂️"))
+    nmarkup.row(types.KeyboardButton(text="Нет, мне не нужна эта война... 🙅‍♂️️"))
     nmarkup.row(types.KeyboardButton(text="Я не знаю...😨"))
     nmarkup.row(types.KeyboardButton(text="Да, я готов(а) поддержать войну / спецоперацию 💥"))
     nmarkup.row(types.KeyboardButton(text="Столько парней погибло, теперь мы не имеем права проиграть... 😔"))
@@ -496,7 +496,7 @@ async def reasons_why_support_war(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(((F.text.contains('не нужна эта война...🙅')) | (F.text == "Я не знаю...😨")),
+@router.message(((F.text == "Нет, мне не нужна эта война... 🙅‍♂️") | (F.text == "Я не знаю...😨")),
                 state=TruereasonsState.final, flags=flags)
 async def reasons_now_he_normal(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_now_he_normal'})
