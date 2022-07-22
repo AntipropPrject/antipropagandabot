@@ -29,7 +29,7 @@ async def putin_love_putin(message: Message, state: FSMContext):
     await state.set_state(StateofPutin.main)
 
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Согласен, кто, если не Путин? 🤷‍♂️"))
+    nmarkup.row(types.KeyboardButton(text="Согласен(а), кто, если не Путин? 🤷‍♂️"))
     nmarkup.row(types.KeyboardButton(text="Нет, не согласен 🙅‍♂️"))
     await simple_media(message, tag='putin_love_putin', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
@@ -60,7 +60,7 @@ async def putin_big_love_putin(message: Message):
 
 
 @router.message(
-    (F.text == "Согласен, кто, если не Путин? 🤷‍♂️") | (F.text == "Не лучший президент, но кто, если не Путин? 🤷‍♂️"),
+    (F.text == "Согласен(а), кто, если не Путин? 🤷‍♂️") | (F.text == "Не лучший президент, но кто, если не Путин? 🤷‍♂️"),
     flags=flags)
 async def putin_only_one(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'putin_only_one'})
