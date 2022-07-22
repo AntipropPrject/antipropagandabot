@@ -21,3 +21,6 @@
 #
 #          $ docker-compose up --build
 
+# Настроить конфигурацию токена в .env.example
+# Изменить название файла .env.example на .env
+

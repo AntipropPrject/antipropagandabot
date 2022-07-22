@@ -19,8 +19,8 @@ class all_data():
         self.mg_pswd = os.getenv('MONGO_PASSWORD')
         self.mg_host = os.getenv('MONGO_HOST')
         self.mg_port = os.getenv('MONGO_PORT')
-        self.super_admins = os.getenv('SU_ADMINS')
-        self.THROTTLE_TIME = os.getenv('THROTTLE_TIME')
+        self.super_admins = [5429649862, 5177494340, 5581082758, 5316104187, 784006905, 5597084736, 5441287748]
+        self.THROTTLE_TIME = 0.8
         self.commichannel = os.getenv('COMMIT_CH')
         self.masterchannel = os.getenv('MASTER_CH')
 # фывфывфдв
