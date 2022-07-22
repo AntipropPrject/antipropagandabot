@@ -123,8 +123,8 @@ async def main():
 
     await session.close()
     # await dp.start_polling(bot)
-    await dp.startup.register(on_startup)
-    await dp.shutdown.register(on_shutdown)
+    dp.startup.register(on_startup)
+    dp.shutdown.register(on_shutdown)
     app = configure_app(dp, bot)
     await web.run_app(app, host="0.0.0.0", port=1443)
 
