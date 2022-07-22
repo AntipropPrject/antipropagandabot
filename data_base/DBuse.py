@@ -2,6 +2,8 @@ import psycopg2
 from psycopg2 import sql
 from bata import all_data
 from datetime import datetime
+
+from data_base.connect_pool import get_cursor
 from log import logg
 import motor.motor_asyncio
 """^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^PostgreSQL^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"""
@@ -9,12 +11,9 @@ import motor.motor_asyncio
 
 async def data_getter(query):
     try:
-        conn = all_data().get_postg()
-        with conn:
-            with conn.cursor() as cur:
-                cur.execute(query)
-                data = cur.fetchall()
-        conn.close()
+        with get_cursor() as cur:
+            cur.execute(query)
+            data = cur.fetchall()
         return data
     except psycopg2.Error as error:
         return error
@@ -22,12 +21,9 @@ async def data_getter(query):
 
 async def safe_data_getter(safe_query, values_dict):
     try:
-        conn = all_data().get_postg()
-        with conn:
-            with conn.cursor() as cur:
-                cur.execute(safe_query, values_dict)
-                data = cur.fetchall()
-        conn.close()
+        with get_cursor() as cur:
+            cur.execute(safe_query, values_dict)
+            data = cur.fetchall()
         return data
     except psycopg2.Error as error:
         return False
@@ -38,11 +34,9 @@ async def sql_delete(table_name, condition_dict):
 
         safe_query = sql.SQL("DELETE from {} WHERE {} = {};").format(sql.Identifier(table_name), sql.SQL(', ').join(
             map(sql.Identifier, condition_dict)), sql.SQL(", ").join(map(sql.Placeholder, condition_dict)))
-        conn = all_data().get_postg()
-        with conn:
-            with conn.cursor() as cur:
-                cur.execute(safe_query, condition_dict)
-        conn.close()
+
+        with get_cursor() as cur:
+            cur.execute(safe_query, condition_dict)
     except (psycopg2.Error, IndexError) as error:
         await logg.get_error(f"{error}", __file__)
         return False
@@ -63,12 +57,10 @@ async def sql_safe_select(column, table_name, condition_dict):
                                                                                                         condition_dict)),
                                                                                  col_names=sql.SQL(',').join(
                                                                                          ident_list))
-        conn = all_data().get_postg()
-        with conn:
-            with conn.cursor() as cur:
-                cur.execute(safe_query, condition_dict)
-                data = cur.fetchall()
-        conn.close()
+
+        with get_cursor() as cur:
+            cur.execute(safe_query, condition_dict)
+            data = cur.fetchall()
         if isinstance(column, list):
             return data[0]
         else:
@@ -89,12 +81,10 @@ async def sql_safe_select_like(column1, column2, table_name, first_condition, se
                       f" LIKE '%{first_condition}%'"
                       f" AND {column2}"
                       f" LIKE '%{str(second_condition)[-5:-1].strip()}%'")
-        conn = all_data().get_postg()
-        with conn:
-            with conn.cursor() as cur:
-                cur.execute(safe_query)
-                data = cur.fetchall()
-        conn.close()
+
+        with get_cursor() as cur:
+            cur.execute(safe_query)
+            data = cur.fetchall()
         return data
     except psycopg2.Error as error:
         await logg.get_error(f"{error}", __file__)
@@ -106,12 +96,9 @@ async def sql_select_row_like(tablename, rownumber, like_dict: dict):
         key = list(like_dict.keys())[0]
         q = f"SELECT * FROM (SELECT *, row_number() over (ORDER BY {key}) FROM {tablename} WHERE " \
             f"{key} like '{like_dict[key]}%') AS sub WHERE row_number = {rownumber};"
-        conn = all_data().get_postg()
-        with conn:
-            with conn.cursor() as cur:
-                cur.execute(q)
-                data = cur.fetchall()
-        conn.close()
+        with get_cursor() as cur:
+            cur.execute(q)
+            data = cur.fetchall()
         return data[0]
     except (psycopg2.Error, IndexError) as error:
         return False
@@ -201,11 +188,8 @@ async def sql_safe_insert(table_name, data_dict):
     try:
         safe_query = sql.SQL("INSERT INTO {} ({}) VALUES ({});").format(sql.Identifier(table_name), sql.SQL(', ').join(
                 map(sql.Identifier, data_dict)), sql.SQL(", ").join(map(sql.Placeholder, data_dict)), )
-        conn = all_data().get_postg()
-        with conn:
-            with conn.cursor() as cur:
-                cur.execute(safe_query, data_dict)
-        conn.close()
+        with get_cursor() as cur:
+            cur.execute(safe_query, data_dict)
         # postgresql_csv_dump(table_name)
         return True
     except psycopg2.Error as error:
@@ -226,12 +210,8 @@ async def sql_safe_update(table_name, data_dict, condition_dict):
                                                                                     map(sql.Placeholder, data_dict)),
                                                                             sql.Identifier(where), sql.Literal(equals))
 
-        conn = all_data().get_postg()
-        print(safe_query.as_string(conn))
-        with conn:
-            with conn.cursor() as cur:
-                cur.execute(safe_query, data_dict)
-        conn.close()
+        with get_cursor() as cur:
+            cur.execute(safe_query, data_dict)
         # postgresql_csv_dump(table_name)
         return "Complete"
     except AssertionError as error:
