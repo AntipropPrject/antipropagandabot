@@ -56,27 +56,27 @@ def configure_app(dp, bot) -> web.Application:
     return app
 
 
-async def periodic():
-    print('periodic function has been started')
-
-    while True:
-
-        status_spam = await redis_just_one_read('Usrs: admins: spam: status:')
-        c_time = datetime.now().strftime("%H:%M:%S")
-        date = datetime.now().strftime('%Y.%m.%d')
-        # удаление дневного счетчика
-        if c_time == '21:00:01':
-            await day_count(count_delete=True)
-        if c_time == '07:00:01':
-            await mongo_export_to_file()
-        if status_spam == '1':
-            if c_time == '08:00:01':
-                await start_spam(f'{date} 11:00')
-            if c_time == '16:00:01':
-                await start_spam(f'{date} 19:00')
-        if c_time == '19:00:01':
-            await mongo_export_to_file()
-        await asyncio.sleep(1)
+# async def periodic():
+#     print('periodic function has been started')
+#
+#     while True:
+#
+#         status_spam = await redis_just_one_read('Usrs: admins: spam: status:')
+#         c_time = datetime.now().strftime("%H:%M:%S")
+#         date = datetime.now().strftime('%Y.%m.%d')
+#         # удаление дневного счетчика
+#         if c_time == '21:00:01':
+#             await day_count(count_delete=True)
+#         if c_time == '07:00:01':
+#             await mongo_export_to_file()
+#         if status_spam == '1':
+#             if c_time == '08:00:01':
+#                 await start_spam(f'{date} 11:00')
+#             if c_time == '16:00:01':
+#                 await start_spam(f'{date} 19:00')
+#         if c_time == '19:00:01':
+#             await mongo_export_to_file()
+#         await asyncio.sleep(1)
 
 
 async def main():
