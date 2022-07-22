@@ -1,6 +1,4 @@
-import os
 from contextlib import contextmanager
-
 import psycopg2.pool
 import psycopg2.extras
 

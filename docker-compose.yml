@@ -37,6 +37,9 @@ services:
     depends_on:
       - db
     network_mode: host
+    env_file:
+      - .env
+
 
 
 
