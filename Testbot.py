@@ -120,7 +120,7 @@ async def main():
     # use the session here
 
     # periodic function
-    asyncio.create_task(periodic())
+    # asyncio.create_task(periodic())
 
     await session.close()
     # await dp.start_polling(bot)
