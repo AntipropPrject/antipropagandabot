@@ -42,6 +42,15 @@ async def on_startup(dispatcher: Dispatcher) -> None:
     print("🚀 Bot launched as Hoook!")
     print(f"webhook: https://kamaga777123.xyz/")
 
+    bot_info = await bot.get_me()
+
+    print(f"Hello, i'm {bot_info.first_name} | {bot_info.username}")
+
+    if bata.Check_tickets is True:
+        await happy_tester(bot)
+    else:
+        print('Tickets checking is disabled, so noone will know...')
+
 
 async def on_shutdown(dispatcher: Dispatcher) -> None:
     print("😴 Bot shutdown...")
@@ -79,15 +88,8 @@ def configure_app(dp, bot) -> web.Application:
 #         await asyncio.sleep(1)
 
 
-async def main():
-    bot_info = await  bot.get_me()
+def main():
 
-    print(f"Hello, i'm {bot_info.first_name} | {bot_info.username}")
-
-    if bata.Check_tickets is True:
-        await happy_tester(bot)
-    else:
-        print('Tickets checking is disabled, so noone will know...')
     # Технические роутеры
     # TablesCreator.tables_god()
     dp.include_router(pg_mg.router)
@@ -122,7 +124,7 @@ async def main():
     # periodic function
     # asyncio.create_task(periodic())
 
-    await session.close()
+    # await session.close()
     # await dp.start_polling(bot)
     dp.startup.register(on_startup)
     dp.shutdown.register(on_shutdown)
@@ -131,4 +133,4 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
