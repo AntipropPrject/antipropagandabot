@@ -126,8 +126,8 @@ async def main():
     dp.startup.register(on_startup)
     dp.shutdown.register(on_shutdown)
     app = configure_app(dp, bot)
-    await web.run_app(app, host="0.0.0.0", port=1443)
+    web.run_app(app, host="0.0.0.0", port=1443)
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
