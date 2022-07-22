@@ -131,4 +131,4 @@ async def main():
 
 
 if __name__ == "__main__":
-    await main()
+    asyncio.run(main())
