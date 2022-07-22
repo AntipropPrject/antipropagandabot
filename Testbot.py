@@ -29,7 +29,7 @@ async def on_startup(dispatcher: Dispatcher) -> None:
 
 
     ###await bot.set_webhook("https://64.225.83.109/", certificate="64.225.83.109+7.pem")
-    await bot.set_webhook("https://64.225.83.109/")
+    await bot.set_webhook("https://kamaga777123.xyz/")
     webhook = await bot.get_webhook_info()
 
     print(webhook)
@@ -37,7 +37,7 @@ async def on_startup(dispatcher: Dispatcher) -> None:
     print(webhook)
 
     logging.info("🚀 Bot launched as Hoook!")
-    logging.info(f"webhook: https://64.225.83.109")
+    logging.info(f"webhook: https://kamaga777123.xyz/")
 
 
 async def on_shutdown(dispatcher: Dispatcher) -> None:
@@ -80,7 +80,7 @@ def main():
     dp.startup.register(on_startup)
     dp.shutdown.register(on_shutdown)
     app = configure_app(dp, bot)
-    web.run_app(app, host="0.0.0.0", port=443)
+    web.run_app(app, host="0.0.0.0", port=1443)
     # await bot.delete_webhook(drop_pending_updates=True)
     # await dp.start_polling(bot)
 
