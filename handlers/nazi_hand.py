@@ -10,7 +10,7 @@ from data_base.DBuse import data_getter, poll_write, sql_safe_select, redis_dele
 from filters.MapFilters import NaziFilter, RusHate_pr, NotNaziFilter
 from handlers import true_resons_hand
 from resources.all_polls import nazizm, nazizm_pr
-from stats.stat import mongo_update_stat
+from stats.stat import mongo_update_stat, mongo_update_stat_new
 from utilts import simple_media
 
 
@@ -48,6 +48,7 @@ router.message.filter(state=NaziState)
 async def nazi_first_poll(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Продолжить'))
+
     question = "Отметьте один или более вариантов, с которыми согласны или частично согласны"
     await message.answer_poll(question, nazizm, allows_multiple_answers=True, is_anonymous=False,
                               reply_markup=nmarkup.as_markup(resize_keyboard=True))
@@ -64,8 +65,12 @@ async def npoll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: F
     await state.set_state(NaziState.after_first_poll)
     nazizm_answers = poll_answer.option_ids
     await state.update_data(nazizm_answers=nazizm_answers)
+    lst_answers = []
     for index in nazizm_answers:
+        lst_answers.append(nazizm[index])
         await poll_write(f'Usrs: {poll_answer.user.id}: Nazi_answers: first_poll:', nazizm[index])
+    await mongo_update_stat_new(tg_id=poll_answer.user.id, column='nazi_ex', value=lst_answers)
+
     # это индекс "ненавидят евреев" в списке
     if 8 in nazizm_answers:
         await redis_delete_from_list(f'Usrs: {poll_answer.user.id}: Nazi_answers: first_poll:',
@@ -154,6 +159,7 @@ async def nazi_how_many(message: Message, state: FSMContext):
 
 @router.message((F.text.in_(set(nazizm_pr))), state=NaziState.small_poll, flags=flags)
 async def poll_answer_handler(message: Message, bot: Bot, state: FSMContext):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='neo-nazi', value=message.text)
     await state.set_state(NaziState.after_small_poll)
     answer = message.text
     first_poll_answers = await poll_get(f'Usrs: {message.from_user.id}: Nazi_answers: first_poll:')
@@ -478,6 +484,8 @@ async def nazi_game_start(message: Message, state: FSMContext):
 @router.message(((F.text == "Начнём! 🚀") | (F.text == "Ну давай еще 😎") | (F.text == "Продолжаем, давай еще! 👉")),
                 state=NaziState.game, flags=flags)
 async def country_game_question(message: Message, state: FSMContext):
+    if message.text == '':
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='game_ru_or_usr', value='Начали и НЕ закончили')
     try:
         count = (await state.get_data())['ngamecount']
     except:
@@ -549,6 +557,7 @@ async def country_game_answer(message: Message, state: FSMContext):
         f'🇷🇺 В России: {round(100 - t_percentage * 100)}% \n🇺🇦 На Украине: {round(t_percentage * 100)}%',
         reply_markup=nmarkup.as_markup(resize_keyboard=True))
     if END is True:
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='game_ru_or_usr', value='Начали и закончили')
         await message.answer('Мы посмотрели все фото. Спасибо за игру 🤝')
 
 
@@ -564,6 +573,8 @@ async def putin_game2_are_you_sure(message: Message, state: FSMContext):
     ((F.text == "Мне уже хватит 👌") | (F.text == "Спасибо 🤝") | (F.text == "Пропустим игру 🙅‍♂️")),
     state=NaziState.game, flags=flags)
 async def putin_in_the_past(message: Message, state: FSMContext):
+    if message.text == 'Пропустим игру 🙅‍♂️':
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='game_ru_or_usr', value='Пропустили')
     await state.clear()
     await state.set_state(true_resons_hand.TruereasonsState.main)
     await mongo_update_stat(message.from_user.id, 'nazi')

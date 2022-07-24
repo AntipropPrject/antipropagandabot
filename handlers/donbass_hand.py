@@ -10,7 +10,7 @@ from handlers.true_resons_hand import TruereasonsState
 from keyboards.main_keys import filler_kb
 from resources.all_polls import donbass_first_poll, welc_message_one
 from states.donbass_states import donbass_state
-from stats.stat import mongo_update_stat
+from stats.stat import mongo_update_stat, mongo_update_stat_new
 from utilts import simple_media
 
 
@@ -469,6 +469,7 @@ async def donbas_no_army_here(message: Message, state=FSMContext):
 
 @router.message((F.text == "Путин помог разжечь этот конфликт, чтобы помешать Украине вступить в НАТО 🛡"), flags=flags)
 async def donbas_hypocrisy(message: Message, state: FSMContext):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='donbass_end', value='Путин мешал вступить в НАТО')
     text = await sql_safe_select('text', 'texts', {'name': 'donbas_hypocrisy'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
@@ -477,6 +478,7 @@ async def donbas_hypocrisy(message: Message, state: FSMContext):
 
 @router.message((F.text == "Вообще-то, наших войск не было в ДНР/ ЛНР все эти 8 лет 🙅"), flags=flags)
 async def donbas_untrue(message: Message, state=FSMContext):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='donbass_end', value='Наших не было в ЛДНР')
     text = await sql_safe_select('text', 'texts', {'name': 'donbas_untrue'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Хорошо 👌"))
@@ -487,6 +489,8 @@ async def donbas_untrue(message: Message, state=FSMContext):
 @router.message((F.text == "Вернемся к другим причинам войны 👌"))
 @router.message((F.text == "Путин просто помогал жителям Донбасса, которым не понравились результаты Майдана 🤷"))
 async def donbas_no_army_here(message: Message, state: FSMContext):
+    if 'Путин' in message.text or 'причинам' in message.text:
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='donbass_end', value=message.text)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Да, замечаю  😯"))
     nmarkup.row(types.KeyboardButton(text="Нет, не замечаю🤷‍♀"))
