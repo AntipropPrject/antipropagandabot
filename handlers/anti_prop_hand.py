@@ -311,6 +311,7 @@ async def antip_crossed_boy_3(message: Message):
 
 @router.message((F.text == "Какой ужас 😱") | (F.text == "Давай продолжим 😕"), flags=flags)
 async def antip_crossed_boy_3(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='grade_tv', value=message.text)
     text2 = await sql_safe_select('text', 'texts', {'name': 'antip_be_honest'})
     await message.answer(text2, reply_markup=antip_killme_kb(), disable_web_page_preview=True)
 
@@ -872,6 +873,7 @@ async def antip_reputation_matters(message: Message):
                 ((F.text.contains('действия')) & (F.text.contains('Украине'))) | (
                         F.text.contains('Продолжим 🇷🇺🇺🇦')), flags=flags)
 async def war_point_now(message: Message, state: FSMContext):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='map_antiprop', value=message.text)
     await mongo_update_stat(message.from_user.id, 'antiprop')
     await state.set_state(true_resons_hand.TruereasonsState.main)
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_war_point_now'})
@@ -884,6 +886,7 @@ async def war_point_now(message: Message, state: FSMContext):
                 ((F.text.contains('действия')) & (F.text.contains('Украине'))) | (
                         F.text.contains("Продолжим 🇷🇺🇺🇦")), flags=flags)
 async def reasons_lets_figure(message: Message, state: FSMContext):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='map_antiprop', value=message.text)
     await state.set_state(true_resons_hand.TruereasonsState.main)
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_lets_figure'})
     await mongo_update_stat(message.from_user.id, 'antiprop')
@@ -898,6 +901,7 @@ async def reasons_lets_figure(message: Message, state: FSMContext):
 @router.message(((F.text.contains('действия')) & (F.text.contains('Украине'))) | (
         F.text.contains('Продолжим 🇷🇺🇺🇦')), flags=flags)
 async def reasons_king_of_info(message: Message, state: FSMContext):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='map_antiprop', value=message.text)
     await state.set_state(true_resons_hand.TruereasonsState.main)
     await mongo_update_stat(message.from_user.id, 'antiprop')
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_king_of_info'})

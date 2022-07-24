@@ -89,6 +89,7 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FS
             continue
         true_options.append(donbass_first_poll[index])
         await poll_write(f'Usrs: {poll_answer.user.id}: Donbass_polls: First:', donbass_first_poll[index])
+    await mongo_update_stat_new(tg_id=poll_answer.user.id, column='donbass_ex', value=true_options)
     if "🛡 Если бы мы не нанесли упреждающий удар, то Украина напала бы первая и жертв было бы больше" in true_options:
         await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: Invasion:',
                          "💂 Предотвратить размещение военных баз НАТО на Украине")

@@ -250,6 +250,8 @@ async def reasons_normal_game_start(message: Message, state: FSMContext):
 @router.message(((F.text == "Начнем! 🚀") | (F.text == "Продолжаем, давай еще! 👉")), state=TruereasonsState.game,
                 flags=flags)
 async def reasons_normal_game_question(message: Message, state: FSMContext):
+    if 'Начнем! 🚀' in message.text:
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='normal_game_stats', value='Начали и НЕ закончили')
     try:
         count = (await state.get_data())['ngamecount']
     except:
@@ -282,6 +284,7 @@ async def reasons_normal_game_question(message: Message, state: FSMContext):
         else:
             await message.answer(f'{truth_data[1]}', reply_markup=nmarkup.as_markup(resize_keyboard=True))
     else:
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='normal_game_stats', value='Начали и закончили')
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Продолжим 🤝"))
         await message.answer(
@@ -320,6 +323,9 @@ async def reasons_normal_game_answer(message: Message, state: FSMContext):
 @router.message(((F.text.contains("Достаточно,")) | (F.text == "Продолжим 🤝") | (F.text == 'Пропустим игру 🙅‍♀️')),
                 state=TruereasonsState.game, flags=flags)
 async def reasons_real_reasons(message: Message, state: FSMContext):
+    if 'Пропустим игру' in message.text:
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='normal_game_stats', value='Пропустили')
+
     await state.set_state(TruereasonsState.final)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
