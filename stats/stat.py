@@ -5,7 +5,6 @@ import motor.motor_asyncio
 from bata import all_data
 from log import logg
 
-
 client = all_data().get_mongo()
 database = client.database
 collection_stat = database['statistics']
@@ -67,9 +66,10 @@ async def mongo_select_stat():
         await logg.get_error(f"mongo_select_stat | {error}", __file__)
         return False
 
+
 async def mongo_select_stat_all_user():
     try:
-        lst=[]
+        lst = []
         async for answer in collection_stat_all.find():
             lst.append(answer)
         return lst
@@ -79,7 +79,14 @@ async def mongo_select_stat_all_user():
 
 async def mongo_is_done(p_id):
     try:
+
         collection = await collection_stat.find_one({'_id': p_id})
         return collection['end']
     except Exception as error:
         await logg.get_error(f"mongo_is_done | {error}", __file__)
+    try:
+        document = await collection_stat.find_one({'_id': p_id})
+        return document
+    except Exception as error:
+        await logg.get_error(f"MONGO MENU | {error}", __file__)
+
