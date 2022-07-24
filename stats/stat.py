@@ -1,3 +1,5 @@
+import datetime
+
 import motor.motor_asyncio
 
 from bata import all_data
@@ -5,8 +7,9 @@ from log import logg
 
 
 client = all_data().get_mongo()
-database = client['database']
+database = client.database
 collection_stat = database['statistics']
+collection_stat_new = database['statistics_new']
 collection_stat_all = database['userinfo']
 
 
@@ -14,13 +17,24 @@ collection_stat_all = database['userinfo']
 
 async def mongo_stat(tg_id):
     try:
-        user_answer = {'_id': int(tg_id), 'come': 1,  'start': 0, 'antiprop': 0, 'donbass': 0,
-                       'war_aims': 0, 'putin': 0, 'faith': 'none', 'political_view': 'none', 'end': 0,
-                       'nazi': 0, 'prevent_strike': 0}
+        user_answer = {'_id': int(tg_id), 'come': 1}
         await collection_stat.insert_one(user_answer)
     except Exception as error:
         pass
 
+async def mongo_stat_new(tg_id):
+    try:
+        user_answer = {'_id': int(tg_id), 'datetime': datetime.datetime.now(), 'come': True}
+        await collection_stat.insert_one(user_answer)
+    except Exception as error:
+        pass
+
+
+async def mongo_update_stat_new(tg_id, column, options='$set', value=True):
+    try:
+        await collection_stat.update_one({'_id': int(tg_id)}, {options: {column: value}})
+    except Exception as error:
+        await logg.get_error(f"mongo_update_stat | {error}", __file__)
 
 async def mongo_update_stat(tg_id, column, options='$set', value=1):
     try:
@@ -65,7 +79,7 @@ async def mongo_select_stat_all_user():
 
 async def mongo_is_done(p_id):
     try:
-        collection = collection_stat.find_one({'_id': p_id})
-        return await collection['end']
+        collection = await collection_stat.find_one({'_id': p_id})
+        return collection['end']
     except Exception as error:
-        await logg.get_error(f"mongo_select_stat_all_user | {error}", __file__)
+        await logg.get_error(f"mongo_is_done | {error}", __file__)

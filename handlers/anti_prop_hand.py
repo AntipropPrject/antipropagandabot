@@ -17,7 +17,7 @@ from filters.MapFilters import WebPropagandaFilter, TVPropagandaFilter, PplPropa
 from handlers import true_resons_hand
 from keyboards.map_keys import antip_why_kb, antip_killme_kb
 from states.antiprop_states import propaganda_victim
-from stats.stat import mongo_update_stat
+from stats.stat import mongo_update_stat, mongo_update_stat_new
 from utilts import simple_media, dynamic_media_answer
 
 flags = {"throttling_key": "True"}
@@ -63,6 +63,7 @@ async def antip_cant_unsee(message: Message):
 
 @router.message((F.text.contains('редакторам скинули фейк')), flags=flags)
 async def antip_cant_unsee(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='corpses', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'antip_fake_on_main'})
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Хорошо 👌"))
@@ -71,6 +72,7 @@ async def antip_cant_unsee(message: Message):
 
 @router.message((F.text.contains(' специальная ложь, но')), flags=flags)
 async def antip_eye_log(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='corpses', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'antip_eye_log'})
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Хорошо 👌"))
@@ -81,6 +83,7 @@ async def antip_eye_log(message: Message):
                                                          (F.text.contains('явная ложь')) | (
                                                          F.text.contains('Не знаю, давай'))))
 async def antiprop_rather_yes_start(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='corpses', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'antip_rather_yes_TV'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Открой мне глаза 👀"))
@@ -163,6 +166,7 @@ async def antip_conspirasy(message: Message):
 
 @router.message((F.text == "Продолжай ⏳"), state=propaganda_victim.choose_TV, flags=flags)
 async def antip_pile_of_lies(message: Message, state: FSMContext):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='false_on_tv', value='Да')
     text = await sql_safe_select('text', 'texts', {'name': 'antip_pile_of_lies'})
     utv_list = ['1 канал 📺', 'Россия 1 / 24 📺', 'НТВ 📺', 'Звезда 📺']
     await state.update_data(first_tv_count=0, rus24_tv_count=0, HTB_tv_count=0, Star_tv_count=0)
@@ -335,6 +339,8 @@ async def antip_another_tv(message: Message, state: FSMContext):
         (F.text.contains('знал'))), flags=flags)
 @router.message(WebPropagandaFilter(), commands=["test"])
 async def antip_not_only_TV(message: Message, web_lies_list: List[str], state: FSMContext):
+    if 'шаг' not in message.text:
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='crucified_man', value=message.text)
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Покажи новость 👀"))
     all_answers_user = web_lies_list.copy()
@@ -437,6 +443,7 @@ async def show_the_news(message: types.Message, state: FSMContext):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text='Новость посмотрел(а). Что с ней не так? 🤔'))
     if message.text == 'Покажи новость 👀':
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='false_on_web_prop', value='Да')
         print(all_answers_user[0])
         tag = await get_tag(all_answers_user[0])
         news = await data_getter(f"SELECT name FROM assets WHERE name LIKE '{tag}_media_%'")
@@ -584,6 +591,8 @@ async def antip_truth_game_start(message: Message, state: FSMContext):
 
 @router.message((F.text == "Начнем! 🚀") | (F.text == "Продолжаем, давай еще! 👉"), flags=flags)
 async def antip_truth_game_start_question(message: Message, state: FSMContext):
+    if message.text =='Начнем! 🚀':
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='game_false_or_true', value='Начали и НЕ закончили')
     try:
         count = (await state.get_data())['gamecount']
     except:
@@ -664,12 +673,15 @@ async def antip_truth_game_answer(message: Message, state: FSMContext):
         except TelegramBadRequest:
             await message.answer_photo(media, caption=reb)
     if END is True:
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='game_false_or_true', value='Начали и закончили')
         await message.answer('У меня закончились сюжеты. Спасибо за игру🤝')
 
 
 @router.message(YandexPropagandaFilter(), ((F.text == "Пропустим игру 🙅‍♀️") | (F.text == '🤝 Продолжим')
                                            | (F.text == 'Достаточно, двигаемся дальше  🙅‍♀️')), flags=flags)
 async def antip_propaganda_here_too(message: Message, state: FSMContext):
+    if message.text == 'Пропустим игру 🙅‍♀️':
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='game_false_or_true', value='Пропустили')
     await state.set_state(propaganda_victim.yandex)
     text = await sql_safe_select('text', 'texts', {'name': 'antip_propaganda_here_too'})
     nmarkup = ReplyKeyboardBuilder()
@@ -771,6 +783,7 @@ async def antip_anecdote(message: Message, state: FSMContext):
 
 @router.message((F.text.in_({'😁', "🙂", "😕"})), flags=flags)
 async def antip_emoji(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='reaction_on_anecdot', value=message.text)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Конечно! 🙂"))
     nmarkup.add(types.KeyboardButton(text="Ну, давай 🤨"))
@@ -781,6 +794,7 @@ async def antip_emoji(message: Message):
 
 @router.message((F.text == "Подожди! А украинскую пропаганду ты показать не хочешь? Как-то однобоко. 🤔"), flags=flags)
 async def antip_after_anecdote_log(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='can_ask_u_answ', value='Украинская пропаганда')
     text = await sql_safe_select('text', 'texts', {'name': 'antip_after_anecdote_log'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Конечно! 🙂"))
@@ -790,6 +804,7 @@ async def antip_after_anecdote_log(message: Message):
 
 @router.message((F.text.in_({"Конечно! 🙂", "Ну, давай 🤨"})), flags=flags)
 async def antip_do_you_agree(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='can_ask_u_answ', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'antip_do_you_agree'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Да, полностью согласен 👌"))
@@ -803,22 +818,26 @@ async def antip_do_you_agree(message: Message):
 
 @router.message((F.text.contains('почему')), flags=flags)
 async def antip_why_they_belive(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='prop_machine_1', value=message.text)
     await simple_media(message, 'antip_why_they_belive', antip_why_kb())
 
 
 @router.message((F.text.contains('Возможно') | (F.text.contains('полностью')) | (F.text.contains('Скорее')) | (
         F.text.contains('Допускаю'))), flags=flags)
 async def antip_to_the_main(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='prop_machine_1', value=message.text)
     await simple_media(message, 'antip_to_the_main', antip_why_kb())
 
 
 @router.message((F.text.contains('странах')) | (F.text.contains('🇺🇸')), flags=flags)
 async def antip_to_the_main(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='prop_machine_1', value=message.text)
     await simple_media(message, 'antip_prop_difference', antip_why_kb())
 
 
 @router.message((F.text.contains("Нет, не согласен(а) 🙅‍♂️")), flags=flags)
 async def antip_love_propaganda(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='prop_machine_1', value=message.text)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Скорее согласен(а) 👌"))
     nmarkup.row(types.KeyboardButton(text="Да, как и во многих других странах 🇺🇸"))

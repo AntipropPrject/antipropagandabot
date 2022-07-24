@@ -15,7 +15,7 @@ from handlers.preventive_strike import PreventStrikeState
 from handlers.putin_hand import StateofPutin
 from resources.all_polls import welc_message_one
 from states.donbass_states import donbass_state
-from stats.stat import mongo_update_stat
+from stats.stat import mongo_update_stat, mongo_update_stat_new
 from utilts import simple_media
 
 
@@ -112,6 +112,7 @@ async def reasons_war(message: Message):
 
 @router.message(WarReason(answer="👪 Защитить русских в Донбассе"), flags=flags)
 async def donbass_big_tragedy(message: Message, state=FSMContext):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='start_donbass', value='Да')
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Start_answers: Invasion:',
                                  "👪 Защитить русских в Донбассе")
     await state.set_state(donbass_state.eight_years)

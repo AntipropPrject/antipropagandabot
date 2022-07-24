@@ -6,6 +6,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from data_base.DBuse import *
 from handlers.anti_prop_hand import antip_truth_game_start, antip_web_exit_1
 from states.antiprop_states import propaganda_victim
+from stats.stat import mongo_update_stat_new
 
 flags = {"throttling_key": "True"}
 router = Router()
@@ -18,6 +19,8 @@ messageDict = dict()
 @router.message((F.text.contains('послушаем его еще! 🗣')), flags=flags)
 @router.message(commands=["testsmi"], flags=flags)
 async def smi_statement(message: Message, state: FSMContext):
+    if message.text == 'Начнём 🙂':
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='false_on_prop', value='Да')
     messageDict.update({message.from_user.id: message})
     person_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
 

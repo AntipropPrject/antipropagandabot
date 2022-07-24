@@ -248,7 +248,7 @@ async def mongo_select_news(coll=None) -> [list, bool]:
     try:
 
         client = all_data().get_mongo()
-        database = client['database']
+        database = client.database
         spam_list = []
         if coll == 'main':
             collection = database['spam_news_main']
@@ -269,7 +269,7 @@ async def mongo_pop_news(m_id: str, coll=None):
     try:
 
         client = all_data().get_mongo()
-        database = client['database']
+        database = client.database
         if 'main' in coll:
             collection = database['spam_news_main']
             await collection.delete_one({'media': {'$regex': m_id}})
@@ -285,7 +285,7 @@ async def mongo_update_news(m_id: str, new_m_id: str, new_caption: str, coll=Non
     try:
 
         client = all_data().get_mongo()
-        database = client['database']
+        database = client.database
         if 'main' in coll:
             collection = database['spam_news_main']
             await collection.replace_one({'media': {'$regex': m_id}}, {"media": str(new_m_id), "caption": new_caption}, True)
@@ -304,7 +304,7 @@ async def mongo_user_info(tg_id, username):
 
     try:
         client = all_data().get_mongo()
-        database = client['database']
+        database = client.database
         collection = database['userinfo']
         user_answer = {'_id': int(tg_id), 'username': str(username), 'datetime': f'{today}_{time}',
                        'datetime_end': None, 'viewed_news': []}
@@ -316,7 +316,7 @@ async def mongo_user_info(tg_id, username):
 async def mongo_select_info(tg_id):
     try:
         client = all_data().get_mongo()
-        database = client['database']
+        database = client.database
         collection = database['userinfo']
         try:
             x = await collection.find_one({"_id": int(tg_id)})
@@ -334,7 +334,7 @@ async def mongo_add(tg_id, answers):
         for answer in answers:
             answer_list.append(answer)
         client = all_data().get_mongo()
-        database = client['database']
+        database = client.database
         collection = database['useranswer']
         user_answer = {'_id': int(tg_id), 'answers_1': str(answer_list[0]), 'answers_2': (answer_list[1]),
                        'answers_3': str(answer_list[2]), 'answers_4': (answer_list[3]), 'answers_5': (answer_list[4]),
@@ -347,7 +347,7 @@ async def mongo_add(tg_id, answers):
 async def mongo_select(tg_id):
     try:
         client = all_data().get_mongo()
-        database = client['database']
+        database = client.database
         collection = database['useranswer']
         myquery = {"_id": int(tg_id)}
         async for answer in collection.find(myquery):
@@ -359,7 +359,7 @@ async def mongo_select(tg_id):
 async def mongo_update_viewed_news(tg_id, value):
     try:
         client = all_data().get_mongo()
-        database = client['database']
+        database = client.database
         collection = database['userinfo']
         await collection.update_one({'_id': int(tg_id)}, {"$push": {"viewed_news": value}}, True)
     except Exception as error:
@@ -369,7 +369,7 @@ async def mongo_update_viewed_news(tg_id, value):
 async def mongo_update_end(tg_id):
     try:
         client = all_data().get_mongo()
-        database = client['database']
+        database = client.database
         collection = database['userinfo']
         await collection.update_one({'_id': int(tg_id)}, {'$set': {'datetime_end': datetime.utcnow()}}, True)
     except Exception as error:
@@ -379,7 +379,7 @@ async def mongo_update_end(tg_id):
 async def mongo_pop(tg_id, value_dict):
     try:
         client = all_data().get_mongo()
-        database = client['database']
+        database = client.database
         collection = database['useranswer']
         await collection.update({'_id': int(tg_id)}, {'$pull': {'other_answer': value_dict}})
     except Exception as error:
@@ -390,7 +390,7 @@ async def mongo_pop(tg_id, value_dict):
 async def mongo_add_admin(tg_id):
     try:
         client = all_data().get_mongo()
-        database = client['database']
+        database = client.database
         collection = database['admins']
         user_answer = {'_id': int(tg_id)}
         await collection.insert_one(user_answer)
@@ -401,7 +401,7 @@ async def mongo_add_admin(tg_id):
 async def mongo_select_admins():
     try:
         client = all_data().get_mongo()
-        database = client['database']
+        database = client.database
         collection = database['admins']
         lst = []
         async for answer in collection.find():
@@ -414,7 +414,7 @@ async def mongo_select_admins():
 async def mongo_pop_admin(tg_id):
     try:
         client = all_data().get_mongo()
-        database = client['database']
+        database = client.database
         collection = database['admins']
         await collection.delete_one({'_id': int(tg_id)})
     except Exception as error:
@@ -422,8 +422,9 @@ async def mongo_pop_admin(tg_id):
 
 
 async def mongo_game_answer(user_id, game, number, answer_group, condict):
-    base = all_data().get_mongo()['database']
-    collection = base['user_games']
+    client = all_data().get_mongo()
+    database = client.database
+    collection = database['user_games']
     data = await collection.find_one({'_id': user_id})
     if data is None:
         await collection.insert_one({'_id': user_id, game: [number]})

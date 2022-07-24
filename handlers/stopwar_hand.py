@@ -245,7 +245,7 @@ async def stopwar_lets_fight(message: Message, bot: Bot):
         else:
             days_pr = 'дней,'
         #timer
-        sec = 299
+        sec = 10
         markup = ReplyKeyboardBuilder()
         markup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
         bot_message = await message.answer('5:00')
