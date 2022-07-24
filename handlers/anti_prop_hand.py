@@ -79,9 +79,15 @@ async def antip_eye_log(message: Message):
     await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
-@router.message(TVPropagandaFilter(option="Скорее да"), ((F.text == "Хорошо 👌") |
-                                                         (F.text.contains('явная ложь')) | (
-                                                         F.text.contains('Не знаю, давай'))))
+@router.message(((F.text == "Хорошо 👌") | (F.text.contains('явная ложь')) | (F.text.contains('Не знаю, давай'))))
+async def antip_stop_emotions(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'antip_stop_emotions'})
+    nmarkap = ReplyKeyboardBuilder()
+    nmarkap.row(types.KeyboardButton(text="Хорошо 🤝"))
+    await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+
+
+@router.message(TVPropagandaFilter(option="Скорее да"), (F.text == "Хорошо 🤝"))
 async def antiprop_rather_yes_start(message: Message):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='corpses', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'antip_rather_yes_TV'})
@@ -92,8 +98,7 @@ async def antiprop_rather_yes_start(message: Message):
 
 
 @router.message(TVPropagandaFilter(option="Не знаю, потому что не смотрю ни новости по ТВ, ни их интернет-версию 🤷‍♂"),
-                ((F.text == "Хорошо 👌") |
-                 (F.text.contains('явная ложь')) | (F.text.contains('Не знаю, давай'))))
+                (F.text == "Хорошо 🤝"))
 async def antiprop_rather_yes_start_no_tv(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antiprop_rather_yes_start_no_tv'})
     nmarkup = ReplyKeyboardBuilder()
@@ -102,9 +107,7 @@ async def antiprop_rather_yes_start_no_tv(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(TVPropagandaFilter(option="Да, полностью доверяю"), ((F.text == "Хорошо 👌") |
-                                                                     (F.text.contains('явная ложь')) | (
-                                                                     F.text.contains('Не знаю, давай'))))
+@router.message(TVPropagandaFilter(option="Да, полностью доверяю"), (F.text == "Хорошо 🤝"))
 async def antip_all_yes_TV(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_all_yes_TV'})
     nmarkup = ReplyKeyboardBuilder()
@@ -112,9 +115,7 @@ async def antip_all_yes_TV(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(TVPropagandaFilter(option="Скорее нет"), ((F.text == "Хорошо 👌") |
-                                                          (F.text.contains('явная ложь')) | (
-                                                          F.text.contains('Не знаю, давай'))))
+@router.message(TVPropagandaFilter(option="Скорее нет"), (F.text == "Хорошо 🤝"))
 async def rather_no_TV(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_rather_no_TV'})
     nmarkup = ReplyKeyboardBuilder()
@@ -123,9 +124,7 @@ async def rather_no_TV(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(TVPropagandaFilter(option="Нет, не верю ни слову"), ((F.text == "Хорошо 👌") |
-                                                                     (F.text.contains('явная ложь')) | (
-                                                                     F.text.contains('Не знаю, давай'))))
+@router.message(TVPropagandaFilter(option="Нет, не верю ни слову"), (F.text == "Хорошо 🤝"))
 async def antip_all_no_TV(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_all_no_TV'})
     nmarkup = ReplyKeyboardBuilder()
@@ -335,7 +334,7 @@ async def antip_another_tv(message: Message, state: FSMContext):
 
 
 @router.message(WebPropagandaFilter(), (
-        (F.text.contains('шаг')) | (F.text.contains('удивлен')) | (F.text.contains('шоке')) |
+        (F.text.contains('шаг')) | (F.text.contains('удивлён')) | (F.text.contains('шоке')) |
         (F.text.contains('знал'))), flags=flags)
 @router.message(WebPropagandaFilter(), commands=["test"])
 async def antip_not_only_TV(message: Message, web_lies_list: List[str], state: FSMContext):
@@ -564,7 +563,7 @@ async def antip_web_exit_1(message: Message, state: FSMContext):
 
 
 @router.message(PplPropagandaFilter(),
-                (F.text.contains('шаг')) | (F.text.contains('удивлен')) | (F.text.contains('шоке')) | (
+                (F.text.contains('шаг')) | (F.text.contains('удивлён')) | (F.text.contains('шоке')) | (
                         F.text.contains('знал')) | (F.text == 'Конечно!'), flags=flags)
 async def antip_bad_people_lies(message: Message, state: FSMContext):
     redis = all_data().get_data_red()
@@ -578,7 +577,7 @@ async def antip_bad_people_lies(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.contains('шаг')) | (F.text.contains('удивлен')) | (F.text.contains('шоке')) | (
+@router.message((F.text.contains('шаг')) | (F.text.contains('удивлён')) | (F.text.contains('шоке')) | (
         F.text.contains('знал')) | (F.text == 'Конечно!') | (F.text == 'Ну давай'), flags=flags)
 async def antip_truth_game_start(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_truth_game_start'})
@@ -707,15 +706,15 @@ async def antip_yandex(message: Message):
 @router.message((F.text == "Продолжай ⏳"), state=propaganda_victim.yandex, flags=flags)
 async def antip_yandex_rupor(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_yandex_rupor'})
-    await message.answer(text, disable_web_page_preview=True)
-    if await redis_check(f'Usrs: {message.from_user.id}: Start_answers: NotWiki'):
-        await antip_why_not_wiki(message, state)
-    else:
-        nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(types.KeyboardButton(text="Давай"))
-        await message.answer("У меня есть анекдот", reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Я удивлен(а) 🤔"))
+    nmarkup.row(types.KeyboardButton(text="Я не удивлен(а) 🤷‍♂️"))
+    nmarkup.row(types.KeyboardButton(text="Я не верю 😕"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
+@router.message(WikiFilter(), (F.text.contains('удивлен')) | (F.text.contains('не верю')),
+                state=propaganda_victim.yandex, flags=flags)
 @router.message(WikiFilter(), ((F.text == "Пропустим игру 🙅‍♀️") | (F.text == '🤝 Продолжим')
                                | (F.text == 'Достаточно, двигаемся дальше  🙅‍♀️')), flags=flags)
 async def antip_why_not_wiki(message: Message, state: FSMContext):
@@ -741,12 +740,17 @@ async def antip_clear_and_cool(message: Message):
 
 @router.message((F.text == "Продолжай ⏳"), state=propaganda_victim.wiki, flags=flags)
 async def antip_look_at_it_yourself(message: Message):
-    await simple_media(message, 'antip_look_at_it_yourself')
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Давай"))
-    await message.answer("У меня есть анекдот", reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    nmarkup.row(types.KeyboardButton(text="Спасибо, не знал(а) 🙂"))
+    nmarkup.row(types.KeyboardButton(text="Ничего нового 🤷‍♀️"))
+    nmarkup.row(types.KeyboardButton(text="Я не верю 😕"))
+    await simple_media(message, 'antip_look_at_it_yourself', nmarkup.as_markup(resize_keyboard=True))
 
 
+@router.message(((F.text.contains('Спасибо')) | (F.text.contains('нового')) | (F.text.contains('не верю'))),
+                state=propaganda_victim.wiki, flags=flags)
+@router.message(((F.text.contains('удивлен')) | (F.text.contains('не верю'))),
+                state=propaganda_victim.yandex, flags=flags)
 @router.message(
     (F.text == "Пропустим игру 🙅‍♀️") | (F.text == '🤝 Продолжим') | (F.text == 'Достаточно, двигаемся дальше  🙅‍♀️'),
     flags=flags)
