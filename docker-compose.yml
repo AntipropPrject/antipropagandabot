@@ -43,6 +43,18 @@ services:
       - "1443:1443"
     env_file:
       - .env
+  webflask:
+    build: ./web
+    container_name: flasktest
+    command: bash -c 'python main.py'
+    volumes:
+      - .:/codefl
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+
+
 
 
 
