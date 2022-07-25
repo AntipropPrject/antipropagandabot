@@ -164,22 +164,26 @@ async def message_6(message: types.Message, state: FSMContext):
     await state.set_state(welcome_states.start_dialog.dialogue_6)
 
 
+
 @router.message(welcome_states.start_dialog.dialogue_6, flags=flags)
 async def message_6to7(message: types.Message, state: FSMContext):
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Покажи варианты ✍"))
-    text = await sql_safe_select("text", "texts", {"name": "start_russia_goal"})
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
-    if message.text == "Начал(а) интересоваться после 24 февраля 🇷🇺🇺🇦" or message.text == "Скорее да  🙂" or \
-            message.text == "Скорее нет  🙅‍♂":
-        await mongo_update_stat_new(tg_id=message.from_user.id, column='interest_politics', value=message.text)
-        await state.set_state(welcome_states.start_dialog.dialogue_extrafix)
+    if message.text == "Начал(а) интересоваться после 24 февраля 🇷🇺🇺🇦" or message.text == "Скорее да  🙂":
+        nmarkup = ReplyKeyboardBuilder()
+        nmarkup.row(types.KeyboardButton(text="Покажи варианты ✍"))
+        text = await sql_safe_select("text", "texts", {"name": "start_russia_goal"})
+        await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
         await poll_write(f'Usrs: {message.from_user.id}: Start_answers: interest_in_politics:',
                          message.text[:-3].strip())
+    elif message.text == 'Скорее нет  🙅‍♂':
+        nmarkup = ReplyKeyboardBuilder()
+        nmarkup.row(types.KeyboardButton(text="Хорошо, продолжим 👌"))
+        text = await sql_safe_select("text", "texts", {"name": "not_in_vain"})
+        await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await state.set_state(welcome_states.start_dialog.dialogue_extrafix)
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='interest_politics', value=message.text)
 
 
-@router.message(text_contains='Покажи варианты',
-                state=welcome_states.start_dialog.dialogue_extrafix, flags=flags)  # Сохраняю 1 вопрос
+@router.message((F.text.contains('Хорошо, продолжим')) | (F.text.contains('Покажи варианты')), state=welcome_states.start_dialog.dialogue_extrafix, flags=flags)  # Сохраняю 1 вопрос
 async def message_7(message: types.Message, state: FSMContext):
     markup = ReplyKeyboardBuilder()
     markup.add(types.KeyboardButton(text="Продолжить"))
