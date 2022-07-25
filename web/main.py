@@ -3,7 +3,7 @@ from datetime import datetime
 from flask import Flask, request
 from werkzeug.utils import redirect
 
-from ..data_base.DBuse import data_getter
+from data_base.DBuse import data_getter
 
 
 
