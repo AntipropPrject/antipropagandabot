@@ -163,18 +163,14 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FS
         nmarkup.row(types.KeyboardButton(text="Хорошо  👌"))
         await bot.send_message(poll_answer.user.id, text, reply_markup=nmarkup.as_markup(resize_keyboard=True), parse_mode="HTML")
     elif indexes == [0]:
-        await state.set_state(donbass_state.after_poll)
-        await redis_delete_from_list(f'Usrs: {poll_answer.user.id}: Donbass_polls: First:', donbass_first_poll[2])
+        await state.set_state(donbass_state.second_poll)
+        text = await sql_safe_select('text', 'texts', {'name': 'donbas_who_do_that'})
         nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(types.KeyboardButton(text="Понятно 👌"))
-        media = await sql_safe_select('t_id', 'assets', {'name': 'civil_casualties'})
-        caption = await sql_safe_select('text', 'texts', {'name': 'civil_casualties'})
-        try:
-            await bot.send_video(poll_answer.user.id, video=media, caption=caption,
-                                 reply_markup=nmarkup.as_markup(resize_keyboard=True))
-        except:
-            await bot.send_photo(poll_answer.user.id, photo=media, caption=caption,
-                                 reply_markup=nmarkup.as_markup(resize_keyboard=True))
+        nmarkup.row(types.KeyboardButton(text="В подробностях 📜"))
+        nmarkup.row(types.KeyboardButton(text="Покороче ⏱"))
+        await bot.send_message(poll_answer.user.id, text, reply_markup=nmarkup.as_markup(resize_keyboard=True), parse_mode="HTML",
+                             disable_web_page_preview=True)
+
 
 
 # Этот скорее всего никогда не будет использоваться
