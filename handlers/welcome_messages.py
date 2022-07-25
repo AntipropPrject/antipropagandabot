@@ -199,6 +199,14 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FS
         await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: Invasion:', welc_message_one[index])
     await state.update_data(ans_lst_2=lst_str)
     await state.update_data(answer_2=lst_answers)
+
+    if 'Я не знаю' in lst_str[0]:  # idnt know
+        await mongo_update_stat_new(tg_id=poll_answer.user.id, column='war_aims_gen', value='Только "Я не знаю"')
+    if {0, 1, 2, 3, 5, 8}.isdisjoint(set(lst_answers)) is False:  # red
+        await mongo_update_stat_new(tg_id=poll_answer.user.id, column='war_aims_gen', value='Хотя бы один красный')
+    if {4, 6}.isdisjoint(set(lst_answers)) is False:  # green
+        await mongo_update_stat_new(tg_id=poll_answer.user.id, column='war_aims_gen', value='Есть зелёные и нет красных')
+
     await mongo_update_stat_new(tg_id=poll_answer.user.id,column='war_aims_ex', value=lst_str)
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Да, полностью доверяю ✅"),
@@ -247,6 +255,16 @@ async def poll_answer_handler_tho(poll_answer: types.PollAnswer, bot: Bot, state
     for index in lst_answers:
         lst_str.append(web_prop[index])
         await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: ethernet:', web_prop[index])
+
+    if 'Никому из них...' in lst_str[0]:  # idnt know
+        await mongo_update_stat_new(tg_id=poll_answer.user.id, column='web_prop_gen', value='Только "Я не знаю"')
+    if {2, 3, 4, 5, 7}.isdisjoint(set(lst_answers)) is False:  # red
+        await mongo_update_stat_new(tg_id=poll_answer.user.id, column='web_prop_gen', value='Хотя бы один красный')
+    if {1, 6}.isdisjoint(set(lst_answers)) is False:  # green
+        await mongo_update_stat_new(tg_id=poll_answer.user.id, column='web_prop_gen', value='Есть зелёные и нет красных')
+    if 'Википедия' not in lst_str:
+        await mongo_update_stat_new(tg_id=poll_answer.user.id, column='why_not_wiki', value=lst_str)
+
     await state.update_data(answer_4=poll_answer.option_ids)
     await mongo_update_stat_new(tg_id=poll_answer.user.id, column='web_prop_ex', value=lst_str)
     await state.update_data(ans_lst_4=lst_str)
@@ -278,6 +296,12 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
                              people_prop[index])
         elif people_prop[index] == "Владимир Путин":
             await redis_just_one_write(f'Usrs: {poll_answer.user.id}: Start_answers: LovePutin', 'True')
+
+    if {1, 2, 3, 4, 5}.isdisjoint(set(lst_answers)) is False:  # red
+        await mongo_update_stat_new(tg_id=poll_answer.user.id, column='prop_gen', value='Хотя бы один красный')
+    if {6}.isdisjoint(set(lst_answers)) is False:  # green
+        await mongo_update_stat_new(tg_id=poll_answer.user.id, column='prop_gen', value='Есть зелёные и нет красных')
+
     await mongo_update_stat_new(tg_id=poll_answer.user.id,column='prop_ex', value=lst_str)
     text = await sql_safe_select("text", "texts", {"name": "start_thank_you"})
     await bot.send_message(poll_answer.user.id, text)

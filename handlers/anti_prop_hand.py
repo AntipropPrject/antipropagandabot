@@ -831,12 +831,14 @@ async def antip_why_they_belive(message: Message):
         F.text.contains('Допускаю'))), flags=flags)
 async def antip_to_the_main(message: Message):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='prop_machine_1', value=message.text)
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='prop_machine_2', value=message.text)
     await simple_media(message, 'antip_to_the_main', antip_why_kb())
 
 
 @router.message((F.text.contains('странах')) | (F.text.contains('🇺🇸')), flags=flags)
 async def antip_to_the_main(message: Message):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='prop_machine_1', value=message.text)
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='prop_machine_2', value=message.text)
     await simple_media(message, 'antip_prop_difference', antip_why_kb())
 
 
@@ -852,6 +854,7 @@ async def antip_love_propaganda(message: Message):
 
 @router.message(F.text == 'Нет, нам хотят донести правду 😌')
 async def antip_big_love_propaganda(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='prop_machine_2', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'antip_big_love_propaganda'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(

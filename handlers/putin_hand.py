@@ -310,6 +310,7 @@ async def putin_in_the_past(message: Message, state: FSMContext):
 @router.message(((F.text == "Докажи 🤔") | (F.text == "Нет, я не согласен(а) ❌")), state=StateofPutin.final,
                 flags=flags)
 async def putin_prove_me(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='future_with_putin', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'putin_prove_me'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Давай 👌"))
@@ -320,6 +321,8 @@ async def putin_prove_me(message: Message):
                  (F.text == "Был хорошим президентом раньше, но сейчас - нет 🙅") |
                  (F.text == "Давай 👌")), state=StateofPutin, flags=flags)
 async def stopwar_start(message: Message, state: FSMContext):
+    if 'согласен(а)' in message.text:
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='future_with_putin', value=message.text)
     if 'Военный преступник' in message.text or 'Был хорошим' in message.text:
         await mongo_update_stat_new(tg_id=message.from_user.id, column='not_love_putin_descr', value=message.text)
 
