@@ -72,6 +72,10 @@ async def reasons_now_you_nothing(message: Message, state: FSMContext):
 
 @router.message((F.text == "Давай попробуем 👌"), flags=flags)
 async def reasons_now_you_fucked(message: Message, state: FSMContext):
+    base_list = ("👪 Защитить русских в Донбассе", "🛡 Предотвратить вторжение на территорию России или ДНР/ЛНР",
+                 "🤬 Денацификация / Уничтожить нацистов")
+    for thing in base_list:
+        await poll_write(f'Usrs: {message.from_user.id}: Start_answers: Invasion:', thing)
     await redis_just_one_write(f'Usrs: {message.from_user.id}: Politics:', 'Аполитичный')
     await anti_prop_hand.war_point_now(message, state)
 
