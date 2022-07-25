@@ -24,14 +24,14 @@ async def mongo_stat(tg_id):
 async def mongo_stat_new(tg_id):
     try:
         user_answer = {'_id': int(tg_id), 'datetime': datetime.datetime.now(), 'come': True}
-        await collection_stat.insert_one(user_answer)
+        await collection_stat_new.insert_one(user_answer)
     except Exception as error:
         pass
 
 
 async def mongo_update_stat_new(tg_id, column, options='$set', value=True):
     try:
-        await collection_stat.update_one({'_id': int(tg_id)}, {options: {column: value}})
+        await collection_stat_new.update_one({'_id': int(tg_id)}, {options: {column: value}})
     except Exception as error:
         await logg.get_error(f"mongo_update_stat | {error}", __file__)
 
