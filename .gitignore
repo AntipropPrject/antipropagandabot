@@ -52,10 +52,7 @@ coverage.xml
 docs/_build/
 .idea/.name
 *.pyc
-*.pyc
 logfile.log
-*.pyc
-bata.py
 *.mp4
 *.jpg
 *.png
