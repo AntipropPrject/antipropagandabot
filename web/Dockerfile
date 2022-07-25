@@ -1,6 +1,6 @@
 FROM python:3.8
 
-ADD .. /code
+ADD .. /code/web
 WORKDIR /code/web
 RUN pip install -r /web/requirements.txt && echo "source activate my_env" > ~/.bashrc
 
