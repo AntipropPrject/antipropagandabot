@@ -5,19 +5,12 @@ import psycopg2
 from flask import Flask, request
 from werkzeug.utils import redirect
 
-from connect_pool import get_cursor
+from data_base.DBuse import data_getter
 
 app = Flask(__name__)
 
 
-async def data_getter(query):
-    try:
-        with get_cursor() as cur:
-            cur.execute(query)
-            data = cur.fetchall()
-        return data
-    except psycopg2.Error as error:
-        return error
+
 
 
 # @app.before_request
