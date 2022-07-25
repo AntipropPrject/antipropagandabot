@@ -782,7 +782,7 @@ async def antip_anecdote(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="😁"))
     nmarkup.row(types.KeyboardButton(text="🙂"))
     nmarkup.row(types.KeyboardButton(text="😕"))
-    nmarkup.adjust(1, 1, 1)
+    nmarkup.adjust(3)
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
