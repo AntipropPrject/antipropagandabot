@@ -311,11 +311,14 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
     else:
         await mongo_add(poll_answer.user.id,
                         [data['answer_1'], data['ans_lst_2'], data['answer_3'], data['ans_lst_4'], lst_str])
-    answer_4, answer_5 = set(data["answer_4"]), set(poll_answer.option_ids)
+    answer_3, answer_4, answer_5 = set(data["answer_3"]), set(data["answer_4"]), set(poll_answer.option_ids)
     if (data["answer_3"] != "Нет, не верю ни слову ⛔"
         and data["answer_3"] != "Не знаю, потому что не смотрю ни новости по ТВ, ни их интернет-версию 🤷‍♂") \
             or ({0, 2, 3, 4, 5, 7}.isdisjoint(answer_4) is False
-                or {1, 2, 3, 4, 5}.isdisjoint(answer_5) is False):
+                or {1, 2, 3, 4, 5}.isdisjoint(answer_5) is False
+                or 'Да, полностью доверяю ✅' in answer_3) \
+                or 'Скорее да 👍' in answer_3 \
+                or 'Скорее нет 👎' in answer_3:
 
         await redis_just_one_write(f'Usrs: {poll_answer.user.id}: INFOState:', 'Жертва пропаганды')
         await mongo_update_stat(poll_answer.user.id, column='faith', value='victim', options='$set')
