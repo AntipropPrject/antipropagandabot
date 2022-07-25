@@ -5,7 +5,6 @@ import psycopg2
 from flask import Flask, request
 from werkzeug.utils import redirect
 
-from data_base.DBuse import data_getter
 
 app = Flask(__name__)
 
@@ -26,6 +25,7 @@ async def index():
     just_time = str(date)[10:].strip()
     ip = request.remote_addr
 
+    from data_base.DBuse import data_getter
     await data_getter(
         f"insert into utm_table(utm_name,date,time,location) values('{utm_source}','{just_date}','{just_time}','{ip}');commit;")
     print(utm_source)
