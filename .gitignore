@@ -21,6 +21,7 @@ var/
 *.egg
 bata.py
 .env
+misk.xml
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
