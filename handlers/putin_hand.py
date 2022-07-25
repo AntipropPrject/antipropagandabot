@@ -60,6 +60,7 @@ async def putin_big_love_putin(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Скорее да 👍"))
     nmarkup.row(types.KeyboardButton(text="Скорее нет 👎"))
+    nmarkup.adjust(2)
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
@@ -88,6 +89,7 @@ async def putin_so_handsome(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Скорее да 👍"))
     nmarkup.row(types.KeyboardButton(text="Скорее нет 👎"))
+    nmarkup.adjust(2)
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
@@ -98,6 +100,7 @@ async def putin_not_putin(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Скорее да 👍"))
     nmarkup.row(types.KeyboardButton(text="Скорее нет 👎"))
+    nmarkup.adjust(2)
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
