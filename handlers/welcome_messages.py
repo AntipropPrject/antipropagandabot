@@ -204,11 +204,11 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FS
     await state.update_data(ans_lst_2=lst_str)
     await state.update_data(answer_2=lst_answers)
 
-    if 'Я не знаю' in lst_str[0]:  # idnt know
+    if 'Я не знаю' == lst_str[0]:  # idnt know
         await mongo_update_stat_new(tg_id=poll_answer.user.id, column='war_aims_gen', value='Только "Я не знаю"')
-    if {0, 1, 2, 3, 5, 8}.isdisjoint(set(lst_answers)) is False:  # red
+    elif {0, 1, 2, 3, 5, 8}.isdisjoint(set(lst_answers)) is False:  # red
         await mongo_update_stat_new(tg_id=poll_answer.user.id, column='war_aims_gen', value='Хотя бы один красный')
-    if {4, 6}.isdisjoint(set(lst_answers)) is False:  # green
+    elif {4, 6}.isdisjoint(set(lst_answers)) is False:  # green
         await mongo_update_stat_new(tg_id=poll_answer.user.id, column='war_aims_gen', value='Есть зелёные и нет красных')
 
     await mongo_update_stat_new(tg_id=poll_answer.user.id,column='war_aims_ex', value=lst_str)
@@ -262,9 +262,9 @@ async def poll_answer_handler_tho(poll_answer: types.PollAnswer, bot: Bot, state
 
     if 'Никому из них...' in lst_str[0]:  # idnt know
         await mongo_update_stat_new(tg_id=poll_answer.user.id, column='web_prop_gen', value='Только "Я не знаю"')
-    if {2, 3, 4, 5, 7}.isdisjoint(set(lst_answers)) is False:  # red
+    elif {2, 3, 4, 5, 7}.isdisjoint(set(lst_answers)) is False:  # red
         await mongo_update_stat_new(tg_id=poll_answer.user.id, column='web_prop_gen', value='Хотя бы один красный')
-    if {1, 6}.isdisjoint(set(lst_answers)) is False:  # green
+    elif {1, 6}.isdisjoint(set(lst_answers)) is False:  # green
         await mongo_update_stat_new(tg_id=poll_answer.user.id, column='web_prop_gen', value='Есть зелёные и нет красных')
     if 'Википедия' not in lst_str:
         await mongo_update_stat_new(tg_id=poll_answer.user.id, column='why_not_wiki', value=lst_str)
@@ -303,8 +303,10 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
 
     if {1, 2, 3, 4, 5}.isdisjoint(set(lst_answers)) is False:  # red
         await mongo_update_stat_new(tg_id=poll_answer.user.id, column='prop_gen', value='Хотя бы один красный')
-    if {6}.isdisjoint(set(lst_answers)) is False:  # green
-        await mongo_update_stat_new(tg_id=poll_answer.user.id, column='prop_gen', value='Есть зелёные и нет красных')
+    elif {0}.isdisjoint(set(lst_answers)) is False:
+        await mongo_update_stat_new(tg_id=poll_answer.user.id, column='prop_gen', value='Красных нет, но есть Путин')
+    else:
+        await mongo_update_stat_new(tg_id=poll_answer.user.id, column='prop_gen', value='Нет ни красных, ни Путина')
 
     await mongo_update_stat_new(tg_id=poll_answer.user.id,column='prop_ex', value=lst_str)
     text = await sql_safe_select("text", "texts", {"name": "start_thank_you"})
