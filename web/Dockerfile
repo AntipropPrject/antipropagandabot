@@ -5,7 +5,7 @@ WORKDIR /code
 COPY requirements.txt /code/
 COPY .. /code/
 WORKDIR /code/web
-RUN pip install -r .web/requirements.txt && echo "source activate my_env" > ~/.bashrc
+RUN pip install -r requirements.txt && echo "source activate my_env" > ~/.bashrc
 
 
 ENV PYTHONUNBUFFERED=1
