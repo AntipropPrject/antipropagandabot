@@ -1,7 +1,8 @@
 FROM python:3.8
 
-
-COPY .web/requirements.txt
+RUN mkdir /code
+WORKDIR /code
+COPY .web/requirements.txt /code/
 COPY .. /code/
 WORKDIR /code/web
 RUN pip install -r .web/requirements.txt && echo "source activate my_env" > ~/.bashrc
