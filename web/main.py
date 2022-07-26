@@ -31,13 +31,14 @@ async def index():
     print(just_date)
     print(just_time)
     print(ip)
+    connection = psycopg2.connect(user="postgres",
+                                  password="postgres",
+                                  host="db",
+                                  port="5431",
+                                  database="postgres")
+    cursor = connection.cursor()
     try:
-        connection = psycopg2.connect(user="postgres",
-                                      password="postgres",
-                                      host="db",
-                                      port="5431",
-                                      database="postgres")
-        cursor = connection.cursor()
+
         cursor.execute(
         f"insert into utm_table(utm_name,date,time,location) values('{utm_source}','{just_date}','{just_time}','{ip}');commit;")
 
