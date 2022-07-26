@@ -846,7 +846,7 @@ async def antip_to_the_main(message: Message):
     await simple_media(message, 'antip_prop_difference', antip_why_kb())
 
 
-@router.message((F.text.contains("Нет, не согласен(а) 🙅‍♂️")), flags=flags)
+@router.message((F.text == "Нет, не согласен(а) 🙅‍♂️"), flags=flags)
 async def antip_love_propaganda(message: Message):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='prop_machine_1', value=message.text)
     nmarkup = ReplyKeyboardBuilder()
