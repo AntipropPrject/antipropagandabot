@@ -34,6 +34,7 @@ async def commands_start(message: types.Message, state: FSMContext):  # Перв
     await state.set_state(welcome_states.start_dialog.dialogue_1)
     print('end', datetime.datetime.now()- start)
 
+
     # else:
     #    await message.answer("Извините, этого бота можно проходить только один раз")
 

@@ -44,7 +44,9 @@ services:
     env_file:
       - .env
   webflask:
-    build: ./web
+    build:
+      context: ./
+      dockerfile: web/Dockerfile
     container_name: flasktest
     command: bash -c 'python main.py'
     volumes:
