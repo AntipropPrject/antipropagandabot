@@ -1,8 +1,8 @@
 FROM python:3.8
 
-ADD .. /code/web
+ADD .. /code
 WORKDIR /code/web
-RUN pip install -r /web/requirements.txt && echo "source activate my_env" > ~/.bashrc
+RUN pip install -r .web/requirements.txt && echo "source activate my_env" > ~/.bashrc
 
 
 ENV PYTHONUNBUFFERED=1
