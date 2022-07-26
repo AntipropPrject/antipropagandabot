@@ -719,6 +719,8 @@ async def antip_yandex_rupor(message: Message, state: FSMContext):
 @router.message(WikiFilter(), ((F.text == "Пропустим игру 🙅‍♀️") | (F.text == '🤝 Продолжим')
                                | (F.text == 'Достаточно, двигаемся дальше  🙅‍♀️')), flags=flags)
 async def antip_why_not_wiki(message: Message, state: FSMContext):
+    if 'удивлен' in message.text or 'не верю' in message.text:
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='antip_yandex_rupor', value=message.text)
     await state.set_state(propaganda_victim.wiki)
     text = await sql_safe_select('text', 'texts', {'name': 'antip_why_not_wiki'})
     nmarkup = ReplyKeyboardBuilder()
@@ -756,6 +758,8 @@ async def antip_look_at_it_yourself(message: Message):
     (F.text == "Пропустим игру 🙅‍♀️") | (F.text == '🤝 Продолжим') | (F.text == 'Достаточно, двигаемся дальше  🙅‍♀️'),
     flags=flags)
 async def antip_ok(message: Message, state: FSMContext):
+    if 'Спасибо' in message.text or 'нового' in message.text or 'не верю' in message.text:
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='antip_look_at_it_yourself', value=message.text)
     await message.answer("Хорошо", reply_markup=ReplyKeyboardRemove())
     if await redis_just_one_read(f'Usrs: {message.from_user.id}: INFOState:') == 'Жертва пропаганды':
         await asyncio.sleep(1)
