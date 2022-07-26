@@ -34,7 +34,7 @@ async def index():
     connection = psycopg2.connect(user="postgres",
                                   password="postgres",
                                   host="db",
-                                  port="5431",
+                                  port="5432",
                                   database="postgres")
     cursor = connection.cursor()
     try:
@@ -52,8 +52,8 @@ async def index():
             cursor.close()
             connection.close()
             print("PostgreSQL connection is closed")
+        return redirect("https://t.me/Russia_Ukraine_Bot")
 
-    return redirect("https://t.me/Russia_Ukraine_Bot")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=False)
