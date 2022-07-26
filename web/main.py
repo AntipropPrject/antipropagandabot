@@ -18,7 +18,6 @@ def get_postg():
 # def before_request():
 #     Flask.custom_profiler = {"start": time.time()}
 
-
 @app.route("/asd")
 async def index():
     utm_source = request.args.get('utm_source')
@@ -39,10 +38,10 @@ async def index():
     cursor = connection.cursor()
     try:
         response = requests.get(f"https://api.iplocation.net/?cmd=ip-country&ip={ip}")
-        location = response["country_name"]
+        location = response.json()["country_name"]
         print(location)
         cursor.execute(
-        f"insert into utm_table(utm_source,date,time,location) values('{utm_source}','{just_date}','{just_time}','{ip}');commit;")
+        f"insert into utm_table(utm_source,date,time,location) values('{utm_source}','{just_date}','{just_time}','{location}');commit;")
     except (Exception, psycopg2.Error) as error:
         print("Error while fetching data from PostgreSQL", error)
 
