@@ -1,16 +1,17 @@
 from datetime import datetime
 
+import psycopg2
 from flask import Flask, request
 from werkzeug.utils import redirect
 
 from data_base.DBuse import data_getter
 
-
-
 app = Flask(__name__)
 
 
-
+def get_postg():
+    return psycopg2.connect(database="postgres", user="postgres", password="postgres", host="db",
+                            port=5431)
 
 
 # @app.before_request
@@ -25,17 +26,33 @@ async def index():
     just_date = str(date)[:10].strip()
     just_time = str(date)[10:].strip()
     ip = request.remote_addr
-
-    await data_getter(
-        f"insert into utm_table(utm_name,date,time,location) values('{utm_source}','{just_date}','{just_time}','{ip}');commit;")
     print(utm_source)
     print(date)
     print(just_date)
     print(just_time)
     print(ip)
+    try:
+        connection = psycopg2.connect(user="postgres",
+                                      password="postgres",
+                                      host="db",
+                                      port="5431",
+                                      database="postgres")
+        cursor = connection.cursor()
+        cursor.execute(
+        f"insert into utm_table(utm_name,date,time,location) values('{utm_source}','{just_date}','{just_time}','{ip}');commit;")
+
+    except (Exception, psycopg2.Error) as error:
+        print("Error while fetching data from PostgreSQL", error)
+
+
+    finally:
+        # closing database connection.
+        if connection:
+            cursor.close()
+            connection.close()
+            print("PostgreSQL connection is closed")
+
     return redirect("https://t.me/Russia_Ukraine_Bot")
-
-
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=False)
