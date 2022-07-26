@@ -4,7 +4,7 @@ import psycopg2
 from flask import Flask, request
 from werkzeug.utils import redirect
 
-from data_base.DBuse import data_getter
+
 
 app = Flask(__name__)
 
