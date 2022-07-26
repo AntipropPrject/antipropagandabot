@@ -4,6 +4,7 @@ from datetime import time
 
 from aiogram import Router, F, Bot
 from aiogram import types
+from aiogram.dispatcher.filters.command import CommandStart, CommandObject
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
@@ -19,6 +20,11 @@ from stats.stat import mongo_stat, mongo_update_stat, mongo_stat_new, mongo_upda
 
 flags = {"throttling_key": "True"}
 router = Router()
+
+
+@router.message(CommandStart(command_magic=F.args), flags=flags)
+async def adv_company(message: types.Message, state: FSMContext, command: CommandObject):
+    await message.answer(f'Это диплинк с аргументом: {command.args}')
 
 
 @router.message(commands=['start', 'help', 'restart'], state='*', flags=flags)

@@ -217,11 +217,11 @@ async def stopwar_made_a_big_team(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_made_a_big_team'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Да нет, я согласен(а), важно, чтобы россияне поняли — война им не нужна 🕊"))
-    nmarkup.row(types.KeyboardButton(text="Да, закончим разговор, прощай! 👆"))
+    nmarkup.row(types.KeyboardButton(text="Да, закончим разговор, прощай! 🖕"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Да, закончим разговор, прощай! 👆"), flags=flags)
+@router.message((F.text == "Да, закончим разговор, прощай! 🖕"), flags=flags)
 async def stopwar_I_told_you_everything(message: Message, bot: Bot, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_I_told_you_everything'})
     nmarkup = ReplyKeyboardBuilder()

@@ -1,10 +1,14 @@
 import csv
 from aiogram import Router
 from aiogram import types
+from aiogram.dispatcher.filters import command
+from aiogram.dispatcher.filters.command import CommandStart, Command, CommandObject
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.dispatcher.fsm.state import StatesGroup, State
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
+from magic_filter import F
+
 from handlers import true_resons_hand
 from handlers import stopwar_hand
 from handlers.true_resons_hand import reasons_who_to_blame
