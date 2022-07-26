@@ -37,7 +37,6 @@ async def commands_start(message: types.Message, state: FSMContext):  # Перв
     text = await sql_safe_select("text", "texts", {"name": "start_hello"})
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     await state.set_state(welcome_states.start_dialog.dialogue_1)
-
     # else:
     #    await message.answer("Извините, этого бота можно проходить только один раз")
 
@@ -140,7 +139,6 @@ async def message_4(message: types.Message):
 @router.message(welcome_states.start_dialog.dialogue_5, text_contains=('долго', 'допрашивать'),
                 content_types=types.ContentType.TEXT, text_ignore_case=True, flags=flags)
 async def message_5(message: types.Message, state: FSMContext):
-    await mongo_update_stat_new(tg_id=message.from_user.id, column='on_ucraine_or_not', value='Нет')
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Хорошо, задавай свои вопросы 👌"))
     text = await sql_safe_select("text", "texts", {"name": "start_only_five"})
