@@ -1,5 +1,5 @@
 from datetime import datetime
-
+import requests
 import psycopg2
 from flask import Flask, request
 from werkzeug.utils import redirect
@@ -38,10 +38,11 @@ async def index():
                                   database="postgres")
     cursor = connection.cursor()
     try:
-
+        response = requests.get(f"https://api.iplocation.net/?cmd=ip-country&ip={ip}")
+        location = response["country_name"]
+        print(location)
         cursor.execute(
         f"insert into utm_table(utm_source,date,time,location) values('{utm_source}','{just_date}','{just_time}','{ip}');commit;")
-
     except (Exception, psycopg2.Error) as error:
         print("Error while fetching data from PostgreSQL", error)
 
