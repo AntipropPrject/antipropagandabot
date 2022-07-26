@@ -40,7 +40,7 @@ async def index():
     try:
 
         cursor.execute(
-        f"insert into utm_table(utm_name,date,time,location) values('{utm_source}','{just_date}','{just_time}','{ip}');commit;")
+        f"insert into utm_table(utm_source,date,time,location) values('{utm_source}','{just_date}','{just_time}','{ip}');commit;")
 
     except (Exception, psycopg2.Error) as error:
         print("Error while fetching data from PostgreSQL", error)
