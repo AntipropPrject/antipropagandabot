@@ -300,7 +300,9 @@ async def admin_truthgame_update_select(message: types.Message, state: FSMContex
     data = (await sql_games_row_selecter('truthgame', number))
     await game_answer(message, data['plot_media'], data['plot_text'])
     await game_answer(message, data['rebb_media'], data['rebb_text'], nmrkup.as_markup(resize_keyboard=True))
-    await message.answer('Если это корректные сообщения, отправьте мне сообщение сюжета:')
+    await message.answer(f'Если вам хочется отредактировать отдельно текст/медиа по тегам, то теги таковы:\n'
+                         f'Правда: {dick["st_tag"]}\nЛожь: {dick["rb_tag"]}\n\n'
+                         f'Если же вы хотите отредактировать все полностью, то пришлите мне новый сюжет ("Правда"):')
     await state.set_state(admin.truthgame_update_stt)
 
 
