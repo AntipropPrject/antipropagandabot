@@ -80,6 +80,7 @@ async def poll_filler(message: types.Message):
 # Тут удвоение первого поста каждой ветки, потому что нам надо отвечать СРАЗУ после опроса
 @router.poll_answer(state=donbass_state.eight_years_selection)
 async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FSMContext):
+    await state.set_state(donbass_state.after_poll)
     indexes = poll_answer.option_ids
     true_options = list()
     print(indexes)
@@ -170,6 +171,7 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FS
         nmarkup.row(types.KeyboardButton(text="Покороче ⏱"))
         await bot.send_message(poll_answer.user.id, text, reply_markup=nmarkup.as_markup(resize_keyboard=True), parse_mode="HTML",
                              disable_web_page_preview=True)
+
 
 
 
