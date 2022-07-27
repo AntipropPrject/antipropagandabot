@@ -247,7 +247,6 @@ async def stopwar_lets_fight(message: Message, bot: Bot):
         usertime = datetime.strptime(date_start, "%d-%m-%Y %H:%M")
         time_bot = datetime.strptime(datetime.strftime(datetime.now(), "%d-%m-%Y %H:%M"), "%d-%m-%Y %H:%M") - usertime
         str_date = str(time_bot)[:-3].replace('days', '').replace("day", '')
-        days_pr = ''
         if int(time_bot.days) == 1:
             days_pr = 'день,'
         elif 1 <= int(time_bot.days) <= 4:
@@ -255,6 +254,7 @@ async def stopwar_lets_fight(message: Message, bot: Bot):
         else:
             days_pr = 'дней,'
         #timer
+        print('TIME IN TIMER IS CLEAR', str_date)
         sec = 299
         markup = ReplyKeyboardBuilder()
         markup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
