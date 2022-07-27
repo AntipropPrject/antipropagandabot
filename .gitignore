@@ -17,6 +17,7 @@ parts/
 sdist/
 var/
 *.egg-info/
+statlogs/
 .installed.cfg
 *.egg
 bata.py
@@ -56,3 +57,4 @@ logfile.log
 *.mp4
 *.jpg
 *.png
+*.log
