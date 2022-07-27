@@ -35,9 +35,11 @@ async def export(message: types.Message, state: FSMContext):
                                       caption=f"Type: backup base\n\n"
                                               f"Date: {today} (UTC)")
         await asyncio.sleep(0.1)
-        await message.answer_document(FSInputFile(f'log/logs/Log-{today_for_log}.log'), caption=f"Type: logs\n\n"
+        try:
+            await message.answer_document(FSInputFile(f'log/logs/Log-{today_for_log}.log'), caption=f"Type: logs\n\n"
                                                                                         f"Date: {today} (UTC)")
-
+        except Exception as e:
+            print(e)
         if message.text == 'Создать копию':
             nmarkup = ReplyKeyboardBuilder()
             nmarkup.row(types.KeyboardButton(text="Назад"))
