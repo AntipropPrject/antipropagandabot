@@ -18,7 +18,7 @@ jobs:
           connect_timeout: 10s
           script: |
             echo Preparing
-            sudo mkdir -p Backups/database
+            mkdir -p Backups/database
             cd Backups
             echo DUMPING PG
             sudo -S docker exec -t antiprop_posgres pg_dumpall -c -U postgres > ./PGDUMP.sql
