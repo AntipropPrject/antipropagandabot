@@ -21,3 +21,18 @@ jobs:
             mkdir -p Backups
             cd Backups
             sudo -S docker exec -t antiprop_posgres pg_dumpall -c -U postgres > ./DUMP.sql
+      - name: mongo_dump
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.TEST_IP }}
+          username: ec2-user
+          key: ${{ secrets.SSHKEY }}
+          connect_timeout: 10s
+          script: |
+            echo DUMPING MONGO
+            mkdir -p Backups
+            sudo mkdir -p Backups/database
+            sudo -S docker exec antipropagandabot-mongodb-1 mongodump -u mongoOTPOR -p mongoOTPOR --authenticationDatabase admin --db database -o /home
+            sudo -S docker cp antipropagandabot-mongodb-1:/home/database /home/ec2-user/Backups
+      
+        
