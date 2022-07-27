@@ -322,6 +322,7 @@ async def mongo_select_info(tg_id):
             x = await collection.find_one({"_id": int(tg_id)})
         except:
             x = await collection.find_one({"username": str(tg_id)})
+        print(x)
         return x
     except Exception as error:
         await logg.get_error(f"mongo_select_info | {error}", __file__)
