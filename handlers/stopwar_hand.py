@@ -239,13 +239,12 @@ async def stopwar_lets_fight(message: Message, bot: Bot):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='will_they_stop', value=message.text)
     check_user = await redis_just_one_read(f'Usrs: {message.from_user.id}: check:')
     await redis_just_one_write(f'Usrs: {message.from_user.id}: check:', message.from_user.id)
-    if str(check_user) != str(message.from_user.id):
+    if await redis_just_one_read(f'Usrs: {message.from_user.id}: check:'):
         user_info = await mongo_select_info(message.from_user.id)
         date_start = user_info['datetime'].replace('_', ' ')
         usertime = datetime.strptime(date_start, "%d-%m-%Y %H:%M")
         time_bot = datetime.strptime(datetime.strftime(datetime.now(), "%d-%m-%Y %H:%M"), "%d-%m-%Y %H:%M") - usertime
         str_date = str(time_bot)[:-3].replace('days', '').replace("day", '')
-        days_pr = ''
         if int(time_bot.days) == 1:
             days_pr = 'день,'
         elif 1 <= int(time_bot.days) <= 4:
@@ -307,6 +306,7 @@ async def stopwar_share_blindly(message: Message, bot: Bot, state: FSMContext):
         await message.answer('Таймер вышел. Вы можете перейти в главное меню.'
                              ' Но если у вас есть ещё с кем поделиться ссылкой на меня'
                              ' — обязательно сделайте это!', reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
 
 @router.message((F.text == "Покажи инструкцию, как поделиться со всем списком контактов 📝"), flags=flags)
 async def stopwar_share_blindly(message: Message, bot: Bot, state: FSMContext):
