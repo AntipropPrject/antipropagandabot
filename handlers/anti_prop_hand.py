@@ -565,7 +565,7 @@ async def antip_web_exit_1(message: Message, state: FSMContext):
 
 @router.message(PplPropagandaFilter(),
                 (F.text.contains('шаг')) | (F.text.contains('удивлён')) | (F.text.contains('шоке')) | (
-                        F.text.contains('знал, что по ТВ')) | (F.text == 'Конечно!'), flags=flags)
+                        F.text.contains('знал')) | (F.text == 'Конечно!'), flags=flags)
 async def antip_bad_people_lies(message: Message, state: FSMContext):
     redis = all_data().get_data_red()
     await state.set_state(propaganda_victim.ppl_propaganda)
@@ -579,7 +579,7 @@ async def antip_bad_people_lies(message: Message, state: FSMContext):
 
 
 @router.message((F.text.contains('шаг')) | (F.text.contains('удивлён')) | (F.text.contains('шоке')) | (
-        F.text.contains('знал')) | (F.text == 'Конечно!') | (F.text == 'Ну давай'), flags=flags)
+        F.text.contains('знал, что по ТВ')) | (F.text == 'Конечно!') | (F.text == 'Ну давай'), flags=flags)
 async def antip_truth_game_start(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_truth_game_start'})
     nmarkup = ReplyKeyboardBuilder()
