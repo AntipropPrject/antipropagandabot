@@ -308,6 +308,7 @@ async def stopwar_share_blindly(message: Message, bot: Bot, state: FSMContext):
                              ' Но если у вас есть ещё с кем поделиться ссылкой на меня'
                              ' — обязательно сделайте это!', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
+
 @router.message((F.text == "Покажи инструкцию, как поделиться со всем списком контактов 📝"), flags=flags)
 async def stopwar_share_blindly(message: Message, bot: Bot, state: FSMContext):
     timer = await redis_just_one_read(f'Usrs: {message.from_user.id}: count:')
