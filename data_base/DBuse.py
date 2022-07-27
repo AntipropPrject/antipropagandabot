@@ -171,7 +171,10 @@ async def sql_games_row_selecter(tablename: str, row: int):
 async def sql_add_value(table_name, column, cond_dict):
     que = ''
     for key in cond_dict:
-        que = f'UPDATE {table_name} set {column} = {column} + 1 where {key} = {cond_dict[key]} RETURNING {column};'
+        if isinstance(cond_dict[key], int):
+            que = f'UPDATE {table_name} set {column} = {column} + 1 where {key} = {cond_dict[key]} RETURNING {column};'
+        elif isinstance(cond_dict[key], str):
+            que = f"UPDATE {table_name} set {column} = {column} + 1 where {key} = '{cond_dict[key]}' RETURNING {column};"
         print(que)
     a = await data_getter(que)
     print(a)
@@ -218,6 +221,16 @@ async def sql_safe_update(table_name, data_dict, condition_dict):
         logg.get_info(f"{error}")
     except psycopg2.Error as error:
         await logg.get_error(f"{error}", __file__)
+
+
+async def advertising_value(tag):
+    print(tag)
+    all_tags = await data_getter("SELECT id FROM dumbstats.advertising")
+    print(all_tags)
+    for row in all_tags:
+        print(row)
+        if tag in row:
+            await sql_add_value("dumbstats.advertising", "count", {"id": tag})
 
 
 """^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^MongoDB^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"""
