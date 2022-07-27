@@ -3,7 +3,7 @@ name: everyday pg dump
 on:
   workflow_dispatch:
   schedule:
-    - cron: '15 11 27 7 *'
+    - cron: '17 11 * * *'
 
 jobs:
   pg_dumping:
