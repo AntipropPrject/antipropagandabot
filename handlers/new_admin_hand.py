@@ -5,8 +5,6 @@ import shutil
 import zipfile
 from asyncio import sleep
 from datetime import datetime
-
-import pymongo
 from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.filters.callback_data import CallbackData
@@ -20,7 +18,8 @@ from data_base.DBuse import sql_safe_select, sql_safe_update, sql_safe_insert, m
     mongo_pop_admin, mongo_select_admins, sql_delete, redis_just_one_write, redis_just_one_read, mongo_select, \
     mongo_select_news, mongo_add_news, poll_write, mongo_pop_news, mongo_update_news
 from day_func import day_count
-from export_to_csv.pg_mg import backin
+from export_to_csv.pg_mg import Backup
+
 from filters.isAdmin import IsAdmin, IsSudo, isKamaga
 from handlers.admin_for_games import admin_home_games, admin_truthgame, admin_gam_tv
 from keyboards.admin_keys import main_admin_keyboard, middle_admin_keyboard, app_admin_keyboard, redct_text, \
@@ -881,7 +880,7 @@ async def import_csv(message: types.Message, state: FSMContext):
         await state.set_state(admin.import_csv_from_local)
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Назад"))
-        await message.answer("Напишите дату бэкапа в формате: day:month:year",
+        await message.answer("Напишите дату бэкапа в формате: year.month.day",
                              reply_markup=nmarkup.as_markup(resize_keyboard=True))
     elif "0" in status:
         await message.answer("Вы должны включить технический режим 🔴'")
@@ -891,15 +890,14 @@ async def import_csv(message: types.Message, state: FSMContext):
 async def import_csv(message: types.Message, state: FSMContext):
     path = "export_to_csv/backups"
     # we shall store all the file names in this list
-    test_list = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':')
+    test_list = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.')
     switch = True
     for i in message.text:
         if i not in test_list:
             switch = False
     if switch == True:
         backlist = []
-        date = message.text.replace(':', "-")
-        print(date)
+        date = message.text.replace('.', "-")
         for root, dirs, files in os.walk(path):
             for file in files:
                 if date in str(file) and '.zip' in str(file):
@@ -935,19 +933,9 @@ async def import_csv(message: types.Message, state: FSMContext):
 async def import_csv(message: types.Message, state: FSMContext):
     csv_id = message.document
     file_name = csv_id.file_name
-    file = await bot.get_file(csv_id.file_id)
-    file_path = file.file_path
-    path = 'export_to_csv/backin'
-    try:
-        if not os.path.exists(path): os.makedirs(path)
-    except OSError:
-        await get_error("Создать директорию %s не удалось" % path)
-    await bot.download_file(file_path, f"export_to_csv/backin/backin.zip")
-    with zipfile.ZipFile("export_to_csv/backin/backin.zip", 'r') as zip_file:
-        zip_file.extractall("export_to_csv/backin")
-
-    if 'backup' in file_name.lower():
-        await backin()
+    if 'dump' in file_name.lower():
+        backup = Backup()
+        await backup.restore_all(name=file_name)
         await state.set_state(admin.edit_context)
         await message.answer("Импорт завершен успешно", reply_markup=await settings_bot())
         await logg.admin_logs(message.from_user.id, message.from_user.username, "Завершил(a) импорт")
@@ -955,23 +943,14 @@ async def import_csv(message: types.Message, state: FSMContext):
         await message.answer("Неправильное название архива")
 
 
-@router.callback_query(lambda call: 'backup' in call.data)
+@router.callback_query(lambda call: 'DUMP' in call.data)
 async def import_csv(query: types.CallbackQuery, state: FSMContext):
     file = query.data
-    path = 'export_to_csv/backups'
-    try:
-        if not os.path.exists(path): os.makedirs(path)
-    except OSError:
-        await get_error("Создать директорию %s не удалось" % path)
-    with zipfile.ZipFile(f"export_to_csv/backups/{file}", 'r') as zip_file:
-        zip_file.extractall("export_to_csv/backin")
-    await backin()
-    try:
-        shutil.rmtree('export_to_csv/backin/export_to_csv')
-    except:
-        pass
+    print(file)
+    backup = Backup()
+    await backup.restore_all(name=file)
     await state.set_state(admin.edit_context)
-    await logg.admin_logs(query.from_user.id, query.from_user.username , "Завершил(a) импорт")
+    await logg.admin_logs(query.from_user.id, query.from_user.username, "Завершил(a) импорт")
     await query.message.answer("Импорт завершен успешно", reply_markup=await settings_bot())
 
 

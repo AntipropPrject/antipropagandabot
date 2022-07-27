@@ -7,7 +7,7 @@ import bata
 from bata import all_data
 from data_base.DBuse import redis_just_one_read
 from day_func import day_count
-from export_to_csv.pg_mg import mongo_export_to_file
+from export_to_csv.pg_mg import Backup
 from handlers import start_hand, anti_prop_hand, smi_hand, donbass_hand, true_resons_hand, putin_hand, stopwar_hand, \
     nazi_hand, preventive_strike, new_admin_hand, welcome_messages, status, main_menu_hand, admin_for_games, admin_for_games_dir
 from export_to_csv import pg_mg
@@ -25,23 +25,24 @@ dp = Dispatcher(storage)
 
 async def periodic():
     print('periodic function has been started')
+    backup = Backup()
     while True:
-
         status_spam = await redis_just_one_read('Usrs: admins: spam: status:')
+        datefor_backup = datetime.now().strftime('%Y-%m-%d_%H-%M')
         c_time = datetime.now().strftime("%H:%M:%S")
         date = datetime.now().strftime('%Y.%m.%d')
-        #удаление дневного счетчика
+        #  удаление дневного счетчика
         if c_time == '21:00:01':
             await day_count(count_delete=True)
         if c_time == '07:00:01':
-            await mongo_export_to_file()
+            await backup.dump_all(name=f'DUMP_{datefor_backup}')
         if status_spam == '1':
             if c_time == '08:00:01':
                 await start_spam(f'{date} 11:00')
             if c_time == '16:00:01':
                 await start_spam(f'{date} 19:00')
         if c_time == '19:00:01':
-            await mongo_export_to_file()
+            await backup.dump_all(name=f'DUMP_{datefor_backup}')
         await asyncio.sleep(1)
 
 

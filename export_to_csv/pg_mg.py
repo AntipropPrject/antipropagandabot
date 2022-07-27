@@ -77,19 +77,16 @@ class Backup():
             await self.dump_postgres()
         except Exception as e:
             await logg.get_error(e)
-
         await self.zip(name)
+        asyncio.create_task(self.delete_files())
 
     async def restore_all(self, name=None):
         print('start')
         if name is None:
-            ValueError(logg.get_error('Restore mongo: File for restore not found'))
+            ValueError(await logg.get_error('Restore mongo: File for restore not found'))
         await self.unzip(name=name)
-
         file_list = os.listdir(self.path_files+self.path_files)
-
         if len([type_f for type_f in file_list if ".csv" in type_f]) != 0:
-            print(123123)
             await self.restore_postgres()
         if len([type_f for type_f in file_list if ".bson" in type_f]) != 0:
             await self.restore_mongo()
@@ -139,7 +136,6 @@ class Backup():
             file_list = os.listdir(self.path_files)
             for file in file_list:
                 zip_file.write(self.path_files + file)
-        await self.delete_files()
         print('saved successfully')
 
     async def unzip(self, name):
@@ -147,6 +143,7 @@ class Backup():
             zip_file.extractall(self.path_files)
 
     async def delete_files(self):
+        await asyncio.sleep(3)
         if os.path.isdir(self.path_files):
             shutil.rmtree(self.path_files)
 
