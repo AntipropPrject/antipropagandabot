@@ -1,8 +1,7 @@
 name: deploy to a server on push
 
 on:
-  push:
-    branches: [ master ]
+  [workflow_dispatch]
 
 jobs:
   deploy-to-server:
