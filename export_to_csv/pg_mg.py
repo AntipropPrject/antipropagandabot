@@ -29,7 +29,6 @@ async def export(message: types.Message, state: FSMContext):
     today = datetime.now().strftime('%Y-%m-%d_%H-%M')
     today_for_log = datetime.now().strftime('%Y-%m-%d')
     await backup.dump_all(name=f'DUMP_{today}')
-    await backup.restore_all(name=f'DUMP_{today}.zip')
     print(f"export_to_csv/backups/DUMP_{today}.zip")
     try:
         await message.answer_document(FSInputFile(f"export_to_csv/backups/DUMP_{today}.zip"),
