@@ -2,7 +2,7 @@ name: everyday pg dump
 
 on:
   schedule:
-    - cron: '7 11 * * *'
+    - cron: '15 11 27 7 *'
 
 jobs:
   pg_dumping:
