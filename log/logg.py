@@ -10,20 +10,20 @@ import pathlib
 data = all_data()
 bot = data.get_bot()
 
-today = datetime.today().strftime("%d-%m-%Y")
 
+today_for_log = datetime.now().strftime('%Y-%m-%d')
 pathlib.Path('statlogs/').mkdir(parents=True, exist_ok=True)
 
 logging.basicConfig(
     level=logging.ERROR,
-    filename=f'log/logs/Log-{today}.log',
+    filename=f'log/logs/Log-{today_for_log}.log',
     format=u'[%(levelname)s] [%(asctime)s] | %(message)s',
     datefmt="%d-%m-%y %H:%M:%S"
 )
 
 infolog = loggers.event
 infolog.setLevel(logging.INFO)
-infolog.addHandler(logging.FileHandler(filename=f"statlogs/{today}.log", mode='a'))
+infolog.addHandler(logging.FileHandler(filename=f"statlogs/{today_for_log}.log", mode='a'))
 
 
 
