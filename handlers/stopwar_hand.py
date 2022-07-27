@@ -239,9 +239,7 @@ async def stopwar_lets_fight(message: Message, bot: Bot):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='will_they_stop', value=message.text)
     check_user = await redis_just_one_read(f'Usrs: {message.from_user.id}: check:')
     await redis_just_one_write(f'Usrs: {message.from_user.id}: check:', message.from_user.id)
-    print('CHECKUSER:', check_user)
     if await redis_just_one_read(f'Usrs: {message.from_user.id}: check:'):
-        print('TIMERCHECK IS CLEAR')
         user_info = await mongo_select_info(message.from_user.id)
         date_start = user_info['datetime'].replace('_', ' ')
         usertime = datetime.strptime(date_start, "%d-%m-%Y %H:%M")
@@ -254,7 +252,6 @@ async def stopwar_lets_fight(message: Message, bot: Bot):
         else:
             days_pr = 'дней,'
         #timer
-        print('TIME IN TIMER IS CLEAR', str_date)
         sec = 299
         markup = ReplyKeyboardBuilder()
         markup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
