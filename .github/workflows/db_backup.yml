@@ -1,15 +1,15 @@
-name: everyday pg dump
+name: everyday db dump
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: '17 11 * * *'
+    - cron: '17 12 * * *'
 
 jobs:
   pg_dumping:
     runs-on: ubuntu-latest
     steps:
-      - name: ssh pipeline 1
+      - name: pg_dump
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.TEST_IP }}
