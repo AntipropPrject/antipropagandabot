@@ -36,7 +36,8 @@ async def export(message: types.Message, state: FSMContext):
                                               f"Date: {today} (UTC)")
         await asyncio.sleep(0.1)
         try:
-            await message.answer_document(FSInputFile(f'log/logs/Log-{today_for_log}.log'), caption=f"Type: logs\n\n"
+            file = FSInputFile(f'log/logs/Log-{today_for_log}.log')
+            await message.answer_document(file=file, caption=f"Type: logs\n\n"
                                                                                         f"Date: {today} (UTC)")
         except Exception as e:
             print(e)
