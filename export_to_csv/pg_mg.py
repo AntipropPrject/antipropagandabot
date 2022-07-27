@@ -18,7 +18,6 @@ from states.admin_states import admin
 router = Router()
 
 
-
 @router.message(IsSudo(), F.text.contains('Экспорт') | F.text.contains('Создать копию'))
 async def export(message: types.Message, state: FSMContext):
     await mongo_export_to_file()
@@ -57,22 +56,22 @@ async def mongo_export_to_file():
     ch = current_datetime.hour
     mn = current_datetime.minute
     client = all_data().get_mongo()
-    database = client['database']
-    collection_1 = database['userinfo']
-    collection_2 = database['statistics']
-    collection_3 = database['admins']
-    collection_4 = database['spam_actual_news']
-    collection_5 = database['spam_news_main']
-    collection_6 = database['user_games']
-    collection_7 = database['useranswer']
+    database = client.database
+    collection_1 = database.userinfo
+    collection_2 = database.statistics
+    collection_3 = database.admins
+    collection_4 = database.spam_actual_news
+    collection_5 = database.spam_news_main
+    collection_6 = database.user_games
+    collection_7 = database.useranswer
     # make an API call to the MongoDB server
-    mongo_docs_1 = collection_1.find()
-    mongo_docs_2 = collection_2.find()
-    mongo_docs_3 = collection_3.find()
-    mongo_docs_4 = collection_4.find()
-    mongo_docs_5 = collection_5.find()
-    mongo_docs_6 = collection_6.find()
-    mongo_docs_7 = collection_7.find()
+    mongo_docs_1 = await collection_1.find({}).to_list(None)
+    mongo_docs_2 = await collection_2.find({}).to_list(None)
+    mongo_docs_3 = await collection_3.find({}).to_list(None)
+    mongo_docs_4 = await collection_4.find({}).to_list(None)
+    mongo_docs_5 = await collection_5.find({}).to_list(None)
+    mongo_docs_6 = await collection_6.find({}).to_list(None)
+    mongo_docs_7 = await collection_7.find({}).to_list(None)
     # Convert the mongo docs to a DataFrame
     docs_1 = pandas.DataFrame(mongo_docs_1)
     docs_2 = pandas.DataFrame(mongo_docs_2)
