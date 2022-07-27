@@ -239,4 +239,9 @@ async def happy_tester(bot):
         print(f'[{datetime.now().strftime("%H:%M")}] Bot is up, detected new commits:{string}')
     else:
         print(f'[{datetime.now().strftime("%H:%M")}] Bot is up, shore is clear: no new commits here')
+        try:
+            await bot.send_message(bata.all_data().commichannel, f'Bot {botname}'
+                                                                 f' was restarted without interesting commits')
+        except TelegramBadRequest:
+            print(f'BOT NOT IN CHANNEL AND THIS MESSAGE SHOULD BE IN LOGS')
     await bot.session.close()

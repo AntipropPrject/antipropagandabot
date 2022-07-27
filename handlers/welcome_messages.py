@@ -10,8 +10,8 @@ from aiogram.types import ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from bata import all_data
-from data_base.DBuse import poll_write, sql_safe_select, mongo_add, mongo_select, redis_just_one_write,\
-    mongo_user_info, redis_just_one_read
+from data_base.DBuse import poll_write, sql_safe_select, mongo_add, mongo_select, redis_just_one_write, \
+    mongo_user_info, redis_just_one_read, advertising_value
 from day_func import day_count
 from resources.all_polls import web_prop, welc_message_one, people_prop
 from states import welcome_states
@@ -24,7 +24,8 @@ router = Router()
 
 @router.message(CommandStart(command_magic=F.args), flags=flags)
 async def adv_company(message: types.Message, state: FSMContext, command: CommandObject):
-    await message.answer(f'Это диплинк с аргументом: {command.args}')
+    await advertising_value(command.args)
+    await commands_start(message, state)
 
 
 @router.message(commands=['start', 'help', 'restart'], state='*', flags=flags)
