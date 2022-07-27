@@ -709,7 +709,7 @@ async def antip_yandex_rupor(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_yandex_rupor'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Я удивлен(а) 🤔"))
-    nmarkup.row(types.KeyboardButton(text="Я не удивлен(а) 🤷‍♂️"))
+    nmarkup.add(types.KeyboardButton(text="Я не удивлен(а) 🤷‍♂️"))
     nmarkup.row(types.KeyboardButton(text="Я не верю 😕"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
@@ -745,7 +745,7 @@ async def antip_clear_and_cool(message: Message):
 async def antip_look_at_it_yourself(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Спасибо, не знал(а) 🙂"))
-    nmarkup.row(types.KeyboardButton(text="Ничего нового 🤷‍♀️"))
+    nmarkup.add(types.KeyboardButton(text="Ничего нового 🤷‍♀️"))
     nmarkup.row(types.KeyboardButton(text="Я не верю 😕"))
     await simple_media(message, 'antip_look_at_it_yourself', nmarkup.as_markup(resize_keyboard=True))
 
