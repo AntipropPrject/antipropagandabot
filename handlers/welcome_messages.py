@@ -40,13 +40,6 @@ async def commands_start(message: types.Message, state: FSMContext):  # Перв
     await state.set_state(welcome_states.start_dialog.dialogue_1)
 
 
-    print('end', datetime.datetime.now()- start)
-
-
-
-    # else:
-    #    await message.answer("Извините, этого бота можно проходить только один раз")
-
 async def start_base(message):
     user_id = message.from_user.id  # if old is None:
     redis = all_data().get_data_red()
