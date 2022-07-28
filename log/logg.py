@@ -28,36 +28,11 @@ infolog.addHandler(logging.FileHandler(filename=f"statlogs/{today_for_log}.log",
 
 
 def get_info(text):
-    today_for_log = datetime.now().strftime('%Y-%m-%d')
-    logging.basicConfig(
-        level=logging.ERROR,
-        filename=f'log/logs/Log-{today_for_log}.log',
-        format=u'[%(levelname)s] [%(asctime)s] | %(message)s',
-        datefmt="%d-%m-%y %H:%M:%S"
-    )
-
-    # await bot.send_message(chat_id='-1001397216477', text=f"ОШИБКА\n\n"
-    #                                                      f"___________\n"
-    #                                                      f"{text}")
-    logger = logging.getLogger()
-    logger.info(text)
+    pass
 
 
 async def get_error(text, file_name=None):
-    today_for_log = datetime.now().strftime('%Y-%m-%d')
-    print(f"{Fore.RED}[ERROR] FILE: {file_name} | " + Fore.WHITE + text)
-    logging.basicConfig(
-        level=logging.ERROR,
-        filename=f'log/logs/Log-{today_for_log}.log',
-        format=u'[%(levelname)s] [%(asctime)s] | %(message)s',
-        datefmt="%d-%m-%y %H:%M:%S"
-    )
-
-    # await bot.send_message(chat_id='-1001397216477', text=f"ОШИБКА\n\n"
-    #                                                      f"___________\n"
-    #                                                      f"{text}")
-    logger = logging.getLogger()
-    logger.error(text)
+   pass
 
 
 async def admin_logs(id, name, text):

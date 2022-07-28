@@ -21,13 +21,11 @@ from states.admin_states import admin
 router = Router()
 
 
-
 @router.message(IsSudo(), F.text.contains('Экспорт') | F.text.contains('Создать копию'))
 async def export(message: types.Message, state: FSMContext):
     print(1)
     backup = Backup()
     today = datetime.now().strftime('%Y-%m-%d_%H-%M')
-    today_for_log = datetime.now().strftime('%Y-%m-%d')
     await backup.dump_all(name=f'DUMP_{today}')
     print(f"export_to_csv/backups/DUMP_{today}.zip")
     try:
@@ -46,8 +44,7 @@ async def export(message: types.Message, state: FSMContext):
         await message.answer("Файл не успел отправиться, возможно стоит доработать эту функцию")
 
 
-class Backup():
-
+class Backup:
     def __init__(self):
         self._db_name = 'database'
         self.db = all_data().get_mongo()[self._db_name]
