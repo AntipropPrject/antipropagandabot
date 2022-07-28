@@ -39,8 +39,24 @@ services:
     depends_on:
       - db
     network_mode: host
+    ports:
+      - "1443:1443"
     env_file:
       - .env
+  webflask:
+    build:
+      context: ./
+      dockerfile: web/Dockerfile
+    container_name: flasktest
+    command: bash -c 'python main.py'
+    volumes:
+      - .:/codefl
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+
+
 
 
 

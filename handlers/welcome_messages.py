@@ -38,6 +38,12 @@ async def commands_start(message: types.Message, state: FSMContext):  # Перв
     text = await sql_safe_select("text", "texts", {"name": "start_hello"})
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     await state.set_state(welcome_states.start_dialog.dialogue_1)
+
+
+    print('end', datetime.datetime.now()- start)
+
+
+
     # else:
     #    await message.answer("Извините, этого бота можно проходить только один раз")
 
