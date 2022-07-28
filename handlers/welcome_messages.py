@@ -155,7 +155,7 @@ async def poll_filler(message: types.Message):
 @router.message(welcome_states.start_dialog.dialogue_5, text_contains=('Хорошо', 'свои', 'вопросы'),
                 content_types=types.ContentType.TEXT, text_ignore_case=True, flags=flags)
 @router.message(welcome_states.start_dialog.dialogue_5, text_contains='Задавай', content_types=types.ContentType.TEXT,
-                text_ignore_case=True, flags=flags)  # Задаю первый вопрос и ставлю состояние
+                text_ignore_case=True, flags=flags)  # Задаю первый вопрос и ставлю состояни
 async def message_6(message: types.Message, state: FSMContext):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Скорее да  🙂"), types.KeyboardButton(text="Скорее нет  🙅‍♂"))
