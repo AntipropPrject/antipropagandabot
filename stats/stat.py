@@ -45,22 +45,13 @@ async def mongo_update_stat(tg_id, column, options='$set', value=1):
 async def mongo_select_stat():
     try:
         count_dict={}
-        count_dict['start'] = int(collection_stat.count_documents({'start': {'$gte':1}}))
-        count_dict['antiprop'] = int(collection_stat.count_documents({'antiprop': {'$gte':1}}))
-        count_dict['donbass'] = int(collection_stat.count_documents({'donbass': {'$gte':1}}))
-        count_dict['war_aims'] = int(collection_stat.count_documents({'war_aims': {'$gte':1}}))
-        count_dict['putin'] = int(collection_stat.count_documents({'putin': {'$gte':1}}))
-        count_dict['end'] = int(collection_stat.count_documents({'end': {'$gte':1}}))
+        count_dict['start'] = int(await collection_stat.count_documents({'start': {'$gte':1}}))
+        count_dict['antiprop'] = int(await collection_stat.count_documents({'antiprop': {'$gte':1}}))
+        count_dict['donbass'] = int(await collection_stat.count_documents({'donbass': {'$gte':1}}))
+        count_dict['war_aims'] = int(await collection_stat.count_documents({'war_aims': {'$gte':1}}))
+        count_dict['putin'] = int(await collection_stat.count_documents({'putin': {'$gte':1}}))
+        count_dict['end'] = int(await collection_stat.count_documents({'end': {'$gte':1}}))
 
-        count_dict['victim_warsupp']=int(collection_stat.count_documents({'$and': [{'faith': 'victim'}, {'political_view': 'warsupp'}]}))
-        count_dict['victim_oppos']=int(collection_stat.count_documents({'$and': [{'faith': 'victim'}, {'political_view': 'oppos'}]}))
-        count_dict['victim_apolitical']=int(collection_stat.count_documents({'$and': [{'faith': 'victim'}, {'political_view': 'apolitical'}]}))
-        count_dict['kinginfo_warsupp']=int(collection_stat.count_documents({'$and': [{'faith': 'kinginfo'}, {'political_view': 'warsupp'}]}))
-        count_dict['kinginfo_oppos']=int(collection_stat.count_documents({'$and': [{'faith': 'kinginfo'}, {'political_view': 'oppos'}]}))
-        count_dict['kinginfo_warsupp']=int(collection_stat.count_documents({'$and': [{'faith': 'kinginfo'}, {'political_view': 'warsupp'}]}))
-        count_dict['start_warsupp']=int(collection_stat.count_documents({'$and': [{'faith': 'foma'}, {'political_view': 'warsupp'}]}))
-        count_dict['start_oppos']=int(collection_stat.count_documents({'$and': [{'faith': 'foma'}, {'political_view': 'oppos'}]}))
-        count_dict['start_warsupp']=int(collection_stat.count_documents({'$and': [{'faith': 'foma'}, {'political_view': 'warsupp'}]}))
         return count_dict
     except Exception as error:
         await logg.get_error(f"mongo_select_stat | {error}", __file__)
