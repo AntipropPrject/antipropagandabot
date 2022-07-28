@@ -1,14 +1,10 @@
 import asyncio
-import datetime
-from datetime import time
-
 from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.filters.command import CommandStart, CommandObject
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-
 from bata import all_data
 from data_base.DBuse import poll_write, sql_safe_select, mongo_add, mongo_select, redis_just_one_write, \
     mongo_user_info, redis_just_one_read, advertising_value
@@ -17,6 +13,7 @@ from resources.all_polls import web_prop, welc_message_one, people_prop
 from states import welcome_states
 from states.antiprop_states import propaganda_victim
 from stats.stat import mongo_stat, mongo_update_stat, mongo_stat_new, mongo_update_stat_new
+
 
 flags = {"throttling_key": "True"}
 router = Router()
@@ -41,6 +38,7 @@ async def commands_start(message: types.Message, state: FSMContext):  # Перв
 
 
 async def start_base(message):
+    await day_count()
     user_id = message.from_user.id  # if old is None:
     redis = all_data().get_data_red()
     for key in redis.scan_iter(f"Usrs: {message.from_user.id}:*"):
@@ -159,7 +157,6 @@ async def poll_filler(message: types.Message):
 @router.message(welcome_states.start_dialog.dialogue_5, text_contains='Задавай', content_types=types.ContentType.TEXT,
                 text_ignore_case=True, flags=flags)  # Задаю первый вопрос и ставлю состояние
 async def message_6(message: types.Message, state: FSMContext):
-    await mongo_update_stat_new(tg_id=message.from_user.id, column='on_ucraine_or_not', value='Нет')
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Скорее да  🙂"), types.KeyboardButton(text="Скорее нет  🙅‍♂"))
     markup.row(types.KeyboardButton(text="Начал(а) интересоваться после 24 февраля 🇷🇺🇺🇦"))
@@ -168,22 +165,25 @@ async def message_6(message: types.Message, state: FSMContext):
     await state.set_state(welcome_states.start_dialog.dialogue_6)
 
 
-
-@router.message(welcome_states.start_dialog.dialogue_6, flags=flags)
+@router.message((F.text.contains('интересоваться после 24') | F.text.contains('Скорее да') | F.text.contains('продолжим')), welcome_states.start_dialog.dialogue_6, flags=flags)
 async def message_6to7(message: types.Message, state: FSMContext):
-    if message.text == "Начал(а) интересоваться после 24 февраля 🇷🇺🇺🇦" or message.text == "Скорее да  🙂":
-        nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(types.KeyboardButton(text="Покажи варианты ✍"))
-        text = await sql_safe_select("text", "texts", {"name": "start_russia_goal"})
-        await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
-        await poll_write(f'Usrs: {message.from_user.id}: Start_answers: interest_in_politics:',
-                         message.text[:-3].strip())
-    elif message.text == 'Скорее нет  🙅‍♂':
-        nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(types.KeyboardButton(text="Хорошо, продолжим 👌"))
-        text = await sql_safe_select("text", "texts", {"name": "not_in_vain"})
-        await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Покажи варианты ✍"))
+    text = await sql_safe_select("text", "texts", {"name": "start_russia_goal"})
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await poll_write(f'Usrs: {message.from_user.id}: Start_answers: interest_in_politics:',
+                     message.text[:-3].strip())
     await state.set_state(welcome_states.start_dialog.dialogue_extrafix)
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='interest_politics', value=message.text)
+
+
+@router.message((F.text.contains('Скорее нет  🙅‍')),welcome_states.start_dialog.dialogue_6, flags=flags)
+async def message_dfwd(message: types.Message, state: FSMContext):
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Хорошо, продолжим 👌"))
+    text = await sql_safe_select("text", "texts", {"name": "not_in_vain"})
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await state.set_state(welcome_states.start_dialog.dialogue_6)
     await mongo_update_stat_new(tg_id=message.from_user.id, column='interest_politics', value=message.text)
 
 
