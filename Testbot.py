@@ -70,20 +70,12 @@ def configure_app(dp, bot) -> web.Application:
 
 async def periodic():
     print('periodic function has been started')
-
     backup = Backup()
-
-
-
     while True:
         status_spam = await redis_just_one_read('Usrs: admins: spam: status:')
         datefor_backup = datetime.now().strftime('%Y-%m-%d_%H-%M')
         c_time = datetime.now().strftime("%H:%M:%S")
         date = datetime.now().strftime('%Y.%m.%d')
-
-        #  удаление дневного счетчика
-
-        # удаление дневного счетчика
 
         if c_time == '21:00:01':
             await day_count(count_delete=True)
