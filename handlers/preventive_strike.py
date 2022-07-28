@@ -8,7 +8,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from data_base.DBuse import sql_safe_select, sql_select_row_like
 from filters.MapFilters import ManualFilters
 from handlers import true_resons_hand
-from stats.stat import mongo_update_stat
+from stats.stat import mongo_update_stat, mongo_update_stat_new
 from utilts import simple_media, dynamic_media_answer
 
 
@@ -26,6 +26,7 @@ router.message.filter(state=PreventStrikeState)
 
 @router.message((F.text == 'Давай разберём 👌'), flags=flags)
 async def prevent_strike_any_brutality(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='prevent_strike_start', value='Да')
     text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_any_brutality'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Каким образом? 🤔'))
@@ -54,6 +55,7 @@ async def prevent_strike_q1(message: Message, state: FSMContext):
 
 @router.message((F.text.in_({'Да, это странно 🤔', 'Ничего подозрительного 🙅‍♂️'})), state=PreventStrikeState.q2, flags=flags)
 async def prevent_strike_q2(message: Message, state: FSMContext):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='prevent_first_qstn', value=message.text)
     await state.set_state(PreventStrikeState.q3)
     text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_q2'})
     nmarkup = ReplyKeyboardBuilder()
@@ -64,6 +66,7 @@ async def prevent_strike_q2(message: Message, state: FSMContext):
 
 @router.message((F.text.in_({'Да, это странно 🤔', 'Ничего подозрительного 🙅‍♂️'})), state=PreventStrikeState.q3, flags=flags)
 async def prevent_strike_q3(message: Message, state: FSMContext):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='prevent_second_qstn', value=message.text)
     await state.set_state(PreventStrikeState.q4)
     text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_q3'})
     nmarkup = ReplyKeyboardBuilder()
@@ -74,6 +77,7 @@ async def prevent_strike_q3(message: Message, state: FSMContext):
 
 @router.message((F.text.in_({'Да, это странно 🤔', 'Ничего подозрительного 🙅‍♂️'})), state=PreventStrikeState.q4, flags=flags)
 async def prevent_strike_q4(message: Message, state: FSMContext):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='prevent_third_qstn', value=message.text)
     await state.set_state(PreventStrikeState.main)
     text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_q4'})
     nmarkup = ReplyKeyboardBuilder()
@@ -84,6 +88,7 @@ async def prevent_strike_q4(message: Message, state: FSMContext):
 
 @router.message((F.text.in_({'Да, это странно 🤔', 'Ничего подозрительного 🙅‍♂️'})), state=PreventStrikeState.main, flags=flags)
 async def prevent_strike_now_you(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='prevent_fourth_qstn', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_now_you'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Да, превентивный удар - лишь повод 👌'))
@@ -96,24 +101,24 @@ async def prevent_strike_now_you(message: Message):
     F.text.in_(
         {'Да, превентивный удар - лишь повод 👌', 'Я и так не верил(а) в то, что Украина готовит нападение 🤷‍♂️'}), flags=flags)
 async def prevent_strike_hitler_allright(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_hitler_allright'})
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='prevent_strike_convinced', value=message.text)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Да, хочу 🙂'))
     nmarkup.row(types.KeyboardButton(text='Нет, продолжим разговор ⏱'))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await simple_media(message, 'prevent_strike_hitler_allright', nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message(F.text == 'Нет, это настоящая причина начала военных действий ☝️', flags=flags)
 async def prevent_strike_hitler_did_it(message: Message, state: FSMContext):
-    text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_hitler_did_it'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Да, хочу 🙂'))
     nmarkup.row(types.KeyboardButton(text='Нет, продолжим разговор ⏱'))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await simple_media(message, 'prevent_strike_hitler_did_it', nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message(F.text.contains('продолжим'), flags=flags)
 async def prevent_strike_end_point(message: Message, state: FSMContext):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='prevent_strike_fin', value='Да')
     await state.set_state(true_resons_hand.TruereasonsState.main)
     await mongo_update_stat(message.from_user.id, 'prevent_strike')
     ManualFilters(message, state)

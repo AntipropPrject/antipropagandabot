@@ -10,7 +10,7 @@ from handlers.true_resons_hand import TruereasonsState
 from keyboards.main_keys import filler_kb
 from resources.all_polls import donbass_first_poll, welc_message_one
 from states.donbass_states import donbass_state
-from stats.stat import mongo_update_stat
+from stats.stat import mongo_update_stat, mongo_update_stat_new
 from utilts import simple_media
 
 
@@ -80,6 +80,7 @@ async def poll_filler(message: types.Message):
 # Тут удвоение первого поста каждой ветки, потому что нам надо отвечать СРАЗУ после опроса
 @router.poll_answer(state=donbass_state.eight_years_selection)
 async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FSMContext):
+    await state.set_state(donbass_state.after_poll)
     indexes = poll_answer.option_ids
     true_options = list()
     print(indexes)
@@ -89,6 +90,14 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FS
             continue
         true_options.append(donbass_first_poll[index])
         await poll_write(f'Usrs: {poll_answer.user.id}: Donbass_polls: First:', donbass_first_poll[index])
+    await mongo_update_stat_new(tg_id=poll_answer.user.id, column='donbass_ex', value=true_options)
+
+
+    if {1, 2, 3, 4, 5, 6}.isdisjoint(set(indexes)) is False:  # red
+        await mongo_update_stat_new(tg_id=poll_answer.user.id, column='web_prop_gen', value='Хотя бы один красный')
+    if {0, 7}.isdisjoint(set(indexes)) is False:  # green
+        await mongo_update_stat_new(tg_id=poll_answer.user.id, column='web_prop_gen', value='Есть зелёные и нет красных')
+
     if "🛡 Если бы мы не нанесли упреждающий удар, то Украина напала бы первая и жертв было бы больше" in true_options:
         await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: Invasion:',
                          "💂 Предотвратить размещение военных баз НАТО на Украине")
@@ -155,9 +164,15 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FS
         nmarkup.row(types.KeyboardButton(text="Хорошо  👌"))
         await bot.send_message(poll_answer.user.id, text, reply_markup=nmarkup.as_markup(resize_keyboard=True), parse_mode="HTML")
     elif indexes == [0]:
-        await bot.send_message(poll_answer.user.id, 'Ну что же, похоже мне не надо вас переубеждать. Пойдем дальше?',
-                               reply_markup=filler_kb(), disable_web_page_preview=True)
-    await state.set_state(donbass_state.after_poll)
+        await state.set_state(donbass_state.second_poll)
+        text = await sql_safe_select('text', 'texts', {'name': 'donbas_who_do_that'})
+        nmarkup = ReplyKeyboardBuilder()
+        nmarkup.row(types.KeyboardButton(text="В подробностях 📜"))
+        nmarkup.row(types.KeyboardButton(text="Покороче ⏱"))
+        await bot.send_message(poll_answer.user.id, text, reply_markup=nmarkup.as_markup(resize_keyboard=True), parse_mode="HTML",
+                             disable_web_page_preview=True)
+
+
 
 
 # Этот скорее всего никогда не будет использоваться
@@ -469,6 +484,7 @@ async def donbas_no_army_here(message: Message, state=FSMContext):
 
 @router.message((F.text == "Путин помог разжечь этот конфликт, чтобы помешать Украине вступить в НАТО 🛡"), flags=flags)
 async def donbas_hypocrisy(message: Message, state: FSMContext):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='donbass_end', value='Путин мешал вступить в НАТО')
     text = await sql_safe_select('text', 'texts', {'name': 'donbas_hypocrisy'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
@@ -477,6 +493,7 @@ async def donbas_hypocrisy(message: Message, state: FSMContext):
 
 @router.message((F.text == "Вообще-то, наших войск не было в ДНР/ ЛНР все эти 8 лет 🙅"), flags=flags)
 async def donbas_untrue(message: Message, state=FSMContext):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='donbass_end', value='Наших не было в ЛДНР')
     text = await sql_safe_select('text', 'texts', {'name': 'donbas_untrue'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Хорошо 👌"))
@@ -487,6 +504,8 @@ async def donbas_untrue(message: Message, state=FSMContext):
 @router.message((F.text == "Вернемся к другим причинам войны 👌"))
 @router.message((F.text == "Путин просто помогал жителям Донбасса, которым не понравились результаты Майдана 🤷"))
 async def donbas_no_army_here(message: Message, state: FSMContext):
+    if 'Путин' in message.text or 'причинам' in message.text:
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='donbass_end', value=message.text)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Да, замечаю  😯"))
     nmarkup.row(types.KeyboardButton(text="Нет, не замечаю🤷‍♀"))

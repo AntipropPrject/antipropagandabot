@@ -17,10 +17,12 @@ parts/
 sdist/
 var/
 *.egg-info/
+statlogs/
 .installed.cfg
 *.egg
 bata.py
 .env
+misk.xml
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
@@ -51,10 +53,8 @@ coverage.xml
 docs/_build/
 .idea/.name
 *.pyc
-*.pyc
 logfile.log
-*.pyc
-bata.py
 *.mp4
 *.jpg
 *.png
+*.log

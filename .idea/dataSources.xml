@@ -1,32 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="Локальный контейнер" uuid="af54fb20-e073-4f08-98c7-0ba6d27f82ea">
+    <data-source source="LOCAL" name="Local PostgeSQL" uuid="af54fb20-e073-4f08-98c7-0ba6d27f82ea">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
       <jdbc-url>jdbc:postgresql://localhost:5431/postgres</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="Тестовый (трогать можно)" uuid="a1d56d57-bb98-4923-a7cd-01874e30a74f">
+    <data-source source="LOCAL" name="Test PostgreSQL" uuid="a1d56d57-bb98-4923-a7cd-01874e30a74f">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://16.170.206.95:5431/postgres</jdbc-url>
+      <jdbc-url>jdbc:postgresql://16.170.208.192:5431/postgres</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="ЕБАНЫЙ ПРОД НЕ ТРОГАТЬ" uuid="c93d62e7-a86d-4cea-a7a1-049a45cad14a">
+    <data-source source="LOCAL" name="Production PostgreSQL (WARNING)" uuid="c93d62e7-a86d-4cea-a7a1-049a45cad14a">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://16.171.26.240:5431/postgres</jdbc-url>
+      <jdbc-url>jdbc:postgresql://167.71.42.22:5431/postgres</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="ЕБАНЫЙ ПРОД НЕ ТРОГАТЬ!" uuid="5f841a7c-9780-4afe-82de-b10dc7de77bb">
+    <data-source source="LOCAL" name="Production MongoDB (WARNING)" uuid="5f841a7c-9780-4afe-82de-b10dc7de77bb">
       <driver-ref>mongo</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>com.dbschema.MongoJdbcDriver</jdbc-driver>
-      <jdbc-url>mongodb://16.171.26.240:27017</jdbc-url>
+      <jdbc-url>mongodb://167.71.42.22:27017</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+    <data-source source="LOCAL" name="Test MongoDB" uuid="58e285aa-a93b-422a-b281-ab12e8c4e3d7">
+      <driver-ref>mongo</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>com.dbschema.MongoJdbcDriver</jdbc-driver>
+      <jdbc-url>mongodb://16.170.208.192:27017</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+    <data-source source="LOCAL" name="Local MongoDB" uuid="c88cb26a-3504-4282-b83c-309a69765176">
+      <driver-ref>mongo</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>com.dbschema.MongoJdbcDriver</jdbc-driver>
+      <jdbc-url>mongodb://localhost:27017</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
   </component>

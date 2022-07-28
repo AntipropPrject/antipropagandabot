@@ -15,9 +15,9 @@ def antip_why_kb():
 def antip_killme_kb():
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Честно говоря, я в шоке 🤯"))
-    nmarkup.row(types.KeyboardButton(text="Сильно удивлен 😧"))
-    nmarkup.row(types.KeyboardButton(text="Немного удивлен 😯"))
-    nmarkup.row(types.KeyboardButton(text="Не удивлен 😐"))
+    nmarkup.row(types.KeyboardButton(text="Сильно удивлён 😧"))
+    nmarkup.row(types.KeyboardButton(text="Немного удивлён 😯"))
+    nmarkup.row(types.KeyboardButton(text="Не удивлён 😐"))
     nmarkup.row(types.KeyboardButton(text="Я и так знал, что по ТВ врут 🤨"))
     nmarkup.row(types.KeyboardButton(text="Подождите! Я хочу вернуться и посмотреть еще! 📺"))
     nmarkup.adjust(2, 2, 1, 1)

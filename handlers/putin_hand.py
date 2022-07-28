@@ -9,7 +9,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from data_base.DBuse import data_getter, sql_safe_select, mongo_game_answer
 from filters.MapFilters import PutinFilter
 from handlers.stopwar_hand import StopWarState
-from stats.stat import mongo_update_stat
+from stats.stat import mongo_update_stat, mongo_update_stat_new
 from utilts import simple_media
 
 
@@ -27,6 +27,7 @@ router.message.filter(state=StateofPutin)
 
 @router.message(PutinFilter(), (F.text.in_({"Давай 🤝"})), state=StateofPutin.main, flags=flags)
 async def putin_love_putin(message: Message, state: FSMContext):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='started_putin', value='Да')
     await state.set_state(StateofPutin.main)
 
     nmarkup = ReplyKeyboardBuilder()
@@ -53,10 +54,13 @@ async def putin_not_love_putin(message: Message, state: FSMContext):
     (F.text.in_({"Нет, не согласен 🙅‍♂️", "Может и есть, но пока их не видно 🤷‍♂️", "Конечно такие люди есть 🙂"})),
     flags=flags)
 async def putin_big_love_putin(message: Message):
+    if 'Нет, не согласен' in message.text:
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='russia_without_putin', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'putin_big_love_putin'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Скорее да 👍"))
     nmarkup.row(types.KeyboardButton(text="Скорее нет 👎"))
+    nmarkup.adjust(2)
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
@@ -64,6 +68,10 @@ async def putin_big_love_putin(message: Message):
                 (F.text == "Не лучший президент, но кто, если не Путин? 🤷‍♂️"),
                 flags=flags)
 async def putin_only_one(message: Message):
+    if 'Не лучший' in message.text:
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='not_love_putin_descr', value=message.text)
+    if 'Согласен(а)' in message.text:
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='russia_without_putin', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'putin_only_one'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Может и есть, но пока их не видно 🤷‍♂️"))
@@ -75,19 +83,24 @@ async def putin_only_one(message: Message):
 @router.message(
     (F.text == "Не говори такие вещи, Путин с нами надолго! ✊") | (F.text == "Отличный президент ✊"), flags=flags)
 async def putin_so_handsome(message: Message):
+    if 'Отличный президент' in message.text:
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='not_love_putin_descr', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'putin_so_handsome'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Скорее да 👍"))
     nmarkup.row(types.KeyboardButton(text="Скорее нет 👎"))
+    nmarkup.adjust(2)
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text == "Хороший президент, но его приказы плохо исполняют 🤷‍♀️"), flags=flags)
 async def putin_not_putin(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='not_love_putin_descr', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'putin_not_putin'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Скорее да 👍"))
     nmarkup.row(types.KeyboardButton(text="Скорее нет 👎"))
+    nmarkup.adjust(2)
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
@@ -103,6 +116,8 @@ async def putin_game_of_lie(message: Message, state: FSMContext):
 @router.message(((F.text == "Начнем!  🚀") | (F.text == "Нет, давай продолжим 👉") | (F.text == "Продолжаем 👉")),
                 state=StateofPutin.game1, flags=flags)
 async def putin_game1_question(message: Message, state: FSMContext):
+    if 'Начнем!  🚀' in message.text:
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='started_putin_lies', value='Да')
     try:
         count = (await state.get_data())['pgamecount']
     except:
@@ -198,6 +213,7 @@ async def putin_nothing_done(message: Message):
 
 @router.message(((F.text == "Начнем! 🚀")), state=StateofPutin.game2, flags=flags)
 async def putin_gaming(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='started_putin_old_lies', value='Да')
     text = await sql_safe_select('text', 'texts', {'name': 'putin_gaming'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Я готов(а) 👌"))
@@ -297,6 +313,7 @@ async def putin_in_the_past(message: Message, state: FSMContext):
 @router.message(((F.text == "Докажи 🤔") | (F.text == "Нет, я не согласен(а) ❌")), state=StateofPutin.final,
                 flags=flags)
 async def putin_prove_me(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='future_with_putin', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'putin_prove_me'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Давай 👌"))
@@ -307,6 +324,11 @@ async def putin_prove_me(message: Message):
                  (F.text == "Был хорошим президентом раньше, но сейчас - нет 🙅") |
                  (F.text == "Давай 👌")), state=StateofPutin, flags=flags)
 async def stopwar_start(message: Message, state: FSMContext):
+    if 'согласен(а)' in message.text:
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='future_with_putin', value=message.text)
+    if 'Военный преступник' in message.text or 'Был хорошим' in message.text:
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='not_love_putin_descr', value=message.text)
+
     await mongo_update_stat(message.from_user.id, 'putin')
     await state.set_state(StopWarState.main)
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_p_start'})

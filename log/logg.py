@@ -1,32 +1,63 @@
 import os
 from datetime import datetime
+
+from aiogram import loggers
 from colorama import Fore
 import logging
 from bata import all_data
+import pathlib
 
 data = all_data()
 bot = data.get_bot()
 
 
+today_for_log = datetime.now().strftime('%Y-%m-%d')
+pathlib.Path('statlogs/').mkdir(parents=True, exist_ok=True)
+
+logging.basicConfig(
+    level=logging.ERROR,
+    filename=f'log/logs/Log-{today_for_log}.log',
+    format=u'[%(levelname)s] [%(asctime)s] | %(message)s',
+    datefmt="%d-%m-%y %H:%M:%S"
+)
+
+infolog = loggers.event
+infolog.setLevel(logging.INFO)
+infolog.addHandler(logging.FileHandler(filename=f"statlogs/{today_for_log}.log", mode='a'))
+
+
+
 def get_info(text):
-    pass
-
-
-async def get_error(text, file_name=None):
-    today = datetime.today()
-    today = today.strftime("%d-%m-%Y")
-
-    print(f"{Fore.RED}[ERROR] FILE: {file_name} | " + Fore.WHITE + text)
+    today_for_log = datetime.now().strftime('%Y-%m-%d')
     logging.basicConfig(
         level=logging.ERROR,
-        filename=f'log/logs/Log-{today}.log',
+        filename=f'log/logs/Log-{today_for_log}.log',
         format=u'[%(levelname)s] [%(asctime)s] | %(message)s',
         datefmt="%d-%m-%y %H:%M:%S"
     )
 
-    #await bot.send_message(chat_id='-1001397216477', text=f"ОШИБКА\n\n"
+    # await bot.send_message(chat_id='-1001397216477', text=f"ОШИБКА\n\n"
     #                                                      f"___________\n"
     #                                                      f"{text}")
+    logger = logging.getLogger()
+    logger.info(text)
+
+
+async def get_error(text, file_name=None):
+    today_for_log = datetime.now().strftime('%Y-%m-%d')
+    print(f"{Fore.RED}[ERROR] FILE: {file_name} | " + Fore.WHITE + text)
+    logging.basicConfig(
+        level=logging.ERROR,
+        filename=f'log/logs/Log-{today_for_log}.log',
+        format=u'[%(levelname)s] [%(asctime)s] | %(message)s',
+        datefmt="%d-%m-%y %H:%M:%S"
+    )
+
+    # await bot.send_message(chat_id='-1001397216477', text=f"ОШИБКА\n\n"
+    #                                                      f"___________\n"
+    #                                                      f"{text}")
+    logger = logging.getLogger()
+    logger.error(text)
 
 
 async def admin_logs(id, name, text):

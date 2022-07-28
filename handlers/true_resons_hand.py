@@ -15,7 +15,7 @@ from handlers.preventive_strike import PreventStrikeState
 from handlers.putin_hand import StateofPutin
 from resources.all_polls import welc_message_one
 from states.donbass_states import donbass_state
-from stats.stat import mongo_update_stat
+from stats.stat import mongo_update_stat, mongo_update_stat_new
 from utilts import simple_media
 
 
@@ -72,7 +72,11 @@ async def reasons_now_you_nothing(message: Message, state: FSMContext):
 
 @router.message((F.text == "Давай попробуем 👌"), flags=flags)
 async def reasons_now_you_fucked(message: Message, state: FSMContext):
-    await redis_just_one_write(f'Usrs: {message.from_user.id}: Politics:', 'Сторонник войны')
+    base_list = ("👪 Защитить русских в Донбассе", "🛡 Предотвратить вторжение на территорию России или ДНР/ЛНР",
+                 "🤬 Денацификация / Уничтожить нацистов")
+    for thing in base_list:
+        await poll_write(f'Usrs: {message.from_user.id}: Start_answers: Invasion:', thing)
+    await redis_just_one_write(f'Usrs: {message.from_user.id}: Politics:', 'Аполитичный')
     await anti_prop_hand.war_point_now(message, state)
 
 
@@ -112,6 +116,7 @@ async def reasons_war(message: Message):
 
 @router.message(WarReason(answer="👪 Защитить русских в Донбассе"), flags=flags)
 async def donbass_big_tragedy(message: Message, state=FSMContext):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='start_donbass', value='Да')
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Start_answers: Invasion:',
                                  "👪 Защитить русских в Донбассе")
     await state.set_state(donbass_state.eight_years)
@@ -123,6 +128,7 @@ async def donbass_big_tragedy(message: Message, state=FSMContext):
 
 @router.message(WarReason(answer="🤬 Денацификация / Уничтожить нацистов"), flags=flags)
 async def reasons_denazi(message: Message, state=FSMContext):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='start_nazi', value='Да')
     await state.set_state(NaziState.first_poll)
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Start_answers: Invasion:',
                                  "🤬 Денацификация / Уничтожить нацистов")
@@ -248,6 +254,8 @@ async def reasons_normal_game_start(message: Message, state: FSMContext):
 @router.message(((F.text == "Начнем! 🚀") | (F.text == "Продолжаем, давай еще! 👉")), state=TruereasonsState.game,
                 flags=flags)
 async def reasons_normal_game_question(message: Message, state: FSMContext):
+    if 'Начнем! 🚀' in message.text:
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='normal_game_stats', value='Начали и НЕ закончили')
     try:
         count = (await state.get_data())['ngamecount']
     except:
@@ -280,6 +288,7 @@ async def reasons_normal_game_question(message: Message, state: FSMContext):
         else:
             await message.answer(f'{truth_data[1]}', reply_markup=nmarkup.as_markup(resize_keyboard=True))
     else:
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='normal_game_stats', value='Начали и закончили')
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Продолжим 🤝"))
         await message.answer(
@@ -318,6 +327,9 @@ async def reasons_normal_game_answer(message: Message, state: FSMContext):
 @router.message(((F.text.contains("Достаточно,")) | (F.text == "Продолжим 🤝") | (F.text == 'Пропустим игру 🙅‍♀️')),
                 state=TruereasonsState.game, flags=flags)
 async def reasons_real_reasons(message: Message, state: FSMContext):
+    if 'Пропустим игру' in message.text:
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='normal_game_stats', value='Пропустили')
+
     await state.set_state(TruereasonsState.final)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
@@ -328,6 +340,7 @@ async def reasons_real_reasons(message: Message, state: FSMContext):
 @router.message((F.text == "Подожди, а какие тогда настоящие цели войны? 🎯"), state=TruereasonsState.final,
                 flags=flags)
 async def reasons_are_they_real(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='real_reasons_wanted', value='Да')
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_are_they_real'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
@@ -347,6 +360,7 @@ async def reasons_war_of_noone(message: Message):
 @router.message(((F.text == "Я думаю, что люди наверху знают, что делают 👮‍♂️") | (F.text == "Скорее нет 🙅‍♂️")),
                 state=TruereasonsState.final, flags=flags)
 async def reasons_cynical_view(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='do_you_need_war_1', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_cynical_view'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Ни в чем не улучшалось 🤷‍♂️"))
@@ -357,6 +371,7 @@ async def reasons_cynical_view(message: Message):
 
 @router.message((F.text == "Конец гегемонии США / Однополярного мира 🇺🇸"), state=TruereasonsState.final, flags=flags)
 async def reasons_usa_gegemony(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='how_it_helped', value=message.text)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Нет, не понимаю 🤷‍♂️"))
     nmarkup.row(types.KeyboardButton(text="Да, понимаю ✔️"))
@@ -375,6 +390,7 @@ async def reasons_europe_cold(message: Message):
 
 @router.message((F.text == "Ни в чем не улучшалось 🤷‍♂️"), state=TruereasonsState.final, flags=flags)
 async def reasons_only_misery(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='how_it_helped', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_only_misery'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Давай 👌"))
@@ -383,7 +399,7 @@ async def reasons_only_misery(message: Message):
 
 @router.message((F.text == "Импортозамещение 📦"), state=TruereasonsState.final, flags=flags)
 async def reasons_nails_lol(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'reasons_nails_lol'})
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='how_it_helped', value=message.text)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Давай 👌"))
     await simple_media(message, 'reasons_nails_lol', nmarkup.as_markup(resize_keyboard=True))
@@ -485,6 +501,7 @@ async def reasons_pause(message: Message, state: FSMContext):
 @router.message((F.text == "Столько парней погибло, теперь мы не имеем права проиграть... 😔"),
                 state=TruereasonsState.final, flags=flags)
 async def reasons_why_support_war(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='do_you_need_war_2', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_why_support_war'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Нет, мне не нужна эта война... 🙅‍♂️"))
@@ -501,6 +518,9 @@ async def reasons_why_support_war(message: Message):
                  (F.text == "Я не знаю...😨")),
                 state=TruereasonsState.final, flags=flags)
 async def reasons_now_he_normal(message: Message, state: FSMContext):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='do_you_need_war_2', value=message.text)
+    if 'не нужна' in message.text:
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='now_he_normal', value='Да')
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_now_he_normal'})
     await mongo_update_stat(message.from_user.id, 'war_aims')
     await state.set_state(StateofPutin.main)
@@ -513,6 +533,7 @@ async def reasons_now_he_normal(message: Message, state: FSMContext):
     ((F.text == "Да, я готов(а) поддержать войну / спецоперацию 💥") | (F.text == "Давай закончим этот разговор! 🖕")),
     state=TruereasonsState.final, flags=flags)
 async def reasons_he_needs_war(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='do_you_need_war_2', value=message.text)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Покажи текст песни 📝"))
     nmarkup.row(types.KeyboardButton(text="Я передумал(а), мне не нужна эта война...🙅"))
@@ -531,6 +552,7 @@ async def reasons_generation_z(message: Message):
 
 @router.message((F.text == "Скорее да 😔"), state=TruereasonsState.final, flags=flags)
 async def reasons_who_to_blame(message: Message, state: FSMContext):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='do_you_need_war_1', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_who_to_blame'})
     await state.set_state(StateofPutin.main)
     await mongo_update_stat(message.from_user.id, 'war_aims')
