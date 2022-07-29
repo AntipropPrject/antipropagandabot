@@ -551,6 +551,12 @@ async def redis_delete_from_list(key, item):
 
 
 # Одинаковая функция, лол
+async def del_key(key):
+    try:
+        all_data().get_data_red().delete(key)
+    except Exception as error:
+        await logg.get_error(f"{error}", __file__)
+
 async def redis_pop(key):
     try:
         all_data().get_data_red().lpop(key)

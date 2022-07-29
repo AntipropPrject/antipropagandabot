@@ -8,7 +8,7 @@ from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from handlers.main_menu_hand import mainmenu_really_menu
 from data_base.DBuse import sql_safe_select, redis_just_one_write, redis_just_one_read, \
-    mongo_select_info, mongo_update_end
+    mongo_select_info, mongo_update_end, del_key
 from log import logg
 from states.main_menu_states import MainMenuStates
 from stats.stat import mongo_update_stat, mongo_update_stat_new
@@ -23,10 +23,10 @@ class StopWarState(StatesGroup):
     arg_2 = State()
     arg_3 = State()
 
+
 flags = {"throttling_key": "True"}
 router = Router()
 router.message.filter(state=StopWarState)
-
 
 
 @router.message(F.text == "Скорее да ✅", flags=flags)
@@ -63,7 +63,8 @@ async def stopwar_rather_no(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Не согласен(а) 🙅") | (F.text == "Согласен(а) 👌") | (F.text == "Продолжим 👌"), flags=flags)
+@router.message((F.text == "Не согласен(а) 🙅") | (F.text == "Согласен(а) 👌") | (F.text == "Продолжим 👌"),
+                flags=flags)
 async def stopwar_will_it_stop(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_will_it_stop'})
     nmarkup = ReplyKeyboardBuilder()
@@ -82,7 +83,8 @@ async def stopwar_ofc(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Не знаю 🤷‍♀️") | (F.text == "Не обязательно, новый президент может продолжить войну 🗡"), flags=flags)
+@router.message((F.text == "Не знаю 🤷‍♀️") | (F.text == "Не обязательно, новый президент может продолжить войну 🗡"),
+                flags=flags)
 async def stopwar_war_eternal(message: Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='no_putin_will_stop', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_war_eternal'})
@@ -92,7 +94,7 @@ async def stopwar_war_eternal(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Продолжай ⏳"),state=StopWarState.war_1, flags=flags)
+@router.message((F.text == "Продолжай ⏳"), state=StopWarState.war_1, flags=flags)
 async def stopwar_isolation(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_isolation'})
     nmarkup = ReplyKeyboardBuilder()
@@ -146,7 +148,8 @@ async def stopwar_lets_fight(message: Message):
     await simple_media(message, 'stopwar_lets_fight', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Объясни 🤔") | (F.text == "Нет, власти всё равно будут делать, что хотят 🙅‍♂️"), flags=flags)
+@router.message((F.text == "Объясни 🤔") | (F.text == "Нет, власти всё равно будут делать, что хотят 🙅‍♂️"),
+                flags=flags)
 async def stopwar_lets_fight(message: Message):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='will_they_stop', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_The'})
@@ -186,7 +189,8 @@ async def manipulation_argument(message: Message, state: FSMContext):
 async def manipulation_argument(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_fourth_manipulation_argument'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Это разумные аргументы. Важно, чтобы россияне поняли — война им не нужна 🕊"))
+    nmarkup.row(
+        types.KeyboardButton(text="Это разумные аргументы. Важно, чтобы россияне поняли — война им не нужна 🕊"))
     nmarkup.row(types.KeyboardButton(text="Перевороты и революция — это страшно и я не хочу этого 💔"))
     nmarkup.row(types.KeyboardButton(text="Я так и знал(а). Правдобот, ты — проект США 🇺🇸 и хочешь развалить Россию"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
@@ -237,32 +241,29 @@ async def stopwar_I_told_you_everything(message: Message, bot: Bot, state: FSMCo
                  (F.text.contains('Согласен(а), важно, чтобы россияне поняли — война им не нужна 🕊'))), flags=flags)
 async def stopwar_lets_fight(message: Message, bot: Bot):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='will_they_stop', value=message.text)
-    check_user = await redis_just_one_read(f'Usrs: {message.from_user.id}: check:')
-    await redis_just_one_write(f'Usrs: {message.from_user.id}: check:', message.from_user.id)
-    if await redis_just_one_read(f'Usrs: {message.from_user.id}: check:'):
-        user_info = await mongo_select_info(message.from_user.id)
-        date_start = user_info['datetime'].replace('_', ' ')
-        usertime = datetime.strptime(date_start, "%d-%m-%Y %H:%M")
-        time_bot = datetime.strptime(datetime.strftime(datetime.now(), "%d-%m-%Y %H:%M"), "%d-%m-%Y %H:%M") - usertime
-        str_date = str(time_bot)[:-3].replace('days', '').replace("day", '')
-        if int(time_bot.days) == 1:
-            days_pr = 'день,'
-        elif 1 <= int(time_bot.days) <= 4:
-            days_pr = 'дня,'
-        else:
-            days_pr = 'дней,'
-        #timer
-        sec = 299
+    text_1 = await sql_safe_select('text', 'texts', {'name': 'stopwar_hello_world'})
+    text_2 = await sql_safe_select('text', 'texts', {'name': 'stopwar_send_me'})
+    text_3 = await sql_safe_select('text', 'texts', {'name': 'stopwar_send_the_message'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Какие советы? 🤔"))
+    nmarkup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
+    user_info = await mongo_select_info(message.from_user.id)
+    date_start = user_info['datetime'].replace('_', ' ')
+    usertime = datetime.strptime(date_start, "%d-%m-%Y %H:%M")
+    time_bot = datetime.strptime(datetime.strftime(datetime.now(), "%d-%m-%Y %H:%M"), "%d-%m-%Y %H:%M") - usertime
+    str_date = str(time_bot)[:-3].replace('days', '').replace("day", '')
+    if int(time_bot.days) == 1:
+        days_pr = 'день,'
+    elif 1 <= int(time_bot.days) <= 4:
+        days_pr = 'дня,'
+    else:
+        days_pr = 'дней,'
+    act_time = str_date.replace(',', days_pr)
+    if user_info['datetime_end'] == None:  # c is не работает так как объект находится не в озу а в базе
+        sec = 5
         markup = ReplyKeyboardBuilder()
         markup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
         bot_message = await message.answer('5:00')
-        act_time = str_date.replace(',', days_pr)
-        text_1 = await sql_safe_select('text', 'texts', {'name': 'stopwar_hello_world'})
-        text_2 = await sql_safe_select('text', 'texts', {'name': 'stopwar_send_me'})
-        text_3 = await sql_safe_select('text', 'texts', {'name': 'stopwar_send_the_message'})
-        nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(types.KeyboardButton(text="Какие советы? 🤔"))
-        nmarkup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
         try:
             await message.answer(text_1.replace('[YY:YY]', act_time), disable_web_page_preview=True)
             await message.answer(text_2, disable_web_page_preview=True)
@@ -273,28 +274,38 @@ async def stopwar_lets_fight(message: Message, bot: Bot):
         m_id = bot_message.message_id
         await bot.pin_chat_message(chat_id=message.from_user.id, message_id=m_id, disable_notification=True)
         await mongo_update_stat_new(tg_id=message.from_user.id, column='timer', value='Да')
+        await redis_just_one_write(f'Usrs: {message.from_user.id}: count:', '1')
         while sec:
+            print(sec)
             m, s = divmod(sec, 60)
             sec_t = '{:02d}:{:02d}'.format(m, s)
-            await redis_just_one_write(f'Usrs: {message.from_user.id}: count:', sec_t)
             await bot.edit_message_text(chat_id=message.from_user.id, message_id=m_id, text=f'{sec_t}')
             await asyncio.sleep(1)
             sec -= 1
         await mongo_update_stat(message.from_user.id, 'end')
         await mongo_update_end(message.from_user.id)
         await asyncio.sleep(1)
+        await del_key(f'Usrs: {message.from_user.id}: count:')
         await message.answer('Таймер вышел. Вы можете перейти в главное меню.'
                              ' Но если у вас есть ещё с кем поделиться ссылкой на меня'
                              ' — обязательно сделайте это!', reply_markup=markup.as_markup(resize_keyboard=True))
         await bot.delete_message(chat_id=message.from_user.id, message_id=m_id)
         print('Countdown finished.')
+    else:
+        await del_key(f'Usrs: {message.from_user.id}: count:')
+        try:
+            await message.answer(text_1.replace('[YY:YY]', act_time), disable_web_page_preview=True)
+            await message.answer(text_2, disable_web_page_preview=True)
+            await message.answer(text_3, reply_markup=nmarkup.as_markup(resize_keyboard=True),
+                                 disable_web_page_preview=True)
+        except Exception as er:
+            await logg.get_error(er)
 
 
 @router.message((F.text == "Какие советы? 🤔"), flags=flags)
-async def stopwar_share_blindly(message: Message, bot: Bot, state: FSMContext):
+async def stopwar_share_blindly(message: Message):
     timer = await redis_just_one_read(f'Usrs: {message.from_user.id}: count:')
-
-    if timer != '00:01':
+    if timer == '1':
         text = await sql_safe_select('text', 'texts', {'name': 'stopwar_share_blindly'})
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Покажи инструкцию, как поделиться со всем списком контактов 📝"))
@@ -309,11 +320,11 @@ async def stopwar_share_blindly(message: Message, bot: Bot, state: FSMContext):
 
 
 @router.message((F.text == "Покажи инструкцию, как поделиться со всем списком контактов 📝"), flags=flags)
-async def stopwar_share_blindly(message: Message, bot: Bot, state: FSMContext):
+async def stopwar_share_blindly(message: Message):
     timer = await redis_just_one_read(f'Usrs: {message.from_user.id}: count:')
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
-    if timer != '00:01':
+    if timer == '1':
         await simple_media(message, 'stopwar_bulk_forwarding', reply_markup=nmarkup.as_markup(resize_keyboard=True))
     else:
         await message.answer('Таймер вышел. Вы можете перейти в главное меню.'
@@ -324,7 +335,7 @@ async def stopwar_share_blindly(message: Message, bot: Bot, state: FSMContext):
 @router.message((F.text == "Перейти в главное меню 👇"), flags=flags)
 async def main_menu(message: Message, state: FSMContext):
     timer = await redis_just_one_read(f'Usrs: {message.from_user.id}: count:')
-    if timer != '00:01':
+    if timer == '1':
         await message.answer('Пожалуйста, дождитесь окончания таймера,'
                              ' прежде, чем попасть в главное меню. Не теряйте'
                              ' это время зря — поделитесь мной со своими родственниками,'
@@ -333,6 +344,3 @@ async def main_menu(message: Message, state: FSMContext):
         await mongo_update_stat_new(tg_id=message.from_user.id, column='main_menu', value='Да')
         await state.set_state(MainMenuStates.main)
         await mainmenu_really_menu(message, state)
-
-
-
