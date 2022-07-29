@@ -239,7 +239,7 @@ async def admin_truthgame_delete(message: types.Message, state: FSMContext):
     if deletion_data[2] is not None:
         await sql_delete('texts', {'name': deletion_data[2]})
     nmrkup = ReplyKeyboardBuilder()
-    nmrkup.row(types.KeyboardButton(text="Вернуться в главное меню"))
+    nmrkup.row(types.KeyboardButton(text="Вернуться в меню администрирования"))
     await message.answer('Сюжет был успешно удален', reply_markup=nmrkup.as_markup(resize_keyboard=True))
 
 
