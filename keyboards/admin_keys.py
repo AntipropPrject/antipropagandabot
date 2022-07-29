@@ -4,22 +4,30 @@ from aiogram import types
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from bata import all_data
-from data_base.DBuse import poll_get, redis_just_one_read
+from data_base.DBuse import poll_get, redis_just_one_read, mongo_select_admin_levels
 
 
-def main_admin_keyboard(t_id=None):
-    usless_list = ['Пожалуйста, не редактируйте текст напрямую в базе данных',
-                   'Никогда не угадаешь, где скрывалась опечатка']
+async def main_admin_keyboard(t_id=None):
+    usless_list = ('Пожалуйста, не редактируйте текст напрямую в базе данных',
+                   'Никогда не угадаешь, где скрывалась опечатка',
+                   'Ходят слухи, что где-то в админке спрятаны сокровища...')
+    levels = await mongo_select_admin_levels(t_id)
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Изменить медиа"))
-    nmarkup.row(types.KeyboardButton(text="Изменить текст"))
-    nmarkup.row(types.KeyboardButton(text="Игры 🎭"))
     if t_id in all_data().super_admins:
-        nmarkup.row(types.KeyboardButton(text="Управление ботом"))
-        nmarkup.row(types.KeyboardButton(text="Клонировать бота"))
-        nmarkup.row(types.KeyboardButton(text="Подготовить бота к клонированию"))
-    nmarkup.row(types.KeyboardButton(text="Выйти"))
-    nmarkup.adjust(2)
+        levels = all_data().access_levels
+    if levels:
+        if 'Редактирование' in levels:
+            nmarkup.row(types.KeyboardButton(text="Изменить медиа"))
+            nmarkup.row(types.KeyboardButton(text="Изменить текст"))
+            nmarkup.row(types.KeyboardButton(text="Игры 🎭"))
+        if t_id in all_data().super_admins:
+            nmarkup.row(types.KeyboardButton(text="Управление ботом"))
+            nmarkup.row(types.KeyboardButton(text="Клонировать бота"))
+            nmarkup.row(types.KeyboardButton(text="Подготовить бота к клонированию"))
+        if 'Маркетинг' in levels:
+            nmarkup.row(types.KeyboardButton(text="Маркетинг 📈"))
+        nmarkup.adjust(2)
+        nmarkup.row(types.KeyboardButton(text="Выйти"))
     return nmarkup.as_markup(resize_keyboard=True, input_field_placeholder=random.choice(usless_list))
 
 

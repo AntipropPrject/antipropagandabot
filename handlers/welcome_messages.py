@@ -72,7 +72,6 @@ async def message_2(message: types.Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='first_button', value='Начнем')
     # запись значения в базу
     markup = ReplyKeyboardBuilder()
-
     markup.row(types.KeyboardButton(text="1️⃣ Специальная военная операция (СВО)"))
     markup.row(types.KeyboardButton(text="2️⃣ Война"))
     markup.row(types.KeyboardButton(text="Сейчас даже такое мнение "

@@ -1,33 +1,27 @@
 import asyncio
-import csv
 import os
-import shutil
-import zipfile
-from asyncio import sleep
 from datetime import datetime
+
 from aiogram import Router, F, Bot
 from aiogram import types
-from aiogram.dispatcher.filters.callback_data import CallbackData
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
+
 from Testbot import bot
 from bata import all_data
-from data_base.DBuse import sql_safe_select, sql_safe_update, sql_safe_insert, mongo_select_info, mongo_add_admin, \
-    mongo_pop_admin, mongo_select_admins, sql_delete, redis_just_one_write, redis_just_one_read, mongo_select, \
-    mongo_select_news, mongo_add_news, poll_write, mongo_pop_news, mongo_update_news
+from data_base.DBuse import sql_safe_select, sql_safe_update, sql_safe_insert, sql_delete, redis_just_one_write, \
+    redis_just_one_read, mongo_select_news, \
+    mongo_add_news, mongo_pop_news, mongo_update_news
 from day_func import day_count
 from export_to_csv.pg_mg import Backup
-
-from filters.isAdmin import IsAdmin, IsSudo, isKamaga
+from filters.isAdmin import IsAdmin, IsSudo, IsKamaga
 from handlers.admin_for_games import admin_home_games, admin_truthgame, admin_gam_tv
 from keyboards.admin_keys import main_admin_keyboard, middle_admin_keyboard, app_admin_keyboard, redct_text, \
-    redct_media, redct_games, settings_bot, redct_editors, spam_admin_keyboard, red_spam_admin_keyboard
+    redct_media, redct_games, settings_bot, spam_admin_keyboard
 from keyboards.new_admin_kb import secretrebornkb
 from log import logg
-from log.logg import get_error
-
 from states.admin_states import admin
 from stats.stat import mongo_select_stat, mongo_select_stat_all_user
 from utilts import Phoenix
@@ -35,12 +29,12 @@ from utilts import Phoenix
 router = Router()
 
 
-@router.message(IsAdmin(), commands=["admin"])
+@router.message(IsAdmin(level=['Редактирование', 'Маркетинг']), commands=["admin"])
 async def admin_home(message: types.Message, state: FSMContext):
     await state.clear()
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Вошел в режим администратора")
     await message.answer("Добро пожаловать в режим администрации. Что вам угодно сегодня?",
-                         reply_markup=main_admin_keyboard(message.from_user.id))
+                         reply_markup=await main_admin_keyboard(message.from_user.id))
     await state.set_state(admin.menu)
 
 
@@ -48,15 +42,15 @@ async def admin_home(message: types.Message, state: FSMContext):
 async def admin_home_main_menu(message: types.Message, state: FSMContext):
     await state.clear()
     await message.answer("Добро пожаловать в меню",
-                         reply_markup=main_admin_keyboard(message.from_user.id))
+                         reply_markup=await main_admin_keyboard(message.from_user.id))
     await state.set_state(admin.menu)
 
 
-@router.message(IsAdmin(), (F.text.contains('Возврат в главное меню')))
+@router.message(IsAdmin(level=['Редактирование', 'Маркетинг']), (F.text.contains('Возврат в главное меню')))
 async def menu(message: types.Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Вернулся в главное меню")
     await state.clear()
-    await message.answer("Чего изволите теперь?", reply_markup=main_admin_keyboard(message.from_user.id))
+    await message.answer("Чего изволите теперь?", reply_markup=await main_admin_keyboard(message.from_user.id))
     await state.set_state(admin.menu)
 
 
@@ -64,7 +58,7 @@ async def menu(message: types.Message, state: FSMContext):
 
 
 @router.message((F.text == 'Отменить изменения'), state=(
-        admin.confirm_add_text, admin.confirm_add_media, admin.confirm_edit_text, admin.confirm_edit_media, ))
+        admin.confirm_add_text, admin.confirm_add_media, admin.confirm_edit_text, admin.confirm_edit_media,))
 async def reset(message: Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Отменить изменения'")
     stt = await state.get_state()
@@ -86,7 +80,6 @@ async def reset(message: Message, state: FSMContext):
     else:
         await state.set_state(admin.home)
         await admin_home_main_menu(message, state)
-
 
 
 @router.message((F.text == 'Назад'), state="*")
@@ -151,21 +144,21 @@ async def cmd_cancel(message: types.Message, state: FSMContext):
 """***************************************MENU************************************************"""
 
 
-@router.message(IsAdmin(), ((F.text.contains('текст')) | (F.text.contains('текстом'))), state=admin.menu)
+@router.message(IsAdmin(level=['Редактирование']), ((F.text.contains('текст')) | (F.text.contains('текстом'))), state=admin.menu)
 async def select_text(message: types.Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Редактировать текст'")
     await message.answer("Выберите интересующий вас пункт меню", reply_markup=redct_text())
     await state.set_state(admin.edit_context)
 
 
-@router.message(IsAdmin(), ((F.text.contains('медиа'))), state=admin.menu)
+@router.message(IsAdmin(level=['Редактирование']), ((F.text.contains('медиа'))), state=admin.menu)
 async def select_text(message: types.Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Редактировать медиа'")
     await message.answer("Выберите интересующий вас пункт меню", reply_markup=redct_media())
     await state.set_state(admin.edit_context)
 
 
-@router.message(IsAdmin(), ((F.text.contains('игры')) | (F.text.contains('играми'))), state=admin.menu)
+@router.message(IsAdmin(level=['Редактирование']), ((F.text.contains('игры')) | (F.text.contains('играми'))), state=admin.menu)
 async def select_text(message: types.Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Редактировать игры'")
     await message.answer("Это меню еще не готово", reply_markup=redct_games())
@@ -178,14 +171,18 @@ async def suadmin_bot_edit(message: types.Message, state: FSMContext):
     await message.answer("Выберите интересующий вас пункт меню", reply_markup=await settings_bot())
     await state.set_state(admin.edit_context)
 
+
 """***************************************ADD_SPAM************************************************"""
+
 
 @router.message(IsSudo(), (F.text == 'Рассылка'), state=admin.edit_context)
 async def sadmins(message: Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Рассылка'")
     await state.clear()
-    await message.answer("Тут можно редактировать список новостей для рассылки, создать свою и отключить рассылку", reply_markup=await spam_admin_keyboard())
+    await message.answer("Тут можно редактировать список новостей для рассылки, создать свою и отключить рассылку",
+                         reply_markup=await spam_admin_keyboard())
     await state.set_state(admin.spam_menu)
+
 
 @router.message(IsSudo(), (F.text == 'Главные новости'), state=admin.spam_menu)
 async def sadmins(message: Message, state: FSMContext):
@@ -213,7 +210,10 @@ async def sadmins(message: Message, state: FSMContext):
     else:
         nmarkup = InlineKeyboardBuilder()
         nmarkup.button(text='Добавить новость', callback_data='add_main_news')
-        await message.answer("Упс.. Мне не удалось найти главные новости. Я добавил кнопочку под сообщением, чтобы вы смогли их добавить!", reply_markup=nmarkup.as_markup())
+        await message.answer(
+            "Упс.. Мне не удалось найти главные новости. Я добавил кнопочку под сообщением, чтобы вы смогли их добавить!",
+            reply_markup=nmarkup.as_markup())
+
 
 @router.message(IsSudo(), (F.text == 'Актуальные новости'), state=admin.spam_menu)
 async def sadmins(message: Message, state: FSMContext):
@@ -228,7 +228,7 @@ async def sadmins(message: Message, state: FSMContext):
         for spam in actual_news:
             count += 1
             nmarkup = InlineKeyboardBuilder()
-            #vote_cb.new(action='up', amount=amount))
+            # vote_cb.new(action='up', amount=amount))
             media = spam["media"]
             nmarkup.button(text='Удалить', callback_data=f'del_{media[:47]}_actu')
             nmarkup.button(text='Редактировать', callback_data=f'red_{media[:47]}_actu')
@@ -248,12 +248,15 @@ async def sadmins(message: Message, state: FSMContext):
         nmarkup = InlineKeyboardBuilder()
         nmarkup.button(text='Добавить новость', callback_data='add_actual_news')
         await message.answer(
-            "Упс.. Мне не удалось найти aктуальные новости. Я добавил кнопочку под сообщением, чтобы вы смогли их добавить!", reply_markup=nmarkup.as_markup())
+            "Упс.. Мне не удалось найти aктуальные новости. Я добавил кнопочку под сообщением, чтобы вы смогли их добавить!",
+            reply_markup=nmarkup.as_markup())
+
 
 @router.message(IsSudo(), (F.text == 'Создать рассылку'), state=admin.spam_menu)
 async def sadmins(message: Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Создать рассылку'")
     await message.answer("Это меню на данный момент не готово")
+
 
 @router.message(IsSudo(), (F.text == 'Включить рассылку 🔴'), state=admin.spam_menu)
 async def sadmins(message: Message, state: FSMContext):
@@ -261,7 +264,8 @@ async def sadmins(message: Message, state: FSMContext):
     await redis_just_one_write(f'Usrs: admins: spam: status:', '1')
     await message.answer("Запланированная рассылка была включена", reply_markup=await spam_admin_keyboard())
 
-#1
+
+# 1
 @router.message(IsSudo(), (F.text == 'Выключить рассылку 🟢'), state=admin.spam_menu)
 async def sadmins(message: Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Выключить рассылку'")
@@ -270,7 +274,7 @@ async def sadmins(message: Message, state: FSMContext):
     await message.answer("Запланированная рассылка была отключена", reply_markup=await spam_admin_keyboard())
 
 
-@router.callback_query(lambda call: call.data=="add_main_news" or call.data=="add_actual_news")
+@router.callback_query(lambda call: call.data == "add_main_news" or call.data == "add_actual_news")
 async def add_news(query: types.CallbackQuery, state: FSMContext):
     await state.update_data(coll=str(query.data))
     markup = ReplyKeyboardBuilder()
@@ -278,23 +282,24 @@ async def add_news(query: types.CallbackQuery, state: FSMContext):
     if str(query.data) == 'add_main_news':
         await state.set_state(admin.add_news_spam)
         await query.message.answer(
-                'Чтобы добавить главную новость'
-                ' -- отправьте мне медиафайл'
-                ' в одном сообщении и напишите описание', reply_markup=markup.as_markup(resize_keyboard=True)
+            'Чтобы добавить главную новость'
+            ' -- отправьте мне медиафайл'
+            ' в одном сообщении и напишите описание', reply_markup=markup.as_markup(resize_keyboard=True)
         )
     elif str(query.data) == 'add_actual_news':
         await state.set_state(admin.add_media_actula_spam)
         await query.message.answer(
-                'Чтобы добавить актуальную новость'
-                ' -- отправьте мне медиафайл'
-                ' в одном сообщении и напишите описание', reply_markup=markup.as_markup(resize_keyboard=True)
+            'Чтобы добавить актуальную новость'
+            ' -- отправьте мне медиафайл'
+            ' в одном сообщении и напишите описание', reply_markup=markup.as_markup(resize_keyboard=True)
         )
+
 
 @router.callback_query(lambda call: 'del' in call.data)
 async def delete_news(query: types.CallbackQuery, state: FSMContext):
-    #spam["media"][0]}_aclual
+    # spam["media"][0]}_aclual
     media_id = str(query.data[4:-5])
-    coll= query.data[-10:]
+    coll = query.data[-10:]
     await mongo_pop_news(media_id, coll=coll)
     await query.message.delete()
     await state.set_state(admin.spam_menu)
@@ -303,19 +308,21 @@ async def delete_news(query: types.CallbackQuery, state: FSMContext):
 
 @router.callback_query(lambda call: 'red' in call.data)
 async def update(query: types.CallbackQuery, state: FSMContext):
-    await state.update_data(media_id = str(query.data[4:-5]))
+    await state.update_data(media_id=str(query.data[4:-5]))
     await state.update_data(coll=str(query.data[-10:]))
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text='Назад'))
     await state.set_state(admin.update_news)
-    await query.message.answer("Отправьте мне новое медиа с описанием взамен старому", reply_markup=markup.as_markup(resize_keyboard=True))
+    await query.message.answer("Отправьте мне новое медиа с описанием взамен старому",
+                               reply_markup=markup.as_markup(resize_keyboard=True))
+
 
 @router.message(state=admin.update_news)
 async def update_news(message: Message, state: FSMContext):
     data = await state.get_data()
     print(data['media_id'])
     print(data['coll'])
-    caption= message.html_text
+    caption = message.html_text
     if message.content_type == 'photo':
         id = message.photo[0].file_id
         await mongo_update_news(m_id=data['media_id'], new_m_id=id, new_caption=caption, coll=data['coll'])
@@ -328,6 +335,7 @@ async def update_news(message: Message, state: FSMContext):
         await message.answer("Вы успешно изменили новость", reply_markup=await spam_admin_keyboard())
     else:
         await message.answer("Упс.. Кажется вы отправили не медиа, пожалуйста повторите попытку")
+
 
 @router.message(state=admin.add_media_actula_spam)
 async def add_news(message: Message, state: FSMContext):
@@ -346,7 +354,6 @@ async def add_news(message: Message, state: FSMContext):
         await message.answer("Напишите дату, на которую хотите запланировать рассылку в формате: YYYY.MM.DD")
     else:
         await message.answer("Упс.. Кажется вы отправили не медиа, пожалуйста повторите попытку")
-
 
 
 @router.message(state=admin.add_date_for_spam)
@@ -395,7 +402,6 @@ async def add_news(message: Message, state: FSMContext):
         await message.answer("Ошибка, вы указали неверный формат даты, пожулуйста повторите попытку")
 
 
-
 @router.message(state=admin.add_news_spam)
 async def add_news(message: Message, state: FSMContext):
     data = await state.get_data()
@@ -419,95 +425,12 @@ async def add_news(message: Message, state: FSMContext):
         await message.answer("Упс.. Кажется вы отправили не медиа, пожалуйста повторите попытку")
 
 
-
-
-
 """***************************************EDITORS************************************************"""
-
-
-@router.message(IsAdmin(), (F.text == 'Отменить'), state='*')
-async def sadmins(message: Message, state: FSMContext):
-    await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Отменить'")
-    await state.clear()
-    await message.answer("Выберите интересующий вас пункт меню", reply_markup=redct_editors())
-    await state.set_state(admin.editors_menu)
-
-
-@router.message(IsSudo(), (F.text == 'Редакторы бота'), state=admin.edit_context)
-async def sadmins(message: Message, state: FSMContext):
-    await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Редакторы бота'")
-    await state.clear()
-    await message.answer("Тут можно изменять список редакторов бота", reply_markup=redct_editors())
-    await state.set_state(admin.editors_menu)
-
-
-@router.message(IsSudo(), (F.text == 'Посмотреть редакторов'), state=admin.editors_menu)
-async def sadmins_select(message: Message):
-    await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Посмотреть редакторов'")
-    admins_list = await mongo_select_admins()
-
-    lst_id = []
-    lst_username = []
-    for id in admins_list:
-        lst_id.append(id['_id'])
-    for username in lst_id:
-        x = await mongo_select_info(username)
-        lst_username.append(x['username'])
-    for i in range(len(lst_id)):
-        await message.answer(f"Пользователь - @{lst_username[i]}\n"
-                             f"ID - <code>{lst_id[i]}</code>")
-
-
-@router.message(IsSudo(), (F.text == 'Добавить редактора'), state=admin.editors_menu)
-async def admins_add(message: Message, state: FSMContext):
-    await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Добавить редактора'")
-    await state.clear()
-    markup = ReplyKeyboardBuilder()
-    markup.row(types.KeyboardButton(text='Отменить'))
-    await message.answer("Напишите id пользователя", reply_markup=markup.as_markup(resize_keyboard=True))
-    await state.set_state(admin.add)
-
-
-@router.message(IsSudo(), state=admin.add)
-async def admins_add(message: Message, state: FSMContext):
-    # проверка есть ли человек в общей базе
-    id_admin = await mongo_select_info(message.text)
-    if message.text in str(id_admin):
-        await mongo_add_admin(message.text)
-        await message.answer("Пользователь добавлен")
-        await logg.admin_logs(message.from_user.id, message.from_user.username, f"Редактор -- '{message.text}' -- был добавлен")
-        await state.clear()
-    else:
-        await message.answer("Неправильный id")
-
-
-@router.message(IsSudo(), (F.text == 'Удалить редактора'), state=admin.editors_menu)
-async def admins_pop(message: Message, state: FSMContext):
-    await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Удалить редактора'")
-    await state.clear()
-    markup = ReplyKeyboardBuilder()
-    markup.row(types.KeyboardButton(text='Отменить'))
-    await message.answer("Напишите id пользователя", reply_markup=markup.as_markup(resize_keyboard=True))
-    await state.set_state(admin.pop)
-
-
-@router.message(IsSudo(), state=admin.pop)
-async def admins_pop(message: Message, state: FSMContext):
-    # проверка есть ли человек в общей базе
-    id_admin = await mongo_select_info(message.text)
-    if message.text in str(id_admin):
-        await mongo_pop_admin(message.text)
-        await logg.admin_logs(message.from_user.id, message.from_user.username, f"Редактор -- '{message.text}' -- был удалён")
-        await message.answer("Пользователь удалён", reply_markup=redct_editors())
-        await state.clear()
-    else:
-        await message.answer("Неправильный id пользователя")
-
 
 """***************************************TEXTS************************************************"""
 
 
-@router.message(IsAdmin(), (F.text == 'Добавить новый текст'), state=admin.edit_context)
+@router.message(IsAdmin(level=['Редактирование']), (F.text == 'Добавить новый текст'), state=admin.edit_context)
 async def text_hello(message: types.Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Добавить новый текст'")
     await state.set_state(admin.add_text)
@@ -533,7 +456,7 @@ async def get_text(message: Message, state: FSMContext):
                              'Пожалуйста, прочтите инструкцию.', reply_markup=middle_admin_keyboard())
 
 
-@router.message(IsAdmin(), (F.text == 'Редактировать текст'), state=admin.edit_context)
+@router.message(IsAdmin(level=['Редактирование']), (F.text == 'Редактировать текст'), state=admin.edit_context)
 async def text_edit_tag(message: types.Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Редактировать текст'")
     await state.set_state(admin.edit_text)
@@ -571,7 +494,7 @@ async def cancel(message: Message, state: FSMContext):
     await state.set_state(admin.edit_context)
 
 
-@router.message(IsAdmin(), (F.text == "Удалить текст"))
+@router.message(IsAdmin(level=['Редактирование']), (F.text == "Удалить текст"))
 async def delete_text_start(message: Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Удалить текст'")
     await state.set_state(admin.delete_text_test)
@@ -667,7 +590,7 @@ async def get_video(message: Message, state: FSMContext):
 
 
 # red video
-@router.message(IsAdmin(), (F.text == 'Редактировать медиа'), state=admin.edit_context)
+@router.message(IsAdmin(level=['Редактирование']), (F.text == 'Редактировать медиа'), state=admin.edit_context)
 async def media_edit_tag(message: types.Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Редактировать медиа'")
     await state.set_state(admin.edit_media_test)
@@ -717,7 +640,7 @@ async def updated_video_test(message: Message, state: FSMContext):
     await state.set_state(admin.confirm_edit_media)
 
 
-@router.message(IsAdmin(), (F.text == "Удалить медиа"), state=admin.edit_context)
+@router.message(IsAdmin(level=['Редактирование']), (F.text == "Удалить медиа"), state=admin.edit_context)
 async def delete_text_start(message: Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Удалить медиа'")
     await state.set_state(admin.delete_media_test)
@@ -808,7 +731,8 @@ async def approve_edit_text(message: Message, state: FSMContext):
 
 @router.message((F.text == 'Подтвердить'), state=admin.confirm_add_media)
 async def approve_media(message: Message, state: FSMContext):
-    await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Подтвердить' -- Медиа добавлено")
+    await logg.admin_logs(message.from_user.id, message.from_user.username,
+                          "Нажал(a) -- 'Подтвердить' -- Медиа добавлено")
     data = await state.get_data()
     text = await sql_safe_insert('assets', data)
     if text is not False:
@@ -822,7 +746,8 @@ async def approve_media(message: Message, state: FSMContext):
 
 @router.message((F.text == 'Подтвердить'), state=admin.confirm_add_text)
 async def approve_text(message: Message, state: FSMContext):
-    await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Подтвердить' -- Текст добавлен")
+    await logg.admin_logs(message.from_user.id, message.from_user.username,
+                          "Нажал(a) -- 'Подтвердить' -- Текст добавлен")
     data = await state.get_data()
     r = await sql_safe_insert('texts', data)
     if r != False:
@@ -955,7 +880,6 @@ async def import_csv(query: types.CallbackQuery, state: FSMContext):
 
 
 def count_visual(all_user, count):
-
     pr = round(int(count) / int(all_user) * 100)
     if pr <= 20:
         return f'<b>{pr}%</b> 🔴'
@@ -967,7 +891,6 @@ def count_visual(all_user, count):
         return f"<b>{pr}%</b> 🟡"
     elif pr >= 80:
         return f"<b>{pr}%</b> 🟢"
-
 
 
 @router.message((F.text == 'Статистика бота'), state=admin.edit_context)
@@ -988,9 +911,6 @@ async def statistics(message: Message, state: FSMContext):
                          f'Прошли Цели войны: {stat["war_aims"]} ({count_visual(all_user, stat["war_aims"])})\n'
                          f'Прошли Президента: {stat["putin"]} ({count_visual(all_user, stat["putin"])})\n'
                          f'Прошли до   конца: {stat["end"]} ({count_visual(all_user, stat["end"])})')
-
-
-
 
 
 @router.message(IsSudo(), commands=["reborn"], state=admin.edit_context)
@@ -1076,7 +996,6 @@ async def secretreborn(message: types.Message, state: FSMContext):
 async def clone_bot(message: Message, state: FSMContext):
     await bot.send_message(784006905, "/writesender")
 
-
     from data_base.DBuse import data_getter
     counter = 0
 
@@ -1098,7 +1017,7 @@ async def clone_bot(message: Message, state: FSMContext):
         await asyncio.sleep(1)
 
 
-@router.message(IsAdmin(), (F.text == 'Подготовить бота к клонированию'))
+@router.message(IsSudo(), (F.text == 'Подготовить бота к клонированию'))
 async def clone_bot_1(message: Message, state: FSMContext):
     await bot.send_message(784006905, "/writreciver")
     con = all_data().get_postg()
@@ -1113,7 +1032,8 @@ async def clone_bot_1(message: Message, state: FSMContext):
                             )''')
     logg.get_info("table assets is created".upper())
 
-@router.message(isKamaga(), content_types='video')
+
+@router.message(IsKamaga(), content_types='video')
 async def clone_bot_2(message: Message, state: FSMContext):
     video_id = message.video.file_id
     caption = message.caption
@@ -1121,11 +1041,9 @@ async def clone_bot_2(message: Message, state: FSMContext):
     await message.answer(f"Фото {caption} добавлено в базу данных. Ассет: {video_id}")
 
 
-@router.message(isKamaga(), content_types='photo')
+@router.message(IsKamaga(), content_types='photo')
 async def clone_bot_3(message: Message, state: FSMContext):
     photo_id = message.photo[-1].file_id
     caption = message.caption
     await sql_safe_insert('new_assets', {'t_id': photo_id, 'name': caption})
     await message.answer(f"Фото {caption} добавлено в базу данных. Ассет: {photo_id}")
-
-
