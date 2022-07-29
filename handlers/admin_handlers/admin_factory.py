@@ -26,7 +26,7 @@ async def canccel(message: Message, state: FSMContext):
     await state.set_state(admin.editors_menu)
 
 
-@router.message(IsSudo(), (F.text == 'Редакторы бота'), state=admin.edit_context)
+@router.message(IsSudo(), (F.text == 'Администраторы'), state=admin.edit_context)
 async def sadmins(message: Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Редакторы бота'")
     await state.clear()
@@ -34,7 +34,7 @@ async def sadmins(message: Message, state: FSMContext):
     await state.set_state(admin.editors_menu)
 
 
-@router.message(IsSudo(), (F.text == 'Посмотреть редакторов'), state=admin.editors_menu)
+@router.message(IsSudo(), (F.text == 'Посмотреть администраторов'), state=admin.editors_menu)
 async def sadmins_select(message: Message):
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Посмотреть редакторов'")
     admins_list = await mongo_all_admins()
@@ -48,7 +48,7 @@ async def sadmins_select(message: Message):
         await message.answer(text)
 
 
-@router.message(IsSudo(), (F.text == 'Добавить редактора'), state=admin.editors_menu)
+@router.message(IsSudo(), (F.text == 'Добавить администратора'), state=admin.editors_menu)
 async def admins_add(message: Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Добавить редактора'")
     await state.clear()
@@ -93,7 +93,7 @@ async def admins_add(message: Message, state: FSMContext):
         await message.answer("Этого пользователя нет в основной таблице; Пусть напишет /start")
 
 
-@router.message(IsSudo(), (F.text == 'Удалить редактора'), state=admin.editors_menu)
+@router.message(IsSudo(), (F.text == 'Удалить администратора'), state=admin.editors_menu)
 async def admins_pop(message: Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Удалить редактора'")
     await state.clear()

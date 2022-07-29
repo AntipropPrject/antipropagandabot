@@ -19,6 +19,7 @@ async def marketing_menu(message: Message, state: FSMContext):
            '\n- Проверить статистику по имеющимся счетчикам\n\nУдачи!'
     nmarkup.row(types.KeyboardButton(text="Получить новую ссылку"))
     nmarkup.row(types.KeyboardButton(text="Проверить все ссылки"))
+    nmarkup.row(types.KeyboardButton(text="Вернуться в главное меню"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -55,7 +56,6 @@ async def marketing_all_links(message: Message, bot: Bot, state: FSMContext):
     count, text = 0, ''
     for company in companies:
         count += 1
-        print(count)
         bot_link = f'https://t.me/{(await bot.get_me()).username.replace(" ", "_")}?start={company[0]}'
         text = text + '-------------------------------------\n' + \
                f'<code>Название кампании: {company[1]}\n' \

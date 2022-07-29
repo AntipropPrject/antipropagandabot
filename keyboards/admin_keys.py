@@ -49,9 +49,9 @@ def games_keyboard(t_id=None):
 
 def redct_editors():
     markup = ReplyKeyboardBuilder()
-    markup.row(types.KeyboardButton(text='Посмотреть редакторов'))
-    markup.row(types.KeyboardButton(text='Добавить редактора'))
-    markup.row(types.KeyboardButton(text='Удалить редактора'))
+    markup.row(types.KeyboardButton(text='Посмотреть администраторов'))
+    markup.row(types.KeyboardButton(text='Добавить администратора'))
+    markup.row(types.KeyboardButton(text='Удалить администратора'))
     markup.row(types.KeyboardButton(text='Назад'))
     return markup.as_markup(resize_keyboard=True)
 
@@ -95,7 +95,7 @@ async def settings_bot():
         pass
     print(status)
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Редакторы бота"))
+    nmarkup.row(types.KeyboardButton(text="Администраторы"))
     nmarkup.row(types.KeyboardButton(text="Экспорт"))
     nmarkup.row(types.KeyboardButton(text="Импорт"))
     nmarkup.row(types.KeyboardButton(text="Статистика бота"))
