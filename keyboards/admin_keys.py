@@ -4,7 +4,7 @@ from aiogram import types
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from bata import all_data
-from data_base.DBuse import poll_get, redis_just_one_read, mongo_select_admin_levels
+from data_base.DBuse import redis_just_one_read, mongo_select_admin_levels
 
 
 async def main_admin_keyboard(t_id=None):
@@ -47,6 +47,7 @@ def games_keyboard(t_id=None):
     nmarkup.adjust(2)
     return nmarkup.as_markup(resize_keyboard=True, input_field_placeholder=random.choice(usless_list))
 
+
 def redct_editors():
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text='Посмотреть администраторов'))
@@ -54,6 +55,7 @@ def redct_editors():
     markup.row(types.KeyboardButton(text='Удалить администратора'))
     markup.row(types.KeyboardButton(text='Назад'))
     return markup.as_markup(resize_keyboard=True)
+
 
 def redct_media():
     nmarkup = ReplyKeyboardBuilder()
@@ -72,6 +74,7 @@ def redct_text():
     nmarkup.row(types.KeyboardButton(text="Возврат в главное меню"))
     return nmarkup.as_markup(resize_keyboard=True)
 
+
 def game_keys():
     nmrkup = ReplyKeyboardBuilder()
     nmrkup.row(types.KeyboardButton(text="Добавить сюжет"))
@@ -80,12 +83,12 @@ def game_keys():
     nmrkup.row(types.KeyboardButton(text="Назад"))
     return nmrkup.as_markup(resize_keyboard=True)
 
+
 def redct_games():
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Нужно придумать кнопки"))
     nmarkup.row(types.KeyboardButton(text="Возврат в главное меню"))
     return nmarkup.as_markup(resize_keyboard=True)
-
 
 
 async def settings_bot():
@@ -117,12 +120,14 @@ def middle_admin_keyboard():
     nmarkup.row(types.KeyboardButton(text="Назад"))
     return nmarkup.as_markup(resize_keyboard=True)
 
+
 def app_admin_keyboard():
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Отменить изменения"))
     nmarkup.row(types.KeyboardButton(text="Подтвердить"))
     nmarkup.adjust(1, 1)
     return nmarkup.as_markup(resize_keyboard=True)
+
 
 async def spam_admin_keyboard():
     try:
@@ -152,10 +157,22 @@ def red_spam_admin_keyboard():
     nmarkup.row(types.KeyboardButton(text="Назад"))
     return nmarkup.as_markup(resize_keyboard=True)
 
+
 def admin_games_keyboard():
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Добавить сюжет"))
     nmarkup.row(types.KeyboardButton(text="Удалить сюжет"))
     nmarkup.row(types.KeyboardButton(text="Редактировать сюжет"))
     nmarkup.row(types.KeyboardButton(text="Назад"))
+    return nmarkup.as_markup(resize_keyboard=True)
+
+
+def secretrebornkb():
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Скачать медиа"))
+    nmarkup.row(types.KeyboardButton(text="Починить медиа"))
+    nmarkup.row(types.KeyboardButton(text="Получить все медиа"))
+    nmarkup.row(types.KeyboardButton(text="Принять медиа"))
+    nmarkup.adjust(2)
+    nmarkup.row(types.KeyboardButton(text="Вернуться в менее опасное место"))
     return nmarkup.as_markup(resize_keyboard=True)

@@ -1,10 +1,11 @@
 import asyncio
-from aiogram import Router
-from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError
-from bata import all_data
-from data_base.DBuse import mongo_update_viewed_news
 from datetime import datetime, timedelta
 
+from aiogram import Router
+from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError
+
+from bata import all_data
+from data_base.DBuse import mongo_update_viewed_news
 
 router = Router()
 data = all_data()
@@ -74,10 +75,8 @@ async def send_spam(user_id, media_id, caption):
                 await bot.send_photo(chat_id=int(user_id), photo=str(media_id), caption=str(caption))
         else:
             try:
-                await bot.send_video(chat_id=int((user_id)), video=(media_id))
+                await bot.send_video(chat_id=int(user_id), video=media_id)
             except TelegramBadRequest:
-                await bot.send_photo(chat_id=int(user_id), photo=(media_id))
-    except TelegramForbiddenError as er:
+                await bot.send_photo(chat_id=int(user_id), photo=media_id)
+    except TelegramForbiddenError:
         print(f"ПОЛЬЗОВАТЕЛЬ {user_id} -- Заблокировал бота")
-
-

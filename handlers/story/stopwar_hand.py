@@ -1,17 +1,19 @@
 import asyncio
 from datetime import datetime
+
 from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.dispatcher.fsm.state import StatesGroup, State
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-from handlers.main_menu_hand import mainmenu_really_menu
+from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
+
 from data_base.DBuse import sql_safe_select, redis_just_one_write, redis_just_one_read, \
     mongo_select_info, mongo_update_end, del_key
+from handlers.story.main_menu_hand import mainmenu_really_menu
 from log import logg
 from states.main_menu_states import MainMenuStates
-from stats.stat import mongo_update_stat, mongo_update_stat_new
 from utilts import simple_media
 
 
@@ -38,7 +40,7 @@ async def stopwar_rather_yes(message: Message):
     nmarkup.add(types.KeyboardButton(text="Не согласен(а) 🙅"))
     try:
         await message.answer_photo(photo, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
-    except:
+    except Exception:
         await message.answer_video(photo, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -51,7 +53,7 @@ async def stopwar_idk(message: Message):
     nmarkup.add(types.KeyboardButton(text="Не согласен(а) 🙅"))
     try:
         await message.answer_photo(photo, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
-    except:
+    except Exception:
         await message.answer_video(photo, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -186,7 +188,7 @@ async def manipulation_argument(message: Message, state: FSMContext):
 
 
 @router.message((F.text == "Следующий аргумент 👉"), state=StopWarState.arg_3, flags=flags)
-async def manipulation_argument(message: Message, state: FSMContext):
+async def manipulation_argument(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_fourth_manipulation_argument'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(
@@ -207,7 +209,7 @@ async def stopwar_I_understand_you_fear(message: Message, state: FSMContext):
 
 
 @router.message((F.text == "Продолжай ⏳"), state=StopWarState.next_1, flags=flags)
-async def stopwar_like_this_in_a_revolution(message: Message, state: FSMContext):
+async def stopwar_like_this_in_a_revolution(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_like_this_in_a_revolution'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Согласен(а), важно, чтобы россияне поняли — война им не нужна 🕊"))
@@ -216,7 +218,7 @@ async def stopwar_like_this_in_a_revolution(message: Message, state: FSMContext)
 
 
 @router.message((F.text == "Я так и знал(а). Правдобот, ты — проект США 🇺🇸 и хочешь развалить Россию"), flags=flags)
-async def stopwar_made_a_big_team(message: Message, state: FSMContext):
+async def stopwar_made_a_big_team(message: Message):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='after_argum', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_made_a_big_team'})
     nmarkup = ReplyKeyboardBuilder()
@@ -226,7 +228,7 @@ async def stopwar_made_a_big_team(message: Message, state: FSMContext):
 
 
 @router.message((F.text == "Да, закончим разговор, прощай! 🖕"), flags=flags)
-async def stopwar_I_told_you_everything(message: Message, bot: Bot, state: FSMContext):
+async def stopwar_I_told_you_everything(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_I_told_you_everything'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Я передумал(а). Важно, чтобы россияне поняли — война им не нужна 🕊"))
@@ -259,7 +261,7 @@ async def stopwar_lets_fight(message: Message, bot: Bot):
     else:
         days_pr = 'дней,'
     act_time = str_date.replace(',', days_pr)
-    if user_info['datetime_end'] == None:  # c is не работает так как объект находится не в озу а в базе
+    if user_info['datetime_end'] is None:  # c is не работает так как объект находится не в озу а в базе
         sec = 5
         markup = ReplyKeyboardBuilder()
         markup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))

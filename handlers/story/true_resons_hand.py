@@ -1,4 +1,5 @@
 import asyncio
+
 from aiogram import Router, F
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
@@ -6,16 +7,17 @@ from aiogram.dispatcher.fsm.state import StatesGroup, State
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
+from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
+
 from data_base.DBuse import data_getter, sql_safe_select, redis_just_one_write, poll_write, mongo_game_answer
 from data_base.DBuse import redis_delete_from_list
 from filters.MapFilters import OperationWar, WarReason
-from handlers import anti_prop_hand
-from handlers.nazi_hand import NaziState
-from handlers.preventive_strike import PreventStrikeState
-from handlers.putin_hand import StateofPutin
+from handlers.story import anti_prop_hand
+from handlers.story.nazi_hand import NaziState
+from handlers.story.preventive_strike import PreventStrikeState
+from handlers.story.putin_hand import StateofPutin
 from resources.all_polls import welc_message_one
 from states.donbass_states import donbass_state
-from stats.stat import mongo_update_stat, mongo_update_stat_new
 from utilts import simple_media
 
 
@@ -224,7 +226,7 @@ async def reasons_biopigeons(message: Message):
 """@router.message(WarReason(answer="🗺 Вернуть России исторические земли / Объединить русский народ"))
 async def reasons_take_lands(message: Message, state: FSMContext):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Start_answers: Invasion:', 
-                                                                        "🗺 Вернуть России исторические земли / Объединить русский народ")
+                                          "🗺 Вернуть России исторические земли / Объединить русский народ")
     text = "Кусок про захват территорий, но мы его не выводим"
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Кнопка'))
@@ -233,7 +235,8 @@ async def reasons_take_lands(message: Message, state: FSMContext):
 
 @router.message(WarReason(answer="Сменить власть в Украине"))
 async def reasons_new_power(message: Message, state: FSMContext):
-    await redis_delete_from_list(f'Usrs: {message.from_user.id}: Start_answers: Invasion:', "♻️ Сменить власть в Украине")
+    await redis_delete_from_list(f'Usrs: {message.from_user.id}: Start_answers: Invasion:',
+     "♻️ Сменить власть в Украине")
     text = "Кусок про смену власти в Украине. Но мы его не выводим."
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Кнопка'))
@@ -255,10 +258,11 @@ async def reasons_normal_game_start(message: Message, state: FSMContext):
                 flags=flags)
 async def reasons_normal_game_question(message: Message, state: FSMContext):
     if 'Начнем! 🚀' in message.text:
-        await mongo_update_stat_new(tg_id=message.from_user.id, column='normal_game_stats', value='Начали и НЕ закончили')
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='normal_game_stats',
+                                    value='Начали и НЕ закончили')
     try:
         count = (await state.get_data())['ngamecount']
-    except:
+    except Exception:
         count = 0
     how_many_rounds = (await data_getter("SELECT COUNT (*) FROM public.normal_game"))[0][0]
     print(f"В таблице {how_many_rounds} записей, а вот счетчик сейчас {count}")
@@ -439,8 +443,6 @@ async def reasons_why_only_rus(message: Message):
 
 @router.message((F.text == "Какие результаты? 📊"), state=TruereasonsState.final, flags=flags)
 async def reasons_eritrea(message: Message, state: FSMContext):
-    text = await sql_safe_select('text', 'texts', {'name': 'reasons_eritrea'})
-    media = await sql_safe_select('t_id', 'assets', {'name': 'reasons_eritrea'})
     await state.set_state(TruereasonsState.final)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Это показательный пример... 🙁"))
@@ -464,8 +466,6 @@ async def reasons_propaganda_man(message: Message):
 
 @router.message((F.text == "Давай"), state=TruereasonsState.final, flags=flags)
 async def reasons_celeb_video(message: Message, state: FSMContext):
-    text = await sql_safe_select('text', 'texts', {'name': 'reasons_celeb_video'})
-    media = await sql_safe_select('t_id', 'assets', {'name': 'reasons_celeb_video'})
     await state.set_state(TruereasonsState.final)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="..."))

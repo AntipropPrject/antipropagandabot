@@ -1,4 +1,3 @@
-from aiogram import Bot
 from aiogram.dispatcher.filters import BaseFilter
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message
@@ -6,8 +5,8 @@ from typing import Union, Dict, Any
 
 import bata
 from data_base.DBuse import poll_get, redis_just_one_read, redis_check
-from handlers import true_resons_hand
-from resources.all_polls import welc_message_one, nazizm, donbass_first_poll
+from handlers.story import true_resons_hand
+from resources.all_polls import welc_message_one
 
 
 class DonbassOptionsFilter(BaseFilter):

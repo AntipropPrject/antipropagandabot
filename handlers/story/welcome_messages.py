@@ -1,10 +1,13 @@
 import asyncio
+
 from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.filters.command import CommandStart, CommandObject
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
+from bot_statistics.stat import mongo_stat, mongo_update_stat, mongo_stat_new, mongo_update_stat_new
+
 from bata import all_data
 from data_base.DBuse import poll_write, sql_safe_select, mongo_add, mongo_select, redis_just_one_write, \
     mongo_user_info, redis_just_one_read, advertising_value
@@ -12,8 +15,6 @@ from day_func import day_count
 from resources.all_polls import web_prop, welc_message_one, people_prop
 from states import welcome_states
 from states.antiprop_states import propaganda_victim
-from stats.stat import mongo_stat, mongo_update_stat, mongo_stat_new, mongo_update_stat_new
-
 
 flags = {"throttling_key": "True"}
 router = Router()
@@ -164,7 +165,9 @@ async def message_6(message: types.Message, state: FSMContext):
     await state.set_state(welcome_states.start_dialog.dialogue_6)
 
 
-@router.message((F.text.contains('интересоваться после 24') | F.text.contains('Скорее да') | F.text.contains('продолжим')), welcome_states.start_dialog.dialogue_6, flags=flags)
+@router.message(
+    (F.text.contains('интересоваться после 24') | F.text.contains('Скорее да') | F.text.contains('продолжим')),
+    welcome_states.start_dialog.dialogue_6, flags=flags)
 async def message_6to7(message: types.Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Покажи варианты ✍"))
@@ -176,7 +179,7 @@ async def message_6to7(message: types.Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='interest_politics', value=message.text)
 
 
-@router.message((F.text.contains('Скорее нет  🙅‍')),welcome_states.start_dialog.dialogue_6, flags=flags)
+@router.message((F.text.contains('Скорее нет  🙅‍')), welcome_states.start_dialog.dialogue_6, flags=flags)
 async def message_dfwd(message: types.Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Хорошо, продолжим 👌"))
@@ -186,7 +189,8 @@ async def message_dfwd(message: types.Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='interest_politics', value=message.text)
 
 
-@router.message((F.text.contains('Хорошо, продолжим')) | (F.text.contains('Покажи варианты')), state=welcome_states.start_dialog.dialogue_extrafix, flags=flags)  # Сохраняю 1 вопрос
+@router.message((F.text.contains('Хорошо, продолжим')) | (F.text.contains('Покажи варианты')),
+                state=welcome_states.start_dialog.dialogue_extrafix, flags=flags)  # Сохраняю 1 вопрос
 async def message_7(message: types.Message, state: FSMContext):
     markup = ReplyKeyboardBuilder()
     markup.add(types.KeyboardButton(text="Продолжить"))
@@ -212,9 +216,10 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FS
     elif {0, 1, 2, 3, 5, 8}.isdisjoint(set(lst_answers)) is False:  # red
         await mongo_update_stat_new(tg_id=poll_answer.user.id, column='war_aims_gen', value='Хотя бы один красный')
     elif {4, 6}.isdisjoint(set(lst_answers)) is False:  # green
-        await mongo_update_stat_new(tg_id=poll_answer.user.id, column='war_aims_gen', value='Есть зелёные и нет красных')
+        await mongo_update_stat_new(tg_id=poll_answer.user.id, column='war_aims_gen',
+                                    value='Есть зелёные и нет красных')
 
-    await mongo_update_stat_new(tg_id=poll_answer.user.id,column='war_aims_ex', value=lst_str)
+    await mongo_update_stat_new(tg_id=poll_answer.user.id, column='war_aims_ex', value=lst_str)
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Да, полностью доверяю ✅"),
                types.KeyboardButton(text="Нет, не верю ни слову ⛔"))
@@ -268,7 +273,8 @@ async def poll_answer_handler_tho(poll_answer: types.PollAnswer, bot: Bot, state
     elif {2, 3, 4, 5, 7}.isdisjoint(set(lst_answers)) is False:  # red
         await mongo_update_stat_new(tg_id=poll_answer.user.id, column='web_prop_gen', value='Хотя бы один красный')
     elif {1, 6}.isdisjoint(set(lst_answers)) is False:  # green
-        await mongo_update_stat_new(tg_id=poll_answer.user.id, column='web_prop_gen', value='Есть зелёные и нет красных')
+        await mongo_update_stat_new(tg_id=poll_answer.user.id, column='web_prop_gen',
+                                    value='Есть зелёные и нет красных')
     if 'Википедия' not in lst_str:
         await mongo_update_stat_new(tg_id=poll_answer.user.id, column='why_not_wiki', value=lst_str)
 
@@ -311,7 +317,7 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
     else:
         await mongo_update_stat_new(tg_id=poll_answer.user.id, column='prop_gen', value='Нет ни красных, ни Путина')
 
-    await mongo_update_stat_new(tg_id=poll_answer.user.id,column='prop_ex', value=lst_str)
+    await mongo_update_stat_new(tg_id=poll_answer.user.id, column='prop_ex', value=lst_str)
     text = await sql_safe_select("text", "texts", {"name": "start_thank_you"})
     await bot.send_message(poll_answer.user.id, text)
     await mongo_update_stat(poll_answer.user.id, 'start')
@@ -326,8 +332,8 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
             or ({0, 2, 3, 4, 5, 7}.isdisjoint(answer_4) is False
                 or {1, 2, 3, 4, 5}.isdisjoint(answer_5) is False
                 or 'Да, полностью доверяю ✅' in answer_3) \
-                or 'Скорее да 👍' in answer_3 \
-                or 'Скорее нет 👎' in answer_3:
+            or 'Скорее да 👍' in answer_3 \
+            or 'Скорее нет 👎' in answer_3:
 
         await redis_just_one_write(f'Usrs: {poll_answer.user.id}: INFOState:', 'Жертва пропаганды')
         await mongo_update_stat(poll_answer.user.id, column='faith', value='victim', options='$set')

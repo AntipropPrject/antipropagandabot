@@ -11,19 +11,19 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 from Testbot import bot
 from bata import all_data
+from bot_statistics.stat import mongo_select_stat, mongo_select_stat_all_user
 from data_base.DBuse import sql_safe_select, sql_safe_update, sql_safe_insert, sql_delete, redis_just_one_write, \
     redis_just_one_read, mongo_select_news, \
     mongo_add_news, mongo_pop_news, mongo_update_news
 from day_func import day_count
 from export_to_csv.pg_mg import Backup
 from filters.isAdmin import IsAdmin, IsSudo, IsKamaga
-from handlers.admin_for_games import admin_home_games, admin_truthgame, admin_gam_tv
+from handlers.admin_handlers.admin_for_games import admin_home_games, admin_truthgame, admin_gam_tv
 from keyboards.admin_keys import main_admin_keyboard, middle_admin_keyboard, app_admin_keyboard, redct_text, \
     redct_media, redct_games, settings_bot, spam_admin_keyboard
-from keyboards.new_admin_kb import secretrebornkb
+from keyboards.admin_keys import secretrebornkb
 from log import logg
 from states.admin_states import admin
-from stats.stat import mongo_select_stat, mongo_select_stat_all_user
 from utilts import Phoenix
 
 router = Router()
@@ -144,7 +144,8 @@ async def cmd_cancel(message: types.Message, state: FSMContext):
 """***************************************MENU************************************************"""
 
 
-@router.message(IsAdmin(level=['Редактирование']), ((F.text.contains('текст')) | (F.text.contains('текстом'))), state=admin.menu)
+@router.message(IsAdmin(level=['Редактирование']), ((F.text.contains('текст')) | (F.text.contains('текстом'))),
+                state=admin.menu)
 async def select_text(message: types.Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Редактировать текст'")
     await message.answer("Выберите интересующий вас пункт меню", reply_markup=redct_text())
@@ -158,7 +159,8 @@ async def select_text(message: types.Message, state: FSMContext):
     await state.set_state(admin.edit_context)
 
 
-@router.message(IsAdmin(level=['Редактирование']), ((F.text.contains('игры')) | (F.text.contains('играми'))), state=admin.menu)
+@router.message(IsAdmin(level=['Редактирование']), ((F.text.contains('игры')) | (F.text.contains('играми'))),
+                state=admin.menu)
 async def select_text(message: types.Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Редактировать игры'")
     await message.answer("Это меню еще не готово", reply_markup=redct_games())

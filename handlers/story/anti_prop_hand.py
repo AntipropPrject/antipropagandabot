@@ -7,17 +7,16 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
+from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
 
 from bata import all_data
-from data_base.DBuse import poll_get, redis_just_one_read, sql_select_row_like, mongo_game_answer, \
-    redis_check
+from data_base.DBuse import poll_get, redis_just_one_read, sql_select_row_like, mongo_game_answer
 from data_base.DBuse import sql_safe_select, data_getter
 from filters.MapFilters import WebPropagandaFilter, TVPropagandaFilter, PplPropagandaFilter, \
-        PoliticsFilter, WikiFilter, YandexPropagandaFilter
-from handlers import true_resons_hand
+    PoliticsFilter, WikiFilter, YandexPropagandaFilter
+from handlers.story import true_resons_hand
 from keyboards.map_keys import antip_why_kb, antip_killme_kb
 from states.antiprop_states import propaganda_victim
-from stats.stat import mongo_update_stat, mongo_update_stat_new
 from utilts import simple_media, dynamic_media_answer
 
 flags = {"throttling_key": "True"}
@@ -591,8 +590,9 @@ async def antip_truth_game_start(message: Message, state: FSMContext):
 
 @router.message((F.text == "Начнем! 🚀") | (F.text == "Продолжаем, давай еще! 👉"), flags=flags)
 async def antip_truth_game_start_question(message: Message, state: FSMContext):
-    if message.text =='Начнем! 🚀':
-        await mongo_update_stat_new(tg_id=message.from_user.id, column='game_false_or_true', value='Начали и НЕ закончили')
+    if message.text == 'Начнем! 🚀':
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='game_false_or_true',
+                                    value='Начали и НЕ закончили')
     try:
         count = (await state.get_data())['gamecount']
     except:

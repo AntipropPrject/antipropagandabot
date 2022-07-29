@@ -66,4 +66,3 @@ async def marketing_all_links(message: Message, bot: Bot, state: FSMContext):
         if count == 3 or company == companies[-1]:
             await message.answer(text)
             count, text = 0, ''
-
