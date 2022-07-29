@@ -49,7 +49,7 @@ async def marketing_new_link(message: Message, bot: Bot, state: FSMContext):
                          reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(state=admin.marketing)
+@router.message((F.text == "Проверить все ссылки"), state=admin.marketing)
 async def marketing_all_links(message: Message, bot: Bot, state: FSMContext):
     query = "SELECT * FROM dumbstats.advertising WHERE id like 'adv_%' ORDER BY id"
     companies = await data_getter(query)
