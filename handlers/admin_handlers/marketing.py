@@ -19,7 +19,7 @@ async def marketing_menu(message: Message, state: FSMContext):
            '\n- Проверить статистику по имеющимся счетчикам\n\nУдачи!'
     nmarkup.row(types.KeyboardButton(text="Получить новую ссылку"))
     nmarkup.row(types.KeyboardButton(text="Проверить все ссылки"))
-    nmarkup.row(types.KeyboardButton(text="Возврат в главное меню"))
+    nmarkup.row(types.KeyboardButton(text="Вернуться в главное меню"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -44,6 +44,7 @@ async def marketing_new_link(message: Message, bot: Bot, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Получить новую ссылку"))
     nmarkup.row(types.KeyboardButton(text="Проверить все ссылки"))
+    nmarkup.row(types.KeyboardButton(text="Вернуться в главное меню"))
     await state.set_state(admin.marketing)
     await message.answer(f'Создание ссылки под названием {label} успешно завершено:\n{bot_link}',
                          reply_markup=nmarkup.as_markup(resize_keyboard=True))

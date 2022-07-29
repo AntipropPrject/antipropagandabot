@@ -46,7 +46,7 @@ async def admin_home_main_menu(message: types.Message, state: FSMContext):
     await state.set_state(admin.menu)
 
 
-@router.message(IsAdmin(level=['Редактирование', 'Маркетинг']), (F.text.contains('Возврат в главное меню')))
+@router.message(IsAdmin(level=['Редактирование', 'Маркетинг']), (F.text.contains('в главное меню')))
 async def menu(message: types.Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Вернулся в главное меню")
     await state.clear()
