@@ -73,6 +73,21 @@ async def sql_safe_select(column, table_name, condition_dict):
         return False
 
 
+async def sql_safe_insert(table_name, values_dict: dict):
+    try:
+        safe_query = sql.SQL("INSERT INTO {} ({}) VALUES ({});").format(sql.Identifier(table_name),
+                                                                                  sql.SQL(', ').join(map(sql.Identifier,
+                                                                                                         values_dict)),
+                                                                                     sql.SQL(", ").join(map(sql.Placeholder,
+                                                                                                            values_dict)))
+        with get_cursor() as cur:
+            cur.execute(safe_query, values_dict)
+    except (psycopg2.Error, IndexError) as error:
+        await logg.get_error(f"{error}", __file__)
+        return False
+
+
+
 async def sql_safe_select_like(column1, column2, table_name, first_condition, second_condition):
     try:
         safe_query = (f"SELECT {column1}"
@@ -180,6 +195,9 @@ async def sql_add_value(table_name, column, cond_dict):
     print(a)
 
 
+
+
+
 async def poll_delete_value(key, value):
     try:
         return all_data().get_data_red().delete(value)
@@ -187,9 +205,9 @@ async def poll_delete_value(key, value):
         await logg.get_error(f"{error}", __file__)
 
 
-async def sql_safe_insert(table_name, data_dict):
+async def sql_safe_insert(schema, table_name, data_dict):
     try:
-        safe_query = sql.SQL("INSERT INTO {} ({}) VALUES ({});").format(sql.Identifier(table_name), sql.SQL(', ').join(
+        safe_query = sql.SQL("INSERT INTO {}.{} ({}) VALUES ({});").format(sql.Identifier(schema), sql.Identifier(table_name), sql.SQL(', ').join(
                 map(sql.Identifier, data_dict)), sql.SQL(", ").join(map(sql.Placeholder, data_dict)), )
         with get_cursor() as cur:
             cur.execute(safe_query, data_dict)
@@ -401,18 +419,28 @@ async def mongo_pop(tg_id, value_dict):
 
 
 # admin
-async def mongo_add_admin(tg_id):
+async def mongo_add_admin(tg_id, level: str):
     try:
         client = all_data().get_mongo()
         database = client.database
         collection = database['admins']
-        user_answer = {'_id': int(tg_id)}
-        await collection.insert_one(user_answer)
+        insert_dict = {'_id': int(tg_id), 'access': [level]}
+        await collection.insert_one(insert_dict)
     except Exception as error:
         await logg.get_error(f"mongo_add_admin | {error}", __file__)
 
 
-async def mongo_select_admins():
+async def mongo_edit_admin(tg_id, level: str):
+    try:
+        client = all_data().get_mongo()
+        database = client.database
+        collection = database['admins']
+        await collection.update_one({'_id': int(tg_id)}, {'$addToSet': {'access': level}})
+    except Exception as error:
+        await logg.get_error(f"mongo_EDIT_admin | {error}", __file__)
+
+
+async def mongo_all_admins():
     try:
         client = all_data().get_mongo()
         database = client.database
@@ -425,12 +453,30 @@ async def mongo_select_admins():
         await logg.get_error(f"mongo_select_admins | {error}", __file__)
 
 
-async def mongo_pop_admin(tg_id):
+async def mongo_select_admin_levels(tg_id: int):
     try:
         client = all_data().get_mongo()
         database = client.database
         collection = database['admins']
-        await collection.delete_one({'_id': int(tg_id)})
+        admin_info = await collection.find_one({'_id': int(tg_id)})
+        if admin_info is not None:
+            levels = admin_info['access']
+            return levels
+        else:
+            return False
+    except Exception as error:
+        return False
+
+
+async def mongo_pop_admin_level(tg_id, level):
+    try:
+        client = all_data().get_mongo()
+        database = client.database
+        collection = database['admins']
+        if len(await mongo_select_admin_levels(tg_id)) <= 1:
+            await collection.delete_one({'_id': int(tg_id)})
+        else:
+            await collection.update_one({'_id': int(tg_id)}, {'$pull': {'access': level}})
     except Exception as error:
         await logg.get_error(f"mongo_pop_admin | {error}", __file__)
 
