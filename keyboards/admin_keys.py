@@ -43,7 +43,7 @@ def games_keyboard(t_id=None):
     nmarkup.row(types.KeyboardButton(text="Путин (Обещания) 🍜"))
     nmarkup.row(types.KeyboardButton(text="Игра Абсурда 🗯"))
     nmarkup.row(types.KeyboardButton(text="Игра Нацизма 💤"))
-    nmarkup.row(types.KeyboardButton(text="Возврат в главное меню"))
+    nmarkup.row(types.KeyboardButton(text="Вернуться в главное меню"))
     nmarkup.adjust(2)
     return nmarkup.as_markup(resize_keyboard=True, input_field_placeholder=random.choice(usless_list))
 
@@ -62,7 +62,7 @@ def redct_media():
     nmarkup.row(types.KeyboardButton(text="Добавить новое медиа"))
     nmarkup.row(types.KeyboardButton(text="Редактировать медиа"))
     nmarkup.row(types.KeyboardButton(text="Удалить медиа"))
-    nmarkup.row(types.KeyboardButton(text="Возврат в главное меню"))
+    nmarkup.row(types.KeyboardButton(text="Вернуться в главное меню"))
     return nmarkup.as_markup(resize_keyboard=True)
 
 
@@ -71,7 +71,7 @@ def redct_text():
     nmarkup.row(types.KeyboardButton(text="Добавить новый текст"))
     nmarkup.row(types.KeyboardButton(text="Редактировать текст"))
     nmarkup.row(types.KeyboardButton(text="Удалить текст"))
-    nmarkup.row(types.KeyboardButton(text="Возврат в главное меню"))
+    nmarkup.row(types.KeyboardButton(text="Вернуться в главное меню"))
     return nmarkup.as_markup(resize_keyboard=True)
 
 
@@ -87,7 +87,7 @@ def game_keys():
 def redct_games():
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Нужно придумать кнопки"))
-    nmarkup.row(types.KeyboardButton(text="Возврат в главное меню"))
+    nmarkup.row(types.KeyboardButton(text="Вернуться в главное меню"))
     return nmarkup.as_markup(resize_keyboard=True)
 
 
@@ -110,7 +110,7 @@ async def settings_bot():
             nmarkup.row(types.KeyboardButton(text="Включить тех. режим 🔴"))
     except:
         nmarkup.row(types.KeyboardButton(text="Включить тех. режим 🔴"))
-    nmarkup.row(types.KeyboardButton(text="Возврат в главное меню"))
+    nmarkup.row(types.KeyboardButton(text="Вернуться в главное меню"))
     nmarkup.adjust(1, 2, 1, 1, 1)
     return nmarkup.as_markup(resize_keyboard=True)
 
@@ -145,7 +145,7 @@ async def spam_admin_keyboard():
             nmarkup.row(types.KeyboardButton(text="Включить рассылку 🔴"))
     except:
         nmarkup.row(types.KeyboardButton(text="Включить рассылку 🔴"))
-    nmarkup.row(types.KeyboardButton(text="Возврат в главное меню"))
+    nmarkup.row(types.KeyboardButton(text="Вернуться в главное меню"))
     return nmarkup.as_markup(resize_keyboard=True)
 
 
