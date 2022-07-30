@@ -82,7 +82,7 @@ async def reset(message: Message, state: FSMContext):
         await admin_home_main_menu(message, state)
 
 
-@router.message((F.text == 'Назад'), state="*")
+@router.message((F.text == 'Назад'), state=admin)
 async def reset(message: Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Назад'")
     stt = await state.get_state()

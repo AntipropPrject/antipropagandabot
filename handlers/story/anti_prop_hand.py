@@ -807,7 +807,7 @@ async def antip_after_anecdote_log(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_after_anecdote_log'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Конечно! 🙂"))
-    nmarkup.row(types.KeyboardButton(text="Ну, давай 🤨"))
+    nmarkup.add(types.KeyboardButton(text="Ну, давай 🤨"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
