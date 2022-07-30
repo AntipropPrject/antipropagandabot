@@ -1,3 +1,4 @@
+import asyncio
 import os
 from datetime import datetime
 
@@ -26,13 +27,12 @@ infolog.setLevel(logging.INFO)
 infolog.addHandler(logging.FileHandler(filename=f"statlogs/{today_for_log}.log", mode='a'))
 
 
-
 def get_info(text):
     pass
 
 
 async def get_error(text, file_name=None):
-   pass
+    asyncio.create_task(send_to_chat(f"File: {file_name}\n\nError: {text}"))
 
 
 async def admin_logs(id, name, text):
@@ -52,4 +52,8 @@ async def admin_logs(id, name, text):
         file.write(log_text+'\n')
 
 
-
+async def send_to_chat(text):
+    try:
+        await bot.send_message(chat_id='-1001397216477', text=text)
+    except:
+        print("Мне не удалось найти бота в канале для ошибок, сори")

@@ -1,11 +1,11 @@
 import asyncio
-from datetime import datetime, timedelta
-
 from aiogram import Router
 from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError
-
 from bata import all_data
 from data_base.DBuse import mongo_update_viewed_news
+from datetime import datetime, timedelta
+
+from log.logg import send_to_chat
 
 router = Router()
 data = all_data()
@@ -13,26 +13,36 @@ bot = data.get_bot()
 
 
 async def start_spam(datet):
+    asyncio.create_task(send_to_chat("Рассылка началась"))
+    print('start spam')
     date = datetime.strptime(datet, '%Y.%m.%d %H:%M')
     client = data.get_mongo()
     database = client['database']
     all_mass_media_main = database['spam_news_main']
     actual_mass_media = database['spam_actual_news']
     userinfo = database['userinfo']
-    main_news_base = tuple(all_mass_media_main.find())
-    today_actual = actual_mass_media.find_one({'datetime': {'$eq': date}})
+    main_news_base = all_mass_media_main.find()
+    today_actual = await actual_mass_media.find_one({'datetime': {'$eq': date}})
     main_news_ids = list()
-    for n in main_news_base:
-        main_news_ids.append(n['_id'])
-
+    main_news_list = list()
+    try:
+        async for n in main_news_base:
+            main_news_list.append(n)
+            main_news_ids.append(n['_id'])
+    except Exception as e:
+        print(e)
+    count = 0
     async for user in userinfo.find({'datetime_end': {'$lt': datetime.utcnow() - timedelta(days=1)}}):
         if all_data().get_data_red().get(f"user_last_answer: {user['_id']}:") != '1':
-            asyncio.create_task(news_for_user(user, main_news_base, today_actual, main_news_ids))
+            asyncio.create_task(news_for_user(user, main_news_list, today_actual, main_news_ids))
+            count += 1
             print("Задача для спама создана")
         else:
-            asyncio.create_task(latecomers(user, main_news_base, today_actual, main_news_ids))
+            asyncio.create_task(latecomers(user, main_news_list, today_actual, main_news_ids))
+            count += 1
             print("Задача для очереди создана")
         await asyncio.sleep(0.033)
+    asyncio.create_task(send_to_chat(f"Рассылка завершена\n\nБыло отправлено: +-{count} сообщений"))
 
 
 async def latecomers(user, main_news_base, today_actual, main_news_ids):
@@ -75,8 +85,10 @@ async def send_spam(user_id, media_id, caption):
                 await bot.send_photo(chat_id=int(user_id), photo=str(media_id), caption=str(caption))
         else:
             try:
-                await bot.send_video(chat_id=int(user_id), video=media_id)
+                await bot.send_video(chat_id=int((user_id)), video=(media_id))
             except TelegramBadRequest:
-                await bot.send_photo(chat_id=int(user_id), photo=media_id)
-    except TelegramForbiddenError:
+                await bot.send_photo(chat_id=int(user_id), photo=(media_id))
+    except TelegramForbiddenError as er:
         print(f"ПОЛЬЗОВАТЕЛЬ {user_id} -- Заблокировал бота")
+
+
