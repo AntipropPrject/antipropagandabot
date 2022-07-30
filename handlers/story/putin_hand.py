@@ -39,6 +39,7 @@ async def putin_love_putin(message: Message, state: FSMContext):
 @router.message((F.text.in_({"Давай 🤝"})), state=StateofPutin.main, flags=flags)
 async def putin_not_love_putin(message: Message, state: FSMContext):
     await state.set_state(StateofPutin.main)
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='started_putin', value='Да')
     text = await sql_safe_select('text', 'texts', {'name': 'putin_lets_speak_about'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Отличный президент ✊"))
