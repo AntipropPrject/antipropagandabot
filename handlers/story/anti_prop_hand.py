@@ -880,7 +880,8 @@ async def antip_reputation_matters(message: Message):
                 ((F.text.contains('действия')) & (F.text.contains('Украине'))) | (
                         F.text.contains('Продолжим 🇷🇺🇺🇦')), flags=flags)
 async def war_point_now(message: Message, state: FSMContext):
-    await mongo_update_stat_new(tg_id=message.from_user.id, column='map_antiprop', value=message.text)
+    if message.text in ['Продолжим 🇷🇺🇺🇦', 'Поговорим про военные действия на Украине 🇷🇺🇺🇦', '🤝 Продолжим']:
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='map_antiprop', value=message.text)
     await mongo_update_stat(message.from_user.id, 'antiprop')
     await state.set_state(true_resons_hand.TruereasonsState.main)
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_war_point_now'})
@@ -893,7 +894,8 @@ async def war_point_now(message: Message, state: FSMContext):
                 ((F.text.contains('действия')) & (F.text.contains('Украине'))) | (
                         F.text.contains("Продолжим 🇷🇺🇺🇦")), flags=flags)
 async def reasons_lets_figure(message: Message, state: FSMContext):
-    await mongo_update_stat_new(tg_id=message.from_user.id, column='map_antiprop', value=message.text)
+    if message.text in ['Продолжим 🇷🇺🇺🇦', 'Поговорим про военные действия на Украине 🇷🇺🇺🇦', '🤝 Продолжим']:
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='map_antiprop', value=message.text)
     await state.set_state(true_resons_hand.TruereasonsState.main)
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_lets_figure'})
     await mongo_update_stat(message.from_user.id, 'antiprop')
