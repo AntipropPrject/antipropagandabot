@@ -1,3 +1,7 @@
+import json
+import re
+
+import aiohttp
 import psycopg2
 from psycopg2 import sql
 from bata import all_data
@@ -6,6 +10,9 @@ from datetime import datetime
 from data_base.connect_pool import get_cursor
 from log import logg
 import motor.motor_asyncio
+
+from utils.spacebot import make_request
+
 """^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^PostgreSQL^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"""
 
 
@@ -242,13 +249,18 @@ async def sql_safe_update(table_name, data_dict, condition_dict):
 
 
 async def advertising_value(tag):
-    print(tag)
-    all_tags = await data_getter("SELECT id FROM dumbstats.advertising")
-    print(all_tags)
-    for row in all_tags:
-        print(row)
-        if tag in row:
-            await sql_add_value("dumbstats.advertising", "count", {"id": tag})
+    if re.search("^adv_", tag):
+        all_tags = await data_getter("SELECT id FROM dumbstats.advertising")
+        for row in all_tags:
+            if tag in row:
+                await sql_add_value("dumbstats.advertising", "count", {"id": tag})
+    else:
+        url = f'https://pravdobot.com/cx79l1k.php?cnv_id={tag}'
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url=url) as response:
+                resp = await response.read()
+                print(response.status)
+
 
 
 """^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^MongoDB^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"""

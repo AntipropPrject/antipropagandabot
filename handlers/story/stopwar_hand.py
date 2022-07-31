@@ -152,7 +152,7 @@ async def stopwar_lets_fight(message: Message):
 
 @router.message((F.text == "Объясни 🤔") | (F.text == "Нет, власти всё равно будут делать, что хотят 🙅‍♂️"),
                 flags=flags)
-async def stopwar_lets_fight(message: Message):
+async def stopwar_The(message: Message):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='will_they_stop', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_The'})
     nmarkup = ReplyKeyboardBuilder()
@@ -161,7 +161,7 @@ async def stopwar_lets_fight(message: Message):
 
 
 @router.message((F.text == "Какие аргументы? 🤔"), flags=flags)
-async def stopwar_lets_fight(message: Message, state: FSMContext):
+async def stopwar_first_manipulation_argument(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_first_manipulation_argument'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Следующий аргумент 👉"))
@@ -170,7 +170,7 @@ async def stopwar_lets_fight(message: Message, state: FSMContext):
 
 
 @router.message((F.text == "Следующий аргумент 👉"), state=StopWarState.arg_1, flags=flags)
-async def stopwar_lets_fight(message: Message, state: FSMContext):
+async def stopwar_second_manipulation_argument(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_second_manipulation_argument'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Следующий аргумент 👉"))
@@ -179,7 +179,7 @@ async def stopwar_lets_fight(message: Message, state: FSMContext):
 
 
 @router.message((F.text == "Следующий аргумент 👉"), state=StopWarState.arg_2, flags=flags)
-async def manipulation_argument(message: Message, state: FSMContext):
+async def stopwar_third_manipulation_argument(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_third_manipulation_argument'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Следующий аргумент 👉"))
@@ -188,7 +188,7 @@ async def manipulation_argument(message: Message, state: FSMContext):
 
 
 @router.message((F.text == "Следующий аргумент 👉"), state=StopWarState.arg_3, flags=flags)
-async def manipulation_argument(message: Message):
+async def stopwar_fourth_manipulation_argument(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_fourth_manipulation_argument'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(
@@ -241,7 +241,7 @@ async def stopwar_I_told_you_everything(message: Message):
                  (F.text.contains('Ну не знаю... 🤷‍♀️')) |
                  (F.text.contains('Это разумные аргументы. Важно, чтобы россияне поняли — война им не нужна 🕊')) |
                  (F.text.contains('Согласен(а), важно, чтобы россияне поняли — война им не нужна 🕊'))), flags=flags)
-async def stopwar_lets_fight(message: Message, bot: Bot):
+async def stopwar_timer(message: Message, bot: Bot):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='will_they_stop', value=message.text)
     text_1 = await sql_safe_select('text', 'texts', {'name': 'stopwar_hello_world'})
     text_2 = await sql_safe_select('text', 'texts', {'name': 'stopwar_send_me'})
