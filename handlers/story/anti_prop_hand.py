@@ -310,7 +310,7 @@ async def antip_crossed_boy_3(message: Message):
 
 @router.message((F.text == "Какой ужас 😱") | (F.text == "Давай продолжим 😕"), flags=flags)
 async def antip_crossed_boy_3(message: Message):
-    await mongo_update_stat_new(tg_id=message.from_user.id, column='grade_tv', value=message.text)
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='crucified_man', value=message.text)
     text2 = await sql_safe_select('text', 'texts', {'name': 'antip_be_honest'})
     await message.answer(text2, reply_markup=antip_killme_kb(), disable_web_page_preview=True)
 
@@ -339,7 +339,7 @@ async def antip_another_tv(message: Message, state: FSMContext):
 @router.message(WebPropagandaFilter(), commands=["test"])
 async def antip_not_only_TV(message: Message, web_lies_list: List[str], state: FSMContext):
     if 'шаг' not in message.text:
-        await mongo_update_stat_new(tg_id=message.from_user.id, column='crucified_man', value=message.text)
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='grade_tv', value=message.text)
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Покажи новость 👀"))
     all_answers_user = web_lies_list.copy()
