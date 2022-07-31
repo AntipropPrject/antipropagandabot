@@ -125,6 +125,7 @@ async def prevent_strike_hitler_did_it(message: Message):
 
 @router.message(F.text.contains('продолжим'), flags=flags)
 async def prevent_strike_end_point(message: Message, state: FSMContext):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='game_i_show_u', value='Пропустили')
     await mongo_update_stat_new(tg_id=message.from_user.id, column='prevent_strike_fin', value='Да')
     await state.set_state(true_resons_hand.TruereasonsState.main)
     await mongo_update_stat(message.from_user.id, 'prevent_strike')
@@ -133,6 +134,7 @@ async def prevent_strike_end_point(message: Message, state: FSMContext):
 
 @router.message(F.text == 'Да, хочу 🙂', flags=flags)
 async def prevent_strike_will_show(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='game_i_show_u', value='Начали и НЕ закончили')
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Посмотрел(а) 📺'))
     await simple_media(message, 'prevent_strike_will_show', nmarkup.as_markup(resize_keyboard=True))
@@ -165,5 +167,6 @@ async def prevent_strike_memes(message: Message, state: FSMContext):
     except TelegramBadRequest:  # Это бессмысленный экцепт, можно потом убрать
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text='Продолжим 🙂'))
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='game_i_show_u', value='Начали и закончили')
         await message.answer('Я устал шутить про Лукашенко 😌 Продолжим?',
                              reply_markup=nmarkup.as_markup(resize_keyboard=True))
