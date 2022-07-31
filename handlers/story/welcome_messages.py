@@ -169,6 +169,8 @@ async def message_6(message: types.Message, state: FSMContext):
     (F.text.contains('интересоваться после 24') | F.text.contains('Скорее да') | F.text.contains('продолжим')),
     welcome_states.start_dialog.dialogue_6, flags=flags)
 async def message_6to7(message: types.Message, state: FSMContext):
+    if 'продолжим' not in message.text:
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='interest_politics', value=message.text)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Покажи варианты ✍"))
     text = await sql_safe_select("text", "texts", {"name": "start_russia_goal"})
@@ -176,7 +178,6 @@ async def message_6to7(message: types.Message, state: FSMContext):
     await poll_write(f'Usrs: {message.from_user.id}: Start_answers: interest_in_politics:',
                      message.text[:-3].strip())
     await state.set_state(welcome_states.start_dialog.dialogue_extrafix)
-    await mongo_update_stat_new(tg_id=message.from_user.id, column='interest_politics', value=message.text)
 
 
 @router.message((F.text.contains('Скорее нет  🙅‍')), welcome_states.start_dialog.dialogue_6, flags=flags)
@@ -275,8 +276,6 @@ async def poll_answer_handler_tho(poll_answer: types.PollAnswer, bot: Bot, state
     elif {1, 6}.isdisjoint(set(lst_answers)) is False:  # green
         await mongo_update_stat_new(tg_id=poll_answer.user.id, column='web_prop_gen',
                                     value='Есть зелёные и нет красных')
-    if 'Википедия' not in lst_str:
-        await mongo_update_stat_new(tg_id=poll_answer.user.id, column='why_not_wiki', value=lst_str)
 
     await state.update_data(answer_4=poll_answer.option_ids)
     await mongo_update_stat_new(tg_id=poll_answer.user.id, column='web_prop_ex', value=lst_str)

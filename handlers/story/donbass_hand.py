@@ -84,14 +84,15 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FS
     await state.set_state(donbass_state.after_poll)
     indexes = poll_answer.option_ids
     true_options = list()
-    print(indexes)
+    answers_list = list()
     for index in indexes:
+        answers_list.append(donbass_first_poll[index])
         if index == 0:
             # TODO:перекидывать дальше
             continue
         true_options.append(donbass_first_poll[index])
         await poll_write(f'Usrs: {poll_answer.user.id}: Donbass_polls: First:', donbass_first_poll[index])
-    await mongo_update_stat_new(tg_id=poll_answer.user.id, column='donbass_ex', value=true_options)
+    await mongo_update_stat_new(tg_id=poll_answer.user.id, column='donbass_ex', value=answers_list)
 
     if {1, 2, 3, 4, 5, 6}.isdisjoint(set(indexes)) is False:  # red
         await mongo_update_stat_new(tg_id=poll_answer.user.id, column='web_prop_gen', value='Хотя бы один красный')

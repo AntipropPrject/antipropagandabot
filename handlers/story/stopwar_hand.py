@@ -33,6 +33,7 @@ router.message.filter(state=StopWarState)
 
 @router.message(F.text == "Скорее да ✅", flags=flags)
 async def stopwar_rather_yes(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='is_putin_ready_to_stop', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_rather_yes'})
     photo = await sql_safe_select('t_id', 'assets', {'name': 'stopwar_rather_yes'})
     nmarkup = ReplyKeyboardBuilder()
@@ -46,6 +47,7 @@ async def stopwar_rather_yes(message: Message):
 
 @router.message(F.text == "Не знаю 🤷‍♂️", flags=flags)
 async def stopwar_idk(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='is_putin_ready_to_stop', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_idk'})
     photo = await sql_safe_select('t_id', 'assets', {'name': 'stopwar_idk'})
     nmarkup = ReplyKeyboardBuilder()
@@ -59,6 +61,7 @@ async def stopwar_idk(message: Message):
 
 @router.message(F.text == "Скорее нет ❌", flags=flags)
 async def stopwar_rather_no(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='is_putin_ready_to_stop', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_rather_no'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжим 👌"))

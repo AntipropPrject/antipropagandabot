@@ -310,7 +310,7 @@ async def antip_crossed_boy_3(message: Message):
 
 @router.message((F.text == "Какой ужас 😱") | (F.text == "Давай продолжим 😕"), flags=flags)
 async def antip_crossed_boy_3(message: Message):
-    await mongo_update_stat_new(tg_id=message.from_user.id, column='grade_tv', value=message.text)
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='crucified_man', value=message.text)
     text2 = await sql_safe_select('text', 'texts', {'name': 'antip_be_honest'})
     await message.answer(text2, reply_markup=antip_killme_kb(), disable_web_page_preview=True)
 
@@ -339,7 +339,7 @@ async def antip_another_tv(message: Message, state: FSMContext):
 @router.message(WebPropagandaFilter(), commands=["test"])
 async def antip_not_only_TV(message: Message, web_lies_list: List[str], state: FSMContext):
     if 'шаг' not in message.text:
-        await mongo_update_stat_new(tg_id=message.from_user.id, column='crucified_man', value=message.text)
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='grade_tv', value=message.text)
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Покажи новость 👀"))
     all_answers_user = web_lies_list.copy()
@@ -735,6 +735,7 @@ async def antip_why_not_wiki(message: Message, state: FSMContext):
                  | (F.text.contains('Не слышал')) | (F.text.contains('я доверяю'))),
                 state=propaganda_victim.wiki, flags=flags)
 async def antip_clear_and_cool(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='why_not_wiki', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'antip_clear_and_cool'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
@@ -880,7 +881,8 @@ async def antip_reputation_matters(message: Message):
                 ((F.text.contains('действия')) & (F.text.contains('Украине'))) | (
                         F.text.contains('Продолжим 🇷🇺🇺🇦')), flags=flags)
 async def war_point_now(message: Message, state: FSMContext):
-    await mongo_update_stat_new(tg_id=message.from_user.id, column='map_antiprop', value=message.text)
+    if message.text in ['Продолжим 🇷🇺🇺🇦', 'Поговорим про военные действия на Украине 🇷🇺🇺🇦', '🤝 Продолжим']:
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='map_antiprop', value=message.text)
     await mongo_update_stat(message.from_user.id, 'antiprop')
     await state.set_state(true_resons_hand.TruereasonsState.main)
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_war_point_now'})
@@ -893,7 +895,8 @@ async def war_point_now(message: Message, state: FSMContext):
                 ((F.text.contains('действия')) & (F.text.contains('Украине'))) | (
                         F.text.contains("Продолжим 🇷🇺🇺🇦")), flags=flags)
 async def reasons_lets_figure(message: Message, state: FSMContext):
-    await mongo_update_stat_new(tg_id=message.from_user.id, column='map_antiprop', value=message.text)
+    if message.text in ['Продолжим 🇷🇺🇺🇦', 'Поговорим про военные действия на Украине 🇷🇺🇺🇦', '🤝 Продолжим']:
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='map_antiprop', value=message.text)
     await state.set_state(true_resons_hand.TruereasonsState.main)
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_lets_figure'})
     await mongo_update_stat(message.from_user.id, 'antiprop')
