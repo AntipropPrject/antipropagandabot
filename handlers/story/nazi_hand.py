@@ -495,7 +495,7 @@ async def nazi_game_start(message: Message, state: FSMContext):
 @router.message(((F.text == "Начнём! 🚀") | (F.text == "Ну давай еще 😎") | (F.text == "Продолжаем, давай еще! 👉")),
                 state=NaziState.game, flags=flags)
 async def country_game_question(message: Message, state: FSMContext):
-    if message.text == '':
+    if message.text == 'Начнём! 🚀':
         await mongo_update_stat_new(tg_id=message.from_user.id, column='game_ru_or_usr', value='Начали и НЕ закончили')
     try:
         count = (await state.get_data())['ngamecount']
