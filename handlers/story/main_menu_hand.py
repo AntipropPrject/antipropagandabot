@@ -3,9 +3,10 @@ from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
+
 from data_base.DBuse import sql_safe_select, data_getter, sql_games_row_selecter, sql_select_row_like, mongo_game_answer
 from filters.MapFilters import SubscriberFilter
-from handlers.welcome_messages import commands_start
+from handlers.story.welcome_messages import commands_start
 from states.main_menu_states import MainMenuStates
 from utilts import simple_media, game_answer, dynamic_media_answer
 
@@ -92,7 +93,8 @@ async def mainmenu_putin_flipper(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'mainmenu_putin_flipper'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Перевороты и революция — это страшно и я не хочу этого 💔"))
-    nmarkup.row(types.KeyboardButton(text="Это разумные аргументы. Важно, чтобы россияне поняли — война им не нужна 🕊"))
+    nmarkup.row(
+        types.KeyboardButton(text="Это разумные аргументы. Важно, чтобы россияне поняли — война им не нужна 🕊"))
     nmarkup.row(types.KeyboardButton(text="Вернуться в главное меню 👇"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 

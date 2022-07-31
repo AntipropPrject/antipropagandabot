@@ -13,4 +13,5 @@ async def empty(message: types.Message):
         await asyncio.sleep(0.8)
         await message.delete()
     else:
-        await message.answer("Неправильная команда, вы можете выбрать ответ на клиаватуре или в опросе.\n\n Если желаете начать сначала - нажмите /start")
+        await message.answer(
+            "Неправильная команда, вы можете выбрать ответ на клиаватуре или в опросе.\n\n Если желаете начать сначала - нажмите /start")

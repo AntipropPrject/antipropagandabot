@@ -1,20 +1,17 @@
 from aiogram import Router, types, F
 from aiogram.dispatcher.fsm.context import FSMContext
-from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
-from data_base.DBuse import sql_safe_update, data_getter, sql_safe_insert, sql_delete, sql_games_row_selecter
-from filters.isAdmin import IsAdmin
-from keyboards.admin_keys import games_keyboard, admin_games_keyboard, app_admin_keyboard, \
-    game_keys
+from aiogram.utils.keyboard import ReplyKeyboardBuilder
+
+from data_base.DBuse import data_getter
+from keyboards.admin_keys import game_keys
 from log import logg
 from states.admin_states import admin
-from utilts import game_answer
-from utilts import simple_media
 
 router = Router()
 router.message.filter(state=admin)
 
 
-@router.message(IsAdmin(), (F.text == "Пропагандисты 💢"))
+@router.message((F.text == "Пропагандисты 💢"), state=admin.game_menu)
 async def admin_home(message: types.Message, state: FSMContext):
     await state.clear()
     await logg.admin_logs(message.from_user.id, message.from_user.username,
@@ -26,7 +23,7 @@ async def admin_home(message: types.Message, state: FSMContext):
     await state.set_state(admin.addingMistakeOrLie)
 
 
-@router.message(IsAdmin(), state=admin.addingMistakeOrLie)
+@router.message(state=admin.addingMistakeOrLie)
 async def menu(message: types.Message, state: FSMContext):
     await state.update_data(surnameOfPerson=message.text)
     await message.answer(
@@ -35,7 +32,7 @@ async def menu(message: types.Message, state: FSMContext):
     await state.set_state(admin.addingMistakeOrLie_adding)
 
 
-@router.message(IsAdmin(), (F.text == "Добавить сюжет"), state=admin.addingMistakeOrLie_adding)
+@router.message((F.text == "Добавить сюжет"), state=admin.addingMistakeOrLie_adding)
 async def menu(message: types.Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username,
                           "Ошибка или ложь(пропагандисты) - добавление")
@@ -48,7 +45,7 @@ async def menu(message: types.Message, state: FSMContext):
     await state.set_state(admin.addingMistakeOrLie_media)
 
 
-@router.message(IsAdmin(), state=admin.addingMistakeOrLie_media)
+@router.message(state=admin.addingMistakeOrLie_media)
 async def menu(message: types.Message, state: FSMContext):
     try:
         media_id = message.video.file_id
@@ -82,7 +79,7 @@ async def menu(message: types.Message, state: FSMContext):
     await state.clear()
 
 
-@router.message(IsAdmin(), (F.text == "Удалить сюжет"), state=admin.addingMistakeOrLie_adding)
+@router.message((F.text == "Удалить сюжет"), state=admin.addingMistakeOrLie_adding)
 async def menu(message: types.Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username,
                           "Ошибка или ложь(пропагандисты) - удаление")
@@ -100,8 +97,7 @@ async def menu(message: types.Message, state: FSMContext):
     await state.set_state(admin.addingMistakeOrLie_deleting)
 
 
-
-@router.message(IsAdmin(), state=admin.addingMistakeOrLie_deleting)
+@router.message(state=admin.addingMistakeOrLie_deleting)
 async def admin_home(message: types.Message, state: FSMContext):
     await state.update_data(media_to_delete=message.text)
     nmrkup = ReplyKeyboardBuilder()
@@ -120,7 +116,7 @@ async def admin_home(message: types.Message, state: FSMContext):
     await state.set_state(admin.addingMistakeOrLie_deleting_apply)
 
 
-@router.message(IsAdmin(), state=admin.addingMistakeOrLie_deleting_apply)
+@router.message(state=admin.addingMistakeOrLie_deleting_apply)
 async def admin_home(message: types.Message, state: FSMContext):
     data = await state.get_data()
     media_id = data['media_to_delete']

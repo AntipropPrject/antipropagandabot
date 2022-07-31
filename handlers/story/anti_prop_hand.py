@@ -7,17 +7,16 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
+from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
 
 from bata import all_data
-from data_base.DBuse import poll_get, redis_just_one_read, sql_select_row_like, mongo_game_answer, \
-    redis_check
+from data_base.DBuse import poll_get, redis_just_one_read, sql_select_row_like, mongo_game_answer
 from data_base.DBuse import sql_safe_select, data_getter
 from filters.MapFilters import WebPropagandaFilter, TVPropagandaFilter, PplPropagandaFilter, \
-        PoliticsFilter, WikiFilter, YandexPropagandaFilter
-from handlers import true_resons_hand
+    PoliticsFilter, WikiFilter, YandexPropagandaFilter
+from handlers.story import true_resons_hand
 from keyboards.map_keys import antip_why_kb, antip_killme_kb
 from states.antiprop_states import propaganda_victim
-from stats.stat import mongo_update_stat, mongo_update_stat_new
 from utilts import simple_media, dynamic_media_answer
 
 flags = {"throttling_key": "True"}
@@ -311,7 +310,7 @@ async def antip_crossed_boy_3(message: Message):
 
 @router.message((F.text == "Какой ужас 😱") | (F.text == "Давай продолжим 😕"), flags=flags)
 async def antip_crossed_boy_3(message: Message):
-    await mongo_update_stat_new(tg_id=message.from_user.id, column='grade_tv', value=message.text)
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='crucified_man', value=message.text)
     text2 = await sql_safe_select('text', 'texts', {'name': 'antip_be_honest'})
     await message.answer(text2, reply_markup=antip_killme_kb(), disable_web_page_preview=True)
 
@@ -340,7 +339,7 @@ async def antip_another_tv(message: Message, state: FSMContext):
 @router.message(WebPropagandaFilter(), commands=["test"])
 async def antip_not_only_TV(message: Message, web_lies_list: List[str], state: FSMContext):
     if 'шаг' not in message.text:
-        await mongo_update_stat_new(tg_id=message.from_user.id, column='crucified_man', value=message.text)
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='grade_tv', value=message.text)
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Покажи новость 👀"))
     all_answers_user = web_lies_list.copy()
@@ -591,8 +590,9 @@ async def antip_truth_game_start(message: Message, state: FSMContext):
 
 @router.message((F.text == "Начнем! 🚀") | (F.text == "Продолжаем, давай еще! 👉"), flags=flags)
 async def antip_truth_game_start_question(message: Message, state: FSMContext):
-    if message.text =='Начнем! 🚀':
-        await mongo_update_stat_new(tg_id=message.from_user.id, column='game_false_or_true', value='Начали и НЕ закончили')
+    if message.text == 'Начнем! 🚀':
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='game_false_or_true',
+                                    value='Начали и НЕ закончили')
     try:
         count = (await state.get_data())['gamecount']
     except:
@@ -735,6 +735,7 @@ async def antip_why_not_wiki(message: Message, state: FSMContext):
                  | (F.text.contains('Не слышал')) | (F.text.contains('я доверяю'))),
                 state=propaganda_victim.wiki, flags=flags)
 async def antip_clear_and_cool(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='why_not_wiki', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'antip_clear_and_cool'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
@@ -807,7 +808,7 @@ async def antip_after_anecdote_log(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_after_anecdote_log'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Конечно! 🙂"))
-    nmarkup.row(types.KeyboardButton(text="Ну, давай 🤨"))
+    nmarkup.add(types.KeyboardButton(text="Ну, давай 🤨"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -880,7 +881,8 @@ async def antip_reputation_matters(message: Message):
                 ((F.text.contains('действия')) & (F.text.contains('Украине'))) | (
                         F.text.contains('Продолжим 🇷🇺🇺🇦')), flags=flags)
 async def war_point_now(message: Message, state: FSMContext):
-    await mongo_update_stat_new(tg_id=message.from_user.id, column='map_antiprop', value=message.text)
+    if message.text in ['Продолжим 🇷🇺🇺🇦', 'Поговорим про военные действия на Украине 🇷🇺🇺🇦', '🤝 Продолжим']:
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='map_antiprop', value=message.text)
     await mongo_update_stat(message.from_user.id, 'antiprop')
     await state.set_state(true_resons_hand.TruereasonsState.main)
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_war_point_now'})
@@ -893,7 +895,8 @@ async def war_point_now(message: Message, state: FSMContext):
                 ((F.text.contains('действия')) & (F.text.contains('Украине'))) | (
                         F.text.contains("Продолжим 🇷🇺🇺🇦")), flags=flags)
 async def reasons_lets_figure(message: Message, state: FSMContext):
-    await mongo_update_stat_new(tg_id=message.from_user.id, column='map_antiprop', value=message.text)
+    if message.text in ['Продолжим 🇷🇺🇺🇦', 'Поговорим про военные действия на Украине 🇷🇺🇺🇦', '🤝 Продолжим']:
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='map_antiprop', value=message.text)
     await state.set_state(true_resons_hand.TruereasonsState.main)
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_lets_figure'})
     await mongo_update_stat(message.from_user.id, 'antiprop')

@@ -5,10 +5,11 @@ from aiogram.dispatcher.fsm.state import StatesGroup, State
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
+from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
+
 from data_base.DBuse import sql_safe_select, sql_select_row_like
 from filters.MapFilters import ManualFilters
-from handlers import true_resons_hand
-from stats.stat import mongo_update_stat, mongo_update_stat_new
+from handlers.story import true_resons_hand
 from utilts import simple_media, dynamic_media_answer
 
 
@@ -18,6 +19,7 @@ class PreventStrikeState(StatesGroup):
     q2 = State()
     q3 = State()
     q4 = State()
+
 
 flags = {"throttling_key": "True"}
 router = Router()
@@ -53,7 +55,8 @@ async def prevent_strike_q1(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.in_({'Да, это странно 🤔', 'Ничего подозрительного 🙅‍♂️'})), state=PreventStrikeState.q2, flags=flags)
+@router.message((F.text.in_({'Да, это странно 🤔', 'Ничего подозрительного 🙅‍♂️'})), state=PreventStrikeState.q2,
+                flags=flags)
 async def prevent_strike_q2(message: Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='prevent_first_qstn', value=message.text)
     await state.set_state(PreventStrikeState.q3)
@@ -64,7 +67,8 @@ async def prevent_strike_q2(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.in_({'Да, это странно 🤔', 'Ничего подозрительного 🙅‍♂️'})), state=PreventStrikeState.q3, flags=flags)
+@router.message((F.text.in_({'Да, это странно 🤔', 'Ничего подозрительного 🙅‍♂️'})), state=PreventStrikeState.q3,
+                flags=flags)
 async def prevent_strike_q3(message: Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='prevent_second_qstn', value=message.text)
     await state.set_state(PreventStrikeState.q4)
@@ -75,7 +79,8 @@ async def prevent_strike_q3(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.in_({'Да, это странно 🤔', 'Ничего подозрительного 🙅‍♂️'})), state=PreventStrikeState.q4, flags=flags)
+@router.message((F.text.in_({'Да, это странно 🤔', 'Ничего подозрительного 🙅‍♂️'})), state=PreventStrikeState.q4,
+                flags=flags)
 async def prevent_strike_q4(message: Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='prevent_third_qstn', value=message.text)
     await state.set_state(PreventStrikeState.main)
@@ -86,20 +91,22 @@ async def prevent_strike_q4(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.in_({'Да, это странно 🤔', 'Ничего подозрительного 🙅‍♂️'})), state=PreventStrikeState.main, flags=flags)
+@router.message((F.text.in_({'Да, это странно 🤔', 'Ничего подозрительного 🙅‍♂️'})), state=PreventStrikeState.main,
+                flags=flags)
 async def prevent_strike_now_you(message: Message):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='prevent_fourth_qstn', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_now_you'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Да, превентивный удар - лишь повод 👌'))
-    nmarkup.row(types.KeyboardButton(text='Я и так не верил(а) в то, что Украина готовит нападение 🤷‍♂️'))
     nmarkup.row(types.KeyboardButton(text='Нет, это настоящая причина начала военных действий ☝️'))
+    nmarkup.row(types.KeyboardButton(text='Я и так не верил(а) в то, что Украина готовит нападение 🤷‍♂️'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message(
     F.text.in_(
-        {'Да, превентивный удар - лишь повод 👌', 'Я и так не верил(а) в то, что Украина готовит нападение 🤷‍♂️'}), flags=flags)
+        {'Да, превентивный удар - лишь повод 👌', 'Я и так не верил(а) в то, что Украина готовит нападение 🤷‍♂️'}),
+    flags=flags)
 async def prevent_strike_hitler_allright(message: Message):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='prevent_strike_convinced', value=message.text)
     nmarkup = ReplyKeyboardBuilder()
@@ -109,7 +116,7 @@ async def prevent_strike_hitler_allright(message: Message):
 
 
 @router.message(F.text == 'Нет, это настоящая причина начала военных действий ☝️', flags=flags)
-async def prevent_strike_hitler_did_it(message: Message, state: FSMContext):
+async def prevent_strike_hitler_did_it(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Да, хочу 🙂'))
     nmarkup.row(types.KeyboardButton(text='Нет, продолжим разговор ⏱'))
@@ -118,6 +125,7 @@ async def prevent_strike_hitler_did_it(message: Message, state: FSMContext):
 
 @router.message(F.text.contains('продолжим'), flags=flags)
 async def prevent_strike_end_point(message: Message, state: FSMContext):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='game_i_show_u', value='Пропустили')
     await mongo_update_stat_new(tg_id=message.from_user.id, column='prevent_strike_fin', value='Да')
     await state.set_state(true_resons_hand.TruereasonsState.main)
     await mongo_update_stat(message.from_user.id, 'prevent_strike')
@@ -126,6 +134,7 @@ async def prevent_strike_end_point(message: Message, state: FSMContext):
 
 @router.message(F.text == 'Да, хочу 🙂', flags=flags)
 async def prevent_strike_will_show(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='game_i_show_u', value='Начали и НЕ закончили')
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Посмотрел(а) 📺'))
     await simple_media(message, 'prevent_strike_will_show', nmarkup.as_markup(resize_keyboard=True))
@@ -158,5 +167,6 @@ async def prevent_strike_memes(message: Message, state: FSMContext):
     except TelegramBadRequest:  # Это бессмысленный экцепт, можно потом убрать
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text='Продолжим 🙂'))
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='game_i_show_u', value='Начали и закончили')
         await message.answer('Я устал шутить про Лукашенко 😌 Продолжим?',
                              reply_markup=nmarkup.as_markup(resize_keyboard=True))

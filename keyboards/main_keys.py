@@ -1,8 +1,5 @@
 from aiogram import types
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-import random
-
-
 
 
 def filler_kb():

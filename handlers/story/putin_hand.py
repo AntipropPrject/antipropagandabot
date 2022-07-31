@@ -5,11 +5,11 @@ from aiogram.dispatcher.fsm.state import StatesGroup, State
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
+from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
 
 from data_base.DBuse import data_getter, sql_safe_select, mongo_game_answer
 from filters.MapFilters import PutinFilter
-from handlers.stopwar_hand import StopWarState
-from stats.stat import mongo_update_stat, mongo_update_stat_new
+from handlers.story.stopwar_hand import StopWarState
 from utilts import simple_media
 
 
@@ -39,6 +39,7 @@ async def putin_love_putin(message: Message, state: FSMContext):
 @router.message((F.text.in_({"Давай 🤝"})), state=StateofPutin.main, flags=flags)
 async def putin_not_love_putin(message: Message, state: FSMContext):
     await state.set_state(StateofPutin.main)
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='started_putin', value='Да')
     text = await sql_safe_select('text', 'texts', {'name': 'putin_lets_speak_about'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Отличный президент ✊"))
@@ -120,7 +121,7 @@ async def putin_game1_question(message: Message, state: FSMContext):
         await mongo_update_stat_new(tg_id=message.from_user.id, column='started_putin_lies', value='Да')
     try:
         count = (await state.get_data())['pgamecount']
-    except:
+    except Exception:
         count = 0
     how_many_rounds = (await data_getter("SELECT COUNT (*) FROM public.putin_lies"))[0][0]
     if count < how_many_rounds:
@@ -203,7 +204,7 @@ async def putin_plenty_promises(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(((F.text == "Давай 👌")), state=StateofPutin.game2, flags=flags)
+@router.message((F.text == "Давай 👌"), state=StateofPutin.game2, flags=flags)
 async def putin_nothing_done(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'putin_nothing_done'})
     nmarkup = ReplyKeyboardBuilder()
@@ -211,7 +212,7 @@ async def putin_nothing_done(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(((F.text == "Начнем! 🚀")), state=StateofPutin.game2, flags=flags)
+@router.message((F.text == "Начнем! 🚀"), state=StateofPutin.game2, flags=flags)
 async def putin_gaming(message: Message):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='started_putin_old_lies', value='Да')
     text = await sql_safe_select('text', 'texts', {'name': 'putin_gaming'})
@@ -225,7 +226,7 @@ async def putin_gaming(message: Message):
 async def putin_game2_question(message: Message, state: FSMContext):
     try:
         count = (await state.get_data())['pgamecount']
-    except:
+    except Exception:
         count = 0
     how_many_rounds = (await data_getter("SELECT COUNT (*) FROM public.putin_old_lies"))[0][0]
     if count < how_many_rounds:
