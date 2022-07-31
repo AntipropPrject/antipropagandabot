@@ -735,6 +735,7 @@ async def antip_why_not_wiki(message: Message, state: FSMContext):
                  | (F.text.contains('Не слышал')) | (F.text.contains('я доверяю'))),
                 state=propaganda_victim.wiki, flags=flags)
 async def antip_clear_and_cool(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='why_not_wiki', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'antip_clear_and_cool'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
