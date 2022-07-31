@@ -11,13 +11,16 @@ from bata import all_data
 from data_base.DBuse import redis_just_one_read
 from day_func import day_count
 from export_to_csv.pg_mg import Backup
-from handlers import start_hand, anti_prop_hand, smi_hand, donbass_hand, true_resons_hand, putin_hand, stopwar_hand, \
-    nazi_hand, preventive_strike, new_admin_hand, welcome_messages, status, main_menu_hand, admin_for_games, \
-    admin_for_games_dir
+
+
 from export_to_csv import pg_mg
+from handlers import start_hand
 from handlers.admin_for_games_dir import mistakeorlie
+from handlers.admin_handlers import new_admin_hand, admin_for_games
 from handlers.advertising import start_spam
-from handlers.other import other_file
+from handlers.other import other_file, status
+from handlers.story import welcome_messages, anti_prop_hand, smi_hand, true_resons_hand, donbass_hand, nazi_hand, \
+    preventive_strike, putin_hand, stopwar_hand, main_menu_hand
 from middleware.trottling import ThrottlingMiddleware
 from utilts import happy_tester
 
