@@ -39,7 +39,6 @@ async def commands_start(message: types.Message, state: FSMContext):  # Перв
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     await state.set_state(welcome_states.start_dialog.dialogue_1)
 
-
     # else:
     #    await message.answer("Извините, этого бота можно проходить только один раз")
 
@@ -55,7 +54,7 @@ async def start_base(message):
     await mongo_user_info(user_id, message.from_user.username)
 
 
-@router.message((F.text.contains('верить') | F.text.contains('50 000')), welcome_states.start_dialog.dialogue_1,
+@router.message((F.text.contains('верить') | F.text.contains('50 000')), state=welcome_states.start_dialog.dialogue_1,
                 content_types=types.ContentType.TEXT,
                 text_ignore_case=True, flags=flags)  # А с чего мне тебе верить?
 async def message_1(message: types.Message, state: FSMContext):
