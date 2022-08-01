@@ -31,8 +31,9 @@ async def commands_start(message: types.Message, state: FSMContext):  # Перв
     asyncio.create_task(start_base(message))
     await state.clear()
     markup = ReplyKeyboardBuilder()
-    markup.row(types.KeyboardButton(text="Начнем 🇷🇺🇺🇦"))
+    markup.row(types.KeyboardButton(text="Начнём 🇷🇺🇺🇦"))
     markup.row(types.KeyboardButton(text="А с чего мне тебе верить? 🤔"))
+    markup.row(types.KeyboardButton(text="Сначала расскажи про 50 000 руб за ложь 💵"))
     text = await sql_safe_select("text", "texts", {"name": "start_hello"})
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     await state.set_state(welcome_states.start_dialog.dialogue_1)
@@ -49,21 +50,22 @@ async def start_base(message):
     await mongo_user_info(user_id, message.from_user.username)
 
 
-@router.message(welcome_states.start_dialog.dialogue_1, text_contains='верить', content_types=types.ContentType.TEXT,
+@router.message(welcome_states.start_dialog.dialogue_1, text_contains=('верить','50 000'),
+                content_types=types.ContentType.TEXT,
                 text_ignore_case=True, flags=flags)  # А с чего мне тебе верить?
 async def message_1(message: types.Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='first_button', value='А с чего мне тебе верить?')
     markup = ReplyKeyboardBuilder()
-    markup.add(types.KeyboardButton(text="Хорошо 👌"))
+    markup.add(types.KeyboardButton(text="Начнём 🇷🇺🇺🇦"))
     text = await sql_safe_select("text", "texts", {"name": "start_why_belive"})
 
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     await state.set_state(welcome_states.start_dialog.dialogue_2)
 
 
-@router.message(welcome_states.start_dialog.dialogue_2, text_contains='Хорошо', content_types=types.ContentType.TEXT,
+@router.message(welcome_states.start_dialog.dialogue_2, text_contains='Начнём', content_types=types.ContentType.TEXT,
                 text_ignore_case=True, flags=flags)
-@router.message(welcome_states.start_dialog.dialogue_1, text_contains='Начнем 🇷🇺🇺🇦',
+@router.message(welcome_states.start_dialog.dialogue_1, text_contains='Начнём',
                 content_types=types.ContentType.TEXT,
                 text_ignore_case=True, flags=flags)
 # @router.message(welcome_states.start_dialog.dialogue_3) запомнить на ты или на вы в базу
