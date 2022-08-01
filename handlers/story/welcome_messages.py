@@ -55,7 +55,7 @@ async def start_base(message):
     await mongo_user_info(user_id, message.from_user.username)
 
 
-@router.message(welcome_states.start_dialog.dialogue_1, text_contains=('верить','50 000'),
+@router.message(welcome_states.start_dialog.dialogue_1, (F.text.contains('верить') | F.text.contains('50 000')),
                 content_types=types.ContentType.TEXT,
                 text_ignore_case=True, flags=flags)  # А с чего мне тебе верить?
 async def message_1(message: types.Message, state: FSMContext):
