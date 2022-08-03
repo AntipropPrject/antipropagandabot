@@ -63,6 +63,16 @@ class TVPropagandaFilter(BaseFilter):
         return False
 
 
+class WikiFilter(BaseFilter):
+
+    async def __call__(self, message: Message) -> Union[bool, Dict[str, Any]]:
+        if await redis_check(f'Usrs: {message.from_user.id}: Start_answers: NotWiki'):
+            print('Не верит википедии')
+            return True
+        else:
+            return False
+
+
 class WebPropagandaFilter(BaseFilter):
 
     async def __call__(self, message: Message) -> Union[bool, Dict[str, Any]]:
@@ -76,6 +86,16 @@ class WebPropagandaFilter(BaseFilter):
         return False
 
 
+
+class YandexPropagandaFilter(BaseFilter):
+
+    async def __call__(self, message: Message) -> Union[bool, Dict[str, Any]]:
+        if await redis_check(f'Usrs: {message.from_user.id}: Start_answers: Yandex'):
+            return True
+        else:
+            return False
+
+
 class PplPropagandaFilter(BaseFilter):
 
     async def __call__(self, message: Message) -> Union[bool, Dict[str, Any]]:
@@ -87,24 +107,6 @@ class PplPropagandaFilter(BaseFilter):
                 return {'ppl_lies_list': ppl_lies_list}
         return False
 
-
-class YandexPropagandaFilter(BaseFilter):
-
-    async def __call__(self, message: Message) -> Union[bool, Dict[str, Any]]:
-        if await redis_check(f'Usrs: {message.from_user.id}: Start_answers: Yandex'):
-            return True
-        else:
-            return False
-
-
-class WikiFilter(BaseFilter):
-
-    async def __call__(self, message: Message) -> Union[bool, Dict[str, Any]]:
-        if await redis_check(f'Usrs: {message.from_user.id}: Start_answers: NotWiki'):
-            print('Не верит википедии')
-            return True
-        else:
-            return False
 
 # Этот можно ифом, но я не знаю насколько там длинная цепочка с переубеждением
 class OperationWar(BaseFilter):
