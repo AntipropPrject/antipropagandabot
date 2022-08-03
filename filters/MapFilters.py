@@ -29,7 +29,7 @@ class INFOStateFilter(BaseFilter):
             return True
         return False
 
-    
+
 
 class YandexPropagandaFilter(BaseFilter):
 

@@ -101,7 +101,9 @@ async def reset(message: Message, state: FSMContext):
     if stt == 'admin:mediais_back':
         await state.set_state(admin.secretreborn)
         await message.answer('Вы все еще в опасном меню', reply_markup=secretrebornkb())
-    elif stt in ('admin:mass_media_menu', 'admin:truthgame', 'admin:tv_lie'):
+    elif stt in ('admin:mass_media_menu', 'admin:truthgame', 'admin:tv_lie', 'admin:addingMistakeOrLie',
+                 'admin:putin_game_lobby', 'admin:putin_game_old_lies', 'admin:normal_game_lobby',
+                 'admin:nazi_game_lobby'):
         await admin_home_games(message, state)
     elif 'admin:truthgame_' in stt:
         await admin_truthgame(message, state)
