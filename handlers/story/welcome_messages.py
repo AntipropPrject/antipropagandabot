@@ -56,8 +56,6 @@ async def start_base(message):
 
 @router.message((F.text.contains('верить') | F.text.contains('50 000')), state=welcome_states.start_dialog.dialogue_1,
                 flags=flags)  # А с чего мне тебе верить?
-                content_types=types.ContentType.TEXT,
-                 flags=flags)  # А с чего мне тебе верить?
 async def message_1(message: types.Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='first_button', value='А с чего мне тебе верить?')
     markup = ReplyKeyboardBuilder()
