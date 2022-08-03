@@ -15,7 +15,7 @@ bot = data.get_bot()
 logger = get_logger('SPAM')
 async def start_spam(datet):
     asyncio.create_task(send_to_chat("Рассылка началась"))
-    logger.info("Начало рассылки")
+    logger.info("Функция рассылки запущена")
     print('start spam')
     date = datetime.strptime(datet, '%Y.%m.%d %H:%M')
     client = data.get_mongo()

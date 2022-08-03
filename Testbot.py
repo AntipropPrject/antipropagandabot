@@ -1,27 +1,19 @@
 import asyncio
-from datetime import datetime
 from aiogram import Dispatcher
-from aiogram.client.session import aiohttp
 from aiogram.dispatcher.fsm.storage.redis import RedisStorage
 from aiogram.dispatcher.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 from aiohttp import web
-
 import bata
 from bata import all_data
-from data_base.DBuse import redis_just_one_read
-from day_func import day_count
-from export_to_csv.pg_mg import Backup
-
-
 from export_to_csv import pg_mg
 from handlers import start_hand
 from handlers.admin_for_games_dir import mistakeorlie
 from handlers.admin_handlers import new_admin_hand, admin_for_games
-from handlers.advertising import start_spam
 from handlers.other import other_file, status
 from handlers.story import welcome_messages, anti_prop_hand, smi_hand, true_resons_hand, donbass_hand, nazi_hand, \
     preventive_strike, putin_hand, stopwar_hand, main_menu_hand
 from middleware.trottling import ThrottlingMiddleware
+from periodic_func import periodic
 from utilts import happy_tester
 
 data = all_data()
@@ -30,6 +22,7 @@ storage = RedisStorage.from_url(data.redis_url)
 dp = Dispatcher(storage)
 
 async def on_startup(dispatcher: Dispatcher) -> None:
+    asyncio.create_task(periodic())
     webhook = await bot.get_webhook_info()
     if webhook is not None:
         await bot.delete_webhook(drop_pending_updates=True)
@@ -56,7 +49,6 @@ async def on_startup(dispatcher: Dispatcher) -> None:
     else:
         print('Tickets checking is disabled, so noone will know...')
 
-    asyncio.create_task(periodic())
 
 async def on_shutdown(dispatcher: Dispatcher) -> None:
     print("😴 Bot shutdown...")
@@ -69,29 +61,6 @@ def configure_app(dp, bot) -> web.Application:
     SimpleRequestHandler(dispatcher=dp, bot=bot).register(app, path="")
     setup_application(app, dp, bot=bot)
     return app
-
-
-async def periodic():
-    print('periodic function has been started')
-    backup = Backup()
-    while True:
-        status_spam = await redis_just_one_read('Usrs: admins: spam: status:')
-        datefor_backup = datetime.now().strftime('%Y-%m-%d_%H-%M')
-        c_time = datetime.now().strftime("%H:%M:%S")
-        date = datetime.now().strftime('%Y.%m.%d')
-
-        if c_time == '21:00:01':
-            await day_count(count_delete=True)
-        if c_time == '07:00:01':
-            await backup.dump_all(name=f'DUMP_{datefor_backup}')
-        if status_spam == '1':
-            if c_time == '08:00:01':
-                await start_spam(f'{date} 11:00')
-            if c_time == '16:00:01':
-                await start_spam(f'{date} 19:00')
-        if c_time == '19:00:01':
-            await backup.dump_all(name=f'DUMP_{datefor_backup}')
-        await asyncio.sleep(1)
 
 
 def main():
