@@ -86,7 +86,8 @@ async def admin_logs(id, name, text):
 
 async def send_to_chat(text):
     try:
-        await bot.send_message(chat_id='-1001397216477', text=text)
+        bot_info = await bot.get_me()
+        await bot.send_message(chat_id='-1001397216477', text=f"Hello, im {bot_info.first_name}\n\n" + text)
     except:
         print("Мне не удалось найти бота в канале для ошибок, сори")
 
