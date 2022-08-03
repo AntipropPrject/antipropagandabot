@@ -732,7 +732,7 @@ async def approve_edit_text(message: Message, state: FSMContext):
         await state.clear()
         await state.set_state(admin.edit_context)
     else:
-        await message.answer('Что-то пошло не так. Вы не ошиблись в разметке?')
+        await message.answer('Что-то пошло не так. Вы не ошиблись в Аке?')
 
 
 @router.message((F.text == 'Подтвердить'), state=admin.confirm_add_media)
