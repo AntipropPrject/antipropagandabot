@@ -5,6 +5,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 from data_base.DBuse import sql_safe_update, data_getter, sql_safe_insert, sql_delete, sql_games_row_selecter, \
     sql_select_row_like
 from filters.isAdmin import IsAdmin
+from handlers.admin_handlers.new_admin_hand import edit_media, text_edit_text_tag
 from keyboards.admin_keys import games_keyboard, admin_games_keyboard, app_admin_keyboard, \
     game_keys
 from log import logg
@@ -1263,7 +1264,7 @@ async def menu(message: types.Message, state: FSMContext):
     mnrkup = ReplyKeyboardBuilder()
     mnrkup.row(types.KeyboardButton(text="Редактировать подпись(текст)"))
     mnrkup.row(types.KeyboardButton(text="Перезалить видео или фото"))
-    await message.answer('что именно нуждается в редактировании?', reply_markup=mnrkup.as_markup(resize_keyboard=True))
+    await message.answer('Что именно нуждается в редактировании?', reply_markup=mnrkup.as_markup(resize_keyboard=True))
     await state.set_state(admin.tv_lie_upd_text_or_media)
 
 
@@ -1276,8 +1277,11 @@ async def menu(message: types.Message, state: FSMContext):
     nmrkup = ReplyKeyboardBuilder()
     for i in postgresdata:
         nmrkup.row(types.KeyboardButton(text=f'{i[0]}'))
+    nmrkup.adjust(2)
+    nmrkup.row(types.KeyboardButton(text='Назад'))
     await message.answer(
-        "Сюжеты идут по порядку в паре с опровержением. Утверждение сожержит в теге lie, опровержение содержит reb. Ваша задача выбрать сюжет, в котором вы хотите поменять текст  ",
+        "Перед вами теги для редактирования теста через обычную панель. Сюжеты содержат lie, а опровержения reb.\n\n"
+        "Нажмите на нужный тег, чтобы перейти в режим редактирования.",
         reply_markup=nmrkup.as_markup(resize_keyboard=True))
     await state.set_state(admin.tv_lie_upd_text)
 
@@ -1292,20 +1296,19 @@ async def menu(message: types.Message, state: FSMContext):
     for i in postgresdata:
         nmrkup.row(types.KeyboardButton(text=f'{i[0]}'))
     await message.answer(
-        "Сюжеты идут по порядку в паре с опровержением. Утверждение сожержит в теге lie, опровержение сожержит reb. Ваша задача выбрать сюжет, который хотите перезалить  ",
+        "Перед вами теги для редактирования теста через обычную панель. Сюжеты содержат lie, а опровержения reb.\n\n"
+        "Нажмите на нужный тег, чтобы перейти в режим редактирования.",
         reply_markup=nmrkup.as_markup(resize_keyboard=True))
     await state.set_state(admin.tv_lie_upd)
 
 
 @router.message(state=admin.tv_lie_upd)
 async def admin_home(message: types.Message, state: FSMContext):
-    from handlers.admin_handlers.new_admin_hand import edit_media
     await edit_media(message, state)
 
 
 @router.message(state=admin.tv_lie_upd_text)
 async def admin_home(message: types.Message, state: FSMContext):
-    from handlers.admin_handlers.new_admin_hand import text_edit_text_tag
     await text_edit_text_tag(message, state)
 
 
