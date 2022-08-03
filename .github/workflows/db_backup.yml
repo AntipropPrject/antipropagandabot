@@ -12,9 +12,9 @@ jobs:
       - name: ALLDUMP
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.TEST_IP }}
-          username: ec2-user
-          key: ${{ secrets.SSHKEY }}
+          host: ${{ secrets.DO_IP }}
+          username: ${{ secrets.DO_USERNAME }}
+          key: ${{ secrets.SSH }}
           connect_timeout: 10s
           script: |
             echo Preparing
