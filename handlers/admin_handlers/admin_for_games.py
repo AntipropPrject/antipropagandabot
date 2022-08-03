@@ -5,7 +5,6 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 from data_base.DBuse import sql_safe_update, data_getter, sql_safe_insert, sql_delete, sql_games_row_selecter, \
     sql_select_row_like
 from filters.isAdmin import IsAdmin
-from handlers.admin_handlers.new_admin_hand import edit_media, text_edit_text_tag
 from keyboards.admin_keys import games_keyboard, admin_games_keyboard, app_admin_keyboard, \
     game_keys
 from log import logg
@@ -1304,11 +1303,13 @@ async def menu(message: types.Message, state: FSMContext):
 
 @router.message(state=admin.tv_lie_upd)
 async def admin_home(message: types.Message, state: FSMContext):
+    from handlers.admin_handlers.new_admin_hand import edit_media
     await edit_media(message, state)
 
 
 @router.message(state=admin.tv_lie_upd_text)
 async def admin_home(message: types.Message, state: FSMContext):
+    from handlers.admin_handlers.new_admin_hand import text_edit_text_tag
     await text_edit_text_tag(message, state)
 
 
