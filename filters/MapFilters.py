@@ -29,6 +29,16 @@ class INFOStateFilter(BaseFilter):
             return True
         return False
 
+    
+
+class YandexPropagandaFilter(BaseFilter):
+
+    async def __call__(self, message: Message) -> Union[bool, Dict[str, Any]]:
+        if await redis_check(f'Usrs: {message.from_user.id}: Start_answers: Yandex'):
+            return True
+        else:
+            return False
+
 
 class PoliticsFilter(BaseFilter):
     title: Union[str]
@@ -84,16 +94,6 @@ class WebPropagandaFilter(BaseFilter):
             if bad_lie in web_lies_list:
                 return {'web_lies_list': web_lies_list}
         return False
-
-
-
-class YandexPropagandaFilter(BaseFilter):
-
-    async def __call__(self, message: Message) -> Union[bool, Dict[str, Any]]:
-        if await redis_check(f'Usrs: {message.from_user.id}: Start_answers: Yandex'):
-            return True
-        else:
-            return False
 
 
 class PplPropagandaFilter(BaseFilter):
