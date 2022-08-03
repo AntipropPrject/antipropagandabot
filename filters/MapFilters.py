@@ -76,6 +76,18 @@ class WebPropagandaFilter(BaseFilter):
         return False
 
 
+class PplPropagandaFilter(BaseFilter):
+
+    async def __call__(self, message: Message) -> Union[bool, Dict[str, Any]]:
+        ppl_lies_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:')
+        bad_ppl_lies = ("Дмитрий Песков", "Сергей Лавров",
+                        "Маргарита Симоньян", "Владимир Соловьев", "Никита Михалков")
+        for bad_lie in bad_ppl_lies:
+            if bad_lie in ppl_lies_list:
+                return {'ppl_lies_list': ppl_lies_list}
+        return False
+
+
 class YandexPropagandaFilter(BaseFilter):
 
     async def __call__(self, message: Message) -> Union[bool, Dict[str, Any]]:
@@ -93,19 +105,6 @@ class WikiFilter(BaseFilter):
             return True
         else:
             return False
-
-
-class PplPropagandaFilter(BaseFilter):
-
-    async def __call__(self, message: Message) -> Union[bool, Dict[str, Any]]:
-        ppl_lies_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:')
-        bad_ppl_lies = ("Дмитрий Песков", "Сергей Лавров",
-                        "Маргарита Симоньян", "Владимир Соловьев", "Никита Михалков")
-        for bad_lie in bad_ppl_lies:
-            if bad_lie in ppl_lies_list:
-                return {'ppl_lies_list': ppl_lies_list}
-        return False
-
 
 # Этот можно ифом, но я не знаю насколько там длинная цепочка с переубеждением
 class OperationWar(BaseFilter):
