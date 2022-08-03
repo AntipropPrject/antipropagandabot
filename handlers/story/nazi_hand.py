@@ -586,6 +586,7 @@ async def putin_game2_are_you_sure(message: Message):
     ((F.text == "Мне уже хватит 👌") | (F.text == "Спасибо 🤝") | (F.text == "Пропустим игру 🙅‍♂️")),
     state=NaziState.game, flags=flags)
 async def putin_in_the_past(message: Message, state: FSMContext):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='nazi_end', value='Да')
     if message.text == 'Пропустим игру 🙅‍♂️':
         await mongo_update_stat_new(tg_id=message.from_user.id, column='game_ru_or_usr', value='Пропустили')
     await state.clear()

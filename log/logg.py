@@ -1,12 +1,15 @@
 import asyncio
 import os
 from datetime import datetime
-
 from aiogram import loggers
-from colorama import Fore
-import logging
 from bata import all_data
 import pathlib
+import logging
+import traceback
+import os
+import json
+import logging
+import logging.config
 
 data = all_data()
 bot = data.get_bot()
@@ -27,11 +30,40 @@ infolog.setLevel(logging.INFO)
 infolog.addHandler(logging.FileHandler(filename=f"statlogs/{today_for_log}.log", mode='a'))
 
 
+
+
+FOLDER_LOG = "log"
+LOGGING_CONFIG_FILE = 'loggers.json'
+
+def create_log_folder(folder=FOLDER_LOG):
+    if not os.path.exists(folder):
+        os.mkdir(folder)
+
+def get_logger(name, template='default'):
+    create_log_folder()
+    with open(LOGGING_CONFIG_FILE, "r") as f:
+        dict_config = json.load(f)
+        dict_config["loggers"][name] = dict_config["loggers"][template]
+    logging.config.dictConfig(dict_config)
+    return logging.getLogger(name)
+
+def get_default_logger():
+    create_log_folder()
+    with open(LOGGING_CONFIG_FILE, "r") as f:
+        logging.config.dictConfig(json.load(f))
+
+    return logging.getLogger("default")
+
+
+logger = get_logger('main')
 def get_info(text):
-    pass
+    logger.info(text)
+
+
 
 
 async def get_error(text, file_name=None):
+    logger.error(text)
     asyncio.create_task(send_to_chat(f"File: {file_name}\n\nError: {text}"))
 
 
@@ -57,3 +89,6 @@ async def send_to_chat(text):
         await bot.send_message(chat_id='-1001397216477', text=text)
     except:
         print("Мне не удалось найти бота в канале для ошибок, сори")
+
+
+
