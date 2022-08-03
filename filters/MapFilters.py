@@ -80,7 +80,6 @@ class YandexPropagandaFilter(BaseFilter):
 
     async def __call__(self, message: Message) -> Union[bool, Dict[str, Any]]:
         if await redis_check(f'Usrs: {message.from_user.id}: Start_answers: Yandex'):
-            print('Верит яндексу')
             return True
         else:
             return False
@@ -179,9 +178,6 @@ class SubscriberFilter(BaseFilter):
             return True
 
 
-
-
-
 class ManualFilters:
     def __init__(self, message: Message, state: FSMContext):
         self.message = message
@@ -201,5 +197,3 @@ class ManualFilters:
             await true_resons_hand.reasons_demilitarism(self.message, self.state)
         elif welc_message_one[5] in war_answers:
             await true_resons_hand.reasons_biopigeons(self.message, self.state)
-
-
