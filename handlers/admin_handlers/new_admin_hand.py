@@ -18,7 +18,8 @@ from data_base.DBuse import sql_safe_select, sql_safe_update, sql_safe_insert, s
 from day_func import day_count
 from export_to_csv.pg_mg import Backup
 from filters.isAdmin import IsAdmin, IsSudo, IsKamaga
-from handlers.admin_handlers.admin_for_games import admin_home_games, admin_truthgame, admin_gam_tv, admin_mistake_lie
+from handlers.admin_handlers.admin_for_games import admin_home_games, admin_truthgame, admin_gam_tv, admin_mistake_lie, \
+    admin_normal_game_start
 from keyboards.admin_keys import main_admin_keyboard, middle_admin_keyboard, app_admin_keyboard, redct_text, \
     redct_media, redct_games, settings_bot, spam_admin_keyboard
 from keyboards.admin_keys import secretrebornkb
@@ -111,6 +112,8 @@ async def reset(message: Message, state: FSMContext):
         await admin_gam_tv(message, state)
     elif 'MistakeOrLie' in stt:
         await admin_mistake_lie(message, state)
+    elif 'normal_game' in stt:
+        await admin_normal_game_start(message, state)
     elif 'admin:editors_menu' in str(stt):
         await state.set_state(admin.edit_context)
         await message.answer("Выберите интересующий вас пункт меню", reply_markup=await settings_bot())
