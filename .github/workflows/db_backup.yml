@@ -25,8 +25,10 @@ jobs:
             echo DUMPING MONGO
             sudo -S docker exec antipropagandabot-mongodb-1 mongodump -u mongoOTPOR -p mongoOTPOR --authenticationDatabase admin --db database -o /home
             sudo -S docker cp antipropagandabot-mongodb-1:/home/database /root/Backups
+            echo COPY REDIS DUMP
+            sudo -S cp /root/antipropagandabot/storage/redis/data/dump.rdb dump.rdb
             echo Zipping
-            zip -r BACKUP-$(date "+%b_%d_%Y").zip database PGDUMP.sql
+            zip -r BACKUP-$(date "+%b_%d_%Y").zip database PGDUMP.sql dump.rdb
             
       
         
