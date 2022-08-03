@@ -8,7 +8,7 @@ from bata import all_data
 from export_to_csv import pg_mg
 from handlers import start_hand
 from handlers.admin_for_games_dir import mistakeorlie
-from handlers.admin_handlers import new_admin_hand, admin_for_games
+from handlers.admin_handlers import admin_factory, marketing, admin_for_games, new_admin_hand
 from handlers.other import other_file, status
 from handlers.story import welcome_messages, anti_prop_hand, smi_hand, true_resons_hand, donbass_hand, nazi_hand, \
     preventive_strike, putin_hand, stopwar_hand, main_menu_hand
@@ -70,6 +70,8 @@ def main():
     dp.include_router(pg_mg.router)
     dp.include_router(new_admin_hand.router)
     dp.include_router(admin_for_games.router)
+    dp.include_router(marketing.router)
+    dp.include_router(admin_factory.router)
     dp.include_router(mistakeorlie.router)
 
     dp.include_router(status.router)
