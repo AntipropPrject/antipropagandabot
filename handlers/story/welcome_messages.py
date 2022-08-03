@@ -28,6 +28,7 @@ async def adv_company(message: types.Message, state: FSMContext, command: Comman
 
 @router.message(commands=['start', 'help', 'restart'], state='*', flags=flags)
 async def commands_start(message: types.Message, state: FSMContext):  # Первое сообщение
+    await day_count()
     asyncio.create_task(start_base(message))
     await state.clear()
     markup = ReplyKeyboardBuilder()
@@ -37,6 +38,9 @@ async def commands_start(message: types.Message, state: FSMContext):  # Перв
     text = await sql_safe_select("text", "texts", {"name": "start_hello"})
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     await state.set_state(welcome_states.start_dialog.dialogue_1)
+
+    # else:
+    #    await message.answer("Извините, этого бота можно проходить только один раз")
 
 
 async def start_base(message):
@@ -52,6 +56,8 @@ async def start_base(message):
 
 @router.message((F.text.contains('верить') | F.text.contains('50 000')), state=welcome_states.start_dialog.dialogue_1,
                 flags=flags)  # А с чего мне тебе верить?
+                content_types=types.ContentType.TEXT,
+                 flags=flags)  # А с чего мне тебе верить?
 async def message_1(message: types.Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='first_button', value='А с чего мне тебе верить?')
     markup = ReplyKeyboardBuilder()
