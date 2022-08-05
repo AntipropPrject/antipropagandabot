@@ -324,8 +324,6 @@ async def check_avtual_news(date) -> dict:
     except Exception as e:
         print(e)
 
-
-
 async def mongo_pop_news(m_id: str, coll=None):
     try:
 
@@ -337,7 +335,7 @@ async def mongo_pop_news(m_id: str, coll=None):
         elif 'actu' in coll:
             collection = database['spam_actual_news']
             await collection.delete_one({'media': {'$regex': m_id}})
-        print('Delete')
+        return
     except Exception as error:
         await logg.get_error(f"mongo update | {error}", __file__)
 
