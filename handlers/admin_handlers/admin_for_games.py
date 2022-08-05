@@ -846,7 +846,7 @@ async def admin_normal_game_start(message: types.Message, state: FSMContext):
     await state.clear()
     await logg.admin_logs(message.from_user.id, message.from_user.username,
                           "Нормал - Загрузка медиа")
-    await message.answer("Привет! Это простая игра. Тут только один сюжет без опровержения! Что будем делать?",
+    await message.answer("Привет! Это игра абсурда. Тут только один сюжет без опровержения! Что будем делать?",
                          reply_markup=game_keys())
     await state.set_state(admin.normal_game_lobby)
 
@@ -947,26 +947,17 @@ async def admin_normal_game_update_start(message: types.Message, state: FSMConte
 async def admin_normal_game_update_apply(message: types.Message, state: FSMContext):
     await state.update_data(media_to_update=message.text)
     nmrkup = ReplyKeyboardBuilder()
-
     nmrkup.row(types.KeyboardButton(text="Назад"))
-    media_id = await data_getter(f"select t_id from assets where name = '{message.text}'")
-    try:
-        await message.answer_video(media_id[0][0],
-                                   caption="Посмотрите внимательно. Это сюжет вы хотите редактировать? \n"
-                                           "Если да, тогда отправьте новый сюжет.",
-                                   reply_markup=nmrkup.as_markup(resize_keyboard=True))
-    except:
-        await message.answer_photo(media_id[0][0],
-                                   caption="Посмотрите внимательно. Это сюжет вы хотите редактировать? \n"
-                                           "Если да, тогда отправьте новый сюжет.",
-                                   reply_markup=nmrkup.as_markup(resize_keyboard=True))
+    text = await sql_safe_select("text", "texts", {"name": message.text})
+    media_id = await sql_safe_select("t_id", "assets", {"name": message.text})
+    await game_answer(message, media_id, text)
+    await message.answer('Этот сюжет вы хотели отредактировать? Если да, то отправьте новый вариант.',
+                         reply_markup=nmrkup.as_markup(resize_keyboard=True))
     await state.set_state(admin.normal_game_upd_apply)
 
 
 @router.message(state=admin.normal_game_upd_apply)
 async def admin_home(message: types.Message, state: FSMContext):
-    nmrkup = ReplyKeyboardBuilder()
-    nmrkup.row(types.KeyboardButton(text="Назад"))
     data = await state.get_data()
     tag = data['media_to_update']
     try:
@@ -975,13 +966,13 @@ async def admin_home(message: types.Message, state: FSMContext):
         asset = message.video.file_id
     text = message.html_text
     if tag:
-        await data_getter(f"update assets set t_id = '{asset}' where name = '{tag}; commit;'")
-        await data_getter(f"update texts set text = '{text}' where name = '{tag}'; commit;")
-        await message.answer(f"Медиа и текст под тегом <b>{tag}</b> изменено ", parse_mode='html',
-                             reply_markup=nmrkup.as_markup())
+        await sql_safe_update('assets', {'t_id': asset}, {'name': tag})
+        await sql_safe_update('texts', {'text': text}, {'name': tag})
+        await message.answer(f"Медиа и текст под тегом <b>{tag}</b> изменено ")
     else:
         await message.answer("Что-то не так, попробуйте нажать /start и снова зайти в админку")
     await state.clear()
+    await admin_home_games(message, state)
 
 
 @router.message(F.text == "Игра Нацизма 💤")

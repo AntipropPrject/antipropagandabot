@@ -199,15 +199,11 @@ async def happy_tester(bot):
     redis.sadd('LastCommies', *new_log_set)
     diff = new_log_set - old_log_set
     botname = (await bot.get_me()).username
-    print(botname)
-
     s_bot = await SpaceBot.rise('https://otporproject.jetbrains.space', '2dd6e561-edfe-414a-9a5b-b01114d46b9c',
                      'c428a143d05f4512ec5275b8ae190627b71441627f5f7bd975f1021d83ad36aa', 'OTPOR')
-
-
     if len(diff) != 0:
         string, space_string, count = '', '', 0
-
+        message_list = list()
         for comm in diff:
             count += 1
             string = string + '\n' + str(count) + '. ' + comm
@@ -230,18 +226,23 @@ async def happy_tester(bot):
                         await s_bot.update_issue_tag('New Fetures', number, 'PROD SERVER')
                 except ValueError:
                     print('Use commits name templates!')
+            if count % 13 == 0:
+                message_list.append(string)
+                string = ''
         try:
             await bot.send_message(bata.all_data().commichannel,
-                                   f'[{datetime.now().strftime("%H:%M")}] Bot @{botname} is up, detected new commits:\n {string}')
+                                   f'[{datetime.now().strftime("%H:%M")}] Bot @{botname} is up, detected new commits:')
+            for msg in message_list:
+                await bot.send_message(bata.all_data().commichannel, msg)
             await s_bot.send_message('general', f'Bot @{botname} is up, detected new commits:\n {space_string}')
-        except TelegramBadRequest:
-            print(f'BOT NOT IN CHANNEL AND THIS MESSAGE NEED TO BE IN LOGS')
-        print(f'[{datetime.now().strftime("%H:%M")}] Bot is up, detected new commits:{string}')
+        except TelegramBadRequest as exc:
+            print(f'BOT NOT IN CHANNEL AND THIS MESSAGE NEED TO BE IN LOGS\n{exc}')
+        print(f'[{datetime.now().strftime("%H:%M")}] Bot is up, detected new commits:{message_list}')
     else:
         print(f'[{datetime.now().strftime("%H:%M")}] Bot is up, shore is clear: no new commits here')
         try:
             await bot.send_message(bata.all_data().commichannel, f'Bot {botname}'
                                                                  f' was restarted without interesting commits')
         except TelegramBadRequest:
-            print(f'BOT NOT IN CHANNEL AND THIS MESSAGE SHOULD BE IN LOGS')
+            print(f'Bot thinks there is no commits, and cant write it to channel')
     await bot.session.close()
