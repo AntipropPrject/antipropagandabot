@@ -1037,7 +1037,8 @@ async def menu(message: types.Message, state: FSMContext):
             f"insert into texts(text,name) values('{text}', 'country_game_{count}'); commit;")
 
         await data_getter(
-            f"insert into ucraine_or_not_game(asset_name,text_name,belivers,nonbelivers,truth) values ('normal_game_{count}','normal_game_{count}', 1,1,{truth}); commit; ")
+            f"insert into ucraine_or_not_game(asset_name,text_name,belivers,nonbelivers,truth) values "
+            f"('country_game_{count}','country_game_{count}', 1, 1,{truth}); commit; ")
     except Exception as ex:
         await logg.admin_logs(message.from_user.id, message.from_user.username,
                               f"Украина или нет? - Запись в базу данных +{ex}")
@@ -1352,22 +1353,24 @@ async def menu(message: types.Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username,
                           f"Ложь на тв - Запись в базу данных \n {reb_asset} , {tv_channel}")
     # await sql_safe_update('assets', {"t_id": media_id}, {'name': f"statement_{surname}_{count}"})
+    plot_tag = f'{tv_channel}_lie_{str(tag_count).zfill(2)}'
+    reb_tag = f'{tv_channel}_reb_{str(tag_count).zfill(2)}'
     try:
         await data_getter(
-            f"insert into assets(t_id,name) values('{st_asset}', '{tv_channel}_lie_{tag_count}'); commit;")
+            f"insert into assets(t_id,name) values('{st_asset}', '{plot_tag}'); commit;")
         await data_getter(
-            f"insert into assets(t_id,name) values('{reb_asset}', '{tv_channel}_reb_{tag_count}'); commit;")
+            f"insert into assets(t_id,name) values('{reb_asset}', '{reb_tag}'); commit;")
         await data_getter(
-            f"insert into texts(text,name) values('{st_text}', '{tv_channel}_lie_{tag_count}'); commit;")
+            f"insert into texts(text,name) values('{st_text}', '{plot_tag}'); commit;")
         await data_getter(
-            f"insert into texts(text,name) values('{reb_text}', '{tv_channel}_reb_{tag_count}'); commit;")
+            f"insert into texts(text,name) values('{reb_text}', '{reb_tag}'); commit;")
 
     except Exception as ex:
         await logg.admin_logs(message.from_user.id, message.from_user.username,
                               f"Ошибка или ложь(пропагандисты) - Запись в базу данных")
         await message.answer(str(ex))
     await message.answer(
-        f"Добавлено новая пара для игры Ложь На ТВ под тегами {tv_channel}_lie_{tag_count}/{tv_channel}_reb_{tag_count}",
+        f"Добавлено новая пара для игры Ложь На ТВ под тегами {st_asset}/{reb_asset}",
         reply_markup=nmrkup.as_markup(resize_keyboard=True))
     await state.clear()
     await admin_home_games(message, state)
