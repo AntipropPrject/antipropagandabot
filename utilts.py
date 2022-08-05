@@ -244,5 +244,5 @@ async def happy_tester(bot):
             await bot.send_message(bata.all_data().commichannel, f'Bot {botname}'
                                                                  f' was restarted without interesting commits')
         except TelegramBadRequest:
-            print(f'BOT NOT IN CHANNEL AND THIS MESSAGE SHOULD BE IN LOGS')
+            print(f'Bot thinks there is no commits, and cant write it to channel')
     await bot.session.close()
