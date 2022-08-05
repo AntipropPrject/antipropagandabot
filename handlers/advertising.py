@@ -25,40 +25,40 @@ async def start_spam(datet):
     userinfo = database['userinfo']
     main_news_base = all_mass_media_main.find()
     logger.info("Главные новости были получены")
-    try:
-        today_actual = await actual_mass_media.find_one({'datetime': {'$eq': date}})
-        logger.info("Актуальные новости были получены новости были получены")
-    except Exception as e:
-        logger.error(e)
+    today_actual = await actual_mass_media.find_one({'datetime': {'$eq': date}})
+    logger.info("Актуальные новости были получены новости были получены")
 
     main_news_ids = list()
     main_news_list = list()
-    try:
-        async for n in main_news_base:
-            main_news_list.append(n)
-            main_news_ids.append(n['_id'])
-    except Exception as e:
-        logger.error(e)
-        print(e)
+
+    async for n in main_news_base:
+        main_news_list.append(n)
+        main_news_ids.append(n['_id'])
     count = 0
     logger.info('Начало рассылки')
     async for user in userinfo.find({'datetime_end': {'$lt': datetime.utcnow() - timedelta(days=1)}}):
         if all_data().get_data_red().get(f"user_last_answer: {user['_id']}:") != '1':
             asyncio.create_task(news_for_user(user, main_news_list, today_actual, main_news_ids))
             count += 1
+            print(1)
             print("Задача для спама создана")
         else:
             asyncio.create_task(latecomers(user, main_news_list, today_actual, main_news_ids))
             count += 1
             print("Задача для очереди создана")
         await asyncio.sleep(0.033)
-    await mongo_pop_news(m_id=today_actual['media'], coll='actu')
+    try:
+        asyncio.create_task(mongo_pop_news(m_id=today_actual['media'], coll='actu'))
+    except:
+        pass
     logger.info(f'Рассылка завершена, сообщение получили {count}')
     asyncio.create_task(send_to_chat(f"Рассылка завершена\n\nБыло отправлено: +-{count} сообщений"))
 
 
+
 async def latecomers(user, main_news_base, today_actual, main_news_ids):
     for comers in range(5):
+        print(2)
         if all_data().get_data_red().get(f"user_last_answer: {user['_id']}:") != '1':
             await news_for_user(user, main_news_base, today_actual, main_news_ids)
             break
@@ -67,6 +67,7 @@ async def latecomers(user, main_news_base, today_actual, main_news_ids):
 
 async def news_for_user(user, main_news_base, today_actual, main_news_ids):
     user_id = user['_id']
+    print(3)
     print(today_actual)
     user_viewed_news = user['viewed_news']
     if len(user_viewed_news) >= len(main_news_base):
@@ -74,7 +75,6 @@ async def news_for_user(user, main_news_base, today_actual, main_news_ids):
             await send_spam(user_id=user_id, media_id=today_actual['media'], caption=today_actual['caption'])
             print('ОТПРАВКА АКТУАЛЬНОГО СООБЩЕНИЯ', today_actual['media'], today_actual['caption'])
         else:
-            logger.info('Актуальных новостей сегодня нет')
             print('Актуальных новостей сегодня нет')
             return
     else:
@@ -93,6 +93,7 @@ async def news_for_user(user, main_news_base, today_actual, main_news_ids):
 
 
 async def send_spam(user_id, media_id, caption):
+    print(4)
     try:
         if str(caption) != 'None':
             try:
