@@ -878,7 +878,7 @@ async def admin_normal_game_add_done(message: types.Message, state: FSMContext):
     nmrkup = ReplyKeyboardBuilder()
     nmrkup.row(types.KeyboardButton(text="Назад"))
     postgressdata = await data_getter(f"select id from normal_game")
-    count = len(postgressdata) + 1
+    count = str(len(postgressdata) + 1).zfill(2)
     await logg.admin_logs(message.from_user.id, message.from_user.username,
                           f"Игра в нормальность - Запись в базу данных \n {media_id} , normal_game_{count}")
     await sql_safe_insert('public', 'texts', {'name': f'normal_game_{count}', 'text': text})
@@ -1027,6 +1027,7 @@ async def menu(message: types.Message, state: FSMContext):
     nmrkup.row(types.KeyboardButton(text="Назад"))
     postgressdata = await data_getter(f"select name from assets where name like '%country_game%'")
     count = len(postgressdata) + 1
+
     await logg.admin_logs(message.from_user.id, message.from_user.username,
                           f"Украина - Запись в базу данных \n {media_id} , country_game_{count}")
     try:
