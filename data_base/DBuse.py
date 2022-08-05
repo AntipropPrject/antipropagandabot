@@ -63,7 +63,7 @@ async def sql_safe_select(column, table_name, condition_dict):
                                                                                  sql.SQL(", ").join(map(sql.Placeholder,
                                                                                                         condition_dict)),
                                                                                  col_names=sql.SQL(',').join(
-                                                                                         ident_list))
+                                                                                     ident_list))
 
         with get_cursor() as cur:
             cur.execute(safe_query, condition_dict)
@@ -83,16 +83,15 @@ async def sql_safe_select(column, table_name, condition_dict):
 async def sql_safe_insert(table_name, values_dict: dict):
     try:
         safe_query = sql.SQL("INSERT INTO {} ({}) VALUES ({});").format(sql.Identifier(table_name),
-                                                                                  sql.SQL(', ').join(map(sql.Identifier,
-                                                                                                         values_dict)),
-                                                                                     sql.SQL(", ").join(map(sql.Placeholder,
-                                                                                                            values_dict)))
+                                                                        sql.SQL(', ').join(map(sql.Identifier,
+                                                                                               values_dict)),
+                                                                        sql.SQL(", ").join(map(sql.Placeholder,
+                                                                                               values_dict)))
         with get_cursor() as cur:
             cur.execute(safe_query, values_dict)
     except (psycopg2.Error, IndexError) as error:
         await logg.get_error(f"{error}", __file__)
         return False
-
 
 
 async def sql_safe_select_like(column1, column2, table_name, first_condition, second_condition):
@@ -139,8 +138,8 @@ async def sql_games_row_selecter(tablename: str, row: int):
                                              left outer join texts t2 on {tablename}.rebuttal = t2.name)
                                              AS sub WHERE row_number = {row}"""))[0]
             keys = (
-            'truth', 'plot_media', 'plot_text', 'belivers', 'nonbelivers', 'rebb_text', 'rebb_media', 'ROW_NUMBER',
-            'id')
+                'truth', 'plot_media', 'plot_text', 'belivers', 'nonbelivers', 'rebb_text', 'rebb_media', 'ROW_NUMBER',
+                'id')
         elif tablename == 'normal_game':
             data = (await data_getter(f"""SELECT * FROM (Select id, assets.t_id as plot_media, texts.text as plot_text, 
                                              belivers, nonbelivers,
@@ -202,9 +201,6 @@ async def sql_add_value(table_name, column, cond_dict):
     print(a)
 
 
-
-
-
 async def poll_delete_value(key, value):
     try:
         return all_data().get_data_red().delete(value)
@@ -214,8 +210,12 @@ async def poll_delete_value(key, value):
 
 async def sql_safe_insert(schema, table_name, data_dict):
     try:
-        safe_query = sql.SQL("INSERT INTO {}.{} ({}) VALUES ({});").format(sql.Identifier(schema), sql.Identifier(table_name), sql.SQL(', ').join(
-                map(sql.Identifier, data_dict)), sql.SQL(", ").join(map(sql.Placeholder, data_dict)), )
+        safe_query = sql.SQL("INSERT INTO {}.{} ({}) VALUES ({});").format(sql.Identifier(schema),
+                                                                           sql.Identifier(table_name),
+                                                                           sql.SQL(', ').join(
+                                                                               map(sql.Identifier, data_dict)),
+                                                                           sql.SQL(", ").join(
+                                                                               map(sql.Placeholder, data_dict)), )
         with get_cursor() as cur:
             cur.execute(safe_query, data_dict)
         # postgresql_csv_dump(table_name)
@@ -233,9 +233,9 @@ async def sql_safe_update(table_name, data_dict, condition_dict):
         equals = condition_dict[where]
         safe_query = sql.SQL("UPDATE {} SET {} = {} WHERE {} = {};").format(sql.Identifier(table_name),
                                                                             sql.SQL(', ').join(
-                                                                                    map(sql.Identifier, data_dict)),
+                                                                                map(sql.Identifier, data_dict)),
                                                                             sql.SQL(", ").join(
-                                                                                    map(sql.Placeholder, data_dict)),
+                                                                                map(sql.Placeholder, data_dict)),
                                                                             sql.Identifier(where), sql.Literal(equals))
 
         with get_cursor() as cur:
@@ -262,7 +262,6 @@ async def advertising_value(tag):
                 print(response.status)
 
 
-
 """^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^MongoDB^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"""
 
 
@@ -272,7 +271,6 @@ async def mongo_add_news(list_media: str, caption: str, datetime=None, coll=None
         print(caption)
         client = all_data().get_mongo()
         database = client['database']
-
 
         if coll == 'add_main_news':
             collection = database['spam_news_main']
@@ -308,6 +306,26 @@ async def mongo_select_news(coll=None) -> [list, bool]:
         return False
 
 
+async def check_avtual_news(date) -> dict:
+    print(date)
+    client = all_data().get_mongo()
+    database = client.database
+    date_time_1 = datetime.strptime(date+' 11:00', '%Y.%m.%d %H:%M')
+    date_time_2 = datetime.strptime(date+' 19:00', '%Y.%m.%d %H:%M')
+    print(date_time_1)
+    print(date_time_2)
+    collection = database['spam_actual_news']
+    try:
+        count_news_on_date = dict()
+        count_news_on_date['news_11:00'] = int(await collection.count_documents({'datetime': date_time_1}))
+        count_news_on_date['news_19:00'] = int(await collection.count_documents({'datetime': date_time_2}))
+        print(count_news_on_date)
+        return count_news_on_date
+    except Exception as e:
+        print(e)
+
+
+
 async def mongo_pop_news(m_id: str, coll=None):
     try:
 
@@ -331,10 +349,12 @@ async def mongo_update_news(m_id: str, new_m_id: str, new_caption: str, coll=Non
         database = client.database
         if 'main' in coll:
             collection = database['spam_news_main']
-            await collection.replace_one({'media': {'$regex': m_id}}, {"media": str(new_m_id), "caption": new_caption}, True)
+            await collection.replace_one({'media': {'$regex': m_id}}, {"media": str(new_m_id), "caption": new_caption},
+                                         True)
         elif 'actu' in coll:
             collection = database['spam_actual_news']
-            await collection.replace_one({'media': {'$regex': m_id}}, {"media": str(new_m_id), "caption": new_caption}, True)
+            await collection.replace_one({'media': {'$regex': m_id}}, {"media": str(new_m_id), "caption": new_caption},
+                                         True)
         print('Update')
     except Exception as error:
         await logg.get_error(f"mongo update | {error}", __file__)
@@ -568,6 +588,7 @@ async def del_key(key):
         all_data().get_data_red().delete(key)
     except Exception as error:
         await logg.get_error(f"{error}", __file__)
+
 
 async def redis_pop(key):
     try:

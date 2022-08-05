@@ -14,7 +14,7 @@ from bata import all_data
 from bot_statistics.stat import mongo_select_stat, mongo_select_stat_all_user
 from data_base.DBuse import sql_safe_select, sql_safe_update, sql_safe_insert, sql_delete, redis_just_one_write, \
     redis_just_one_read, mongo_select_news, \
-    mongo_add_news, mongo_pop_news, mongo_update_news
+    mongo_add_news, mongo_pop_news, mongo_update_news, check_avtual_news
 from day_func import day_count
 from export_to_csv.pg_mg import Backup
 from filters.isAdmin import IsAdmin, IsSudo, IsKamaga
@@ -371,11 +371,30 @@ async def add_news(message: Message, state: FSMContext):
         datetime.strptime(message.text, '%Y.%m.%d')
         await state.update_data(plan_data=message.text)
         nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(types.KeyboardButton(text="1️⃣1️⃣:0️⃣0️⃣"))
-        nmarkup.row(types.KeyboardButton(text="1️⃣9️⃣:0️⃣0️⃣"))
-        nmarkup.adjust(2)
-        await state.set_state(admin.add_time_for_spam)
-        await message.answer("Выберите время для рассылки", reply_markup=nmarkup.as_markup(resize_keyboard=True))
+        check_date = await check_avtual_news(message.text)
+        try:
+            if int(check_date['news_11:00']) == 0 and int(check_date['news_19:00']) == 0:
+                await state.set_state(admin.add_time_for_spam)
+                nmarkup.row(types.KeyboardButton(text="1️⃣1️⃣:0️⃣0️⃣"))
+                nmarkup.row(types.KeyboardButton(text="1️⃣9️⃣:0️⃣0️⃣"))
+                nmarkup.adjust(2)
+                await message.answer("Выберите время для рассылки",
+                                     reply_markup=nmarkup.as_markup(resize_keyboard=True))
+            elif int(check_date['news_11:00']) == 0:
+                await state.set_state(admin.add_time_for_spam)
+                nmarkup.row(types.KeyboardButton(text="1️⃣1️⃣:0️⃣0️⃣"))
+                await message.answer("Выберите время для рассылки",
+                                     reply_markup=nmarkup.as_markup(resize_keyboard=True))
+            elif int(check_date['news_19:00']) == 0:
+                await state.set_state(admin.add_time_for_spam)
+                nmarkup.row(types.KeyboardButton(text="1️⃣9️⃣:0️⃣0️⃣"))
+                await message.answer("Выберите время для рассылки",
+                                     reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
+            else:
+                await message.answer("К сожалению выбранная дата уже заполнена, пожалуйста выберите дургую")
+        except Exception as e:
+            print(e)
     except ValueError:
         await message.answer("Упс.. Кажется вы указали неверный формат даты, пожалуйста повторите попытку")
 
