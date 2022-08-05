@@ -1370,7 +1370,7 @@ async def menu(message: types.Message, state: FSMContext):
                               f"Ошибка или ложь(пропагандисты) - Запись в базу данных")
         await message.answer(str(ex))
     await message.answer(
-        f"Добавлено новая пара для игры Ложь На ТВ под тегами {st_asset}/{reb_asset}",
+        f"Добавлено новая пара для игры Ложь На ТВ под тегами {plot_tag}/{reb_tag}",
         reply_markup=nmrkup.as_markup(resize_keyboard=True))
     await state.clear()
     await admin_home_games(message, state)
