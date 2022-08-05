@@ -199,12 +199,8 @@ async def happy_tester(bot):
     redis.sadd('LastCommies', *new_log_set)
     diff = new_log_set - old_log_set
     botname = (await bot.get_me()).username
-    print(botname)
-
     s_bot = await SpaceBot.rise('https://otporproject.jetbrains.space', '2dd6e561-edfe-414a-9a5b-b01114d46b9c',
                      'c428a143d05f4512ec5275b8ae190627b71441627f5f7bd975f1021d83ad36aa', 'OTPOR')
-
-
     if len(diff) != 0:
         string, space_string, count = '', '', 0
 
