@@ -203,7 +203,7 @@ async def happy_tester(bot):
                      'c428a143d05f4512ec5275b8ae190627b71441627f5f7bd975f1021d83ad36aa', 'OTPOR')
     if len(diff) != 0:
         string, space_string, count = '', '', 0
-
+        message_list = list()
         for comm in diff:
             count += 1
             string = string + '\n' + str(count) + '. ' + comm
@@ -226,7 +226,12 @@ async def happy_tester(bot):
                         await s_bot.update_issue_tag('New Fetures', number, 'PROD SERVER')
                 except ValueError:
                     print('Use commits name templates!')
+            if count % 13 == 0:
+                message_list.append(string)
+                string = ''
         try:
+            x = 0
+
             await bot.send_message(bata.all_data().commichannel,
                                    f'[{datetime.now().strftime("%H:%M")}] Bot @{botname} is up, detected new commits:\n {string}')
             await s_bot.send_message('general', f'Bot @{botname} is up, detected new commits:\n {space_string}')
