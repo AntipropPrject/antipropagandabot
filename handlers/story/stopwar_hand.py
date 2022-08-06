@@ -265,7 +265,7 @@ async def stopwar_timer(message: Message, bot: Bot):
         days_pr = 'дней,'
     act_time = str_date.replace(',', days_pr)
     if user_info['datetime_end'] is None:  # c is не работает так как объект находится не в озу а в базе
-        sec = 5
+        sec = 299
         markup = ReplyKeyboardBuilder()
         markup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
         bot_message = await message.answer('5:00')
@@ -281,7 +281,6 @@ async def stopwar_timer(message: Message, bot: Bot):
         await mongo_update_stat_new(tg_id=message.from_user.id, column='timer', value='Да')
         await redis_just_one_write(f'Usrs: {message.from_user.id}: count:', '1')
         while sec:
-            print(sec)
             m, s = divmod(sec, 60)
             sec_t = '{:02d}:{:02d}'.format(m, s)
             await bot.edit_message_text(chat_id=message.from_user.id, message_id=m_id, text=f'{sec_t}')
