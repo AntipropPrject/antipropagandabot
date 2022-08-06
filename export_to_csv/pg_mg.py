@@ -194,7 +194,7 @@ class Backup:
         logg.get_info("table Truthgame is created".upper())
 
         cur.execute('''CREATE TABLE public.mistakeorlie(
-                                "id" int4 NULL,
+                                "id" serial NULL,
                                 asset_name varchar NULL,
                                 belivers int4 NOT NULL,
                                 nonbelivers int4 NOT NULL,
@@ -214,7 +214,7 @@ class Backup:
         logg.get_info("mistakeorlie table is created".upper())
 
         cur.execute('''CREATE TABLE public.putin_lies (
-                                    id int4 NOT NULL,
+                                    id serial NOT NULL PRIMARY KEY,
                                     asset_name varchar(50) NULL,
                                     text_name varchar(50) NULL,
                                     belivers int4 NULL,
@@ -234,7 +234,7 @@ class Backup:
         logg.get_info("PUTIN LIES".upper())
 
         cur.execute('''CREATE TABLE public.putin_old_lies (
-                                    id int4 NOT NULL,
+                                    id serial NOT NULL PRIMARY KEY,
                                     asset_name varchar(50) NULL,
                                     text_name varchar(50) NULL,
                                     belivers int4 NULL,
@@ -254,7 +254,7 @@ class Backup:
         logg.get_info("Table putin_old_lies is CREATED".upper())
 
         cur.execute('''CREATE TABLE public.normal_game (
-                                    id int4 NOT NULL PRIMARY KEY,
+                                    id serial NOT NULL PRIMARY KEY,
                                     asset_name varchar(50) NULL,
                                     text_name varchar(50) NULL,
                                     belivers int4 NULL,
@@ -273,7 +273,7 @@ class Backup:
         logg.get_info("table normal_game is here".upper())
 
         cur.execute('''CREATE TABLE public.ucraine_or_not_game (
-                                    id int4 NOT NULL PRIMARY KEY,
+                                    id serial NOT NULL PRIMARY KEY,
                                     asset_name varchar(50) NULL,
                                     text_name varchar(50) NULL,
                                     belivers int4 NULL,

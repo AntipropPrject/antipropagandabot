@@ -125,7 +125,8 @@ async def prevent_strike_hitler_did_it(message: Message):
 
 @router.message(F.text.contains('продолжим'), flags=flags)
 async def prevent_strike_end_point(message: Message, state: FSMContext):
-    await mongo_update_stat_new(tg_id=message.from_user.id, column='game_i_show_u', value='Пропустили')
+    if message.text == 'Нет, продолжим разговор ⏱':
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='game_i_show_u', value='Пропустили')
     await mongo_update_stat_new(tg_id=message.from_user.id, column='prevent_strike_fin', value='Да')
     await state.set_state(true_resons_hand.TruereasonsState.main)
     await mongo_update_stat(message.from_user.id, 'prevent_strike')
