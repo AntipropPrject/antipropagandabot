@@ -1,4 +1,4 @@
-name: Test Pipeline
+name: Test_Pipeline
 
 on:
   workflow_dispatch:

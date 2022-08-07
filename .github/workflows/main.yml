@@ -2,7 +2,7 @@ name: Stage Deploy
 
 on:
   workflow_run:
-    workflows: [ 'Test Pipeline' ]
+    workflows: [ Test_Pipeline ]
     types:
       - completed
 
