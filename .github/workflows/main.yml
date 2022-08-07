@@ -1,8 +1,8 @@
-name: deploy to a server on push
+name: Stage Deploy
 
 on:
   workflow_run:
-    workflows: [ Test Pipiline ]
+    workflows: [ 'Test Pipeline' ]
     types:
       - completed
 
