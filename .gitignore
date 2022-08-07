@@ -58,3 +58,7 @@ logfile.log
 *.jpg
 *.png
 *.log
+*.json
+*.html
+*.svg
+*.css

@@ -1,4 +1,5 @@
 import asyncio
+import os
 from datetime import datetime
 from aiogram import Dispatcher
 from aiogram.client.session import aiohttp
@@ -52,7 +53,7 @@ async def main():
     bot_info = await bot.get_me()
     print(f"Hello, i'm {bot_info.first_name} | {bot_info.username}")
 
-    if bata.Check_tickets is True:
+    if bata.Check_tickets is True and os.getenv('TEST_USER_ID') is None:
         await happy_tester(bot)
     else:
         print('Tickets checking is disabled, so noone will know...')

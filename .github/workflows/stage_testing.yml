@@ -1,0 +1,31 @@
+name: Test Pipiline
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - test
+
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: 'Making .env'
+        run: |
+          touch .env
+          echo BOT_TOKEN = 5483385115:AAG3VIZEBtFlNnHiSzOhL4nf9ZluT-PNh34 >> .env
+          echo TEST_CHANNEL_ID = -1001270576526 >> .env
+          echo TEST_USER_ID = 5429649862 >> .env
+      - name: 'Building containers'
+        run: docker compose -f CI/Testing.yml build
+      - name: 'Testing'
+        run: docker compose -f CI/Testing.yml up --abort-on-container-exit
+      - name: 'Report upload'
+        uses: actions/upload-artifact@v3
+        with:
+          name: Report
+          path: |
+            pytest_html_report.html
+            flake8_report

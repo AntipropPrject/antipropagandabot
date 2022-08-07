@@ -9,7 +9,6 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
-from Testbot import bot
 from bata import all_data
 from bot_statistics.stat import mongo_select_stat, mongo_select_stat_all_user
 from data_base.DBuse import sql_safe_select, sql_safe_update, sql_safe_insert, sql_delete, redis_just_one_write, \
@@ -28,7 +27,8 @@ from states.admin_states import admin
 from utilts import Phoenix
 
 router = Router()
-
+data = all_data()
+bot = data.get_bot()
 
 @router.message(IsAdmin(level=['Редактирование', 'Маркетинг']), commands=["admin"])
 async def admin_home(message: types.Message, state: FSMContext):

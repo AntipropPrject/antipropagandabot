@@ -151,7 +151,7 @@ async def mainmenu_here_we_go_again(message: Message, state: FSMContext):
 
 
 @router.message(F.text == "Да, я готов(а) начать сейчас 🇷🇺🇺🇦", state=MainMenuStates.again, flags=flags)
-async def mainmenu_here_we_go_again(message: Message, state: FSMContext):
+async def mainmenu_here_we_go_again_yeah(message: Message, state: FSMContext):
     await commands_start(message, state)
 
 
