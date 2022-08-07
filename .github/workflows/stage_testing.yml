@@ -19,9 +19,9 @@ jobs:
           echo TEST_CHANNEL_ID = -1001270576526 >> .env
           echo TEST_USER_ID = 5429649862 >> .env
       - name: 'Building containers'
-        run: docker compose -f CI/Testing.yml build
+        run: docker compose -f CI/DocTesting.yml build
       - name: 'Testing'
-        run: docker compose -f CI/Testing.yml up --abort-on-container-exit
+        run: docker compose -f CI/DocTesting.yml up --abort-on-container-exit
       - name: 'Report upload'
         uses: actions/upload-artifact@v3
         with:
