@@ -24,9 +24,9 @@ jobs:
       - name: 'Building containers'
         run: docker compose -f CI/DocTesting.yml build
       - name: 'Testing'
-        if: always()
         run: docker compose -f CI/DocTesting.yml up --abort-on-container-exit
       - name: 'Report upload'
+        if: always()
         uses: actions/upload-artifact@v3
         with:
           name: Report
