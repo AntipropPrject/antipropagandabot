@@ -52,8 +52,7 @@ async def periodic():
 async def main():
     bot_info = await bot.get_me()
     print(f"Hello, i'm {bot_info.first_name} | {bot_info.username}")
-
-    if bata.Check_tickets is True and os.getenv('TEST_USER_ID') is None:
+    if bata.Check_tickets is True and os.getenv('PIPELINE') is None:
         await happy_tester(bot)
     else:
         print('Tickets checking is disabled, so noone will know...')
