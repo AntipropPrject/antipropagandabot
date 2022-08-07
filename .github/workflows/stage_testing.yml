@@ -19,6 +19,7 @@ jobs:
           echo BOT_TOKEN = 5483385115:AAG3VIZEBtFlNnHiSzOhL4nf9ZluT-PNh34 >> .env
           echo TEST_CHANNEL_ID = -1001270576526 >> .env
           echo TEST_USER_ID = 5429649862 >> .env
+          cat .env
       - name: 'Building containers'
         run: docker compose -f CI/DocTesting.yml build
       - name: 'Testing'
