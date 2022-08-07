@@ -1,23 +1,25 @@
-name: deploy to a server on push
+name: Stage Deploy
 
 on:
-  [workflow_dispatch]
+  workflow_run:
+    workflows: [ Test Pipeline ]
+    types:
+      - completed
 
 jobs:
   deploy-to-server:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
-
-      - uses: appleboy/ssh-action@master
+      - name: ssh pipeline 1
+        uses: appleboy/ssh-action@master
         with:
-          host: ec2-16-170-206-95.eu-north-1.compute.amazonaws.com
+          host: ${{ secrets.TEST_IP }}
           username: ec2-user
           key: ${{ secrets.SSHKEY }}
-      
+          connect_timeout: 10s
           script: |
-            sudo service docker start
-            cd antipropagandabot/
-            git pull
-            sleep 5
-            docker compose build
-            docker compose up
+            echo WELCOME
+            cd antipropagandabot
+            sudo -S git pull
+            sudo -S docker restart antiprop_Aiogrammwebhook
