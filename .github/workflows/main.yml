@@ -2,7 +2,7 @@ name: Stage Deploy
 
 on:
   workflow_run:
-    workflows: [ Test_Pipeline ]
+    workflows: [ everyday pg dump ]
     types:
       - completed
 

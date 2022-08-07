@@ -1,11 +1,10 @@
-name: Test_Pipeline
+name: Test Pipeline
 
 on:
   workflow_dispatch:
   push:
     branches:
       - test
-
 
 jobs:
   test:
