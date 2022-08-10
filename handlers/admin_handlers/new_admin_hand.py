@@ -30,6 +30,7 @@ router = Router()
 data = all_data()
 bot = data.get_bot()
 
+
 @router.message(IsAdmin(level=['Редактирование', 'Маркетинг']), commands=["admin"])
 async def admin_home(message: types.Message, state: FSMContext):
     await state.clear()

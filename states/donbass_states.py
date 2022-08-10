@@ -8,4 +8,3 @@ class donbass_state(StatesGroup):
     after_poll = State()
     second_poll = State()
     after_second_poll = State()
-
