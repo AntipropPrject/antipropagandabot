@@ -63,3 +63,5 @@ logfile.log
 *.svg
 *.css
 *.zip
+*.meta
+.idea/dataSources/5f841a7c-9780-4afe-82de-b10dc7de77bb.xml
