@@ -124,7 +124,7 @@ async def admins_pop_not(message: Message, state: FSMContext):
 
 
 @router.message(F.text.in_(set(access_levels)), state=admin.pop)
-async def admins_pop(message: Message, state: FSMContext):
+async def admins_pop_done(message: Message, state: FSMContext):
     old_admin_id = (await state.get_data())['old_admin_id']
     if await mongo_select_info(old_admin_id):
         await mongo_pop_admin_level(old_admin_id, level=message.text)

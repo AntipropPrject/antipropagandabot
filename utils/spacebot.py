@@ -1,8 +1,8 @@
+import base64
+import json
 from json import JSONDecodeError
 
 import aiohttp
-import json
-import base64
 
 
 async def make_request(url: str, method: str, headers, data=None):

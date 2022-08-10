@@ -1,4 +1,5 @@
 import psycopg2
+
 from bata import all_data
 from log import logg
 

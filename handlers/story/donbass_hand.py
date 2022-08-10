@@ -4,8 +4,8 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
 
+from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
 from data_base.DBuse import poll_write, sql_safe_select, poll_get, redis_delete_from_list
 from filters.MapFilters import DonbassOptionsFilter
 from handlers.story.true_resons_hand import TruereasonsState

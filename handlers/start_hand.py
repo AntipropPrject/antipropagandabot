@@ -1,12 +1,10 @@
-import csv
-
 from aiogram import Router
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-from bot_statistics.stat import mongo_is_done
 
+from bot_statistics.stat import mongo_is_done
 from handlers.story import true_resons_hand
 from handlers.story.main_menu_hand import mainmenu_really_menu
 from handlers.story.stopwar_hand import stopwar_first_manipulation_argument

@@ -5,9 +5,9 @@ import unittest
 import pytest
 from aiogram import Bot, Dispatcher
 
-from Testbot import main
 from CI.tests import test_hand
 from CI.tests.updates_for_bot import test_message
+from Testbot import main
 
 
 @pytest.mark.asyncio

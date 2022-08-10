@@ -6,9 +6,9 @@ from aiogram.dispatcher.filters.command import CommandStart, CommandObject
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-from bot_statistics.stat import mongo_stat, mongo_update_stat, mongo_stat_new, mongo_update_stat_new
 
 from bata import all_data
+from bot_statistics.stat import mongo_stat, mongo_update_stat, mongo_stat_new, mongo_update_stat_new
 from data_base.DBuse import poll_write, sql_safe_select, mongo_add, mongo_select, redis_just_one_write, \
     mongo_user_info, redis_just_one_read, advertising_value
 from day_func import day_count

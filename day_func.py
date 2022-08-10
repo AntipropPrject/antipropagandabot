@@ -1,6 +1,5 @@
-from datetime import datetime
-from log import logg
 from bata import all_data
+from log import logg
 
 
 async def day_count(get_count=False, count_delete=False):

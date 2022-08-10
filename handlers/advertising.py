@@ -1,10 +1,11 @@
 import asyncio
-from aiogram import Router
-from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError
-from bata import all_data
-from data_base.DBuse import mongo_update_viewed_news, mongo_pop_news
 from datetime import datetime, timedelta
 
+from aiogram import Router
+from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError
+
+from bata import all_data
+from data_base.DBuse import mongo_update_viewed_news, mongo_pop_news
 from log.logg import send_to_chat, get_logger
 
 router = Router()

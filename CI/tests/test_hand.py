@@ -6,6 +6,7 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.dispatcher.fsm.state import StatesGroup, State
 from aiogram.types import Message
 
+
 class TestStates(StatesGroup):
     one = State()
     two = State()

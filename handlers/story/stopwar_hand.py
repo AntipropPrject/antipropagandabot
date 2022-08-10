@@ -7,8 +7,8 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.dispatcher.fsm.state import StatesGroup, State
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
 
+from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
 from data_base.DBuse import sql_safe_select, redis_just_one_write, redis_just_one_read, \
     mongo_select_info, mongo_update_end, del_key
 from handlers.story.main_menu_hand import mainmenu_really_menu

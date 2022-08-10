@@ -1,7 +1,5 @@
 import datetime
 
-import motor.motor_asyncio
-
 from bata import all_data
 from data_base.DBuse import mongo_select_info
 from log import logg
