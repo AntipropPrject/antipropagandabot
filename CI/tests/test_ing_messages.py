@@ -19,7 +19,7 @@ class TestMessages:
         dp = Dispatcher()
         dp.include_router(test_hand.router)
         result = await dp.feed_update(bot, test_message)
-        assert result == 'Smoketesting was successfull'
+        assert result is True
 
     async def test_bot_door(self):
         try:
