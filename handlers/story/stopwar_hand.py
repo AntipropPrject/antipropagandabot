@@ -324,7 +324,7 @@ async def stopwar_share_blindly(message: Message):
 
 
 @router.message((F.text == "Покажи инструкцию, как поделиться со всем списком контактов 📝"), flags=flags)
-async def stopwar_share_blindly(message: Message):
+async def stopwar_bulk_forwarding(message: Message):
     timer = await redis_just_one_read(f'Usrs: {message.from_user.id}: count:')
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))

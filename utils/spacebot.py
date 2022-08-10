@@ -1,4 +1,3 @@
-import asyncio
 from json import JSONDecodeError
 
 import aiohttp

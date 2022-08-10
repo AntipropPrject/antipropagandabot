@@ -215,7 +215,7 @@ async def donbas_reason_to_war(message: Message, state=FSMContext):
 
 @router.message(DonbassOptionsFilter(option='ООН врёт, не может быть таких жертв среди мирного населения'),
                 (F.text.in_({'Договорились 👌', "Хорошо  👌", "Понятно 👌", "Согласен(а) 👌"})), flags=flags)
-async def donbas_OOH(message: Message, state: FSMContext):
+async def donbas_OOH(message: Message):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Donbass_polls: First:', donbass_first_poll[2])
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Понятно 👌"))
@@ -253,7 +253,7 @@ async def donbas_only_war_objects(message: Message):
 
 @router.message(text_contains=('обвинить', 'провокация'), content_types=types.ContentType.TEXT, text_ignore_case=True,
                 flags=flags)
-async def provocation(message: Message):
+async def protection(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'protection'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(
@@ -268,7 +268,6 @@ async def provocation(message: Message):
                 text_ignore_case=True, flags=flags)
 async def donbas_return_to_donbass(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'donbas_return_to_donbass'})
-    answers = await poll_get(f'Usrs: {message.from_user.id}: Donbass_polls: First:')
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Хорошо  👌"))
     await poll_write(f'Usrs: {message.from_user.id}: Donbass_polls: First:', donbass_first_poll[7])
@@ -363,7 +362,7 @@ async def donbas_understanding(message: Message):
 @router.message(DonbassOptionsFilter(
     option='🎯 Это ужасно, но помимо защиты жителей Донбасса есть более весомые причины для начала войны'),
     (F.text.in_({'Договорились 👌', "Хорошо  👌", "Понятно 👌", "Согласен(а) 👌"})), flags=flags)
-async def donbas_more_reasons(message: Message, state: FSMContext):
+async def donbas_more_reasons(message: Message):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Donbass_polls: First:', donbass_first_poll[7])
     text = await sql_safe_select('text', 'texts', {'name': 'donbas_more_reasons'})
     reason_list_2 = set(await poll_get(f'Usrs: {message.from_user.id}: Start_answers: Invasion:'))
@@ -380,7 +379,7 @@ async def donbas_more_reasons(message: Message, state: FSMContext):
 
 
 @router.message(state=donbass_state.after_poll, flags=flags)
-async def donbas_who_do_that(message: Message, state=FSMContext):
+async def donbas_who_do_that(message: Message, state: FSMContext):
     await state.set_state(donbass_state.second_poll)
     text = await sql_safe_select('text', 'texts', {'name': 'donbas_who_do_that'})
     nmarkup = ReplyKeyboardBuilder()
@@ -391,7 +390,7 @@ async def donbas_who_do_that(message: Message, state=FSMContext):
 
 
 @router.message((F.text == "Покороче ⏱"), flags=flags)
-async def donbas_long_maidan(message: Message):
+async def short_separ_text(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'short_separ_text'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Вернемся к другим причинам войны 👌"))
@@ -528,7 +527,7 @@ async def donbas_no_army_here(message: Message):
 
 
 @router.message((F.text == "Да, замечаю  😯") | (F.text == "Нет, не замечаю🤷‍♀"), flags=flags)
-async def donbas_no_army_here(message: Message, state=FSMContext):
+async def lnr_mobilization(message: Message, state: FSMContext):
     await state.set_state(TruereasonsState.main)
     await mongo_update_stat(message.from_user.id, 'donbass')
     nmarkup = ReplyKeyboardBuilder()

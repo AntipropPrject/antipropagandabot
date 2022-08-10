@@ -119,7 +119,7 @@ async def start_lets_start_2(message: types.Message, state: FSMContext):  # На
 
 
 @router.message(welcome_states.start_dialog.dialogue_5, (F.text == "Стоп! Правильно «в Украине»! ☝️"), flags=flags)
-async def start_lets_start_2(message: types.Message):
+async def start_lets_start_stop(message: types.Message):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='on_ucraine_or_not', value='Да')
     text = await sql_safe_select("text", "texts", {"name": "start_is_it_correct"})
     markup = ReplyKeyboardBuilder()

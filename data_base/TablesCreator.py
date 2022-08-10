@@ -239,5 +239,5 @@ def tables_god():
         # con.close()
         # cur.close()
 
-    except psycopg2.Error as error:
+    except psycopg2.Error:
         pass

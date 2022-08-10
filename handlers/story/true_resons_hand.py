@@ -55,7 +55,7 @@ async def reasons_king_of_info(message: Message, state: FSMContext):
 
 @router.message((F.text == "Подожди. Я так не говорил(а). С чего ты взял, что это ненастоящие цели? 🤷‍♂️"),
                 flags=flags)
-async def reasons_king_of_info(message: Message):
+async def reasons_not_so_fast(message: Message):
     await redis_just_one_write(f'Usrs: {message.from_user.id}: Politics:', 'Сторонник войны')
     base_list = ("👪 Защитить русских в Донбассе", "🛡 Предотвратить вторжение на территорию России или ДНР/ЛНР",
                  "🤬 Денацификация / Уничтожить нацистов")
