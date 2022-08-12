@@ -205,7 +205,7 @@ async def reasons_big_bad_nato(message: Message):
 
 
 @router.message((F.text == 'Давай 👌'), state=TruereasonsState.main, flags=flags)
-async def reasons_lie_no_more_1(message: Message):
+async def reasons_NATO_is_coming(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_NATO_is_coming'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Хорошо 👌'))
@@ -225,7 +225,7 @@ async def reasons_biopigeons(message: Message):
 
 """@router.message(WarReason(answer="🗺 Вернуть России исторические земли / Объединить русский народ"))
 async def reasons_take_lands(message: Message, state: FSMContext):
-    await redis_delete_from_list(f'Usrs: {message.from_user.id}: Start_answers: Invasion:', 
+    await redis_delete_from_list(f'Usrs: {message.from_user.id}: Start_answers: Invasion:',
                                           "🗺 Вернуть России исторические земли / Объединить русский народ")
     text = "Кусок про захват территорий, но мы его не выводим"
     nmarkup = ReplyKeyboardBuilder()

@@ -26,33 +26,33 @@ async def commands_start(message: types.Message, state: FSMContext):
 
 
 @router.message(commands=["testend"], flags=flags)
-async def cmd_start(message: Message, state: FSMContext):
+async def cmd_testend(message: Message, state: FSMContext):
     await stopwar_first_manipulation_argument(message, state)
 
 
 @router.message(commands=["testnazi"], flags=flags)
-async def cmd_start(message: Message, state: FSMContext):
+async def cmd_testnazi(message: Message, state: FSMContext):
     await true_resons_hand.reasons_denazi(message, state)
 
 
 @router.message(commands=["mainskip69"], flags=flags)
-async def cmd_start(message: Message, state: FSMContext):
+async def cmd_mainskip(message: Message, state: FSMContext):
     await state.set_state(MainMenuStates.main)
     await mainmenu_really_menu(message, state)
 
 
 @router.message(commands=["teststrike"], flags=flags)
-async def cmd_start(message: Message, state: FSMContext):
+async def cmd_teststrike(message: Message, state: FSMContext):
     await true_resons_hand.prevent_strike_start(message, state)
 
 
 @router.message(commands=["putest"], flags=flags)
-async def cmd_start(message: Message, state: FSMContext):
+async def cmd_putest(message: Message, state: FSMContext):
     await reasons_who_to_blame(message, state)
 
 
 @router.message(commands=["donbass"], flags=flags)
-async def cmd_start(message: Message, state: FSMContext):
+async def cmd_donbass(message: Message, state: FSMContext):
     await state.clear()
     await state.set_state(donbass_state.eight_years)
     nmarkup = ReplyKeyboardBuilder()

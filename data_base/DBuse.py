@@ -53,14 +53,14 @@ async def sql_safe_select(column, table_name, condition_dict):
                 ident_list.append(sql.Identifier(i))
         elif isinstance(column, str):
             ident_list.append(sql.Identifier(column))
-        safe_query = sql.SQL("SELECT {col_names} from {} WHERE {} = {};").format(sql.Identifier(table_name),
-                                                                                 sql.SQL(', ').join(map(sql.Identifier,
-                                                                                                        condition_dict)),
-                                                                                 sql.SQL(", ").join(map(sql.Placeholder,
-                                                                                                        condition_dict)),
-                                                                                 col_names=sql.SQL(',').join(
-                                                                                     ident_list))
-
+        safe_query = sql.SQL("SELECT {col_names} from {} WHERE {} = {};").format(
+            sql.Identifier(table_name),
+            sql.SQL(', ').join(map(sql.Identifier,
+                                   condition_dict)),
+            sql.SQL(", ").join(map(sql.Placeholder,
+                                   condition_dict)),
+            col_names=sql.SQL(',').join(ident_list)
+        )
         with get_cursor() as cur:
             cur.execute(safe_query, condition_dict)
             data = cur.fetchall()
@@ -145,8 +145,8 @@ async def sql_games_row_selecter(tablename: str, row: int):
                                              AS sub WHERE row_number = {row}"""))[0]
             keys = ('id', 'plot_media', 'plot_text', 'belivers', 'nonbelivers', 'ROW_NUMBER')
         elif tablename == 'ucraine_or_not_game':
-            data = (await data_getter(f"""SELECT * FROM (Select id, truth, assets.t_id as plot_media, texts.text as plot_text, 
-                                             belivers, nonbelivers,
+            data = (await data_getter(f"""SELECT * FROM (Select id, truth, assets.t_id as plot_media, texts.text as
+                                            plot_text, belivers, nonbelivers,
                                              ROW_NUMBER () OVER (ORDER BY id) FROM public.{tablename}
                                              left outer join assets on assets.name = {tablename}.asset_name
                                              left outer join texts on {tablename}.text_name = texts.name)
@@ -161,8 +161,8 @@ async def sql_games_row_selecter(tablename: str, row: int):
                                              AS sub WHERE row_number = {row}"""))[0]
             keys = ('id', 'plot_media', 'plot_text', 'belivers', 'nonbelivers', 'ROW_NUMBER')
         elif tablename == 'mistakeorlie':
-            data = (await data_getter(f"""SELECT * FROM (Select id, truth, assets.t_id as plot_media, texts.text as plot_text, 
-                                             belivers, nonbelivers,
+            data = (await data_getter(f"""SELECT * FROM (Select id, truth, assets.t_id as plot_media, texts.text as
+                                            plot_text, belivers, nonbelivers,
                                              ROW_NUMBER () OVER (ORDER BY id) FROM public.{tablename}
                                              left outer join assets on assets.name = {tablename}.asset_name
                                              left outer join texts on {tablename}.text_name = texts.name)
@@ -191,7 +191,8 @@ async def sql_add_value(table_name, column, cond_dict):
         if isinstance(cond_dict[key], int):
             que = f'UPDATE {table_name} set {column} = {column} + 1 where {key} = {cond_dict[key]} RETURNING {column};'
         elif isinstance(cond_dict[key], str):
-            que = f"UPDATE {table_name} set {column} = {column} + 1 where {key} = '{cond_dict[key]}' RETURNING {column};"
+            que = f"UPDATE {table_name} set {column} = {column} + 1 where" \
+                  f" {key} = '{cond_dict[key]}' RETURNING {column};"
         print(que)
     a = await data_getter(que)
     print(a)
@@ -319,6 +320,7 @@ async def check_avtual_news(date) -> dict:
         return count_news_on_date
     except Exception as e:
         print(e)
+
 
 async def mongo_pop_news(m_id: str, coll=None):
     try:

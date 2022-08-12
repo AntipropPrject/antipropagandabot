@@ -45,8 +45,8 @@ async def simple_media(message: Message, tag: str,
                 except TelegramBadRequest:
                     await logg.get_error(f'NO {tag}')
                     return None
-    except:
-        print("Ошибка")
+    except TelegramBadRequest:
+        print("Странная ошибка")
 
 
 async def game_answer(message: Message, telegram_media_id: Union[int, InputFile] = None, text: str = None,
@@ -64,9 +64,9 @@ async def game_answer(message: Message, telegram_media_id: Union[int, InputFile]
         await message.answer(text, reply_markup=reply_markup, disable_web_page_preview=True)
 
 
-async def bot_send_spam(bot: Bot, user_id: Union[int, str], telegram_media_id: Union[int, InputFile] = None, text: str = None,
-                        reply_markup: Union[InlineKeyboardMarkup, ReplyKeyboardMarkup,
-                                            ReplyKeyboardRemove, ForceReply, None] = None):
+async def bot_send_spam(bot: Bot, user_id: Union[int, str], telegram_media_id: Union[int, InputFile] = None,
+                        text: str = None, reply_markup: Union[InlineKeyboardMarkup, ReplyKeyboardMarkup,
+                                                              ReplyKeyboardRemove, ForceReply, None] = None):
     try:
         if telegram_media_id is not None:
             try:
@@ -74,7 +74,8 @@ async def bot_send_spam(bot: Bot, user_id: Union[int, str], telegram_media_id: U
             except TelegramBadRequest as error:
                 print(error)
                 try:
-                    return await bot.send_video(user_id, video=telegram_media_id, caption=text, reply_markup=reply_markup)
+                    return await bot.send_video(user_id, video=telegram_media_id, caption=text,
+                                                reply_markup=reply_markup)
                 except TelegramBadRequest as error:
                     print(error)
         else:
@@ -140,8 +141,8 @@ class Phoenix:
             try:
                 await Phoenix.feather(message, name[0])
                 await asyncio.sleep(0.5)
-            except:
-                continue
+            except Exception as err:
+                print(err)
         await message.answer('Это все медиа в базе данных. Для всех медиа, '
                              'для которых не было выдана ошибка, теги теперь привязаны к этому боту.')
 
@@ -149,7 +150,6 @@ class Phoenix:
     async def fire(message: Message, bot: Bot):
         all_media_names = await data_getter('SELECT name FROM assets;')
         for name in all_media_names:
-            media = str()
             msg = await simple_media(message, name[0])
             if msg is not None:
                 try:
@@ -169,7 +169,8 @@ class Phoenix:
                     print(f'photo {name[0]} was downloaded')
             await asyncio.sleep(1)
         await message.answer(
-            'Все имеющиеся в базе медиа, для которых удалось найти валидный тег, были сохрнены в папку /resources/media директории бота')
+            'Все имеющиеся в базе медиа, для которых удалось найти валидный тег, '
+            'были сохрнены в папку /resources/media директории бота')
 
     @staticmethod
     async def roost(message: Message, bot: Bot):
@@ -191,7 +192,7 @@ class Phoenix:
 async def happy_tester(bot):
     redis = bata.all_data().get_data_red()
     g = git.Git(os.getcwd())
-    #Вот это форматирование создает проблемы, его надо бы убрать
+    # Вот это форматирование создает проблемы, его надо бы убрать
     loginfo = g.log('--pretty=format:%s || %an')
     old_log_set = redis.smembers('LastCommies')
     new_log_set = set([commname for commname in loginfo.split('\n') if commname.find('OTPOR-') != -1])
@@ -199,7 +200,7 @@ async def happy_tester(bot):
     diff = new_log_set - old_log_set
     botname = (await bot.get_me()).username
     s_bot = await SpaceBot.rise('https://otporproject.jetbrains.space', '2dd6e561-edfe-414a-9a5b-b01114d46b9c',
-                     'c428a143d05f4512ec5275b8ae190627b71441627f5f7bd975f1021d83ad36aa', 'OTPOR')
+                                'c428a143d05f4512ec5275b8ae190627b71441627f5f7bd975f1021d83ad36aa', 'OTPOR')
     if len(diff) != 0:
         string, space_string, count = '', '', 0
         message_list = list()

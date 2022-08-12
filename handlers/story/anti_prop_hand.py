@@ -345,20 +345,20 @@ async def antip_not_only_TV(message: Message, web_lies_list: List[str], state: F
     all_answers_user = web_lies_list.copy()
     try:
         all_answers_user.remove('Meduza / BBC / Радио Свобода / Медиазона / Настоящее время / Популярная Политика')
-    except:
-        pass
+    except Exception as err:
+        print(err)
     try:
         all_answers_user.remove("Википедия")
-    except:
-        pass
+    except Exception as err:
+        print(err)
     try:
         all_answers_user.remove("Яндекс")
-    except:
-        pass
+    except Exception as err:
+        print(err)
     try:
         all_answers_user.remove("Никому из них...")
-    except:
-        pass
+    except Exception as err:
+        print(err)
 
     await state.update_data(RIANEWS_c=0)
     await state.update_data(RUSSIATODAY_c=0)
@@ -566,7 +566,6 @@ async def antip_web_exit_1(message: Message, state: FSMContext):
                 (F.text.contains('шаг')) | (F.text.contains('удивлён')) | (F.text.contains('шоке')) | (
                         F.text.contains('знал')) | (F.text == 'Конечно!'), flags=flags)
 async def antip_bad_people_lies(message: Message, state: FSMContext):
-    redis = all_data().get_data_red()
     await state.set_state(propaganda_victim.ppl_propaganda)
     text = await sql_safe_select('text', 'texts', {'name': 'antip_bad_people_lies'})
     text = text.replace('[[первая красная личность]]',
@@ -595,12 +594,12 @@ async def antip_truth_game_start_question(message: Message, state: FSMContext):
                                     value='Начали и НЕ закончили')
     try:
         count = (await state.get_data())['gamecount']
-    except:
+    except KeyError:
         count = 0
     how_many_rounds = (await data_getter("SELECT COUNT (*) FROM public.truthgame"))[0][0]
     if count < how_many_rounds:
         count += 1
-        truth_data = (await data_getter(f"""SELECT * FROM (Select truth, a.t_id as plot_media, t.text as plot_text, 
+        truth_data = (await data_getter(f"""SELECT * FROM (Select truth, a.t_id as plot_media, t.text as plot_text,
                                          belivers, nonbelivers,
                                          t2.text as rebb_text, a2.t_id as rebb_media,
                                          ROW_NUMBER () OVER (ORDER BY id), id FROM public.truthgame
@@ -621,7 +620,7 @@ async def antip_truth_game_start_question(message: Message, state: FSMContext):
             try:
                 await message.answer_video(truth_data[1], caption=capt,
                                            reply_markup=nmarkup.as_markup(resize_keyboard=True))
-            except:
+            except TelegramBadRequest:
                 await message.answer_photo(truth_data[1], caption=capt,
                                            reply_markup=nmarkup.as_markup(resize_keyboard=True))
         else:
@@ -705,7 +704,7 @@ async def antip_yandex(message: Message):
 
 
 @router.message((F.text == "Продолжай ⏳"), state=propaganda_victim.yandex, flags=flags)
-async def antip_yandex_rupor(message: Message, state: FSMContext):
+async def antip_yandex_rupor(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_yandex_rupor'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Я удивлен(а) 🤔"))
