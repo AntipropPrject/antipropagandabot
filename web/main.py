@@ -1,10 +1,9 @@
 from datetime import datetime
-import requests
+
 import psycopg2
+import requests
 from flask import Flask, request
 from werkzeug.utils import redirect
-
-
 
 app = Flask(__name__)
 

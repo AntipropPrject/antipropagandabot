@@ -6,9 +6,9 @@ from aiogram.dispatcher.filters.command import CommandStart, CommandObject
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-from bot_statistics.stat import mongo_stat, mongo_update_stat, mongo_stat_new, mongo_update_stat_new
 
 from bata import all_data
+from bot_statistics.stat import mongo_stat, mongo_update_stat, mongo_stat_new, mongo_update_stat_new
 from data_base.DBuse import poll_write, sql_safe_select, mongo_add, mongo_select, redis_just_one_write, \
     mongo_user_info, redis_just_one_read, advertising_value
 from day_func import day_count
@@ -22,13 +22,12 @@ router = Router()
 
 @router.message(CommandStart(command_magic=F.args), flags=flags)
 async def adv_company(message: types.Message, state: FSMContext, command: CommandObject):
-    await advertising_value(command.args)
+    asyncio.create_task(advertising_value(command.args))
     await commands_start(message, state)
 
 
 @router.message(commands=['start', 'help', 'restart'], state='*', flags=flags)
 async def commands_start(message: types.Message, state: FSMContext):  # Первое сообщение
-    await day_count()
     asyncio.create_task(start_base(message))
     await state.clear()
     markup = ReplyKeyboardBuilder()
@@ -119,7 +118,7 @@ async def start_lets_start_2(message: types.Message, state: FSMContext):  # На
 
 
 @router.message(welcome_states.start_dialog.dialogue_5, (F.text == "Стоп! Правильно «в Украине»! ☝️"), flags=flags)
-async def start_lets_start_2(message: types.Message):
+async def start_lets_start_stop(message: types.Message):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='on_ucraine_or_not', value='Да')
     text = await sql_safe_select("text", "texts", {"name": "start_is_it_correct"})
     markup = ReplyKeyboardBuilder()

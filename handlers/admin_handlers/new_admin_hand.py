@@ -9,7 +9,6 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
-from Testbot import bot
 from bata import all_data
 from bot_statistics.stat import mongo_select_stat, mongo_select_stat_all_user
 from data_base.DBuse import sql_safe_select, sql_safe_update, sql_safe_insert, sql_delete, redis_just_one_write, \
@@ -18,7 +17,7 @@ from data_base.DBuse import sql_safe_select, sql_safe_update, sql_safe_insert, s
 from day_func import day_count
 from export_to_csv.pg_mg import Backup
 from filters.isAdmin import IsAdmin, IsSudo, IsKamaga
-from handlers.admin_handlers.admin_for_games import admin_home_games, admin_truthgame, admin_gam_tv, admin_mistake_lie, \
+from handlers.admin_handlers.admin_for_games import admin_home_games, admin_truthgame, admin_gam_tv, admin_mistake_lie,\
     admin_normal_game_start
 from keyboards.admin_keys import main_admin_keyboard, middle_admin_keyboard, app_admin_keyboard, redct_text, \
     redct_media, redct_games, settings_bot, spam_admin_keyboard
@@ -28,6 +27,8 @@ from states.admin_states import admin
 from utilts import Phoenix
 
 router = Router()
+data = all_data()
+bot = data.get_bot()
 
 
 @router.message(IsAdmin(level=['Редактирование', 'Маркетинг']), commands=["admin"])

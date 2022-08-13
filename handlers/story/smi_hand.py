@@ -3,8 +3,8 @@ from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-from bot_statistics.stat import mongo_update_stat_new
 
+from bot_statistics.stat import mongo_update_stat_new
 from data_base.DBuse import *
 from handlers.story.anti_prop_hand import antip_truth_game_start, antip_web_exit_1
 from states.antiprop_states import propaganda_victim

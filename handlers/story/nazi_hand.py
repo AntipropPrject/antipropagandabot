@@ -7,8 +7,8 @@ from aiogram.dispatcher.fsm.state import StatesGroup, State
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
 
+from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
 from data_base.DBuse import data_getter, poll_write, sql_safe_select, redis_delete_from_list, poll_get, \
     mongo_game_answer
 from filters.MapFilters import NaziFilter, RusHate_pr, NotNaziFilter
@@ -191,7 +191,7 @@ async def nazi_canny(message: Message):
 
 
 @router.message((F.text.contains('Посмотрел(а) 📺')), state=NaziState.after_small_poll, flags=flags)
-async def nazi_many_forms(message: Message):
+async def nazi_feels(message: Message):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Продолжим 👌"))
     text = await sql_safe_select("text", "texts", {"name": "nazi_feels"})
@@ -210,7 +210,7 @@ async def nazi_genocide(message: Message, state: FSMContext):
 
 
 @router.message((F.text == "Продолжай ⏳"), state=NaziState.genocide, flags=flags)
-async def nazi_many_forms(message: Message):
+async def nazi_genocide_chart(message: Message):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Да, можно 💀"))
     markup.row(types.KeyboardButton(text="Нет, нельзя 🙅‍♀️"))
@@ -232,7 +232,7 @@ async def nazi_odessa(message: Message):
 
 @router.message(((F.text == "Нет, нельзя 🙅‍♀️") | (F.text == "Это трагедия, но не геноцид 🙅‍♀️")),
                 state=NaziState.genocide, flags=flags)
-async def nazi_many_forms(message: Message):
+async def nazi_emotional(message: Message):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Продолжай..."))
     text = await sql_safe_select("text", "texts", {"name": "nazi_emotional"})
@@ -376,7 +376,6 @@ async def nazi_very_little(message: Message):
 @router.message((F.text == "Понятно  👌"), state=NaziState.rushate, flags=flags)
 async def nazi_you_wrong(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'nazi_you_wrong'})
-    answer_lower = ((await poll_get(f'Usrs: {message.from_user.id}: Nazi_answers: small_poll:'))[0]).lower
     text = text.replace('[[выбранный вариант ответа (с маленькой буквы)]]',
                         ((await poll_get(f'Usrs: {message.from_user.id}: Nazi_answers: small_poll:'))[0]).lower()[2:])
     text2 = await sql_safe_select('text', 'texts', {'name': 'nazi_less_than_5'})
@@ -389,7 +388,7 @@ async def nazi_you_wrong(message: Message):
 
 
 @router.message((F.text == "Это было в 2021 году, а сейчас их полстраны 😬"), state=NaziState.rushate, flags=flags)
-async def nazi_vs_gopnics(message: Message):
+async def nazi_half_country(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'nazi_half_country'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Я согласен(на), неонацизм на Украине - преувеличение 👌"))
@@ -474,7 +473,7 @@ async def nazi_parade(message: Message, state: FSMContext):
     answer="На Украине переписывают историю / Разрушают советские памятники / Унижают ветеранов"))
 async def nazi_no_WW2(message: Message, state: FSMContext):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Nazi_answers: first_poll:',
-                                 "В Украине переписывают историю Второй Мировой / 
+                                 "В Украине переписывают историю Второй Мировой /
                                   Разрушают советские памятники / Унижают ветеранов")
     text = await sql_safe_select('text', 'texts', {'name': 'nazi_no_WW2'})
     nmarkup = ReplyKeyboardBuilder()
@@ -516,14 +515,14 @@ async def country_game_question(message: Message, state: FSMContext):
         nmarkup.add(types.KeyboardButton(text="Это в России 🇷🇺"))
         nmarkup.add(types.KeyboardButton(text="Это на Украине 🇺🇦"))
         nmarkup.adjust(1, 1)
-        if truth_data[0] != None:
+        if truth_data[0] is not None:
             capt = ""
-            if truth_data[1] != None:
+            if truth_data[1] is not None:
                 capt = truth_data[1]
             try:
                 await message.answer_video(truth_data[0], caption=capt,
                                            reply_markup=nmarkup.as_markup(resize_keyboard=True))
-            except:
+            except TelegramBadRequest:
                 await message.answer_photo(truth_data[0], caption=capt,
                                            reply_markup=nmarkup.as_markup(resize_keyboard=True))
         else:

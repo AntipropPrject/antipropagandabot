@@ -59,7 +59,7 @@ async def admins_add(message: Message, state: FSMContext):
 
 
 @router.message(IsSudo(), state=admin.add_not)
-async def admins_add(message: Message, state: FSMContext):
+async def admins_add_lvl_choose(message: Message, state: FSMContext):
     if message.text.isdigit():
         await state.set_state(admin.add)
         await state.update_data({'new_admin_id': message.text})
@@ -76,7 +76,7 @@ async def admins_add(message: Message, state: FSMContext):
 
 
 @router.message(IsSudo(), F.text.in_(set(access_levels)), state=admin.add)
-async def admins_add(message: Message, state: FSMContext):
+async def admins_add_lvl_done(message: Message, state: FSMContext):
     new_admin_id = (await state.get_data())['new_admin_id']
     # проверка есть ли человек в общей базе
     if await mongo_select_info(new_admin_id):
@@ -124,7 +124,7 @@ async def admins_pop_not(message: Message, state: FSMContext):
 
 
 @router.message(F.text.in_(set(access_levels)), state=admin.pop)
-async def admins_pop(message: Message, state: FSMContext):
+async def admins_pop_done(message: Message, state: FSMContext):
     old_admin_id = (await state.get_data())['old_admin_id']
     if await mongo_select_info(old_admin_id):
         await mongo_pop_admin_level(old_admin_id, level=message.text)

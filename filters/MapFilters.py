@@ -1,7 +1,8 @@
+from typing import Union, Dict, Any
+
 from aiogram.dispatcher.filters import BaseFilter
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message
-from typing import Union, Dict, Any
 
 import bata
 from data_base.DBuse import poll_get, redis_just_one_read, redis_check
@@ -28,7 +29,6 @@ class INFOStateFilter(BaseFilter):
         if self.infostate == restate:
             return True
         return False
-
 
 
 class YandexPropagandaFilter(BaseFilter):

@@ -1,15 +1,14 @@
 import asyncio
-import os
-from datetime import datetime
-from aiogram import loggers
-from bata import all_data
-import pathlib
-import logging
-import traceback
-import os
 import json
 import logging
 import logging.config
+import os
+import pathlib
+from datetime import datetime
+
+from aiogram import loggers
+
+from bata import all_data
 
 data = all_data()
 bot = data.get_bot()

@@ -1,4 +1,5 @@
 import psycopg2
+
 from bata import all_data
 from log import logg
 
@@ -239,5 +240,5 @@ def tables_god():
         # con.close()
         # cur.close()
 
-    except psycopg2.Error as error:
+    except psycopg2.Error:
         pass

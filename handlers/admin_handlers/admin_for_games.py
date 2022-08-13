@@ -314,6 +314,7 @@ async def mesdfsdfnu(message: types.Message, state: FSMContext):
     await state.clear()
     await admin_home_games(message, state)
 
+
 @router.message((F.text == "Удалить сюжет"), state=admin.truthgame)
 async def admin_truthgame_delete(message: types.Message, state: FSMContext):
     leng = (await data_getter("SELECT COUNT (*) FROM truthgame"))[0][0]
@@ -932,6 +933,7 @@ async def admin_normal_game_del_done(message: types.Message, state: FSMContext):
     await state.clear()
     await admin_home_games(message, state)
 
+
 @router.message((F.text.contains('Редактировать сюжет')), state=admin.normal_game_lobby)
 async def admin_normal_game_update_start(message: types.Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
@@ -1181,7 +1183,7 @@ async def menu(message: types.Message, state: FSMContext):
     postgresdata = await data_getter(
         f"select name from assets where name like '{tag}_lie_%' order by name asc")
     nmrkup = ReplyKeyboardBuilder()
-    for i in range(1, len(postgresdata)+1):
+    for i in range(1, len(postgresdata) + 1):
         nmrkup.row(types.KeyboardButton(text=f'{i}'))
     nmrkup.adjust(3)
     nmrkup.row(types.KeyboardButton(text='Назад'))

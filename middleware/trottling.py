@@ -1,8 +1,10 @@
 from typing import Any, Awaitable, Callable, Dict
+
 from aiogram import BaseMiddleware, loggers
 from aiogram.dispatcher.flags.getter import get_flag
 from aiogram.types import Message
 from cachetools import TTLCache
+
 from bata import all_data
 
 THROTTLE_TIME = all_data().get_THROTTLE_TIME()

@@ -1,0 +1,57 @@
+version: "3.8"
+
+services:
+
+  mongodb:
+    image: mongo:5.0
+    ports:
+      - "27017:27017"
+    volumes:
+      - ~/apps/mongo:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=mongoOTPOR
+      - MONGO_INITDB_ROOT_PASSWORD=mongoOTPOR
+    command: mongod --quiet --logpath /dev/null
+  db:
+    image: postgres:12
+    container_name: antiprop_posgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5431:5432"
+
+  redis:
+    image: redis:alpine
+    container_name: antiprop_redis
+    ports:
+      - "2342:2342"
+    volumes:
+      - ./storage/redis/data:/data
+    command: --port 2342
+
+  web:
+    build: ../.
+    container_name: antiprop_Aiogrammwebhook
+    env_file:
+      - ../.env
+    command: >
+      sh -c "flake8 --exit-zero && pytest"
+    volumes:
+      - ..:/code
+    depends_on:
+      - redis
+      - db
+    network_mode: host
+    ports:
+      - "1443:1443"
+
+
+
+
+
+
+
+
+
+

@@ -3,11 +3,11 @@ from datetime import datetime
 
 from data_base.DBuse import redis_just_one_read
 from day_func import day_count
-from export_to_csv.pg_mg import Backup
 from handlers.advertising import start_spam
 from log.logg import get_logger
 
 logger = get_logger('periodic')
+
 
 async def periodic():
     print('periodic function has been started')
@@ -17,7 +17,7 @@ async def periodic():
         date = datetime.now().strftime('%Y.%m.%d')
 
         if c_time == '21:00:01':
-            logger.info(f'Обнуление дневного счетчика')
+            logger.info('Обнуление дневного счетчика')
             await day_count(count_delete=True)
         if status_spam == '1':
             if c_time == '08:00:01':

@@ -7,8 +7,8 @@ from aiogram.dispatcher.fsm.state import StatesGroup, State
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
 
+from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
 from data_base.DBuse import data_getter, sql_safe_select, redis_just_one_write, poll_write, mongo_game_answer
 from data_base.DBuse import redis_delete_from_list
 from filters.MapFilters import OperationWar, WarReason
@@ -55,7 +55,7 @@ async def reasons_king_of_info(message: Message, state: FSMContext):
 
 @router.message((F.text == "Подожди. Я так не говорил(а). С чего ты взял, что это ненастоящие цели? 🤷‍♂️"),
                 flags=flags)
-async def reasons_king_of_info(message: Message):
+async def reasons_not_so_fast(message: Message):
     await redis_just_one_write(f'Usrs: {message.from_user.id}: Politics:', 'Сторонник войны')
     base_list = ("👪 Защитить русских в Донбассе", "🛡 Предотвратить вторжение на территорию России или ДНР/ЛНР",
                  "🤬 Денацификация / Уничтожить нацистов")
@@ -205,7 +205,7 @@ async def reasons_big_bad_nato(message: Message):
 
 
 @router.message((F.text == 'Давай 👌'), state=TruereasonsState.main, flags=flags)
-async def reasons_lie_no_more_1(message: Message):
+async def reasons_NATO_is_coming(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_NATO_is_coming'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Хорошо 👌'))
@@ -225,7 +225,7 @@ async def reasons_biopigeons(message: Message):
 
 """@router.message(WarReason(answer="🗺 Вернуть России исторические земли / Объединить русский народ"))
 async def reasons_take_lands(message: Message, state: FSMContext):
-    await redis_delete_from_list(f'Usrs: {message.from_user.id}: Start_answers: Invasion:', 
+    await redis_delete_from_list(f'Usrs: {message.from_user.id}: Start_answers: Invasion:',
                                           "🗺 Вернуть России исторические земли / Объединить русский народ")
     text = "Кусок про захват территорий, но мы его не выводим"
     nmarkup = ReplyKeyboardBuilder()

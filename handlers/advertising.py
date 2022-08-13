@@ -1,10 +1,11 @@
 import asyncio
-from aiogram import Router
-from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError
-from bata import all_data
-from data_base.DBuse import mongo_update_viewed_news, mongo_pop_news
 from datetime import datetime, timedelta
 
+from aiogram import Router
+from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError
+
+from bata import all_data
+from data_base.DBuse import mongo_update_viewed_news, mongo_pop_news
 from log.logg import send_to_chat, get_logger
 
 router = Router()
@@ -13,6 +14,8 @@ bot = data.get_bot()
 
 
 logger = get_logger('SPAM')
+
+
 async def start_spam(datet):
     asyncio.create_task(send_to_chat("Рассылка началась"))
     logger.info("Функция рассылки запущена")
@@ -53,7 +56,6 @@ async def start_spam(datet):
         pass
     logger.info(f'Рассылка завершена, сообщение получили {count}')
     asyncio.create_task(send_to_chat(f"Рассылка завершена\n\nБыло отправлено: +-{count} сообщений"))
-
 
 
 async def latecomers(user, main_news_base, today_actual, main_news_ids):
@@ -105,8 +107,7 @@ async def send_spam(user_id, media_id, caption):
                 await bot.send_video(chat_id=int((user_id)), video=(media_id))
             except TelegramBadRequest:
                 await bot.send_photo(chat_id=int(user_id), photo=(media_id))
-    except TelegramForbiddenError as er:
+    except TelegramForbiddenError:
         logger.info(f'ПОЛЬЗОВАТЕЛЬ {user_id} -- Заблокировал бота')
         print(f"ПОЛЬЗОВАТЕЛЬ {user_id} -- Заблокировал бота")
-
 

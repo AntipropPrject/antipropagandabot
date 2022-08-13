@@ -151,7 +151,7 @@ async def mainmenu_here_we_go_again(message: Message, state: FSMContext):
 
 
 @router.message(F.text == "Да, я готов(а) начать сейчас 🇷🇺🇺🇦", state=MainMenuStates.again, flags=flags)
-async def mainmenu_here_we_go_again(message: Message, state: FSMContext):
+async def mainmenu_here_we_go_again_yeah(message: Message, state: FSMContext):
     await commands_start(message, state)
 
 
@@ -397,7 +397,7 @@ async def mainmenu_ppl_lie_select(message: Message, state: FSMContext):
             similarity = 'statement_Симоньян_'
         await state.update_data(ppl=similarity)
     if similarity == 'putin_lie_game_':
-        how_many = len(await data_getter(f"SELECT id FROM putin_lies"))
+        how_many = len(await data_getter("SELECT id FROM putin_lies"))
     else:
         how_many = len(await data_getter(f"SELECT name FROM assets WHERE name LIKE '{similarity}%'"))
     print(how_many)
@@ -424,7 +424,7 @@ async def mainmenu_ppl_one_lie(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text='Целенаправленная ложь 👎'))
     nmarkup.row(types.KeyboardButton(text='Случайная ошибка / Не ложь 👍'))
     if data['ppl'] == 'putin_lie_game_':
-        tag = f'putin_lie_game_'
+        tag = 'putin_lie_game_'
         await dynamic_media_answer(message, tag, number, nmarkup.as_markup(resize_keyboard=True))
         current_row = await sql_games_row_selecter('putin_lies', number)
         await state.update_data(current_row)
@@ -475,7 +475,7 @@ async def mainmenu_ppl_one_reb(message: Message, state: FSMContext):
                 state=(MainMenuStates.baseoflie, MainMenuStates.ptn), flags=flags)
 async def mainmenu_ptn_select(message: Message, state: FSMContext):
     await state.set_state(MainMenuStates.ptn)
-    how_many = len(await data_getter(f"SELECT id FROM putin_old_lies"))
+    how_many = len(await data_getter("SELECT id FROM putin_old_lies"))
     nmarkup = ReplyKeyboardBuilder()
     for i in range(how_many):
         nmarkup.row(types.KeyboardButton(text=f'{fancy_numbers[i]}'))
@@ -497,7 +497,7 @@ async def mainmenu_ptn_one_lie(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Целенаправленная ложь 👎'))
     nmarkup.row(types.KeyboardButton(text='Случайная ошибка / Не ложь 👍'))
-    tag = f'putin_oldlie_game_'
+    tag = 'putin_oldlie_game_'
     await dynamic_media_answer(message, tag, number, nmarkup.as_markup(resize_keyboard=True))
     current_row = await sql_games_row_selecter('putin_old_lies', number)
     await state.update_data(current_row)
@@ -542,11 +542,11 @@ async def mainmenu_games_start(message: Message, state: FSMContext):
 
 @router.message(((F.text == "Правда или Ложь ✅") | (F.text == "👈 Выбрать сюжет")),
                 state=(MainMenuStates.games, MainMenuStates.truthgame), flags=flags)
-async def mainmenu_tv_select(message: Message, state: FSMContext):
+async def mainmenu_truthgame_start(message: Message, state: FSMContext):
     await state.clear()
     await state.set_state(MainMenuStates.truthgame)
     await state.update_data(similarity="truthgame_")
-    how_many = len(await data_getter(f"SELECT id FROM truthgame"))
+    how_many = len(await data_getter("SELECT id FROM truthgame"))
     nmarkup = ReplyKeyboardBuilder()
     for i in range(how_many):
         nmarkup.row(types.KeyboardButton(text=f'{fancy_numbers[i]}'))
@@ -559,7 +559,7 @@ async def mainmenu_tv_select(message: Message, state: FSMContext):
 
 @router.message(((F.text.in_(set(fancy_numbers))) | (F.text == 'Следующий сюжет 👉')),
                 state=MainMenuStates.truthgame, flags=flags)
-async def mainmenu_tv_one_lie(message: Message, state: FSMContext):
+async def mainmenu_tv_one_glie(message: Message, state: FSMContext):
     if message.text in fancy_numbers:
         number = fancy_numbers.index(message.text) + 1
     else:
@@ -606,10 +606,10 @@ async def mainmenu_tv_one_reb(message: Message, state: FSMContext):
 
 @router.message(((F.text == 'Абсурд или Нормальность 🤦‍♀️') | (F.text == '👈 Выбрать новость')),
                 state=(MainMenuStates.games, MainMenuStates.normalgame), flags=flags)
-async def mainmenu_tv_select(message: Message, state: FSMContext):
+async def mainmenu_normalgame_start(message: Message, state: FSMContext):
     await state.clear()
     await state.set_state(MainMenuStates.normalgame)
-    how_many = len(await data_getter(f"SELECT id FROM normal_game"))
+    how_many = len(await data_getter("SELECT id FROM normal_game"))
     nmarkup = ReplyKeyboardBuilder()
     for i in range(how_many):
         nmarkup.row(types.KeyboardButton(text=f'{fancy_numbers[i]}'))
@@ -622,7 +622,7 @@ async def mainmenu_tv_select(message: Message, state: FSMContext):
 
 @router.message(((F.text.in_(set(fancy_numbers))) | (F.text == 'Следующая новость 👀')),
                 state=MainMenuStates.normalgame, flags=flags)
-async def mainmenu_tv_one_lie(message: Message, state: FSMContext):
+async def mainmenu_tv_one_nlie(message: Message, state: FSMContext):
     if message.text in fancy_numbers:
         number = fancy_numbers.index(message.text) + 1
     else:
@@ -660,10 +660,10 @@ async def mainmenu_tv_one_reb(message: Message, state: FSMContext):
 
 @router.message(((F.text == 'Нацизм в России или Украине 🙋‍♂️') | (F.text == '👈 Выбрать фото')),
                 state=(MainMenuStates.games, MainMenuStates.nazigame), flags=flags)
-async def mainmenu_tv_select(message: Message, state: FSMContext):
+async def mainmenu_countrygame_start(message: Message, state: FSMContext):
     await state.clear()
     await state.set_state(MainMenuStates.nazigame)
-    how_many = len(await data_getter(f"SELECT id FROM ucraine_or_not_game"))
+    how_many = len(await data_getter("SELECT id FROM ucraine_or_not_game"))
     nmarkup = ReplyKeyboardBuilder()
     for i in range(how_many):
         nmarkup.row(types.KeyboardButton(text=f'{fancy_numbers[i]}'))
@@ -676,7 +676,7 @@ async def mainmenu_tv_select(message: Message, state: FSMContext):
 
 @router.message(((F.text.in_(set(fancy_numbers))) | (F.text == 'Следующее фото 📷')),
                 state=MainMenuStates.nazigame, flags=flags)
-async def mainmenu_tv_one_lie(message: Message, state: FSMContext):
+async def mainmenu_tv_one_plie(message: Message, state: FSMContext):
     if message.text in fancy_numbers:
         number = fancy_numbers.index(message.text) + 1
     else:
@@ -724,9 +724,9 @@ async def mainmenu_tv_one_reb(message: Message, state: FSMContext):
 
 @router.message(((F.text == "А я сейчас вам покажу... ☝️") | (F.text.contains('👈'))),
                 state=(MainMenuStates.games, MainMenuStates.strikememes), flags=flags)
-async def mainmenu_ptn_select(message: Message, state: FSMContext):
+async def mainmenu_lksh_select(message: Message, state: FSMContext):
     await state.set_state(MainMenuStates.strikememes)
-    how_many = len(await data_getter(f"SELECT name FROM assets WHERE name LIKE 'prevent_strike_meme_%'"))
+    how_many = len(await data_getter("SELECT name FROM assets WHERE name LIKE 'prevent_strike_meme_%'"))
     await state.update_data(len=how_many)
     nmarkup = ReplyKeyboardBuilder()
     for i in range(how_many):

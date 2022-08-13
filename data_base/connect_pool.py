@@ -1,7 +1,7 @@
 from contextlib import contextmanager
-import psycopg2.pool
-import psycopg2.extras
 
+import psycopg2.extras
+import psycopg2.pool
 
 POOL = None
 CONF = {

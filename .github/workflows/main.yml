@@ -1,13 +1,15 @@
-name: deploy to a server on push
+name: Stage Deploy
 
 on:
-  push:
-    branches: 
-      test
+  workflow_run:
+    workflows: [ Test Pipeline ]
+    types:
+      - completed
 
 jobs:
   deploy-to-server:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: ssh pipeline 1
         uses: appleboy/ssh-action@master
