@@ -264,8 +264,6 @@ async def advertising_value(tag):
 
 async def mongo_add_news(list_media: str, caption: str, datetime=None, coll=None):
     try:
-        print(list_media)
-        print(caption)
         client = all_data().get_mongo()
         database = client['database']
 
@@ -277,7 +275,6 @@ async def mongo_add_news(list_media: str, caption: str, datetime=None, coll=None
             collection = database['spam_actual_news']
             spam_list = {'media': list_media, 'caption': caption, 'datetime': datetime}
             await collection.insert_one(spam_list)
-        print('Done')
     except Exception as error:
         await logg.get_error(error)
 
@@ -304,19 +301,15 @@ async def mongo_select_news(coll=None) -> [list, bool]:
 
 
 async def check_avtual_news(date) -> dict:
-    print(date)
     client = all_data().get_mongo()
     database = client.database
     date_time_1 = datetime.strptime(date+' 11:00', '%Y.%m.%d %H:%M')
     date_time_2 = datetime.strptime(date+' 19:00', '%Y.%m.%d %H:%M')
-    print(date_time_1)
-    print(date_time_2)
     collection = database['spam_actual_news']
     try:
         count_news_on_date = dict()
         count_news_on_date['news_11:00'] = int(await collection.count_documents({'datetime': date_time_1}))
         count_news_on_date['news_19:00'] = int(await collection.count_documents({'datetime': date_time_2}))
-        print(count_news_on_date)
         return count_news_on_date
     except Exception as e:
         print(e)
