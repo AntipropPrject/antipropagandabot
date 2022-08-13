@@ -24,6 +24,7 @@ jobs:
       - name: 'Building containers'
         run: docker compose -f CI/DocTesting.yml build
       - name: 'Testing'
+        id: testing
         run: docker compose -f CI/DocTesting.yml up --abort-on-container-exit
       - name: 'Report upload'
         if: always()

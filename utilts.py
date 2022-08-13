@@ -199,8 +199,7 @@ async def happy_tester(bot):
     redis.sadd('LastCommies', *new_log_set)
     diff = new_log_set - old_log_set
     botname = (await bot.get_me()).username
-    s_bot = await SpaceBot.rise('https://otporproject.jetbrains.space', '2dd6e561-edfe-414a-9a5b-b01114d46b9c',
-                                'c428a143d05f4512ec5275b8ae190627b71441627f5f7bd975f1021d83ad36aa', 'OTPOR')
+    # s_bot = await SpaceBot.rise()
     if len(diff) != 0:
         string, space_string, count = '', '', 0
         message_list = list()
@@ -208,24 +207,6 @@ async def happy_tester(bot):
             count += 1
             string = string + '\n' + str(count) + '. ' + comm
             space_string = space_string + '\n' + str(count) + '. ' + comm[:comm.find("||")]
-            if botname == 'AntipropStage_bot':
-                try:
-                    cool = comm.replace('OTPOR-T-', '')[:comm.replace('OTPOR-T-', "").find('||')]
-                    iss_numbers = (int(x) for x in re.split('-| ', cool) if x != '')
-                    for number in iss_numbers:
-                        await s_bot.update_issue_tag('BugTracking', number, 'TEST SERVER')
-                        await s_bot.update_issue_tag('New Fetures', number, 'TEST SERVER')
-                except ValueError:
-                    print('Use commits name templates!')
-            elif botname == 'Russia_Ukraine_Bot':
-                try:
-                    cool = comm.replace('OTPOR-T-', '')[:comm.replace('OTPOR-T-', "").find('||')]
-                    iss_numbers = (int(x) for x in re.split('-| ', cool) if x != '')
-                    for number in iss_numbers:
-                        await s_bot.update_issue_tag('BugTracking', number, 'PROD SERVER')
-                        await s_bot.update_issue_tag('New Fetures', number, 'PROD SERVER')
-                except ValueError:
-                    print('Use commits name templates!')
             if count % 13 == 0:
                 message_list.append(string)
                 string = ''
@@ -234,7 +215,7 @@ async def happy_tester(bot):
                                    f'[{datetime.now().strftime("%H:%M")}] Bot @{botname} is up, detected new commits:')
             for msg in message_list:
                 await bot.send_message(bata.all_data().commichannel, msg)
-            await s_bot.send_message('general', f'Bot @{botname} is up, detected new commits:\n {space_string}')
+            # await s_bot.send_message('general', f'Bot @{botname} is up, detected new commits:\n {space_string}')
         except TelegramBadRequest as exc:
             print(f'BOT NOT IN CHANNEL AND THIS MESSAGE NEED TO BE IN LOGS\n{exc}')
         print(f'[{datetime.now().strftime("%H:%M")}] Bot is up, detected new commits:{message_list}')
@@ -244,5 +225,5 @@ async def happy_tester(bot):
             await bot.send_message(bata.all_data().commichannel, f'Bot {botname}'
                                                                  f' was restarted without interesting commits')
         except TelegramBadRequest:
-            print(f'Bot thinks there is no commits, and cant write it to channel')
+            print('Bot thinks there is no commits, and cant write it to channel')
     await bot.session.close()
