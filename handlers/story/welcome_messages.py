@@ -28,7 +28,6 @@ async def adv_company(message: types.Message, state: FSMContext, command: Comman
 
 @router.message(commands=['start', 'help', 'restart'], state='*', flags=flags)
 async def commands_start(message: types.Message, state: FSMContext):  # Первое сообщение
-    await day_count()
     asyncio.create_task(start_base(message))
     await state.clear()
     markup = ReplyKeyboardBuilder()
