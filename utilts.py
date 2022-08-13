@@ -207,7 +207,7 @@ async def happy_tester(bot):
             count += 1
             string = string + '\n' + str(count) + '. ' + comm
             space_string = space_string + '\n' + str(count) + '. ' + comm[:comm.find("||")]
-            if count % 13 == 0:
+            if count % 13 == 0 or comm == diff[-1]:
                 message_list.append(string)
                 string = ''
         try:
