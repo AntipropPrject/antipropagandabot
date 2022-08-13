@@ -22,7 +22,7 @@ router = Router()
 
 @router.message(CommandStart(command_magic=F.args), flags=flags)
 async def adv_company(message: types.Message, state: FSMContext, command: CommandObject):
-    await advertising_value(command.args)
+    asyncio.create_task(advertising_value(command.args))
     await commands_start(message, state)
 
 
