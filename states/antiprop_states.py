@@ -15,5 +15,5 @@ class propaganda_victim(StatesGroup):
     wiki = State()
     dialogue_start_over = State()
     ppl_propaganda = State()
-
+    web = State()
     final = State()
