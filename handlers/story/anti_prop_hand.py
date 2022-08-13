@@ -182,7 +182,7 @@ async def antiprop_tv_first(message: Message, state: FSMContext):
         count = (await state.get_data())['first_tv_count'] + 1
         await state.update_data(first_tv_count=count)
         nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(types.KeyboardButton(text="Видео посмотрел, что с ним не так? 🤔"))
+        nmarkup.row(types.KeyboardButton(text="Сюжет посмотрел(а). Что с ним не так? 🤔"))
         await dynamic_media_answer(message, 'tv_first_lie_', count, nmarkup.as_markup(resize_keyboard=True))
     except TelegramBadRequest:
         nmarkup = ReplyKeyboardBuilder()
@@ -198,7 +198,7 @@ async def antiprop_tv_24(message: Message, state: FSMContext):
         count = (await state.get_data())['rus24_tv_count'] + 1
         await state.update_data(rus24_tv_count=count)
         nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(types.KeyboardButton(text="Видео посмотрел, что с ним не так? 🤔"))
+        nmarkup.row(types.KeyboardButton(text="Сюжет посмотрел(а).Что с ним не так? 🤔"))
         await dynamic_media_answer(message, 'tv_24_lie_', count, nmarkup.as_markup(resize_keyboard=True))
 
     except TelegramBadRequest:
@@ -215,7 +215,7 @@ async def antiprop_tv_HTB(message: Message, state: FSMContext):
         count = (await state.get_data())['HTB_tv_count'] + 1
         await state.update_data(HTB_tv_count=count)
         nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(types.KeyboardButton(text="Видео посмотрел, что с ним не так? 🤔"))
+        nmarkup.row(types.KeyboardButton(text="Сюжет посмотрел(а). Что с ним не так? 🤔"))
         await dynamic_media_answer(message, 'tv_HTB_lie_', count, nmarkup.as_markup(resize_keyboard=True))
     except TelegramBadRequest:
         nmarkup = ReplyKeyboardBuilder()
@@ -231,7 +231,7 @@ async def antiprop_tv_star(message: Message, state: FSMContext):
         count = (await state.get_data())['Star_tv_count'] + 1
         await state.update_data(Star_tv_count=count)
         nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(types.KeyboardButton(text="Видео посмотрел, что с ним не так? 🤔"))
+        nmarkup.row(types.KeyboardButton(text="Сюжет посмотрел(а). Что с ним не так? 🤔"))
         await dynamic_media_answer(message, 'tv_star_lie_', count, nmarkup.as_markup(resize_keyboard=True))
 
     except TelegramBadRequest:
@@ -241,7 +241,7 @@ async def antiprop_tv_star(message: Message, state: FSMContext):
                              reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.contains('что')) & F.text.contains('не так'), state=propaganda_victim.tv_first, flags=flags)
+@router.message((F.text.contains('Что')) & F.text.contains('не так'), state=propaganda_victim.tv_first, flags=flags)
 async def russia_tv_first_reb(message: Message, state: FSMContext):
     count = (await state.get_data())['first_tv_count']
     nmarkup = ReplyKeyboardBuilder()
@@ -252,7 +252,7 @@ async def russia_tv_first_reb(message: Message, state: FSMContext):
     await dynamic_media_answer(message, 'tv_first_reb_', count, nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.contains('что')) & F.text.contains('не так'), state=propaganda_victim.tv_russia24, flags=flags)
+@router.message((F.text.contains('Что')) & F.text.contains('не так'), state=propaganda_victim.tv_russia24, flags=flags)
 async def tv_russia24_reb(message: Message, state: FSMContext):
     count = (await state.get_data())['rus24_tv_count']
     nmarkup = ReplyKeyboardBuilder()
@@ -263,7 +263,7 @@ async def tv_russia24_reb(message: Message, state: FSMContext):
     await dynamic_media_answer(message, 'tv_24_reb_', count, nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.contains('что')) & F.text.contains('не так'), state=propaganda_victim.tv_HTB, flags=flags)
+@router.message((F.text.contains('Что')) & F.text.contains('не так'), state=propaganda_victim.tv_HTB, flags=flags)
 async def tv_HTB_reb(message: Message, state: FSMContext):
     count = (await state.get_data())['HTB_tv_count']
     nmarkup = ReplyKeyboardBuilder()
@@ -274,7 +274,7 @@ async def tv_HTB_reb(message: Message, state: FSMContext):
     await dynamic_media_answer(message, 'tv_HTB_reb_', count, nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.contains('что')) & F.text.contains('не так'), state=propaganda_victim.tv_star, flags=flags)
+@router.message((F.text.contains('Что')) & F.text.contains('не так'), state=propaganda_victim.tv_star, flags=flags)
 async def tv_star_reb(message: Message, state: FSMContext):
     count = (await state.get_data())['Star_tv_count']
     nmarkup = ReplyKeyboardBuilder()
@@ -334,7 +334,7 @@ async def antip_another_tv(message: Message, state: FSMContext):
 
 
 @router.message(WebPropagandaFilter(), (
-        (F.text.contains('шаг')) | (F.text.contains('удивлён')) | (F.text.contains('шоке')) |
+        (F.text.contains('шаг')) | (F.text.contains('удивлен(а)')) | (F.text.contains('шоке')) |
         (F.text.contains('знал'))), flags=flags)
 @router.message(WebPropagandaFilter(), commands=["test"])
 async def antip_not_only_TV(message: Message, web_lies_list: List[str], state: FSMContext):
@@ -563,8 +563,8 @@ async def antip_web_exit_1(message: Message, state: FSMContext):
 
 
 @router.message(PplPropagandaFilter(),
-                (F.text.contains('шаг')) | (F.text.contains('удивлён')) | (F.text.contains('шоке')) | (
-                        F.text.contains('знал')) | (F.text == 'Конечно!'), flags=flags)
+                (F.text.contains('шаг')) | (F.text.contains('удивлен(а) ')) | (F.text.contains('шоке')) | (
+                        F.text.contains('знал(а)')) | (F.text == 'Конечно!'), flags=flags)
 async def antip_bad_people_lies(message: Message, state: FSMContext):
     await state.set_state(propaganda_victim.ppl_propaganda)
     text = await sql_safe_select('text', 'texts', {'name': 'antip_bad_people_lies'})
@@ -576,8 +576,8 @@ async def antip_bad_people_lies(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.contains('шаг')) | (F.text.contains('удивлён')) | (F.text.contains('шоке')) | (
-        F.text.contains('знал, что по ТВ')) | (F.text == 'Конечно!') | (F.text == 'Ну давай'), flags=flags)
+@router.message((F.text.contains('шаг')) | (F.text.contains('удивлен(а)')) | (F.text.contains('шоке')) | (
+        F.text.contains('знал(а), что по ТВ')) | (F.text == 'Конечно!') | (F.text == 'Ну давай'), flags=flags)
 async def antip_truth_game_start(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_truth_game_start'})
     nmarkup = ReplyKeyboardBuilder()

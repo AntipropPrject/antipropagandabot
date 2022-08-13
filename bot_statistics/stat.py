@@ -29,7 +29,6 @@ async def mongo_stat_new(tg_id):
 
 async def mongo_update_stat_new(tg_id, column, options='$set', value=True):
     user_info = await mongo_select_info(tg_id)
-    print(user_info['datetime_end'])
     if user_info['datetime_end'] is None:
         try:
             await collection_stat_new.update_one({'_id': int(tg_id)}, {options: {column: value}})

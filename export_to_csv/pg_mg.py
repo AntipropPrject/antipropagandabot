@@ -23,11 +23,9 @@ router = Router()
 
 @router.message(IsSudo(), F.text.contains('Экспорт') | F.text.contains('Создать копию'))
 async def export(message: types.Message, state: FSMContext):
-    print(1)
     backup = Backup()
     today = datetime.now().strftime('%Y-%m-%d_%H-%M')
     await backup.dump_all(name=f'DUMP_{today}')
-    print(f"export_to_csv/backups/DUMP_{today}.zip")
     try:
         await message.answer_document(FSInputFile(f"export_to_csv/backups/DUMP_{today}.zip"),
                                       caption=f"Type: backup base\n\n"
