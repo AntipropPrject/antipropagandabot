@@ -338,6 +338,7 @@ async def antip_another_tv(message: Message, state: FSMContext):
         (F.text.contains('знал'))), flags=flags)
 @router.message(WebPropagandaFilter(), commands=["test"])
 async def antip_not_only_TV(message: Message, web_lies_list: List[str], state: FSMContext):
+    await state.set_state(propaganda_victim.web)
     if 'шаг' not in message.text:
         await mongo_update_stat_new(tg_id=message.from_user.id, column='grade_tv', value=message.text)
     markup = ReplyKeyboardBuilder()
