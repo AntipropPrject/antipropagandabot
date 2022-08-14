@@ -714,7 +714,7 @@ async def antip_yandex_rupor(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(WikiFilter(), (F.text.contains('удивлен')) | (F.text.contains('не верю')),
+@router.message(WikiFilter(), (F.text.contains('удивлён')) | (F.text.contains('не верю')),
                 state=propaganda_victim.yandex, flags=flags)
 @router.message(WikiFilter(), ((F.text == "Пропустим игру 🙅‍♀️") | (F.text == '🤝 Продолжим')
                                | (F.text == 'Достаточно, двигаемся дальше  🙅‍♀️')), flags=flags)
