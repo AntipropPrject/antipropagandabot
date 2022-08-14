@@ -579,7 +579,7 @@ async def antip_bad_people_lies(message: Message, state: FSMContext):
 
 @router.message((F.text.contains('шаг')) | (F.text.contains('удивлен(а)')) | (F.text.contains('шоке')) | (
         F.text.contains('знал(а), что по ТВ')) | (F.text == 'Конечно!') | (F.text == 'Ну давай'), flags=flags)
-async def antip_truth_game_start(message: Message, state: FSMContext):
+async def antip_truth_game_start(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_truth_game_start'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Начнем! 🚀"))
@@ -708,8 +708,8 @@ async def antip_yandex(message: Message):
 async def antip_yandex_rupor(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_yandex_rupor'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Я удивлен(а) 🤔"))
-    nmarkup.add(types.KeyboardButton(text="Я не удивлен(а) 🤷‍♂️"))
+    nmarkup.row(types.KeyboardButton(text="Я удивлён(а) 🤔"))
+    nmarkup.add(types.KeyboardButton(text="Я не удивлён(а) 🤷‍♂️"))
     nmarkup.row(types.KeyboardButton(text="Я не верю 😕"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
@@ -753,7 +753,7 @@ async def antip_look_at_it_yourself(message: Message):
 
 @router.message(((F.text.contains('Спасибо')) | (F.text.contains('нового')) | (F.text.contains('не верю'))),
                 state=propaganda_victim.wiki, flags=flags)
-@router.message(((F.text.contains('удивлен')) | (F.text.contains('не верю'))),
+@router.message(((F.text.contains('удивлён')) | (F.text.contains('не верю'))),
                 state=propaganda_victim.yandex, flags=flags)
 @router.message(
     (F.text == "Пропустим игру 🙅‍♀️") | (F.text == '🤝 Продолжим') | (F.text == 'Достаточно, двигаемся дальше  🙅‍♀️'),
