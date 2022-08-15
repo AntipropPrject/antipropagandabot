@@ -30,8 +30,8 @@ dp = Dispatcher(storage)
 
 async def periodic():
     print('periodic function has been started')
-    backup = Backup()
     while True:
+        backup = Backup()
         status_spam = await redis_just_one_read('Usrs: admins: spam: status:')
         datefor_backup = datetime.now().strftime('%Y-%m-%d_%H-%M')
         c_time = datetime.now().strftime("%H:%M:%S")
