@@ -317,8 +317,6 @@ async def start_I_will_rates(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'start_I_will_rates'})
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Давай  👌"))
-    nmarkap.add(types.KeyboardButton(text="Уже так делаю 👌"))
-    nmarkap.row(types.KeyboardButton(text="К чему это? 🤷‍♂️"))
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
