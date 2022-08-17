@@ -18,7 +18,7 @@ from handlers.admin_handlers import admin_factory, marketing, admin_for_games, n
 from handlers.advertising import start_spam
 from handlers.other import status, other_file
 from handlers.story import preventive_strike, true_resons_hand, welcome_messages, nazi_hand, \
-    donbass_hand, main_menu_hand, anti_prop_hand, putin_hand, smi_hand, stopwar_hand
+    donbass_hand, main_menu_hand, anti_prop_hand, putin_hand, smi_hand, stopwar_hand, welcome_stories
 from middleware.trottling import ThrottlingMiddleware
 from utilts import happy_tester
 
@@ -72,6 +72,7 @@ async def main():
     dp.include_router(start_hand.router)
 
     # Начало и антипропаганда
+    dp.include_router(welcome_stories.router)
     dp.include_router(welcome_messages.router)
     dp.include_router(anti_prop_hand.router)
     dp.include_router(smi_hand.router)
