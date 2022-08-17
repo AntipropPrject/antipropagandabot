@@ -12,7 +12,7 @@ from utilts import simple_media
 flags = {"throttling_key": "True"}
 router = Router()
 
-router.message.filter(state=start_dialog)
+router.message.filter(state=start_dialog.big_story)
 
 
 @router.message((F.text.contains('верить') | F.text.contains('50 000')), flags=flags)  # А с чего мне тебе верить?
