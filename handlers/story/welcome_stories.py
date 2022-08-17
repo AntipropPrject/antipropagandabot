@@ -58,6 +58,8 @@ async def start_trolley_1(message: Message):
 
 @router.message((F.text.in_({"Продолжу ехать прямо ⬆️", "Сверну направо ➡️"})), flags=flags)
 async def start_trolley_1_result(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='start_trolley_1_result',
+                                value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'start_trolley_1_result'})
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Продолжай 🤔"))
@@ -74,6 +76,8 @@ async def start_trolley_2(message: Message):
 
 @router.message((F.text.in_({"Ничего не буду делать 🙅‍♂️", "Столкну толстяка с моста ⬇️"})), flags=flags)
 async def start_trolley_2_result(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='start_trolley_2_result',
+                                value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'start_trolley_2_result'})
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="В отличии от рабочего на путях, толстяк не замешан в этой ситуации 🤔"))
@@ -86,6 +90,8 @@ async def start_trolley_2_result(message: Message):
 @router.message((F.text.contains('другое')) | (F.text.contains('Другая причина')) |
                 (F.text.contains('толстяк не замешан')), flags=flags)
 async def start_trolley_2_result_answers(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='start_are_you_ready',
+                                value=message.text)
     text = None
     if 'толстяк не замешан' in message.text:
         text = await sql_safe_select('text', 'texts', {'name': 'start_worker_is_guilty'})
@@ -163,6 +169,8 @@ async def start_continue_or_peace(message: Message):
 @router.message((F.text.in_({"Продолжать военную операцию ⚔️", "Переходить к мирным переговорам 🕊",
                              "Затрудняюсь ответить 🤷‍♀️"})), flags=flags)
 async def start_continue_or_peace_results(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='start_continue_or_peace_results',
+                                value=message.text)
     if "Продолжать военную операцию ⚔️" in message.text:
         await poll_write(f'Usrs: {message.from_user.id}: Start_answers: NewPolitList:', message.text)
     elif "Переходить к мирным переговорам 🕊" in message.text:
@@ -188,6 +196,8 @@ async def start_now_you_putin(message: Message):
 @router.message((F.text.in_({"Начну военную операцию ⚔️", "Не стану этого делать 🙅‍♂️",
                              "Затрудняюсь ответить 🤷‍♀️"})), flags=flags)
 async def start_continue_or_peace_results(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='start_now_you_putin_results',
+                                value=message.text)
     user_answers = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: NewPolitList:')
     user_answers.append(message.text)
     if "Начну военную операцию ⚔️" in user_answers and "Продолжать военную операцию ⚔️" in user_answers:
@@ -221,6 +231,8 @@ async def start_donbas_OOH(message: Message):
 
 @router.message((F.text == "Знал(а) ✅") | (F.text == "Не знал(а) ❌") | (F.text == "Продолжим  👌"), flags=flags)
 async def start_donbas_results(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='start_donbas_results',
+                                value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'start_donbas_results'})
     await redis_just_one_write(f'Usrs: {message.from_user.id}: StartDonbas:', message.text)
     nmarkap = ReplyKeyboardBuilder()
