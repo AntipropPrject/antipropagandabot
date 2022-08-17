@@ -201,11 +201,12 @@ async def start_continue_or_peace_results(message: Message):
     user_answers = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: NewPolitList:')
     user_answers.append(message.text)
     if "Начну военную операцию ⚔️" in user_answers and "Продолжать военную операцию ⚔️" in user_answers:
-        await redis_just_one_write(f'Usrs: {message.from_user.id}: NewPolitStat:', 'Сторонник спецоперации')
+        await redis_just_one_write(f'Usrs: {message.from_user.id}: Start_answers: NewPolitStat:',
+                                   'Сторонник спецоперации')
     elif "Переходить к мирным переговорам 🕊" in user_answers and "Не стану этого делать 🙅‍♂️" in user_answers:
-        await redis_just_one_write(f'Usrs: {message.from_user.id}: NewPolitStat:', 'Противник войны')
+        await redis_just_one_write(f'Usrs: {message.from_user.id}: Start_answers: NewPolitStat:', 'Противник войны')
     else:
-        await redis_just_one_write(f'Usrs: {message.from_user.id}: NewPolitStat:', 'Сомневающийся')
+        await redis_just_one_write(f'Usrs: {message.from_user.id}: Start_answers: NewPolitStat:', 'Сомневающийся')
     text = await sql_safe_select('text', 'texts', {'name': 'start_now_you_putin_results'})
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Давай посмотрим 👌"))
@@ -236,11 +237,11 @@ async def start_donbas_results(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'start_donbas_results'})
     await redis_just_one_write(f'Usrs: {message.from_user.id}: StartDonbas:', message.text)
     nmarkap = ReplyKeyboardBuilder()
-    nmarkap.row(types.KeyboardButton(text="Продолжай ⏳"))
+    nmarkap.row(types.KeyboardButton(text="Продолжай   ⏳"))
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Продолжай ⏳"), flags=flags)
+@router.message((F.text == "Продолжай   ⏳"), flags=flags)
 async def start_donbas_putin(message: Message):
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Покажи 🤔"))
@@ -253,7 +254,8 @@ async def start_many_numbers(message: Message):
     await message.answer(text, disable_web_page_preview=True)
     nmarkap = ReplyKeyboardBuilder()
     if (await redis_just_one_read(f'Usrs: {message.from_user.id}: StartDonbas:')) == "Знал(а) ✅" or (
-            await redis_just_one_read(f'Usrs: {message.from_user.id}: NewPolitStat:')) == 'Противник войны':
+            await redis_just_one_read(f'Usrs: {message.from_user.id}: Start_answers: NewPolitStat:')) ==\
+            'Противник войны':
         await start_remember_money(message)
     else:
         text = await sql_safe_select('text', 'texts', {'name': 'start_how_are_you'})
