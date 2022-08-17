@@ -143,12 +143,12 @@ async def start_red_pill(message: Message):
 async def start_dumb_dam(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'start_dumb_dam'})
     nmarkap = ReplyKeyboardBuilder()
-    nmarkap.row(types.KeyboardButton(text="Ничего не буду делать 🙅‍♂️"))
+    nmarkap.row(types.KeyboardButton(text="Ничего не  буду делать  🙅‍♂️"))
     nmarkap.add(types.KeyboardButton(text="Взорву дамбу 💥"))
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == 'Давай продолжим 👌'), flags=flags)
+@router.message(F.text.in_({"Ничего не  буду делать  🙅‍♂️", "Взорву дамбу 💥"}), flags=flags)
 async def start_dam_results(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'start_dam_results'})
     nmarkap = ReplyKeyboardBuilder()
