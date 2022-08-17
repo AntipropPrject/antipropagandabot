@@ -763,8 +763,8 @@ async def approve_media(message: Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username,
                           "Нажал(a) -- 'Подтвердить' -- Медиа добавлено")
     data = await state.get_data()
-    text = await sql_safe_insert('assets', data)
-    if text is not False:
+    text = await sql_safe_insert('public', 'assets', data)
+    if text:
         await state.clear()
 
         await state.set_state(admin.edit_context)
@@ -778,8 +778,8 @@ async def approve_text(message: Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username,
                           "Нажал(a) -- 'Подтвердить' -- Текст добавлен")
     data = await state.get_data()
-    r = await sql_safe_insert('texts', data)
-    if r != False:
+    r = await sql_safe_insert('public', 'texts', data)
+    if r:
         await state.set_state(admin.edit_context)
         await message.answer('Текст добавлен. Еще разок?', reply_markup=redct_text())
     else:
