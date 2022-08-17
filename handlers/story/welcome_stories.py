@@ -36,11 +36,11 @@ async def start_is_war_bad(message: Message):
 async def start_disgusting(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'start_disgusting'})
     nmarkap = ReplyKeyboardBuilder()
-    nmarkap.row(types.KeyboardButton(text="Продолжай ⏳"))
+    nmarkap.row(types.KeyboardButton(text="Продолжай  ⏳"))
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == 'Продолжай ⏳'), flags=flags)
+@router.message((F.text == 'Продолжай  ⏳'), flags=flags)
 async def start_what_is_moral(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'start_what_is_moral'})
     nmarkap = ReplyKeyboardBuilder()
