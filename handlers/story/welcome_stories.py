@@ -191,7 +191,7 @@ async def start_dam_results(message: Message):
         client = all_data().get_mongo()
         database = client.database
         collection = database['statistics_new']
-        passive = await collection.count_documents({'start_dam_results': 'Ничего не  буду делать  🙅‍♂️️️'})
+        passive = await collection.count_documents({'start_dam_results': 'Ничего не  буду делать  🙅‍♂️'})
         active = await collection.count_documents({'start_dam_results': 'Взорву дамбу 💥'})
         all_people = passive + active
         text = text.replace('XX', f"{(round(passive/all_people * 100, 1) if all_people > 0 else 'N/A')}")
@@ -221,8 +221,6 @@ async def start_continue_or_peace(message: Message):
 async def start_continue_or_peace_results(message: Message):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='start_continue_or_peace_results',
                                 value=message.text)
-
-
     if "Продолжать военную операцию ⚔️" in message.text:
         await poll_write(f'Usrs: {message.from_user.id}: Start_answers: NewPolitList:', message.text)
     elif "Переходить к мирным переговорам 🕊" in message.text:
@@ -230,8 +228,6 @@ async def start_continue_or_peace_results(message: Message):
     elif "Затрудняюсь ответить 🤷‍♀️" in message.text:
         await poll_write(f'Usrs: {message.from_user.id}: Start_answers: NewPolitList:', message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'start_continue_or_peace_results'})
-
-
     try:
         client = all_data().get_mongo()
         database = client.database
@@ -261,12 +257,12 @@ async def start_now_you_putin(message: Message):
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Начну военную операцию ⚔️"))
     nmarkap.row(types.KeyboardButton(text="Не стану этого делать 🙅‍♂️"))
-    nmarkap.row(types.KeyboardButton(text="Затрудняюсь ответить 🤷‍♀️"))
+    nmarkap.row(types.KeyboardButton(text="Затрудняюсь ответить  🤷‍♀️"))
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text.in_({"Начну военную операцию ⚔️", "Не стану этого делать 🙅‍♂️",
-                             "Затрудняюсь ответить 🤷‍♀️"})), flags=flags)
+                             "Затрудняюсь ответить  🤷‍♀️"})), flags=flags)
 async def start_continue_or_peace_results(message: Message):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='start_now_you_putin_results',
                                 value=message.text)
@@ -287,7 +283,7 @@ async def start_continue_or_peace_results(message: Message):
         collection = database['statistics_new']
         war = await collection.count_documents({'start_now_you_putin_results': 'Начну военную операцию ⚔️'})
         stop_war = await collection.count_documents({'start_now_you_putin_results': 'Не стану этого делать 🙅‍♂️'})
-        hz = await collection.count_documents({'start_now_you_putin_results': 'Затрудняюсь ответить 🤷‍♀️'})
+        hz = await collection.count_documents({'start_now_you_putin_results': 'Затрудняюсь ответить  🤷‍♀️'})
         all_people = war + stop_war + hz
         text = text.replace('XX', f"{(round(war / all_people * 100, 1) if all_people > 0 else 'N/A')}")
         text = text.replace('YY', f"{(round(stop_war / all_people * 100, 1) if all_people > 0 else 'N/A')}")
@@ -379,7 +375,7 @@ async def start_many_numbers(message: Message):
             {'start_continue_or_peace_results': 'Переходить к мирным переговорам 🕊'}]})
         dont_knew_hr = await collection.count_documents({'$and': [
             {'start_donbas_results': 'Не знал(а) ❌️'},
-            {'start_continue_or_peace_results': 'Затрудняюсь ответить 🤷‍♀️'}]})
+            {'start_continue_or_peace_results': 'Затрудняюсь ответить  🤷‍♀️'}]})
 
         all_people = knew_war + knew_dont_war + knew_hx + dont_knew_war + dont_knew_dont_war + dont_knew_hr + 1
         print(all_people)
