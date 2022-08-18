@@ -766,7 +766,6 @@ async def approve_media(message: Message, state: FSMContext):
     text = await sql_safe_insert('public', 'assets', data)
     if text:
         await state.clear()
-
         await state.set_state(admin.edit_context)
         await message.answer('Медиа добавлено. Еще разок?', reply_markup=redct_media())
     else:
