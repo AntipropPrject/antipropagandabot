@@ -371,7 +371,7 @@ async def start_many_numbers(message: Message):
         dont_knew_hr = await collection.count_documents({'$and': [
             {'start_donbas_results': 'Не знал(а) ❌️'},
             {'start_continue_or_peace_results': 'Затрудняюсь  ответить  🤷‍♀️'}]})
-        all_people = knew_war + knew_dont_war + knew_hx + dont_knew_war + dont_knew_dont_war + dont_knew_hr + 1
+        all_people = knew_war + knew_dont_war + knew_hx + dont_knew_war + dont_knew_dont_war + dont_knew_hr
         print(all_people)
         AA = float(knew_war / all_people * 100)
         DD = float(dont_knew_war / all_people * 100)
