@@ -377,10 +377,10 @@ async def start_many_numbers(message: Message):
         try:
             AA = float(knew_war / all_people_knew * 100)
             DD = float(dont_knew_war / all_people_dont_knew * 100)
-            XX = DD - AA
+            XX = DD - (AA + 40)
         except Exception as e:
             logger.error(e)
-
+        print((round(XX, 1) if XX >= 0 else str('-') + str(round(abs(XX), 1))))
         text = text.replace('AA', f"{(round(knew_war / all_people_knew * 100, 1) if all_people_knew > 0 else 'N/A')}")
         text = text.replace('BB', f"{(round(knew_dont_war / all_people_knew * 100, 1) if all_people_knew > 0 else 'N/A')}")
         text = text.replace('CC', f"{(round(knew_hx / all_people_knew * 100, 1) if all_people_knew > 0 else 'N/A')}")
