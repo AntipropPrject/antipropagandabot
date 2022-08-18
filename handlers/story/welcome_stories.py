@@ -68,7 +68,7 @@ async def start_trolley_1_result(message: Message):
         client = all_data().get_mongo()
         database = client.database
         collection = database['statistics_new']
-        count_right = await collection.count_documents({'start_trolley_1_result': 'Сверну направо ➡️'})
+        count_right = await collection.count_documents({'start_trolley_1_result': "Сверну направо ➡️"})
         count_straight = await collection.count_documents({'start_trolley_1_result': 'Продолжу ехать прямо ⬆️'})
         all_people = count_straight + count_right
         text = text.replace('XX', f"{(round(count_straight/all_people * 100, 1) if all_people > 0 else 'N/A')}")
@@ -102,9 +102,8 @@ async def start_trolley_2_result(message: Message):
         collection = database['statistics_new']
         passive = await collection.count_documents({'start_trolley_2_result': 'Ничего не буду делать 🙅‍♂️'})
         active = await collection.count_documents({'start_trolley_2_result': 'Столкну толстяка с моста ⬇️'})
-        ZZ = await collection.count_documents({'$and': [{'start_trolley_2_result': 'Столкну толстяка с моста ⬇️'},
-                                                        {'start_trolley_1_result': 'Сверну направо ➡️'}]})
-
+        ZZ = (await collection.count_documents({'start_trolley_1_result': "Сверну направо ➡️"})) - \
+             (await collection.count_documents({'start_trolley_2_result': 'Столкну толстяка с моста ⬇️'}))
         all_people = passive + active
         text = text.replace('XX', f"{(round(passive/all_people * 100, 1) if all_people > 0 else 'N/A')}")
         text = text.replace('YY', f"{(round(active/all_people * 100, 1) if all_people > 0 else 'N/A')}")
