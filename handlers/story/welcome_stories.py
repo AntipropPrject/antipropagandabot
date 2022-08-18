@@ -371,19 +371,19 @@ async def start_many_numbers(message: Message):
         dont_knew_hr = await collection.count_documents({'$and': [
             {'start_donbas_results': 'Не знал(а) ❌'},
             {'start_continue_or_peace_results': 'Затрудняюсь ответить 🤷‍♀️'}]})
-        all_people = knew_war + knew_dont_war + knew_hx + dont_knew_war + dont_knew_dont_war + dont_knew_hr
-        print(all_people)
-        AA = float(knew_war / all_people * 100)
-        DD = float(dont_knew_war / all_people * 100)
+        all_people_knew = knew_war + knew_dont_war + knew_hx
+        all_people_dont_knew = dont_knew_war + dont_knew_dont_war + dont_knew_hr
+        AA = float(knew_war / all_people_knew * 100)
+        DD = float(dont_knew_war / all_people_dont_knew * 100)
         XX = DD - AA
 
-        text = text.replace('AA', f"{(round(AA) if all_people > 0 else 'N/A')}")
-        text = text.replace('BB', f"{(round(knew_dont_war / all_people * 100, 1) if all_people > 0 else 'N/A')}")
-        text = text.replace('CC', f"{(round(knew_hx / all_people * 100, 1) if all_people > 0 else 'N/A')}")
-        text = text.replace('DD', f"{(round(DD) if all_people > 0 else 'N/A')}")
-        text = text.replace('EE', f"{(round(dont_knew_dont_war / all_people * 100, 1) if all_people > 0 else 'N/A')}")
-        text = text.replace('FF', f"{(round(dont_knew_hr / all_people * 100, 1) if all_people > 0 else 'N/A')}")
-        text = text.replace('XX', f"{(round(XX) if all_people > 0 else 'N/A')}")
+        text = text.replace('AA', f"{(round(AA) if all_people_knew > 0 else 'N/A')}")
+        text = text.replace('BB', f"{(round(knew_dont_war / all_people_knew * 100, 1) if all_people_knew > 0 else 'N/A')}")
+        text = text.replace('CC', f"{(round(knew_hx / all_people_knew * 100, 1) if all_people_knew > 0 else 'N/A')}")
+        text = text.replace('DD', f"{(round(DD) if all_people_dont_knew > 0 else 'N/A')}")
+        text = text.replace('EE', f"{(round(dont_knew_dont_war / all_people_dont_knew * 100, 1) if all_people_dont_knew > 0 else 'N/A')}")
+        text = text.replace('FF', f"{(round(dont_knew_hr / all_people_dont_knew * 100, 1) if all_people_dont_knew > 0 else 'N/A')}")
+        text = text.replace('XX', f"{(round(XX) if XX > 0 else 'N/A')}")
     except Exception as e:
         print(e)
         text = text.replace('AA', 'N/A')
