@@ -7,6 +7,7 @@ from bata import all_data
 from bot_statistics.stat import mongo_update_stat_new
 from data_base.DBuse import poll_write, sql_safe_select, redis_just_one_write, \
     poll_get, redis_just_one_read
+from log.logg import get_logger
 from states.welcome_states import start_dialog
 from utilts import simple_media
 
@@ -14,7 +15,7 @@ flags = {"throttling_key": "True"}
 router = Router()
 
 router.message.filter(state=start_dialog.big_story)
-
+logger = get_logger('welcome_stories')
 
 @router.message((F.text.contains('верить') | F.text.contains('50 000')), flags=flags)  # А с чего мне тебе верить?
 async def start_why_belive(message: types.Message):
@@ -373,10 +374,12 @@ async def start_many_numbers(message: Message):
             {'start_continue_or_peace_results': 'Затрудняюсь ответить 🤷‍♀️'}]})
         all_people_knew = knew_war + knew_dont_war + knew_hx + 1
         all_people_dont_knew = dont_knew_war + dont_knew_dont_war + dont_knew_hr + 1
-
-        AA = float(knew_war / all_people_knew * 100)
-        DD = float(dont_knew_war / all_people_dont_knew * 100)
-        XX = DD - AA
+        try:
+            AA = float(knew_war / all_people_knew * 100)
+            DD = float(dont_knew_war / all_people_dont_knew * 100)
+            XX = DD - AA
+        except Exception as e:
+            logger.error(e)
 
         text = text.replace('AA', f"{(round(knew_war / all_people_knew * 100, 1) if all_people_knew > 0 else 'N/A')}")
         text = text.replace('BB', f"{(round(knew_dont_war / all_people_knew * 100, 1) if all_people_knew > 0 else 'N/A')}")
@@ -386,7 +389,7 @@ async def start_many_numbers(message: Message):
         text = text.replace('FF', f"{(round(dont_knew_hr / all_people_dont_knew * 100, 1) if all_people_dont_knew > 0 else 'N/A')}")
         text = text.replace('XX', f"{(round(XX, 1) if XX >= 0 else str('-') + str(round(abs(XX), 1)))}")
     except Exception as e:
-        print(e)
+        logger.error(e)
         text = text.replace('AA', 'N/A')
         text = text.replace('BB', 'N/A')
         text = text.replace('CC', 'N/A')
