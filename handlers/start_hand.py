@@ -54,7 +54,7 @@ async def start_base(message):
 
 
 @router.message(commands=['menu'], flags=flags)
-async def commands_start(message: types.Message, state: FSMContext):
+async def commands_start_menu(message: types.Message, state: FSMContext):
     if await mongo_is_done(message.from_user.id):
         await state.set_state(MainMenuStates.main)
         await main_menu_hand.mainmenu_really_menu(message, state)
