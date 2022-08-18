@@ -377,13 +377,13 @@ async def start_many_numbers(message: Message):
         DD = float(dont_knew_war / all_people_dont_knew * 100)
         XX = DD - AA
 
-        text = text.replace('AA', f"{(round(AA) if all_people_knew > 0 else 'N/A')}")
+        text = text.replace('AA', f"{(round(AA, 1) if all_people_knew > 0 else 'N/A')}")
         text = text.replace('BB', f"{(round(knew_dont_war / all_people_knew * 100, 1) if all_people_knew > 0 else 'N/A')}")
         text = text.replace('CC', f"{(round(knew_hx / all_people_knew * 100, 1) if all_people_knew > 0 else 'N/A')}")
-        text = text.replace('DD', f"{(round(DD) if all_people_dont_knew > 0 else 'N/A')}")
+        text = text.replace('DD', f"{(round(DD, 1) if all_people_dont_knew > 0 else 'N/A')}")
         text = text.replace('EE', f"{(round(dont_knew_dont_war / all_people_dont_knew * 100, 1) if all_people_dont_knew > 0 else 'N/A')}")
         text = text.replace('FF', f"{(round(dont_knew_hr / all_people_dont_knew * 100, 1) if all_people_dont_knew > 0 else 'N/A')}")
-        text = text.replace('XX', f"{(round(XX) if XX > 0 else 'N/A')}")
+        text = text.replace('XX', f"{(round(XX, 1) if XX > 0 else 'N/A')}")
     except Exception as e:
         print(e)
         text = text.replace('AA', 'N/A')
@@ -393,6 +393,7 @@ async def start_many_numbers(message: Message):
         text = text.replace('EE', 'N/A')
         text = text.replace('FF', 'N/A')
         text = text.replace('XX', 'N/A')
+
     await message.answer(text, disable_web_page_preview=True)
     nmarkap = ReplyKeyboardBuilder()
     if (await redis_just_one_read(f'Usrs: {message.from_user.id}: StartDonbas:')) == "Знал(а) ✅" or (
