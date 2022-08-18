@@ -2,6 +2,7 @@ from aiogram.dispatcher.fsm.state import State, StatesGroup
 
 
 class start_dialog(StatesGroup):
+    big_story = State()
     dialogue_1 = State()
     dialogue_2 = State()
     button_next = State()

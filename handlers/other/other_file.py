@@ -3,6 +3,8 @@ import asyncio
 from aiogram import Router
 from aiogram import types
 
+from utilts import simple_media
+
 flags = {"throttling_key": "True"}
 router = Router()
 
@@ -13,5 +15,4 @@ async def empty(message: types.Message):
         await asyncio.sleep(0.8)
         await message.delete()
     else:
-        await message.answer(
-            "Неправильная команда, вы можете выбрать ответ на клиаватуре или в опросе.\n\n Если желаете начать сначала - нажмите /start")
+        await simple_media(message, 'other_text')

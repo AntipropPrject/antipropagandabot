@@ -1,17 +1,12 @@
-import asyncio
-
 from aiogram import Router, F, Bot
 from aiogram import types
-from aiogram.dispatcher.filters.command import CommandStart, CommandObject
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
-from bata import all_data
-from bot_statistics.stat import mongo_stat, mongo_update_stat, mongo_stat_new, mongo_update_stat_new
+from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
 from data_base.DBuse import poll_write, sql_safe_select, mongo_add, mongo_select, redis_just_one_write, \
-    mongo_user_info, redis_just_one_read, advertising_value
-from day_func import day_count
+    redis_just_one_read
 from resources.all_polls import web_prop, welc_message_one, people_prop
 from states import welcome_states
 from states.antiprop_states import propaganda_victim
@@ -20,56 +15,7 @@ flags = {"throttling_key": "True"}
 router = Router()
 
 
-@router.message(CommandStart(command_magic=F.args), flags=flags)
-async def adv_company(message: types.Message, state: FSMContext, command: CommandObject):
-    asyncio.create_task(advertising_value(command.args))
-    await commands_start(message, state)
-
-
-@router.message(commands=['start', 'help', 'restart'], state='*', flags=flags)
-async def commands_start(message: types.Message, state: FSMContext):  # Первое сообщение
-    asyncio.create_task(start_base(message))
-    await state.clear()
-    markup = ReplyKeyboardBuilder()
-    markup.row(types.KeyboardButton(text="Начнём 🇷🇺🇺🇦"))
-    markup.row(types.KeyboardButton(text="А с чего мне тебе верить? 🤔"))
-    markup.row(types.KeyboardButton(text="Сначала расскажи про 50 000 руб за ложь 💵"))
-    text = await sql_safe_select("text", "texts", {"name": "start_hello"})
-    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
-    await state.set_state(welcome_states.start_dialog.dialogue_1)
-
-    # else:
-    #    await message.answer("Извините, этого бота можно проходить только один раз")
-
-
-async def start_base(message):
-    await day_count()
-    user_id = message.from_user.id  # if old is None:
-    redis = all_data().get_data_red()
-    for key in redis.scan_iter(f"Usrs: {message.from_user.id}:*"):
-        redis.delete(key)
-    await mongo_stat(user_id)
-    await mongo_stat_new(user_id)
-    await mongo_user_info(user_id, message.from_user.username)
-
-
-@router.message((F.text.contains('верить') | F.text.contains('50 000')), state=welcome_states.start_dialog.dialogue_1,
-                flags=flags)  # А с чего мне тебе верить?
-async def message_1(message: types.Message, state: FSMContext):
-    await mongo_update_stat_new(tg_id=message.from_user.id, column='first_button', value='А с чего мне тебе верить?')
-    markup = ReplyKeyboardBuilder()
-    markup.add(types.KeyboardButton(text="Начнём 🇷🇺🇺🇦"))
-    text = await sql_safe_select("text", "texts", {"name": "start_why_belive"})
-
-    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
-    await state.set_state(welcome_states.start_dialog.dialogue_2)
-
-
-@router.message(welcome_states.start_dialog.dialogue_2, text_contains='Начнём', content_types=types.ContentType.TEXT,
-                text_ignore_case=True, flags=flags)
-@router.message(welcome_states.start_dialog.dialogue_1, text_contains='Начнём',
-                content_types=types.ContentType.TEXT,
-                text_ignore_case=True, flags=flags)
+@router.message(welcome_states.start_dialog.big_story, text_contains='Готов(а) продолжить 👌', flags=flags)
 # @router.message(welcome_states.start_dialog.dialogue_3) запомнить на ты или на вы в базу
 async def message_2(message: types.Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='first_button', value='Начнем')

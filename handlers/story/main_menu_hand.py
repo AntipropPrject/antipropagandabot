@@ -6,7 +6,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from data_base.DBuse import sql_safe_select, data_getter, sql_games_row_selecter, sql_select_row_like, mongo_game_answer
 from filters.MapFilters import SubscriberFilter
-from handlers.story.welcome_messages import commands_start
+from handlers import start_hand
 from states.main_menu_states import MainMenuStates
 from utilts import simple_media, game_answer, dynamic_media_answer
 
@@ -152,7 +152,7 @@ async def mainmenu_here_we_go_again(message: Message, state: FSMContext):
 
 @router.message(F.text == "Да, я готов(а) начать сейчас 🇷🇺🇺🇦", state=MainMenuStates.again, flags=flags)
 async def mainmenu_here_we_go_again_yeah(message: Message, state: FSMContext):
-    await commands_start(message, state)
+    await start_hand.commands_start(message, state)
 
 
 @router.message(((F.text == "Вернуться в Базу Лжи 👈") | (F.text == "База Лжи 👀")), flags=flags)
