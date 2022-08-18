@@ -354,24 +354,24 @@ async def start_many_numbers(message: Message):
         database = client.database
         collection = database['statistics_new']
         knew_war = await collection.count_documents({'$and': [
-            {'start_donbas_results': 'Знал(а) ✅️'},
+            {'start_donbas_results': 'Знал(а) ✅'},
             {'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️️'}]})
         knew_dont_war = await collection.count_documents({'$and': [
-            {'start_donbas_results': 'Знал(а) ✅️'},
+            {'start_donbas_results': 'Знал(а) ✅'},
             {'start_continue_or_peace_results': 'Переходить к мирным переговорам 🕊'}]})
         knew_hx = await collection.count_documents({'$and': [
-            {'start_donbas_results': 'Знал(а) ✅️'},
+            {'start_donbas_results': 'Знал(а) ✅'},
             {'start_continue_or_peace_results': 'Затрудняюсь ответить 🤷‍♀️'}]})
         dont_knew_war = await collection.count_documents({'$and': [
-            {'start_donbas_results': 'Не знал(а) ❌️'},
+            {'start_donbas_results': 'Не знал(а) ❌'},
             {'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️️'}]})
         dont_knew_dont_war = await collection.count_documents({'$and': [
-            {'start_donbas_results': 'Не знал(а) ❌️'},
+            {'start_donbas_results': 'Не знал(а) ❌'},
             {'start_continue_or_peace_results': 'Переходить к мирным переговорам 🕊'}]})
         dont_knew_hr = await collection.count_documents({'$and': [
-            {'start_donbas_results': 'Не знал(а) ❌️'},
-            {'start_continue_or_peace_results': 'Затрудняюсь  ответить  🤷‍♀️'}]})
-        all_people = knew_war + knew_dont_war + knew_hx + dont_knew_war + dont_knew_dont_war + dont_knew_hr + 1
+            {'start_donbas_results': 'Не знал(а) ❌'},
+            {'start_continue_or_peace_results': 'Затрудняюсь ответить 🤷‍♀️'}]})
+        all_people = knew_war + knew_dont_war + knew_hx + dont_knew_war + dont_knew_dont_war + dont_knew_hr
         print(all_people)
         AA = float(knew_war / all_people * 100)
         DD = float(dont_knew_war / all_people * 100)
