@@ -9,7 +9,6 @@ from export_to_csv import pg_mg
 from handlers import start_hand
 from handlers.admin_for_games_dir import mistakeorlie
 from handlers.admin_handlers import admin_factory, marketing, admin_for_games, new_admin_hand
-from handlers.advertising import start_spam
 from handlers.other import status, other_file
 from handlers.story import preventive_strike, true_resons_hand, welcome_messages, nazi_hand, \
     donbass_hand, main_menu_hand, anti_prop_hand, putin_hand, smi_hand, stopwar_hand, welcome_stories
@@ -41,28 +40,6 @@ async def on_startup(dispatcher: Dispatcher) -> None:
     print("🚀 Bot launched as Hoook!")
     print(f"webhook: https://kamaga777123.xyz/")
 
-
-async def periodic():
-    print('periodic function has been started')
-    while True:
-        backup = Backup()
-        status_spam = await redis_just_one_read('Usrs: admins: spam: status:')
-        datefor_backup = datetime.now().strftime('%Y-%m-%d_%H-%M')
-        c_time = datetime.now().strftime("%H:%M:%S")
-        date = datetime.now().strftime('%Y.%m.%d')
-        #  удаление дневного счетчика
-        if c_time == '21:00:01':
-            await day_count(count_delete=True)
-        if c_time == '07:00:01':
-            await backup.dump_all(name=f'DUMP_{datefor_backup}')
-        if status_spam == '1':
-            if c_time == '08:00:01':
-                await start_spam(f'{date} 11:00')
-            if c_time == '16:00:01':
-                await start_spam(f'{date} 19:00')
-        if c_time == '19:00:01':
-            await backup.dump_all(name=f'DUMP_{datefor_backup}')
-        await asyncio.sleep(1)
 
 
 async def main():
