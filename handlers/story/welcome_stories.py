@@ -355,7 +355,7 @@ async def start_many_numbers(message: Message):
         collection = database['statistics_new']
         knew_war = await collection.count_documents({'$and': [
             {'start_donbas_results': 'Знал(а) ✅'},
-            {'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️️'}]})
+            {'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'}]})
         knew_dont_war = await collection.count_documents({'$and': [
             {'start_donbas_results': 'Знал(а) ✅'},
             {'start_continue_or_peace_results': 'Переходить к мирным переговорам 🕊'}]})
@@ -364,26 +364,27 @@ async def start_many_numbers(message: Message):
             {'start_continue_or_peace_results': 'Затрудняюсь ответить 🤷‍♀️'}]})
         dont_knew_war = await collection.count_documents({'$and': [
             {'start_donbas_results': 'Не знал(а) ❌'},
-            {'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️️'}]})
+            {'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'}]})
         dont_knew_dont_war = await collection.count_documents({'$and': [
             {'start_donbas_results': 'Не знал(а) ❌'},
             {'start_continue_or_peace_results': 'Переходить к мирным переговорам 🕊'}]})
         dont_knew_hr = await collection.count_documents({'$and': [
             {'start_donbas_results': 'Не знал(а) ❌'},
             {'start_continue_or_peace_results': 'Затрудняюсь ответить 🤷‍♀️'}]})
-        all_people_knew = knew_war + knew_dont_war + knew_hx
-        all_people_dont_knew = dont_knew_war + dont_knew_dont_war + dont_knew_hr
+        all_people_knew = knew_war + knew_dont_war + knew_hx + 1
+        all_people_dont_knew = dont_knew_war + dont_knew_dont_war + dont_knew_hr + 1
+
         AA = float(knew_war / all_people_knew * 100)
         DD = float(dont_knew_war / all_people_dont_knew * 100)
         XX = DD - AA
 
-        text = text.replace('AA', f"{(round(AA, 1) if all_people_knew > 0 else 'N/A')}")
+        text = text.replace('AA', f"{(round(knew_war / all_people_knew * 100, 1) if all_people_knew > 0 else 'N/A')}")
         text = text.replace('BB', f"{(round(knew_dont_war / all_people_knew * 100, 1) if all_people_knew > 0 else 'N/A')}")
         text = text.replace('CC', f"{(round(knew_hx / all_people_knew * 100, 1) if all_people_knew > 0 else 'N/A')}")
-        text = text.replace('DD', f"{(round(DD, 1) if all_people_dont_knew > 0 else 'N/A')}")
+        text = text.replace('DD', f"{(round(dont_knew_war / all_people_dont_knew * 100, 1) if all_people_dont_knew > 0 else 'N/A')}")
         text = text.replace('EE', f"{(round(dont_knew_dont_war / all_people_dont_knew * 100, 1) if all_people_dont_knew > 0 else 'N/A')}")
         text = text.replace('FF', f"{(round(dont_knew_hr / all_people_dont_knew * 100, 1) if all_people_dont_knew > 0 else 'N/A')}")
-        text = text.replace('XX', f"{(round(XX, 1) if XX > 0 else 'N/A')}")
+        text = text.replace('XX', f"{(round(XX, 1) if XX >= 0 else str('-') + str(round(abs(XX), 1)))}")
     except Exception as e:
         print(e)
         text = text.replace('AA', 'N/A')
