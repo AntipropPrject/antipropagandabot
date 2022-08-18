@@ -108,10 +108,11 @@ async def start_trolley_2_result(message: Message):
         all_people = passive + active
         text = text.replace('XX', f"{(round(passive/all_people * 100, 1) if all_people > 0 else 'N/A')}")
         text = text.replace('YY', f"{(round(active/all_people * 100, 1) if all_people > 0 else 'N/A')}")
-        text = text.replace('YY', f"{(round(ZZ/all_people * 100, 1) if all_people > 0 else 'N/A')}")
+        text = text.replace('ZZ', f"{(round(ZZ/all_people * 100, 1) if all_people > 0 else 'N/A')}")
     except:
         text = text.replace('XX', 'N/A')
         text = text.replace('YY', 'N/A')
+        text = text.replace('ZZ', 'N/A')
 
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="В отличии от рабочего на путях, толстяк не замешан в этой ситуации 🤔"))
