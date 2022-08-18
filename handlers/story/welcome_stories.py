@@ -373,13 +373,14 @@ async def start_many_numbers(message: Message):
         dont_knew_hr = await collection.count_documents({'$and': [
             {'start_donbas_results': 'Не знал(а) ❌'},
             {'start_continue_or_peace_results': 'Затрудняюсь ответить 🤷‍♀️'}]})
-        all_people_knew = knew_war + knew_dont_war + knew_hx + 1
-        all_people_dont_knew = dont_knew_war + dont_knew_dont_war + dont_knew_hr + 1
+        all_people_knew = knew_war + knew_dont_war + knew_hx
+        all_people_dont_knew = dont_knew_war + dont_knew_dont_war + dont_knew_hr
         try:
             AA = float(knew_war / all_people_knew * 100)
             DD = float(dont_knew_war / all_people_dont_knew * 100)
             XX = DD - AA
         except Exception as e:
+            XX = 1
             logger.error(e)
         print((round(XX, 1) if XX >= 0 else str('-') + str(round(abs(XX), 1))))
         text = text.replace('AA', f"{(round(knew_war / all_people_knew * 100, 1) if all_people_knew > 0 else 'N/A')}")
