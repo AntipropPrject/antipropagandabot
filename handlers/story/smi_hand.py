@@ -38,7 +38,6 @@ async def smi_statement(message: Message, state: FSMContext):
     # except:
     #     print('not_viewed contains nothing ')
 
-    print(person_list)
 
     try:
         count = (await state.get_data())[f'{person_list[0]}_gamecount']
@@ -53,8 +52,6 @@ async def smi_statement(message: Message, state: FSMContext):
         how_many_rounds_redis = (await state.get_data())[f'{person_list[0]}_howmanyrounds']
     except:
         await state.update_data({f'{person_list[0]}_howmanyrounds': how_many_rounds})
-
-    print(f"В таблице {how_many_rounds} записей, а вот счетчик сейчас {count}")
     if count < how_many_rounds:
         count += 1
         try:
@@ -64,7 +61,6 @@ async def smi_statement(message: Message, state: FSMContext):
                 "left outer join texts ON text_name = texts.name "
                 f"where asset_name like '%{str(person_list[0])[-5:-1].strip()}%' and asset_name like '%{str(count)}%'"))[
                 0]
-            print(truth_data)
             await state.update_data({f'{person_list[0]}_gamecount': count})
             await state.update_data(rebuttal=truth_data[5], belive=truth_data[2],
                                     not_belive=truth_data[3], last_media=truth_data[5], gid=truth_data[6])
@@ -142,12 +138,9 @@ async def sme_statement_start_over(message: Message, state: FSMContext):
     person_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
     person = person_list[0]
     data = await state.get_data()
-    print(data[f"{person}_howmanyrounds"])
-    print(data[f"{person}_gamecount"])
     if data[f"{person}_howmanyrounds"] == data[f"{person}_gamecount"]:
         await redis_delete_first_item(f"Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:")
     person_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
-    print(person_list)
 
     try:
         person = person_list[0]
@@ -178,20 +171,15 @@ async def smi_statement_poll(message: Message, state: FSMContext):
     list_to_customize = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
     list_to_customize1 = list_to_customize.copy()
 
-    print(list_to_customize)
 
     try:
         message_text = message.text
         trimed = message_text.rstrip(message_text[-1])
-        print(trimed)
-        print(list_to_customize)
-        print(list_to_customize.__contains__(trimed))
         if not list_to_customize.__contains__(trimed):
             await state.update_data({f'{trimed}_gamecount': 0})
         list_to_customize.remove(trimed)
     except:
         print('дубликатов нет')
-    print(list_to_customize)
 
     redis.delete(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
 
