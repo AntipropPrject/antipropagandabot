@@ -212,7 +212,7 @@ async def start_continue_or_peace(message: Message):
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Продолжать военную операцию ⚔️"))
     nmarkap.row(types.KeyboardButton(text="Переходить к мирным переговорам 🕊"))
-    nmarkap.row(types.KeyboardButton(text="Затрудняюсь  ответить 🤷‍♀️"))
+    nmarkap.row(types.KeyboardButton(text="Затрудняюсь ответить 🤷‍♀️"))
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
