@@ -579,7 +579,7 @@ async def antip_bad_people_lies(message: Message, state: FSMContext):
 
 @router.message((F.text.contains('шаг')) | (F.text.contains('удивлен(а)')) | (F.text.contains('шоке')) | (
         F.text.contains('знал(а), что по ТВ')) | (F.text == 'Конечно!') | (F.text == 'Ну давай'), flags=flags)
-async def antip_truth_game_start(message: Message):
+async def antip_truth_game_start(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_truth_game_start'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Начнем! 🚀"))
