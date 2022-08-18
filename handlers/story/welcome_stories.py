@@ -378,7 +378,7 @@ async def start_many_numbers(message: Message):
         try:
             AA = float(knew_war / all_people_knew * 100)
             DD = float(dont_knew_war / all_people_dont_knew * 100)
-            XX = DD - (AA + 40)
+            XX = DD - AA
         except Exception as e:
             logger.error(e)
         print((round(XX, 1) if XX >= 0 else str('-') + str(round(abs(XX), 1))))
