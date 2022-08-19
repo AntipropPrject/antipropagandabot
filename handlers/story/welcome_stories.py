@@ -17,6 +17,7 @@ router = Router()
 router.message.filter(state=start_dialog.big_story)
 logger = get_logger('welcome_stories')
 
+
 @router.message((F.text.contains('верить') | F.text.contains('50 000')), flags=flags)  # А с чего мне тебе верить?
 async def start_why_belive(message: types.Message):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='first_button', value='А с чего мне тебе верить?')
@@ -76,7 +77,6 @@ async def start_trolley_1_result(message: Message):
     except:
         text = text.replace('XX', 'N/A')
         text = text.replace('YY', 'N/A')
-
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Продолжай 🤔"))
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
@@ -137,8 +137,8 @@ async def start_trolley_2_result_answers(message: Message):
         await message.answer(text, disable_web_page_preview=True)
     text = await sql_safe_select('text', 'texts', {'name': 'start_are_you_ready'})
     nmarkap = ReplyKeyboardBuilder()
-    nmarkap.row(types.KeyboardButton(text="Дай ссылку на лекцию про моральную сторону убийства 🔫"))
     nmarkap.row(types.KeyboardButton(text="Продолжим 👌"))
+    nmarkap.row(types.KeyboardButton(text="Дай ссылку на лекцию про моральную сторону убийства 🔫"))
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
@@ -179,7 +179,7 @@ async def start_dumb_dam(message: Message):
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Ничего не  буду делать  🙅‍♂️"))
     nmarkap.add(types.KeyboardButton(text="Взорву дамбу 💥"))
-    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+    await simple_media(message, "start_dumb_dam", nmarkap.as_markup(resize_keyboard=True))
 
 
 @router.message(F.text.in_({"Ничего не  буду делать  🙅‍♂️", "Взорву дамбу 💥"}), flags=flags)
@@ -320,7 +320,7 @@ async def start_donbas_results(message: Message):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='start_donbas_results',
                                 value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'start_donbas_results'})
-
+    media = await sql_safe_select('t_id', 'assets', {'name': 'start_donbas_results'})
     try:
         client = all_data().get_mongo()
         database = client.database
@@ -337,7 +337,7 @@ async def start_donbas_results(message: Message):
     await redis_just_one_write(f'Usrs: {message.from_user.id}: StartDonbas:', message.text)
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Продолжай ⌛️"))
-    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+    await message.answer_photo(media, text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text == "Продолжай ⌛️"), flags=flags)
