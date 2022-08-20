@@ -179,22 +179,17 @@ class SubscriberFilter(BaseFilter):
             return True
 
 
-class ManualFilters:
-    def __init__(self, message: Message, state: FSMContext):
-        self.message = message
-        self.state = state
-
-    async def truereasons(self):
-        war_answers = poll_get(f"Usrs: {self.message.from_user.id}: Start_answers: Invasion:")
-        if welc_message_one[8] in war_answers:
-            await true_resons_hand.reasons_big_bad_nato(self.message, self.state)
-        elif welc_message_one[0] in war_answers:
-            await true_resons_hand.donbass_big_tragedy(self.message, self.state)
-        elif welc_message_one[1] in war_answers:
-            await true_resons_hand.prevent_strike_start(self.message, self.state)
-        elif welc_message_one[2] in war_answers:
-            await true_resons_hand.reasons_denazi(self.message, self.state)
-        elif welc_message_one[3] in war_answers:
-            await true_resons_hand.reasons_demilitarism(self.message, self.state)
-        elif welc_message_one[5] in war_answers:
-            await true_resons_hand.reasons_biopigeons(self.message, self.state)
+async def manual_filter_truereasons(message, state):
+    war_answers = poll_get(f"Usrs: {message.from_user.id}: Start_answers: Invasion:")
+    if welc_message_one[8] in war_answers:
+        await true_resons_hand.reasons_big_bad_nato(message, state)
+    elif welc_message_one[0] in war_answers:
+        await true_resons_hand.donbass_big_tragedy(message, state)
+    elif welc_message_one[1] in war_answers:
+        await true_resons_hand.prevent_strike_start(message, state)
+    elif welc_message_one[2] in war_answers:
+        await true_resons_hand.reasons_denazi(message, state)
+    elif welc_message_one[3] in war_answers:
+        await true_resons_hand.reasons_demilitarism(message, state)
+    elif welc_message_one[5] in war_answers:
+        await true_resons_hand.reasons_biopigeons(message, state)

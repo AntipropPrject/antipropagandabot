@@ -8,7 +8,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
 from data_base.DBuse import sql_safe_select, sql_select_row_like
-from filters.MapFilters import ManualFilters
+from filters.MapFilters import manual_filter_truereasons
 from handlers.story import true_resons_hand
 from utilts import simple_media, dynamic_media_answer
 
@@ -130,7 +130,7 @@ async def prevent_strike_end_point(message: Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='prevent_strike_fin', value='Да')
     await state.set_state(true_resons_hand.TruereasonsState.main)
     await mongo_update_stat(message.from_user.id, 'prevent_strike')
-    ManualFilters(message, state)
+    await manual_filter_truereasons(message, state)
 
 
 @router.message(F.text == 'Да, хочу 🙂', flags=flags)
@@ -141,7 +141,7 @@ async def prevent_strike_will_show(message: Message):
     await simple_media(message, 'prevent_strike_will_show', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(F.text.in_({'Посмотрел(а) 📺', '😁', '🙂', '😕', 'Достаточно, продолжим ✋'}), flags=flags)
+@router.message(F.text.in_({'Посмотрел(а) 📺', '😁', '🙂', '😕'}), flags=flags)
 async def prevent_strike_memes(message: Message, state: FSMContext):
     try:
         count = (await state.get_data())['lgamecount']
