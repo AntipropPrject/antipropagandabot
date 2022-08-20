@@ -180,7 +180,7 @@ class SubscriberFilter(BaseFilter):
 
 
 async def manual_filter_truereasons(message, state):
-    war_answers = poll_get(f"Usrs: {message.from_user.id}: Start_answers: Invasion:")
+    war_answers = await poll_get(f"Usrs: {message.from_user.id}: Start_answers: Invasion:")
     if welc_message_one[8] in war_answers:
         await true_resons_hand.reasons_big_bad_nato(message, state)
     elif welc_message_one[0] in war_answers:
@@ -193,3 +193,5 @@ async def manual_filter_truereasons(message, state):
         await true_resons_hand.reasons_demilitarism(message, state)
     elif welc_message_one[5] in war_answers:
         await true_resons_hand.reasons_biopigeons(message, state)
+    else:
+        await true_resons_hand.reasons_normal_game_start(message, state)
