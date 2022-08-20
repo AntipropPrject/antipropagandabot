@@ -193,7 +193,6 @@ async def sql_add_value(table_name, column, cond_dict):
         elif isinstance(cond_dict[key], str):
             que = f"UPDATE {table_name} set {column} = {column} + 1 where" \
                   f" {key} = '{cond_dict[key]}' RETURNING {column};"
-        print(que)
     a = await data_getter(que)
     print(a)
 
@@ -374,7 +373,6 @@ async def mongo_select_info(tg_id):
             x = await collection.find_one({"_id": int(tg_id)})
         except:
             x = await collection.find_one({"username": str(tg_id)})
-        print(x)
         return x
     except Exception as error:
         await logg.get_error(f"mongo_select_info | {error}", __file__)

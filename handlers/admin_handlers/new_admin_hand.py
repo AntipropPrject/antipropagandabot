@@ -228,15 +228,12 @@ async def sadmins(message: Message, state: FSMContext):
 @router.message(IsSudo(), (F.text == 'Актуальные новости'), state=admin.spam_menu)
 async def sadmins(message: Message, state: FSMContext):
     actual_news = await mongo_select_news(coll='actu')
-    print(actual_news)
     if len(actual_news) != 0:
         await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Главные новости'")
         await message.answer(f"Все ваши актуальные новости: ")
         count = 0
         count_for_button = len(actual_news)
-        print(actual_news)
         for spam in actual_news:
-            count += 1
             nmarkup = InlineKeyboardBuilder()
             # vote_cb.new(action='up', amount=amount))
             media = spam["media"]
@@ -245,14 +242,12 @@ async def sadmins(message: Message, state: FSMContext):
             if count == count_for_button:
                 nmarkup.button(text='Добавить новость', callback_data=f'add_actual_news')
             nmarkup.adjust(2)
-            print(1)
             try:
                 await message.answer_photo(photo=media, caption=spam['caption'],
                                            reply_markup=nmarkup.as_markup())
             except:
                 await message.answer_video(video=media, caption=spam['caption'],
                                            reply_markup=nmarkup.as_markup())
-            print(2)
             await asyncio.sleep(0.1)
     else:
         nmarkup = InlineKeyboardBuilder()
@@ -279,7 +274,6 @@ async def sadmins(message: Message, state: FSMContext):
 @router.message(IsSudo(), (F.text == 'Выключить рассылку 🟢'), state=admin.spam_menu)
 async def sadmins(message: Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Выключить рассылку'")
-    print(213)
     await redis_just_one_write(f'Usrs: admins: spam: status:', '0')
     await message.answer("Запланированная рассылка была отключена", reply_markup=await spam_admin_keyboard())
 
