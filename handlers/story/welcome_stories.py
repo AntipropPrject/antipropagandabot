@@ -355,8 +355,6 @@ async def start_donbas_putin(message: Message):
         nmarkap.row(types.KeyboardButton(text="Не надо лезть ко мне в голову, давай к следующим темам. 👉"))
         await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
-
-
 """@router.message((F.text == "Покажи 🤔"), flags=flags)
 async def start_many_numbers(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'start_many_numbers'})
