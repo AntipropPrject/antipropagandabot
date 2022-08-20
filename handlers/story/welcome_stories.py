@@ -342,12 +342,23 @@ async def start_donbas_results(message: Message):
 
 @router.message((F.text == "Продолжай ⌛️"), flags=flags)
 async def start_donbas_putin(message: Message):
+    await simple_media(message, 'start_donbas_putin')
     nmarkap = ReplyKeyboardBuilder()
-    nmarkap.row(types.KeyboardButton(text="Покажи 🤔"))
-    await simple_media(message, 'start_donbas_putin', nmarkap.as_markup(resize_keyboard=True))
+    if (await redis_just_one_read(f'Usrs: {message.from_user.id}: StartDonbas:')) == "Знал(а) ✅" or (
+            await redis_just_one_read(f'Usrs: {message.from_user.id}: Start_answers: NewPolitStat:')) ==\
+            'Противник войны':
+        await start_remember_money(message)
+    else:
+        text = await sql_safe_select('text', 'texts', {'name': 'start_how_are_you'})
+        nmarkap.row(types.KeyboardButton(text="Интересно, продолжаем 👌"))
+        nmarkap.row(types.KeyboardButton(text="Хорошо, но интересно, с какой целью ты это делаешь? 🤔"))
+        nmarkap.row(types.KeyboardButton(text="Звучит однобоко — ты не учитываешь другие факторы ☝️"))
+        nmarkap.row(types.KeyboardButton(text="Не надо лезть ко мне в голову, давай к следующим темам. 👉"))
+        await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Покажи 🤔"), flags=flags)
+
+"""@router.message((F.text == "Покажи 🤔"), flags=flags)
 async def start_many_numbers(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'start_many_numbers'})
     try:
@@ -399,19 +410,7 @@ async def start_many_numbers(message: Message):
         text = text.replace('FF', 'N/A')
         text = text.replace('XX', 'N/A')
 
-    await message.answer(text, disable_web_page_preview=True)
-    nmarkap = ReplyKeyboardBuilder()
-    if (await redis_just_one_read(f'Usrs: {message.from_user.id}: StartDonbas:')) == "Знал(а) ✅" or (
-            await redis_just_one_read(f'Usrs: {message.from_user.id}: Start_answers: NewPolitStat:')) ==\
-            'Противник войны':
-        await start_remember_money(message)
-    else:
-        text = await sql_safe_select('text', 'texts', {'name': 'start_how_are_you'})
-        nmarkap.row(types.KeyboardButton(text="Интересно, продолжаем 👌"))
-        nmarkap.row(types.KeyboardButton(text="Хорошо, но интересно, с какой целью ты это делаешь? 🤔"))
-        nmarkap.row(types.KeyboardButton(text="Звучит однобоко — ты не учитываешь другие факторы ☝️"))
-        nmarkap.row(types.KeyboardButton(text="Не надо лезть ко мне в голову, давай к следующим темам. 👉"))
-        await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+    await message.answer(text, disable_web_page_preview=True)"""
 
 
 @router.message((F.text == "Интересно, продолжаем 👌"), flags=flags)
