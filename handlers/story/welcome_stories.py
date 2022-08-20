@@ -37,10 +37,9 @@ async def start_is_war_bad(message: Message):
 
 @router.message((F.text == 'Какой феномен? 🤔'), flags=flags)
 async def start_disgusting(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'start_disgusting'})
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Продолжай  ⏳"))
-    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+    await simple_media(message, 'start_disgusting', reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text == 'Продолжай  ⏳'), flags=flags)
@@ -356,8 +355,6 @@ async def start_donbas_putin(message: Message):
         nmarkap.row(types.KeyboardButton(text="Не надо лезть ко мне в голову, давай к следующим темам. 👉"))
         await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
-
-
 """@router.message((F.text == "Покажи 🤔"), flags=flags)
 async def start_many_numbers(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'start_many_numbers'})
@@ -461,10 +458,10 @@ async def start_let_them_rates(message: Message):
 
 @router.message((F.text.in_({"Полезный совет 👍", "Уже так делаю 👌", "К чему это? 🤷‍♂️"})), flags=flags)
 async def start_I_will_rates(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'start_I_will_rates'})
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Давай  👌"))
-    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+    await simple_media(message, 'start_I_will_rates', reply_markup=nmarkap.as_markup(resize_keyboard=True))
+
 
 
 @router.message((F.text == "Давай  👌"), flags=flags)
