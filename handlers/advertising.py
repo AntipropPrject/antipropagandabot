@@ -43,12 +43,9 @@ async def start_spam(datet):
         if all_data().get_data_red().get(f"user_last_answer: {user['_id']}:") != '1':
             asyncio.create_task(news_for_user(user, main_news_list, today_actual, main_news_ids))
             count += 1
-            print(1)
-            print("Задача для спама создана")
         else:
             asyncio.create_task(latecomers(user, main_news_list, today_actual, main_news_ids))
             count += 1
-            print("Задача для очереди создана")
         await asyncio.sleep(0.033)
     try:
         asyncio.create_task(mongo_pop_news(m_id=today_actual['media'], coll='actu'))
@@ -60,7 +57,6 @@ async def start_spam(datet):
 
 async def latecomers(user, main_news_base, today_actual, main_news_ids):
     for comers in range(5):
-        print(2)
         if all_data().get_data_red().get(f"user_last_answer: {user['_id']}:") != '1':
             await news_for_user(user, main_news_base, today_actual, main_news_ids)
             break
@@ -69,15 +65,11 @@ async def latecomers(user, main_news_base, today_actual, main_news_ids):
 
 async def news_for_user(user, main_news_base, today_actual, main_news_ids):
     user_id = user['_id']
-    print(3)
-    print(today_actual)
     user_viewed_news = user['viewed_news']
     if len(user_viewed_news) >= len(main_news_base):
         if today_actual is not None:
             await send_spam(user_id=user_id, media_id=today_actual['media'], caption=today_actual['caption'])
-            print('ОТПРАВКА АКТУАЛЬНОГО СООБЩЕНИЯ', today_actual['media'], today_actual['caption'])
         else:
-            print('Актуальных новостей сегодня нет')
             return
     else:
         list_not_view = [i for i in main_news_ids if i not in user_viewed_news]
@@ -85,17 +77,13 @@ async def news_for_user(user, main_news_base, today_actual, main_news_ids):
             for main_news in main_news_base:
                 if main_news['_id'] == list_not_view[0]:
                     await send_spam(user_id=user_id, media_id=main_news['media'], caption=main_news['caption'])
-                    print('ОТПРАВКА ГЛАВНОГО СООБЩЕНИЯ', main_news['media'], main_news['caption'])
                     await mongo_update_viewed_news(user_id, main_news['_id'])
-                    print('ЗАПИСЬ АЙДИШНИКА НОВОСТИ В МОНГУ', user_id, list_not_view[0])
 
         else:
-            logger.info('Главные новости для пользователя кончились, а актуальной не было')
             print('Главные новости для пользователя кончились, а актуальной не было')
 
 
 async def send_spam(user_id, media_id, caption):
-    print(4)
     try:
         if str(caption) != 'None':
             try:
@@ -108,6 +96,5 @@ async def send_spam(user_id, media_id, caption):
             except TelegramBadRequest:
                 await bot.send_photo(chat_id=int(user_id), photo=(media_id))
     except TelegramForbiddenError:
-        logger.info(f'ПОЛЬЗОВАТЕЛЬ {user_id} -- Заблокировал бота')
         print(f"ПОЛЬЗОВАТЕЛЬ {user_id} -- Заблокировал бота")
 
