@@ -1,6 +1,8 @@
 from aiogram import types
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
+from data_base.DBuse import poll_get
+
 
 def antip_why_kb():
     markup = ReplyKeyboardBuilder()

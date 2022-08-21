@@ -329,13 +329,9 @@ async def stopwar_start(message: Message, state: FSMContext):
         await mongo_update_stat_new(tg_id=message.from_user.id, column='future_with_putin', value=message.text)
     if 'Военный преступник' in message.text or 'Был хорошим' in message.text:
         await mongo_update_stat_new(tg_id=message.from_user.id, column='not_love_putin_descr', value=message.text)
-
     await mongo_update_stat(message.from_user.id, 'putin')
     await state.set_state(StopWarState.main)
-    text = await sql_safe_select('text', 'texts', {'name': 'stopwar_p_start'})
+    text = await sql_safe_select('text', 'texts', {'name': 'stopwar_why_they_sad'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Скорее да ✅"))
-    nmarkup.row(types.KeyboardButton(text="Скорее нет ❌"))
-    nmarkup.row(types.KeyboardButton(text="Не знаю 🤷‍♂️"))
-    nmarkup.adjust(2, 1)
+    nmarkup.row(types.KeyboardButton(text="Повторим вопросы 👌"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
