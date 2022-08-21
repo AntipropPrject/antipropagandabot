@@ -36,7 +36,7 @@ async def simple_media(message: Message, tag: str,
                 except TelegramBadRequest:
                     media = await sql_safe_select("t_id", "assets", {"name": 'ERROR_SORRY'})
                     await logg.get_error(f'NO {tag}')
-                    return await message.answer_photo(media, caption=text, reply_markup=reply_markup)
+                    await message.answer_photo(media, caption=text, reply_markup=reply_markup)
         else:
             try:
                 return await message.answer_photo(media, reply_markup=reply_markup)
@@ -46,7 +46,7 @@ async def simple_media(message: Message, tag: str,
                 except TelegramBadRequest:
                     media = await sql_safe_select("t_id", "assets", {"name": 'ERROR_SORRY'})
                     await logg.get_error(f'NO {tag}')
-                    return await message.answer_photo(media, reply_markup=reply_markup)
+                    await message.answer_photo(media, reply_markup=reply_markup)
     except TelegramBadRequest:
         print("Странная ошибка")
 
