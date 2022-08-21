@@ -137,9 +137,10 @@ async def smi_statement_enough(message: Message, state: FSMContext):
 async def sme_statement_start_over(message: Message, state: FSMContext):
     person_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
     person = person_list[0]
-    data = await state.get_data()
-    if data[f"{person}_howmanyrounds"] == data[f"{person}_gamecount"]:
-        await redis_delete_first_item(f"Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:")
+    person_list.remove(person)
+    #data = await state.get_data()  # Удаление после просмотра всех сюжетов
+    #if data[f"{person}_howmanyrounds"] == data[f"{person}_gamecount"]:  # Удаление после просмотра всех сюжетов
+    await redis_delete_first_item(f"Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:")
     person_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
 
     try:

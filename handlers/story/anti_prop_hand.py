@@ -444,7 +444,6 @@ async def show_the_news(message: types.Message, state: FSMContext):
     markup.row(types.KeyboardButton(text='Новость посмотрел(а). Что с ней не так? 🤔'))
     if message.text == 'Покажи новость 👀':
         await mongo_update_stat_new(tg_id=message.from_user.id, column='false_on_web_prop', value='Да')
-        print(all_answers_user[0])
         tag = await get_tag(all_answers_user[0])
         news = await data_getter(f"SELECT name FROM assets WHERE name LIKE '{tag}_media_%'")
         count = await get_count(tag, state)
@@ -476,8 +475,6 @@ async def revealing_the_news(message: types.Message, state: FSMContext):
     viewed_channel = data['viewed_channel']  # Просматриваемый канал  менять это для следующих каналов
     tag = await get_tag(viewed_channel)
     news_exposure = await data_getter(f"SELECT name FROM assets WHERE name LIKE '{tag}_exposure_%'")
-    print(news_exposure)
-    print(count)
     if len(news_exposure) != count + 1:
         keyboard = await keyboard_for_next_chanel(f'Покажи еще новость с {viewed_channel}')
         await simple_media(message, news_exposure[count][0], reply_markup=keyboard)
@@ -507,7 +504,14 @@ async def show_more(message: types.Message, state: FSMContext):
 @router.message((F.text.contains('Достаточно, мне все понятно 🤚')), flags=flags)
 async def revealing_the_news(message: Message, state: FSMContext):
     data = await state.get_data()
-    if len(data['all_answers_user']) != 0:
+    viewed_channel = data['viewed_channel']
+    all_answers_user = data['all_answers_user']
+    try:                                                            # Удаление кнопки с клавиатуры
+        all_answers_user.remove(viewed_channel)                     # В случае если
+    except:                                                         # Хоть один сюжет
+        pass                                                        # из источника
+    await state.update_data(all_answers_user=all_answers_user)      # будет просмотрен
+    if len(all_answers_user) != 0:
         all_answers_user = data['all_answers_user']
         markup = await keyboard_for_all_chanel(all_answers_user)
         text = await sql_safe_select('text', 'texts', {'name': 'antip_another_web_lie'})
@@ -538,7 +542,6 @@ async def skip_web(message: Message, state: FSMContext):
     if next_channel == 'Министерство обороны РФ':
         next_channel = 'Министерства обороны РФ'
     text = await sql_safe_select('text', 'texts', {'name': 'antip_maybe_just_one'})
-    print(lst_web_answers)
     text = text.replace('[[список неотсмотренных красных источников через запятую]]', lst_web_answers)
     text = text.replace('[[название следующего непросмотренного красного источника]]', next_channel)
     await state.update_data(not_viewed_chanel=answer_channel[0])
