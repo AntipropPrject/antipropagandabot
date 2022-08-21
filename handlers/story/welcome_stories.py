@@ -168,11 +168,11 @@ async def start_hard_questions(message: Message):
 async def start_red_pill(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'start_red_pill'})
     nmarkap = ReplyKeyboardBuilder()
-    nmarkap.row(types.KeyboardButton(text="Давай продолжим 👌"))
+    nmarkap.row(types.KeyboardButton(text="Я понимаю, готов(а) продолжить 👌"))
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == 'Давай продолжим 👌'), flags=flags)
+@router.message((F.text == 'Я понимаю, готов(а) продолжить 👌'), flags=flags)
 async def start_dumb_dam(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'start_dumb_dam'})
     nmarkap = ReplyKeyboardBuilder()
@@ -221,12 +221,7 @@ async def start_continue_or_peace(message: Message):
 async def start_continue_or_peace_results(message: Message):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='start_continue_or_peace_results',
                                 value=message.text)
-    if "Продолжать военную операцию ⚔️" in message.text:
-        await poll_write(f'Usrs: {message.from_user.id}: Start_answers: NewPolitList:', message.text)
-    elif "Переходить к мирным переговорам 🕊" in message.text:
-        await poll_write(f'Usrs: {message.from_user.id}: Start_answers: NewPolitList:', message.text)
-    elif "Затрудняюсь ответить 🤷‍♀️" in message.text:
-        await poll_write(f'Usrs: {message.from_user.id}: Start_answers: NewPolitList:', message.text)
+    await poll_write(f'Usrs: {message.from_user.id}: Start_answers: NewPolitList:', message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'start_continue_or_peace_results'})
     try:
         client = all_data().get_mongo()
@@ -270,11 +265,15 @@ async def start_continue_or_peace_results(message: Message):
     user_answers.append(message.text)
     if "Начну военную операцию ⚔️" in user_answers and "Продолжать военную операцию ⚔️" in user_answers:
         await redis_just_one_write(f'Usrs: {message.from_user.id}: Start_answers: NewPolitStat:',
-                                   'Сторонник спецоперации')
+                                   'Сторонник спецоперации ⚔️')
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='NewPolitStat_start',
+                                    value='Сторонник спецоперации')
     elif "Переходить к мирным переговорам 🕊" in user_answers and "Не стану этого делать 🙅‍♂️" in user_answers:
-        await redis_just_one_write(f'Usrs: {message.from_user.id}: Start_answers: NewPolitStat:', 'Противник войны')
+        await redis_just_one_write(f'Usrs: {message.from_user.id}: Start_answers: NewPolitStat:', 'Противник войны 🕊')
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='NewPolitStat_start', value='Противник войны')
     else:
-        await redis_just_one_write(f'Usrs: {message.from_user.id}: Start_answers: NewPolitStat:', 'Сомневающийся')
+        await redis_just_one_write(f'Usrs: {message.from_user.id}: Start_answers: NewPolitStat:', 'Сомневающийся 🤷')
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='NewPolitStat_start', value='Сомневающийся')
     text = await sql_safe_select('text', 'texts', {'name': 'start_now_you_putin_results'})
 
     try:
@@ -354,6 +353,7 @@ async def start_donbas_putin(message: Message):
         nmarkap.row(types.KeyboardButton(text="Звучит однобоко — ты не учитываешь другие факторы ☝️"))
         nmarkap.row(types.KeyboardButton(text="Не надо лезть ко мне в голову, давай к следующим темам. 👉"))
         await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+
 
 """@router.message((F.text == "Покажи 🤔"), flags=flags)
 async def start_many_numbers(message: Message):

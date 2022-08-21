@@ -515,6 +515,20 @@ async def mongo_game_answer(user_id, game, number, answer_group, condict):
         pass
 
 
+async def mongo_count_docs(database: str, collection: str, conditions: dict | list, hard_link: bool = False):
+    client = all_data().get_mongo()
+    database = client[database]
+    collection = database[collection]
+    if isinstance(conditions, list) and hard_link:
+        return await collection.count_documents({"$and": conditions})
+    elif isinstance(conditions, list) and not hard_link:
+        a = 0
+        for d in conditions:
+            a += await collection.count_documents(d)
+        return a
+    elif isinstance(conditions, dict):
+        return await collection.count_documents(conditions)
+
 """^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^CSV_UPDATE^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"""
 
 '''def pandas_csv_add(table_name, new_values_dict):
