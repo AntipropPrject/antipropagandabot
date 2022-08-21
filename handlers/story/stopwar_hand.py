@@ -8,6 +8,7 @@ from aiogram.dispatcher.fsm.state import StatesGroup, State
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
+from bata import all_data
 from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
 from data_base.DBuse import sql_safe_select, redis_just_one_write, redis_just_one_read, \
     mongo_select_info, mongo_update_end, del_key, poll_write, redis_delete_from_list, poll_get
@@ -49,7 +50,7 @@ async def stopwar_question_1(message: Message, state: FSMContext):
 async def stopwar_question_2(message: Message, state: FSMContext):
     await state.set_state(StopWarState.must_watch)
     await poll_write(f'Usrs: {message.from_user.id}: StopWar: NewPolitList:', message.text)
-    await mongo_update_stat_new(message.from_user.id, 'stopwar_continue_or_peace_results', message.text)
+    await mongo_update_stat_new(message.from_user.id, 'stopwar_continue_or_peace_results', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_question_2'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Начну военную операцию ⚔️"))
@@ -94,6 +95,22 @@ async def stopwar_how_it_was(message: Message):
     for x in ('War', 'Peace', 'Doubt'):
         await poll_write(f'Usrs: {message.from_user.id}: Stop_war_answers:', x)
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_how_it_was'})
+
+    client = all_data().get_mongo()
+    database = client.database
+    collection = database['statistics_new']
+
+    start_warbringers_count = await collection.count_documents({'NewPolitStat_start': 'Сторонник спецоперации'})
+    start_peacefull_count = await collection.count_documents({'NewPolitStat_start': 'Противник войны'})
+    start_doubting_count = await collection.count_documents({'NewPolitStat_start': 'Сомневающийся'})
+    all_count = start_doubting_count + start_peacefull_count + start_warbringers_count
+    start_war_percentage = start_warbringers_count/all_count * 100
+    start_peace_percentage = start_peacefull_count/all_count * 100
+    start_doubt_percentage = start_doubting_count/all_count * 100
+    text = text.replace('XX', start_war_percentage)
+    text = text.replace('YY', start_peace_percentage)
+    text = text.replace('ZZ', start_doubt_percentage)
+
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Сторонники спецоперации ⚔️"))
     nmarkup.add(types.KeyboardButton(text="Сомневающиеся 🤷"))
