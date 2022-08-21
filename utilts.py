@@ -66,6 +66,14 @@ async def game_answer(message: Message, telegram_media_id: Union[int, InputFile]
         await message.answer(text, reply_markup=reply_markup, disable_web_page_preview=True)
 
 
+def percentage_replace(text:str, symbol: str, part: int, base: int):
+    try:
+        perc = part/base*100
+    except ZeroDivisionError:
+        perc = 0
+    return text.replace(symbol, str(round(perc)))
+
+
 async def bot_send_spam(bot: Bot, user_id: Union[int, str], telegram_media_id: Union[int, InputFile] = None,
                         text: str = None, reply_markup: Union[InlineKeyboardMarkup, ReplyKeyboardMarkup,
                                                               ReplyKeyboardRemove, ForceReply, None] = None):
