@@ -398,7 +398,7 @@ async def get_tag(viewed_channel) -> str:
         return 'RIANEWS'
     elif 'Russia Today' in viewed_channel:
         return 'RUSSIATODAY'
-    elif 'Телеграм-канал: Война' in viewed_channel:
+    elif 'Телеграм-канал «Война' in viewed_channel:
         return 'TCHANEL_WAR'
     elif 'ТАСС / Комсомольская правда' in viewed_channel:
         return 'TACC'
