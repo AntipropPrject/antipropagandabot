@@ -345,7 +345,7 @@ async def antip_not_only_TV(message: Message, web_lies_list: List[str], state: F
     markup.row(types.KeyboardButton(text="Покажи новость 👀"))
     all_answers_user = web_lies_list.copy()
     try:
-        all_answers_user.remove('Meduza / BBC / Радио Свобода / Медиазона / Настоящее время / Популярная Политика')
+        all_answers_user.remove('Meduza / Дождь / Би-би-си')
     except Exception as err:
         print(err)
     try:
@@ -398,7 +398,7 @@ async def get_tag(viewed_channel) -> str:
         return 'RIANEWS'
     elif 'Russia Today' in viewed_channel:
         return 'RUSSIATODAY'
-    elif 'Телеграм-канал: Война' in viewed_channel:
+    elif 'Телеграм-канал «Война' in viewed_channel:
         return 'TCHANEL_WAR'
     elif 'ТАСС / Комсомольская правда' in viewed_channel:
         return 'TACC'
@@ -433,7 +433,7 @@ async def get_count(tag: str, state) -> int:
 @router.message(((F.text.contains('Покажи новость 👀')) | (F.text.contains('РИА Новости 👀')) | (
         F.text.contains('Russia Today 👀')) | (
                          F.text.contains('Министерство обороны РФ 👀')) | (
-                         F.text.contains('Телеграм-канал: Война с фейками 👀')) | (F.text.contains('РБК 👀')) | (
+                         F.text.contains('Телеграм-канал «Война с фейками» 👀')) | (F.text.contains('РБК 👀')) | (
                          F.text.contains('ТАСС / Комсомольская правда / Коммерсантъ / Lenta.ru / Известия 👀')) |
                  (F.text.contains('Хорошо, давай вернемся и посмотрим 👀'))) & ~(
         F.text.contains('еще')), flags=flags)  # вход в цикл
@@ -541,6 +541,9 @@ async def skip_web(message: Message, state: FSMContext):
     next_channel = answer_channel[0]
     if next_channel == 'Министерство обороны РФ':
         next_channel = 'Министерства обороны РФ'
+    if next_channel == 'Телеграм-канал «Война с фейками»':
+        next_channel = 'Телеграм-каналa «Война с фейками»'
+
     text = await sql_safe_select('text', 'texts', {'name': 'antip_maybe_just_one'})
     text = text.replace('[[список неотсмотренных красных источников через запятую]]', lst_web_answers)
     text = text.replace('[[название следующего непросмотренного красного источника]]', next_channel)
