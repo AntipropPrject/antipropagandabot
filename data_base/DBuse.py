@@ -253,8 +253,9 @@ async def advertising_value(tag, user: User):
                 await sql_add_value("dumbstats.advertising", "count", {"id": tag})
     # !TODO: and int(tag) != user.id:
     elif tag.isdigit():
-        await mongo_easy_upsert('database', 'userinfo', {'_id': user.id}, {'ref_parent': tag,
-                                                                           'name_surname': f'{user.first_name} {user.last_name}'})
+        await mongo_easy_upsert('database', 'userinfo', {'_id': user.id},
+                                {'ref_parent': tag,  'name_surname': f'{user.first_name} {user.last_name}'})
+        await redis_just_one_write(f'Usrs: {user.id}: Ref', 1)
     else:
         url = f'https://pravdobot.com/cx79l1k.php?cnv_id={tag}'
         async with aiohttp.ClientSession() as session:

@@ -278,9 +278,10 @@ async def start_now_you_putin_results(message: Message, bot: Bot):
         await redis_just_one_write(f'Usrs: {message.from_user.id}: Start_answers: NewPolitStat:', 'Сомневающийся 🤷')
         await mongo_update_stat_new(tg_id=message.from_user.id, column='NewPolitStat_start', value='Сомневающийся')
 
-    parent_text = await sql_safe_select('text', 'texts', {'name': 'ref_start_polit'})
-    await ref_spy_sender(bot, message.from_user.id, parent_text,
-                         {'[first_q]': user_answers[0], '[second_q]': user_answers[1], '[polit_status]': status})
+    if await redis_just_one_read(f'Usrs: {message.from_user.id}: Ref'):
+        parent_text = await sql_safe_select('text', 'texts', {'name': 'ref_start_polit'})
+        await ref_spy_sender(bot, message.from_user.id, parent_text,
+                             {'[first_q]': user_answers[0], '[second_q]': user_answers[1], '[polit_status]': status})
 
     text = await sql_safe_select('text', 'texts', {'name': 'start_now_you_putin_results'})
     try:

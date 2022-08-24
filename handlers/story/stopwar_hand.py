@@ -82,11 +82,12 @@ async def stopwar_here_they_all(message: Message, bot: Bot):
         await mongo_update_stat_new(tg_id=message.from_user.id, column='NewPolitStat_end',
                                     value='Сомневающийся')
 
-    parent_text = await sql_safe_select('text', 'texts', {'name': 'ref_end_polit'})
-    start_answer = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: NewPolitList:')
-    await ref_spy_sender(bot, message.from_user.id, parent_text,
-                         {'[first_q_start]': start_answer[0], '[second_q_start]': start_answer[1],
-                          '[first_q_end]': first_question[0], '[second_q_end]': message.text})
+    if await redis_just_one_read(f'Usrs: {message.from_user.id}: Ref'):
+        parent_text = await sql_safe_select('text', 'texts', {'name': 'ref_end_polit'})
+        start_answer = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: NewPolitList:')
+        await ref_spy_sender(bot, message.from_user.id, parent_text,
+                             {'[first_q_start]': start_answer[0], '[second_q_start]': start_answer[1],
+                              '[first_q_end]': first_question[0], '[second_q_end]': message.text})
 
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_here_they_all'})
     start_staus = await redis_just_one_read(f'Usrs: {message.from_user.id}: Start_answers: NewPolitStat:')
