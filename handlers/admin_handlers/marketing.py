@@ -6,6 +6,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from data_base.DBuse import data_getter, sql_safe_insert
 from filters.isAdmin import IsAdmin
 from states.admin_states import admin
+from utilts import ref_master
 
 router = Router()
 router.message.filter(state=admin)
@@ -39,7 +40,7 @@ async def marketing_new_link(message: Message, bot: Bot, state: FSMContext):
     leng = len(await data_getter(query))
     label = message.text.replace(" ", "_")
     link = f'adv_{leng + 1}'
-    bot_link = f'https://t.me/{(await bot.get_me()).username.replace(" ", "_")}?start={link}'
+    await ref_master(bot, link)
     await sql_safe_insert('dumbstats', 'advertising', {'id': link, 'label': label, 'count': 0})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Получить новую ссылку"))

@@ -1,4 +1,5 @@
 import asyncio
+import re
 from datetime import datetime
 
 from aiogram import Router, F, Bot
@@ -11,11 +12,12 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from bata import all_data
 from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
 from data_base.DBuse import sql_safe_select, redis_just_one_write, redis_just_one_read, \
-    mongo_select_info, mongo_update_end, del_key, poll_write, redis_delete_from_list, poll_get, mongo_count_docs
+    mongo_select_info, mongo_update_end, del_key, poll_write, redis_delete_from_list, poll_get, mongo_count_docs, \
+    mongo_ez_find_one
 from handlers.story.main_menu_hand import mainmenu_really_menu
 from log import logg
 from states.main_menu_states import MainMenuStates
-from utilts import simple_media, percentage_replace
+from utilts import simple_media, percentage_replace, ref_master, ref_spy_sender
 
 
 class StopWarState(StatesGroup):
@@ -61,7 +63,7 @@ async def stopwar_question_2(message: Message, state: FSMContext):
 
 @router.message((F.text.in_({"Начну военную операцию ⚔️", "Не стану этого делать 🙅‍♂️",
                              "Затрудняюсь ответить 🤷‍♀️"})), state=StopWarState.must_watch, flags=flags)
-async def stopwar_here_they_all(message: Message):
+async def stopwar_here_they_all(message: Message, bot: Bot):
     await mongo_update_stat_new(message.from_user.id, 'stopwar_will_you_start_war', value=message.text)
     first_question = await poll_get(f'Usrs: {message.from_user.id}: StopWar: NewPolitList:')
     if first_question[0] == "Продолжать военную операцию ⚔️" and message.text == "Начну военную операцию ⚔️":
@@ -79,6 +81,13 @@ async def stopwar_here_they_all(message: Message):
                                    'Сомневающийся 🤷')
         await mongo_update_stat_new(tg_id=message.from_user.id, column='NewPolitStat_end',
                                     value='Сомневающийся')
+
+    parent_text = await sql_safe_select('text', 'texts', {'name': 'ref_end_polit'})
+    start_answer = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: NewPolitList:')
+    await ref_spy_sender(bot, message.from_user.id, parent_text,
+                         {'[first_q_start]': start_answer[0], '[second_q_start]': start_answer[1],
+                          '[first_q_end]': first_question[0], '[second_q_end]': message.text})
+
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_here_they_all'})
     start_staus = await redis_just_one_read(f'Usrs: {message.from_user.id}: Start_answers: NewPolitStat:')
     end_status = await redis_just_one_read(f'Usrs: {message.from_user.id}: StopWar: NewPolitStat:')
@@ -445,7 +454,9 @@ async def stopwar_I_told_you_everything(message: Message):
 async def stopwar_timer(message: Message, bot: Bot):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='will_they_stop', value=message.text)
     text_1 = await sql_safe_select('text', 'texts', {'name': 'stopwar_hello_world'})
-    text_2 = await sql_safe_select('text', 'texts', {'name': 'stopwar_send_me'})
+    link = await ref_master(bot, message.from_user.id)
+    text_2 = re.sub('(?<=href\=\")(.*?)(?=\")', link,
+                    (await sql_safe_select('text', 'texts', {'name': 'stopwar_send_me'})))
     text_3 = await sql_safe_select('text', 'texts', {'name': 'stopwar_send_the_message'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Какие советы? 🤔"))

@@ -1,4 +1,4 @@
-from aiogram import Router, F
+from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
@@ -9,7 +9,7 @@ from data_base.DBuse import poll_write, sql_safe_select, redis_just_one_write, \
     poll_get, redis_just_one_read
 from log.logg import get_logger
 from states.welcome_states import start_dialog
-from utilts import simple_media
+from utilts import simple_media, ref_spy_sender
 
 flags = {"throttling_key": "True"}
 router = Router()
@@ -258,24 +258,31 @@ async def start_now_you_putin(message: Message):
 
 @router.message((F.text.in_({"Начну военную операцию ⚔️", "Не стану этого делать 🙅‍♂️",
                              "Затрудняюсь  ответить  🤷‍♀️"})), flags=flags)
-async def start_continue_or_peace_results(message: Message):
+async def start_now_you_putin_results(message: Message, bot: Bot):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='start_now_you_putin_results',
                                 value=message.text)
+    await poll_write(f'Usrs: {message.from_user.id}: Start_answers: NewPolitList:', message.text)
     user_answers = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: NewPolitList:')
-    user_answers.append(message.text)
     if "Начну военную операцию ⚔️" in user_answers and "Продолжать военную операцию ⚔️" in user_answers:
+        status = 'Сторонник спецоперации ⚔️'
         await redis_just_one_write(f'Usrs: {message.from_user.id}: Start_answers: NewPolitStat:',
                                    'Сторонник спецоперации ⚔️')
         await mongo_update_stat_new(tg_id=message.from_user.id, column='NewPolitStat_start',
                                     value='Сторонник спецоперации')
     elif "Переходить к мирным переговорам 🕊" in user_answers and "Не стану этого делать 🙅‍♂️" in user_answers:
+        status = 'Противник войны 🕊'
         await redis_just_one_write(f'Usrs: {message.from_user.id}: Start_answers: NewPolitStat:', 'Противник войны 🕊')
         await mongo_update_stat_new(tg_id=message.from_user.id, column='NewPolitStat_start', value='Противник войны')
     else:
+        status = 'Сомневающийся 🤷'
         await redis_just_one_write(f'Usrs: {message.from_user.id}: Start_answers: NewPolitStat:', 'Сомневающийся 🤷')
         await mongo_update_stat_new(tg_id=message.from_user.id, column='NewPolitStat_start', value='Сомневающийся')
-    text = await sql_safe_select('text', 'texts', {'name': 'start_now_you_putin_results'})
 
+    parent_text = await sql_safe_select('text', 'texts', {'name': 'ref_start_polit'})
+    await ref_spy_sender(bot, message.from_user.id, parent_text,
+                         {'[first_q]': user_answers[0], '[second_q]': user_answers[1], '[polit_status]': status})
+
+    text = await sql_safe_select('text', 'texts', {'name': 'start_now_you_putin_results'})
     try:
         client = all_data().get_mongo()
         database = client.database
