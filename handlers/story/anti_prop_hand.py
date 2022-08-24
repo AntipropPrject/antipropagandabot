@@ -345,7 +345,7 @@ async def antip_not_only_TV(message: Message, web_lies_list: List[str], state: F
     markup.row(types.KeyboardButton(text="Покажи новость 👀"))
     all_answers_user = web_lies_list.copy()
     try:
-        all_answers_user.remove('Meduza / BBC / Радио Свобода / Медиазона / Настоящее время / Популярная Политика')
+        all_answers_user.remove('Meduza / Дождь / Би-би-си')
     except Exception as err:
         print(err)
     try:
