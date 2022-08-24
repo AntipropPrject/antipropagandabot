@@ -1,4 +1,5 @@
 import asyncio
+import re
 from datetime import datetime
 
 from aiogram import Router, F, Bot
@@ -11,11 +12,12 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from bata import all_data
 from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
 from data_base.DBuse import sql_safe_select, redis_just_one_write, redis_just_one_read, \
-    mongo_select_info, mongo_update_end, del_key, poll_write, redis_delete_from_list, poll_get
+    mongo_select_info, mongo_update_end, del_key, poll_write, redis_delete_from_list, poll_get, mongo_count_docs, \
+    mongo_ez_find_one
 from handlers.story.main_menu_hand import mainmenu_really_menu
 from log import logg
 from states.main_menu_states import MainMenuStates
-from utilts import simple_media
+from utilts import simple_media, percentage_replace, ref_master, ref_spy_sender
 
 
 class StopWarState(StatesGroup):
@@ -61,11 +63,10 @@ async def stopwar_question_2(message: Message, state: FSMContext):
 
 @router.message((F.text.in_({"Начну военную операцию ⚔️", "Не стану этого делать 🙅‍♂️",
                              "Затрудняюсь ответить 🤷‍♀️"})), state=StopWarState.must_watch, flags=flags)
-async def stopwar_here_they_all(message: Message):
+async def stopwar_here_they_all(message: Message, bot: Bot):
     await mongo_update_stat_new(message.from_user.id, 'stopwar_will_you_start_war', value=message.text)
     first_question = await poll_get(f'Usrs: {message.from_user.id}: StopWar: NewPolitList:')
-    print(first_question)
-    if first_question[0] == "Начну военную операцию ⚔️" and message.text == "Продолжать военную операцию ⚔️":
+    if first_question[0] == "Продолжать военную операцию ⚔️" and message.text == "Начну военную операцию ⚔️":
         await redis_just_one_write(f'Usrs: {message.from_user.id}: StopWar: NewPolitStat:',
                                    'Сторонник спецоперации ⚔️')
         await mongo_update_stat_new(tg_id=message.from_user.id, column='NewPolitStat_end',
@@ -80,6 +81,14 @@ async def stopwar_here_they_all(message: Message):
                                    'Сомневающийся 🤷')
         await mongo_update_stat_new(tg_id=message.from_user.id, column='NewPolitStat_end',
                                     value='Сомневающийся')
+
+    if await redis_just_one_read(f'Usrs: {message.from_user.id}: Ref'):
+        parent_text = await sql_safe_select('text', 'texts', {'name': 'ref_end_polit'})
+        start_answer = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: NewPolitList:')
+        await ref_spy_sender(bot, message.from_user.id, parent_text,
+                             {'[first_q_start]': start_answer[0], '[second_q_start]': start_answer[1],
+                              '[first_q_end]': first_question[0], '[second_q_end]': message.text})
+
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_here_they_all'})
     start_staus = await redis_just_one_read(f'Usrs: {message.from_user.id}: Start_answers: NewPolitStat:')
     end_status = await redis_just_one_read(f'Usrs: {message.from_user.id}: StopWar: NewPolitStat:')
@@ -91,25 +100,35 @@ async def stopwar_here_they_all(message: Message):
 
 
 @router.message(F.text == "Взглянем на результаты 📊", state=StopWarState.must_watch, flags=flags)
-async def stopwar_how_it_was(message: Message):
+async def stopwar_how_it_was(message: Message, state: FSMContext):
     for x in ('War', 'Peace', 'Doubt'):
         await poll_write(f'Usrs: {message.from_user.id}: Stop_war_answers:', x)
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_how_it_was'})
-
+    await mongo_update_stat_new(message.from_user.id, 'SecondNewPolit')
     client = all_data().get_mongo()
     database = client.database
     collection = database['statistics_new']
 
-    start_warbringers_count = await collection.count_documents({'NewPolitStat_start': 'Сторонник спецоперации'})
-    start_peacefull_count = await collection.count_documents({'NewPolitStat_start': 'Противник войны'})
-    start_doubting_count = await collection.count_documents({'NewPolitStat_start': 'Сомневающийся'})
+    start_warbringers_count = await mongo_count_docs('database', 'statistics_new',
+                                                     {'NewPolitStat_start': 'Сторонник спецоперации'})
+    start_peacefull_count = await mongo_count_docs('database', 'statistics_new',
+                                                   {'NewPolitStat_start': 'Противник войны'})
+    start_doubting_count = await mongo_count_docs('database', 'statistics_new',
+                                                  {'NewPolitStat_start': 'Сомневающийся'})
     all_count = start_doubting_count + start_peacefull_count + start_warbringers_count
-    start_war_percentage = start_warbringers_count/all_count * 100
-    start_peace_percentage = start_peacefull_count/all_count * 100
-    start_doubt_percentage = start_doubting_count/all_count * 100
+    print(start_warbringers_count, start_peacefull_count, start_doubting_count, all_count)
+    start_war_percentage = str(round(start_warbringers_count / all_count * 100))
+    start_peace_percentage = str(round(start_peacefull_count / all_count * 100))
+    start_doubt_percentage = str(round(start_doubting_count / all_count * 100))
     text = text.replace('XX', start_war_percentage)
     text = text.replace('YY', start_peace_percentage)
     text = text.replace('ZZ', start_doubt_percentage)
+    all_count_end = await mongo_count_docs('database', 'statistics_new', [
+        {'NewPolitStat_end': 'Сомневающийся'}, {'NewPolitStat_end': 'Сторонник спецоперации'},
+        {'NewPolitStat_end': 'Противник войны'}])
+    await state.update_data({'How_many_will_end': all_count_end, 'start_warbringers_count': start_warbringers_count,
+                             'start_peacefull_count': start_peacefull_count,
+                             'start_doubting_count': start_doubting_count})
 
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Сторонники спецоперации ⚔️"))
@@ -119,24 +138,73 @@ async def stopwar_how_it_was(message: Message):
 
 
 @router.message(F.text == "Сторонники спецоперации ⚔️", state=StopWarState.must_watch, flags=flags)
-async def stopwar_how_was_warbringers(message: Message):
+async def stopwar_how_was_warbringers(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_how_was_warbringers'})
+    at_the_end = await mongo_count_docs('database', 'statistics_new', [{'NewPolitStat_start': 'Сторонник спецоперации'},
+                                        {'SecondNewPolit': True}], hard_link=True)
+    start_war = (await state.get_data())['start_warbringers_count']
+    end_war_war = await mongo_count_docs('database', 'statistics_new',
+                                         [{'NewPolitStat_start': 'Сторонник спецоперации'},
+                                          {'NewPolitStat_end': 'Сторонник спецоперации'}], hard_link=True)
+    end_war_peace = await mongo_count_docs('database', 'statistics_new',
+                                         [{'NewPolitStat_start': 'Сторонник спецоперации'},
+                                          {'NewPolitStat_end': 'Противник войны'}], hard_link=True)
+    end_war_doubt = await mongo_count_docs('database', 'statistics_new',
+                                         [{'NewPolitStat_start': 'Сторонник спецоперации'},
+                                          {'NewPolitStat_end': 'Сомневающийся'}], hard_link=True)
+    print(start_war, at_the_end, end_war_war, end_war_doubt, end_war_peace)
+    text = percentage_replace(text, 'MM', at_the_end, start_war)
+    text = percentage_replace(text, 'AA', end_war_war, at_the_end)
+    text = percentage_replace(text, 'BB', end_war_doubt, at_the_end)
+    text = percentage_replace(text, 'CC', end_war_peace, at_the_end)
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Stop_war_answers:', 'War')
     await message.answer(text)
     await stopwar_must_watch_all(message)
 
 
 @router.message(F.text == "Сомневающиеся 🤷", state=StopWarState.must_watch, flags=flags)
-async def stopwar_how_was_doubting(message: Message):
+async def stopwar_how_was_doubting(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_how_was_doubting'})
+    at_the_end = await mongo_count_docs('database', 'statistics_new', [{'NewPolitStat_start': 'Сомневающийся'},
+                                                                       {'SecondNewPolit': True}], hard_link=True)
+    start_doub = (await state.get_data())['start_doubting_count']
+    end_doub_war = await mongo_count_docs('database', 'statistics_new',
+                                         [{'NewPolitStat_start': 'Сомневающийся'},
+                                          {'NewPolitStat_end': 'Сторонник спецоперации'}], hard_link=True)
+    end_doub_doub = await mongo_count_docs('database', 'statistics_new',
+                                           [{'NewPolitStat_start': 'Сомневающийся'},
+                                            {'NewPolitStat_end': 'Сомневающийся'}], hard_link=True)
+    end_doub_peace = await mongo_count_docs('database', 'statistics_new',
+                                           [{'NewPolitStat_start': 'Сомневающийся'},
+                                            {'NewPolitStat_end': 'Противник войны'}], hard_link=True)
+    text = percentage_replace(text, 'NN', at_the_end, start_doub)
+    text = percentage_replace(text, 'DD', end_doub_war, at_the_end)
+    text = percentage_replace(text, 'EE', end_doub_doub, at_the_end)
+    text = percentage_replace(text, 'FF', end_doub_peace, at_the_end)
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Stop_war_answers:', 'Doubt')
     await message.answer(text)
     await stopwar_must_watch_all(message)
 
 
 @router.message(F.text == "Противники войны 🕊", state=StopWarState.must_watch, flags=flags)
-async def stopwar_how_was_peacefull(message: Message):
+async def stopwar_how_was_peacefull(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_how_was_peacefull'})
+    at_the_end = await mongo_count_docs('database', 'statistics_new', [{'NewPolitStat_start': 'Противник войны'},
+                                        {'SecondNewPolit': True}], hard_link=True)
+    start_peace = (await state.get_data())['start_peacefull_count']
+    end_peace_war = await mongo_count_docs('database', 'statistics_new',
+                                         [{'NewPolitStat_start': 'Противник войны'},
+                                          {'NewPolitStat_end': 'Сторонник спецоперации'}], hard_link=True)
+    end_peace_doub = await mongo_count_docs('database', 'statistics_new',
+                                           [{'NewPolitStat_start': 'Противник войны'},
+                                            {'NewPolitStat_end': 'Сомневающийся'}], hard_link=True)
+    end_peace_peace = await mongo_count_docs('database', 'statistics_new',
+                                           [{'NewPolitStat_start': 'Противник войны'},
+                                            {'NewPolitStat_end': 'Противник войны'}], hard_link=True)
+    text = percentage_replace(text, 'OO', at_the_end, start_peace)
+    text = percentage_replace(text, 'GG', end_peace_war, at_the_end)
+    text = percentage_replace(text, 'HH', end_peace_doub, at_the_end)
+    text = percentage_replace(text, 'II', end_peace_peace, at_the_end)
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Stop_war_answers:', 'Peace')
     await message.answer(text)
     await stopwar_must_watch_all(message)
@@ -387,7 +455,9 @@ async def stopwar_I_told_you_everything(message: Message):
 async def stopwar_timer(message: Message, bot: Bot):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='will_they_stop', value=message.text)
     text_1 = await sql_safe_select('text', 'texts', {'name': 'stopwar_hello_world'})
-    text_2 = await sql_safe_select('text', 'texts', {'name': 'stopwar_send_me'})
+    link = await ref_master(bot, message.from_user.id)
+    text_2 = re.sub('(?<=href\=\")(.*?)(?=\")', link,
+                    (await sql_safe_select('text', 'texts', {'name': 'stopwar_send_me'})))
     text_3 = await sql_safe_select('text', 'texts', {'name': 'stopwar_send_the_message'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Какие советы? 🤔"))
@@ -430,8 +500,15 @@ async def stopwar_timer(message: Message, bot: Bot):
         await mongo_update_end(message.from_user.id)
         await asyncio.sleep(1)
         await del_key(f'Usrs: {message.from_user.id}: count:')
-        text_end = await sql_safe_select('text', 'texts', {'name': 'stopwar_end_timer'})
-        await message.answer(text_end, reply_markup=nmarkup.as_markup(resize_keyboard=True),  parse_mode="HTML")
+        await message.answer(
+            "5 минут прошли, спасибо, что поделились ссылкой на меня! Вы можете перейти в главное меню."
+            " Но если у вас есть ещё с кем поделиться ссылкой на меня — обязательно сделайте это! "
+            "Кстати! Помните, я в начале разговора упомянул о том, что каждый, кто найдёт в моих словах ложь — получит 50 000 руб? "
+            "<i><b>Если вы считаете, что я в чём-то вам солгал, заберите свои 50 000 руб!</b></i> "
+            "<i>Найдите сообщение, содержащее ложь, сделайте скриншот и отправьте в комментариях к <a href='https://t.me/Russia_Svoboda/67'>этому посту.</a> "
+            "Не забудьте прикрепить доказательства! Я абсолютно серьёзно. "
+            "Всё открыто и прозрачно, <a href='https://t.me/Russia_Svoboda/67'>посмотрите пост</a> и убедитесь сами.</i>",
+            reply_markup=markup.as_markup(resize_keyboard=True), parse_mode="HTML")
         await bot.delete_message(chat_id=message.from_user.id, message_id=m_id)
         print('Countdown finished.')
     else:
@@ -457,8 +534,15 @@ async def stopwar_share_blindly(message: Message):
     else:
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
-        text = await sql_safe_select('text', 'texts', {'name': 'stopwar_end_timer'})
-        await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True),  parse_mode="HTML")
+        await message.answer(
+            "5 минут прошли, спасибо, что поделились ссылкой на меня! Вы можете перейти в главное меню."
+            " Но если у вас есть ещё с кем поделиться ссылкой на меня — обязательно сделайте это! "
+            "Кстати! Помните, я в начале разговора упомянул о том, что каждый, кто найдёт в моих словах ложь — получит 50 000 руб? "
+            "<i><b>Если вы считаете, что я в чём-то вам солгал, заберите свои 50 000 руб!</b></i> "
+            "<i>Найдите сообщение, содержащее ложь, сделайте скриншот и отправьте в комментариях к <a href='https://t.me/Russia_Svoboda/67'>этому посту.</a> "
+            "Не забудьте прикрепить доказательства! Я абсолютно серьёзно. "
+            "Всё открыто и прозрачно, <a href='https://t.me/Russia_Svoboda/67'>посмотрите пост</a> и убедитесь сами.</i>",
+            reply_markup=nmarkup.as_markup(resize_keyboard=True), parse_mode="HTML")
 
 
 @router.message((F.text == "Покажи инструкцию, как поделиться со всем списком контактов 📝"), flags=flags)
@@ -469,8 +553,15 @@ async def stopwar_bulk_forwarding(message: Message):
     if timer == '1':
         await simple_media(message, 'stopwar_bulk_forwarding', reply_markup=nmarkup.as_markup(resize_keyboard=True))
     else:
-        text = await sql_safe_select('text', 'texts', {'name': 'stopwar_end_timer'})
-        await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True),  parse_mode="HTML")
+        await message.answer(
+            "5 минут прошли, спасибо, что поделились ссылкой на меня! Вы можете перейти в главное меню."
+            " Но если у вас есть ещё с кем поделиться ссылкой на меня — обязательно сделайте это! "
+            "Кстати! Помните, я в начале разговора упомянул о том, что каждый, кто найдёт в моих словах ложь — получит 50 000 руб? "
+            "<i><b>Если вы считаете, что я в чём-то вам солгал, заберите свои 50 000 руб!</b></i> "
+            "<i>Найдите сообщение, содержащее ложь, сделайте скриншот и отправьте в комментариях к <a href='https://t.me/Russia_Svoboda/67'>этому посту.</a> "
+            "Не забудьте прикрепить доказательства! Я абсолютно серьёзно. "
+            "Всё открыто и прозрачно, <a href='https://t.me/Russia_Svoboda/67'>посмотрите пост</a> и убедитесь сами.</i>",
+            reply_markup=nmarkup.as_markup(resize_keyboard=True), parse_mode="HTML")
 
 
 @router.message((F.text == "Перейти в главное меню 👇"), flags=flags)

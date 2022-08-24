@@ -10,7 +10,8 @@ from aiogram.types import Message, ReplyKeyboardRemove, InlineKeyboardMarkup, Re
     FSInputFile, InputFile
 
 import bata
-from data_base.DBuse import sql_safe_select, sql_safe_insert, sql_safe_update, data_getter, sql_select_row_like
+from data_base.DBuse import sql_safe_select, sql_safe_insert, sql_safe_update, data_getter, sql_select_row_like, \
+    mongo_ez_find_one
 from log import logg
 from utils.spacebot import SpaceBot
 
@@ -66,6 +67,14 @@ async def game_answer(message: Message, telegram_media_id: Union[int, InputFile]
         await message.answer(text, reply_markup=reply_markup, disable_web_page_preview=True)
 
 
+def percentage_replace(text:str, symbol: str, part: int, base: int):
+    try:
+        perc = part/base*100
+    except ZeroDivisionError:
+        perc = 0
+    return text.replace(symbol, str(round(perc)))
+
+
 async def bot_send_spam(bot: Bot, user_id: Union[int, str], telegram_media_id: Union[int, InputFile] = None,
                         text: str = None, reply_markup: Union[InlineKeyboardMarkup, ReplyKeyboardMarkup,
                                                               ReplyKeyboardRemove, ForceReply, None] = None):
@@ -96,6 +105,27 @@ async def dynamic_media_answer(message: Message, similarity_tag: str, row_number
         text = None
     print(text)
     await game_answer(message, media, text, reply_markup)
+
+
+async def ref_master(bot: Bot, link: str | int):
+    return f'https://t.me/{(await bot.get_me()).username.replace(" ", "_")}?start={str(link)}'
+
+
+async def ref_spy_sender(bot: Bot, child_telegram_id: str | int, message_to_send: str, replace_dict: dict):
+    data = await mongo_ez_find_one('database', 'userinfo', {'_id': int(child_telegram_id)})
+    parent_id, name_surname, username = data['ref_parent'], data['name_surname'], data['username']
+    if name_surname:
+        replace_dict['[CHILD_NAME]'] = name_surname
+    elif username:
+        replace_dict['[CHILD_NAME]'] = username
+    else:
+        replace_dict['[CHILD_NAME]'] = f'пользователь с id {child_telegram_id}'
+    for key in replace_dict:
+        message_to_send = message_to_send.replace(key, replace_dict[key])
+    try:
+        await bot.send_message(parent_id, message_to_send)
+    except TelegramBadRequest as error:
+        await logg.get_error(f"Bad referal parent!! | {error}", __file__)
 
 
 class Phoenix:
