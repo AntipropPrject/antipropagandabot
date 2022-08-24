@@ -29,7 +29,13 @@ async def mongo_stat_new(tg_id):
 
 async def mongo_update_stat_new(tg_id, column, options='$set', value=True):
     user_info = await mongo_select_info(tg_id)
-    if user_info['datetime_end'] is None:
+    try:
+        if user_info['datetime_end'] is None:
+            try:
+                await collection_stat_new.update_one({'_id': int(tg_id)}, {options: {column: value}})
+            except Exception as error:
+                await logg.get_error(f"mongo_update_stat | {error}", __file__)
+    except KeyError:
         try:
             await collection_stat_new.update_one({'_id': int(tg_id)}, {options: {column: value}})
         except Exception as error:
