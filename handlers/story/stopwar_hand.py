@@ -152,7 +152,6 @@ async def stopwar_how_was_warbringers(message: Message, state: FSMContext):
     end_war_doubt = await mongo_count_docs('database', 'statistics_new',
                                            [{'NewPolitStat_start': 'Сторонник спецоперации'},
                                             {'NewPolitStat_end': 'Сомневающийся'}], hard_link=True)
-    print(start_war, at_the_end, end_war_war, end_war_doubt, end_war_peace)
     text = percentage_replace(text, 'MM', at_the_end, start_war)
     text = percentage_replace(text, 'AA', end_war_war, at_the_end)
     text = percentage_replace(text, 'BB', end_war_doubt, at_the_end)
