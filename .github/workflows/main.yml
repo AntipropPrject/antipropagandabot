@@ -17,7 +17,7 @@ jobs:
           host: ${{ secrets.TEST_IP }}
           username: ec2-user
           key: ${{ secrets.SSHKEY }}
-          connect_timeout: 10s
+          command_timeout: 10s
           script: |
             echo WELCOME
             cd antipropagandabot
