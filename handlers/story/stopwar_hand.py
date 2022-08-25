@@ -242,15 +242,10 @@ async def stopwar_old_start(message: Message, state: FSMContext):
 @router.message(F.text == "Скорее да ✅", flags=flags)
 async def stopwar_rather_yes(message: Message):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='is_putin_ready_to_stop', value=message.text)
-    text = await sql_safe_select('text', 'texts', {'name': 'stopwar_rather_yes'})
-    photo = await sql_safe_select('t_id', 'assets', {'name': 'stopwar_rather_yes'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.add(types.KeyboardButton(text="Согласен(а) 👌"))
     nmarkup.add(types.KeyboardButton(text="Не согласен(а) 🙅"))
-    try:
-        await message.answer_photo(photo, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
-    except TelegramBadRequest:
-        await message.answer_video(photo, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await simple_media(message, 'stopwar_rather_yes', nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message(F.text == "Не знаю 🤷‍♂️", flags=flags)
