@@ -88,7 +88,7 @@ class WebPropagandaFilter(BaseFilter):
     async def __call__(self, message: Message) -> Union[bool, Dict[str, Any]]:
         web_lies_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: ethernet:')
         bad_lies = ("РИА Новости", "Russia Today", "Министерство обороны РФ",
-                    "Телеграм-канал: Война с фейками",
+                    "Телеграм-канал «Война с фейками»",
                     "ТАСС / Комсомольская правда / Коммерсантъ / Lenta.ru / Известия")
         for bad_lie in bad_lies:
             if bad_lie in web_lies_list:
