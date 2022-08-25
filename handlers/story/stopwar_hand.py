@@ -263,7 +263,7 @@ async def stopwar_idk(message: Message):
     nmarkup.add(types.KeyboardButton(text="Не согласен(а) 🙅"))
     try:
         await message.answer_photo(photo, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
-    except Exception:
+    except TelegramBadRequest:
         await message.answer_video(photo, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
