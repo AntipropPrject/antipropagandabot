@@ -6,6 +6,7 @@ from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.dispatcher.fsm.state import StatesGroup, State
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
@@ -248,7 +249,7 @@ async def stopwar_rather_yes(message: Message):
     nmarkup.add(types.KeyboardButton(text="Не согласен(а) 🙅"))
     try:
         await message.answer_photo(photo, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
-    except Exception:
+    except TelegramBadRequest:
         await message.answer_video(photo, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
