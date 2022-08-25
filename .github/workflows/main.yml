@@ -2,10 +2,10 @@ name: Stage Deploy
 
 on:
   workflow_dispatch:
-  # workflow_run:
-    # workflows: [ Test Pipeline ]
-    # types:
-      # - completed
+  workflow_run:
+    workflows: [ Test Pipeline ]
+    types:
+      - completed
 
 jobs:
   deploy-to-server:
@@ -18,7 +18,7 @@ jobs:
           host: ${{ secrets.TEST_SERVER_DOMAIN }}
           username: ec2-user
           key: ${{ secrets.SSHKEY }}
-          connect_timeout: 10s
+          command_timeout: 10s
           script: |
             echo WELCOME
             cd antipropagandabot
