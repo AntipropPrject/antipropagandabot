@@ -471,7 +471,6 @@ async def start_I_will_rates(message: Message):
     await simple_media(message, 'start_I_will_rates', reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
-
 @router.message((F.text == "Давай  👌"), flags=flags)
 async def start_donbas_results(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'start_how_to_manipulate'})
