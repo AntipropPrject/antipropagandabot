@@ -757,7 +757,8 @@ async def antip_look_at_it_yourself(message: Message):
     await simple_media(message, 'antip_look_at_it_yourself', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(((F.text.contains('Спасибо, не знал(а) 🙂')) | (F.text.contains('нового')) | (F.text.contains('не верю'))),
+@router.message(((F.text.contains('Спасибо, не знал(а) 🙂')) | (F.text.contains('нового')) |
+                 (F.text.contains('не верю'))),
                 state=propaganda_victim.wiki, flags=flags)
 @router.message(((F.text.contains('удивлён')) | (F.text.contains('не верю'))),
                 state=propaganda_victim.yandex, flags=flags)
