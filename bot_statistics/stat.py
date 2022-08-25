@@ -77,5 +77,5 @@ async def mongo_is_done(p_id):
     try:
         collection = await collection_stat.find_one({'_id': p_id})
         return collection['end']
-    except Exception as error:
-        await logg.get_error(f"mongo_is_done | {error}", __file__)
+    except KeyError:
+        pass
