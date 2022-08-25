@@ -261,10 +261,7 @@ async def stopwar_idk(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.add(types.KeyboardButton(text="Согласен(а) 👌"))
     nmarkup.add(types.KeyboardButton(text="Не согласен(а) 🙅"))
-    try:
-        await message.answer_photo(photo, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
-    except TelegramBadRequest:
-        await message.answer_video(photo, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await simple_media(message, 'stopwar_idk', nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message(F.text == "Скорее нет ❌", flags=flags)
