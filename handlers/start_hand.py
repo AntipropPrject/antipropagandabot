@@ -9,7 +9,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from bata import all_data
 from bot_statistics.stat import mongo_is_done, mongo_stat, mongo_stat_new
-from data_base.DBuse import mongo_user_info, sql_safe_select, advertising_value
+from data_base.DBuse import mongo_user_info, sql_safe_select, advertising_value, mongo_ez_find_one, redis_just_one_write
 from day_func import day_count
 from handlers.story import true_resons_hand
 from handlers.story import main_menu_hand
@@ -52,6 +52,9 @@ async def start_base(message):
     await mongo_stat(user_id)
     await mongo_stat_new(user_id)
     await mongo_user_info(user_id, message.from_user.username)
+    if await mongo_ez_find_one('database', 'userinfo', {'_id': message.from_user.id, 'ref_parent': {'$exists': True}}):
+        await redis_just_one_write(f'Usrs: {message.from_user.id}: Ref', 1)
+
 
 
 @router.message(commands=['menu'], flags=flags)

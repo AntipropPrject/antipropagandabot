@@ -261,7 +261,6 @@ async def advertising_value(tag, user: User):
         async with aiohttp.ClientSession() as session:
             async with session.get(url=url) as response:
                 resp = await response.read()
-                print(response.status)
 
 
 """^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^MongoDB^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"""
@@ -548,7 +547,7 @@ async def mongo_ez_find_one(database: str, collection: str, condition_dict: dict
         collection = database[collection]
         return await collection.find_one(condition_dict)
     except Exception as ex:
-        await logg.get_error(f"Mongo easy upsert is failed\n\n{ex}", __file__)
+        await logg.get_error(f"Mongo easy select is failed\n\n{ex}", __file__)
 
 
 """^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^CSV_UPDATE^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"""
