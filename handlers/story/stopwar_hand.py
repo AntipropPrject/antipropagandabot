@@ -142,11 +142,7 @@ async def stopwar_how_it_was(message: Message, state: FSMContext):
 async def stopwar_how_was_warbringers(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_how_was_warbringers'})
     at_the_end = await mongo_count_docs('database', 'statistics_new', [{'NewPolitStat_start': 'Сторонник спецоперации'},
-
                                                                        {'SecondNewPolit': True}], hard_link=True)
-
-                                        {'SecondNewPolit': True}], hard_link=True)
-
     start_war = (await state.get_data())['start_warbringers_count']
     end_war_war = await mongo_count_docs('database', 'statistics_new',
                                          [{'NewPolitStat_start': 'Сторонник спецоперации'},
