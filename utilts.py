@@ -67,7 +67,7 @@ async def game_answer(message: Message, telegram_media_id: Union[int, InputFile]
         await message.answer(text, reply_markup=reply_markup, disable_web_page_preview=True)
 
 
-def percentage_replace(text:str, symbol: str, part: int, base: int):
+def percentage_replace(text: str, symbol: str, part: int, base: int):
     try:
         perc = part/base*100
     except ZeroDivisionError:

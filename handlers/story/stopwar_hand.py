@@ -189,8 +189,10 @@ async def stopwar_how_was_doubting(message: Message, state: FSMContext):
 @router.message(F.text == "Противники войны 🕊", state=StopWarState.must_watch, flags=flags)
 async def stopwar_how_was_peacefull(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_how_was_peacefull'})
-    at_the_end = await mongo_count_docs('database', 'statistics_new', [{'NewPolitStat_start': 'Противник войны'},
-                                                                       {'SecondNewPolit': True}], hard_link=True)
+    at_the_end = await mongo_count_docs('database', 'statistics_new',
+                                        [{'NewPolitStat_start': 'Противник войны'},
+                                         {'NewPolitStat_end': {'$exists': True}}],
+                                        hard_link=True)
     start_peace = (await state.get_data())['start_peacefull_count']
     end_peace_war = await mongo_count_docs('database', 'statistics_new',
                                            [{'NewPolitStat_start': 'Противник войны'},
