@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - name: 'Making .env'
         run: |
           touch .env
@@ -34,3 +36,12 @@ jobs:
           path: |
             pytest_html_report.html
             flake8_report
+      - name: get file changes
+        run: |
+          mkdir artifacts
+          echo $(git log --pretty=format:%s, ${{ github.event.before }}...${{ github.event.after }}) > artifacts/commi
+      - name: upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: commi
+          path: artifacts/commi

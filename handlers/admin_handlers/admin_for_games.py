@@ -1394,12 +1394,12 @@ async def admin_home(message: types.Message, state: FSMContext):
     await state.set_state(admin.mass_media_menu)
 
 
-@router.message((F.text.contains('Добавить сюжет')), state=admin.mass_media_menu)
+@router.message((F.text.contazins('Добавить сюжет')), state=admin.mass_media_menu)
 async def admin_home(message: types.Message, state: FSMContext):
     nmarkup = InlineKeyboardBuilder()
     nmarkup.button(text='РИА Новости', callback_data='RIANEWS_media_ TCHANEL_WAR_exposure_')
     nmarkup.button(text='Russia Today', callback_data='RUSSIATODAY_media_ RUSSIATODAY_exposure_')
-    nmarkup.button(text='Телеграм-канал: Война с фейками', callback_data='TCHANEL_WAR_media_ TCHANEL_WAR_exposure_')
+    nmarkup.button(text='Телеграм-канал «Война с фейками»', callback_data='TCHANEL_WAR_media_ TCHANEL_WAR_exposure_')
     nmarkup.button(text='ТАСС / Комсомольская правда..', callback_data='TACC_media_ TACC_exposure_')
     nmarkup.button(text='Министерство обороны РФ', callback_data='MINISTRY_media_ MINISTRY_exposure_')
     nmarkup.adjust(1, 1, 1, 1, 1)

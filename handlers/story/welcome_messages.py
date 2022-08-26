@@ -145,8 +145,9 @@ async def message_dfwd(message: types.Message, state: FSMContext):
 async def message_7(message: types.Message, state: FSMContext):
     markup = ReplyKeyboardBuilder()
     markup.add(types.KeyboardButton(text="Продолжить"))
+    text = await sql_safe_select("text", "texts", {"name": "start_goals_poll"})
     await message.answer_poll(
-        question="Выберите все цели, с которыми согласны или частично согласны. Затем нажмите «Проголосовать»",
+        question=text,
         options=welc_message_one, is_anonymous=False, allows_multiple_answers=True,
         reply_markup=markup.as_markup(resize_keyboard=True))
     await state.set_state(welcome_states.start_dialog.dialogue_7)
@@ -235,9 +236,8 @@ async def poll_answer_handler_tho(poll_answer: types.PollAnswer, bot: Bot, state
     text = await sql_safe_select("text", "texts", {"name": "start_people_belive"})
     await state.set_state(welcome_states.start_dialog.dialogue_10)
     await bot.send_message(poll_answer.user.id, text)
-    await bot.send_poll(poll_answer.user.id, 'Отметьте всех людей,'
-                                             ' которым доверяете или частично доверяете.'
-                                             ' Затем нажмите «Проголосовать»',
+    text2 = await sql_safe_select("text", "texts", {"name": "start_belive_TV"})
+    await bot.send_poll(poll_answer.user.id, text2,
                         people_prop, is_anonymous=False,
                         allows_multiple_answers=True,
                         reply_markup=markup.as_markup(resize_keyboard=True))

@@ -60,8 +60,8 @@ async def nazi_first_poll(message: Message):
 
 @router.message((F.text == "Продолжить"), state=NaziState.first_poll, flags=flags)
 async def nazi_poll_filler(message: Message):
-    await message.answer('Чтобы продолжить — отметьте варианты выше, '
-                         'и нажмите <b>"Голосовать"</b> или <b>"Vote"</b>', reply_markup=ReplyKeyboardRemove())
+    text = await sql_safe_select("text", "texts", {"name": "POLL_CONTINUE"})
+    await message.answer(text, reply_markup=ReplyKeyboardRemove())
 
 
 @router.poll_answer(state=NaziState.first_poll, flags=flags)

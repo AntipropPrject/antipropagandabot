@@ -2,10 +2,10 @@ name: Stage Deploy
 
 on:
   workflow_dispatch:
-  # workflow_run:
-    # workflows: [ Test Pipeline ]
-    # types:
-      # - completed
+  workflow_run:
+    workflows: [ Test Pipeline ]
+    types:
+      - completed
 
 jobs:
   deploy-to-server:
@@ -18,10 +18,31 @@ jobs:
           host: ${{ secrets.TEST_SERVER_DOMAIN }}
           username: ec2-user
           key: ${{ secrets.SSHKEY }}
-          connect_timeout: 10s
+          command_timeout: 1m
           script: |
             echo WELCOME
             cd antipropagandabot
             sudo -S git pull
             sudo -S docker restart antiprop_Aiogrammwebhook
+      - uses: actions/checkout@v2
+      - name: Download
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: stage_testing.yml
+          name: commi
+          path: artifacts
+      - name: Use
+        id: hh
+        run: |
+          cat artifacts/commi
+          echo ::set-output name=comm::$(cat artifacts/commi)
+      - name: SPACE
+        uses: Brdur/space-bot-JR@main
+        with:
+          app_id: ${{ secrets.ID_SPACE }}
+          app_secret: ${{ secrets.SECRET_SPACE }}
+          organisation_url: ${{ secrets.URL_SPACE }}
+          project: ${{ secrets.PROJ_NAME_SPACE }}
+          tag: 'ON STAGE'
+          commits_titles: ${{ steps.hh.outputs.comm }}
 

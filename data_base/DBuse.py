@@ -3,6 +3,7 @@ from datetime import datetime
 
 import aiohttp
 import psycopg2
+from aiogram.types import User
 from psycopg2 import sql
 
 from bata import all_data
@@ -244,18 +245,22 @@ async def sql_safe_update(table_name, data_dict, condition_dict):
         await logg.get_error(f"{error}", __file__)
 
 
-async def advertising_value(tag):
+async def advertising_value(tag, user: User):
     if re.search("^adv_", tag):
         all_tags = await data_getter("SELECT id FROM dumbstats.advertising")
         for row in all_tags:
             if tag in row:
                 await sql_add_value("dumbstats.advertising", "count", {"id": tag})
+    elif tag.isdigit():
+        if int(tag) != user.id:
+            await mongo_easy_upsert('database', 'userinfo', {'_id': user.id},
+                                    {'ref_parent': tag,  'name_surname': user.full_name})
+            await redis_just_one_write(f'Usrs: {user.id}: Ref', 1)
     else:
         url = f'https://pravdobot.com/cx79l1k.php?cnv_id={tag}'
         async with aiohttp.ClientSession() as session:
             async with session.get(url=url) as response:
                 resp = await response.read()
-                print(response.status)
 
 
 """^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^MongoDB^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"""
@@ -302,8 +307,8 @@ async def mongo_select_news(coll=None) -> [list, bool]:
 async def check_avtual_news(date) -> dict:
     client = all_data().get_mongo()
     database = client.database
-    date_time_1 = datetime.strptime(date+' 11:00', '%Y.%m.%d %H:%M')
-    date_time_2 = datetime.strptime(date+' 19:00', '%Y.%m.%d %H:%M')
+    date_time_1 = datetime.strptime(date + ' 11:00', '%Y.%m.%d %H:%M')
+    date_time_2 = datetime.strptime(date + ' 19:00', '%Y.%m.%d %H:%M')
     collection = database['spam_actual_news']
     try:
         count_news_on_date = dict()
@@ -352,17 +357,9 @@ async def mongo_user_info(tg_id, username):
     today = datetime.today()
     today = today.strftime("%d-%m-%Y")
     time = datetime.now().strftime("%H:%M")
-
-    try:
-        client = all_data().get_mongo()
-        database = client.database
-        collection = database['userinfo']
-        user_answer = {'_id': int(tg_id), 'username': str(username), 'datetime': f'{today}_{time}',
-                       'datetime_end': None, 'viewed_news': []}
-        await collection.insert_one(user_answer)
-    except Exception as error:
-        pass
-
+    await mongo_easy_upsert('database', 'userinfo', {'_id': tg_id},
+                            {'username': str(username), 'datetime': f'{today}_{time}',
+                             'datetime_end': None, 'viewed_news': []})
 
 async def mongo_select_info(tg_id):
     try:
@@ -528,6 +525,30 @@ async def mongo_count_docs(database: str, collection: str, conditions: dict | li
         return a
     elif isinstance(conditions, dict):
         return await collection.count_documents(conditions)
+
+
+async def mongo_easy_upsert(database: str, collection: str, condition_dict: dict, main_dict: dict):
+    """Use this function if you need to update or insert something and you not sure if it exists.\n\n
+    Condition dict will be inserted too."""
+    try:
+        client = all_data().get_mongo()
+        database = client[database]
+        collection = database[collection]
+        await collection.update_one(condition_dict, {"$set": main_dict}, upsert=True)
+    except Exception as ex:
+        await logg.get_error(f"Mongo easy upsert is failed\n\n{ex}", __file__)
+
+
+async def mongo_ez_find_one(database: str, collection: str, condition_dict: dict):
+    """One select to rule them all. Just use it please."""
+    try:
+        client = all_data().get_mongo()
+        database = client[database]
+        collection = database[collection]
+        return await collection.find_one(condition_dict)
+    except Exception as ex:
+        await logg.get_error(f"Mongo easy select is failed\n\n{ex}", __file__)
+
 
 """^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^CSV_UPDATE^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"""
 
