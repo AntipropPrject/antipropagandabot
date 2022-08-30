@@ -749,15 +749,16 @@ async def antip_clear_and_cool(message: Message):
 
 
 @router.message((F.text == "Продолжай ⏳"), state=propaganda_victim.wiki, flags=flags)
-async def antip_look_at_it_yourself(message: Message):
+async def antip_look_at_it_yourself(message: Message, state: FSMContext):
+    await state.set_state(propaganda_victim.wiki)
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Спасибо, не знал(а) 🙂"))
+    nmarkup.row(types.KeyboardButton(text="Спасибо, не знaл(а) 🙂"))
     nmarkup.add(types.KeyboardButton(text="Ничего нового 🤷‍♀️"))
     nmarkup.row(types.KeyboardButton(text="Я не верю 😕"))
     await simple_media(message, 'antip_look_at_it_yourself', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(((F.text.contains('Спасибо, не знал(а) 🙂')) | (F.text.contains('нового')) |
+@router.message(((F.text.contains('Спасибо, не знaл(а) 🙂')) | (F.text.contains('нового')) |  # не знaл - a - английская
                  (F.text.contains('не верю'))),
                 state=propaganda_victim.wiki, flags=flags)
 @router.message(((F.text.contains('удивлён')) | (F.text.contains('не верю'))),
@@ -767,6 +768,7 @@ async def antip_look_at_it_yourself(message: Message):
     flags=flags)
 async def antip_ok(message: Message, state: FSMContext):
     if 'Спасибо' in message.text or 'нового' in message.text or 'не верю' in message.text:
+        print(message.text)
         await mongo_update_stat_new(tg_id=message.from_user.id, column='antip_look_at_it_yourself', value=message.text)
     await message.answer("Хорошо", reply_markup=ReplyKeyboardRemove())
     if await redis_just_one_read(f'Usrs: {message.from_user.id}: INFOState:') == 'Жертва пропаганды':

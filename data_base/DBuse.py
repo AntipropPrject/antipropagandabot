@@ -195,7 +195,6 @@ async def sql_add_value(table_name, column, cond_dict):
             que = f"UPDATE {table_name} set {column} = {column} + 1 where" \
                   f" {key} = '{cond_dict[key]}' RETURNING {column};"
     a = await data_getter(que)
-    print(a)
 
 
 async def poll_delete_value(key, value):
