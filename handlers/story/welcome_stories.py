@@ -352,7 +352,7 @@ async def start_donbas_putin(message: Message):
     nmarkap = ReplyKeyboardBuilder()
     if (await redis_just_one_read(f'Usrs: {message.from_user.id}: StartDonbas:')) == "Знал(а) ✅" or (
             await redis_just_one_read(f'Usrs: {message.from_user.id}: Start_answers: NewPolitStat:')) ==\
-            'Противник войны':
+            'Противник войны 🕊':
         await start_remember_money(message)
     else:
         text = await sql_safe_select('text', 'texts', {'name': 'start_how_are_you'})
