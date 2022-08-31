@@ -459,20 +459,19 @@ async def stopwar_timer(message: Message, bot: Bot):
     usertime = datetime.strptime(date_start, "%d-%m-%Y %H:%M")
     time_bot = datetime.strptime(datetime.strftime(datetime.now(), "%d-%m-%Y %H:%M"), "%d-%m-%Y %H:%M") - usertime
     str_date = str(time_bot)[:-3].replace('days', '').replace("day", '')
-    if int(time_bot.days) == 1:
-        days_pr = 'день,'
-    elif 1 <= int(time_bot.days) <= 4:
-        days_pr = 'дня,'
-    else:
-        days_pr = 'дней,'
-    act_time = str_date.replace(',', days_pr)
-    if user_info['datetime_end'] is None:  # c is не работает так как объект находится не в озу а в базе
+    print(type(time_bot))
+    days, seconds = time_bot.days, time_bot.seconds
+    hours = days * 24 + seconds // 3600
+    minutes = (seconds % 3600) // 60
+
+    time = f"{hours}ч. {minutes}мин"
+    if user_info['datetime_end'] is None:
         sec = 299
         markup = ReplyKeyboardBuilder()
         markup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
         bot_message = await message.answer('5:00')
         try:
-            await message.answer(text_1.replace('[YY:YY]', act_time), disable_web_page_preview=True)
+            await message.answer(text_1.replace('[YY:YY]', str(time)), disable_web_page_preview=True)
             await message.answer(text_2, disable_web_page_preview=True)
             await message.answer(text_3, reply_markup=nmarkup.as_markup(resize_keyboard=True),
                                  disable_web_page_preview=True)
