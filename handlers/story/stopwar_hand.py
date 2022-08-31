@@ -458,13 +458,14 @@ async def stopwar_timer(message: Message, bot: Bot):
     date_start = user_info['datetime'].replace('_', ' ')
     usertime = datetime.strptime(date_start, "%d-%m-%Y %H:%M")
     time_bot = datetime.strptime(datetime.strftime(datetime.now(), "%d-%m-%Y %H:%M"), "%d-%m-%Y %H:%M") - usertime
-    str_date = str(time_bot)[:-3].replace('days', '').replace("day", '')
-    print(type(time_bot))
     days, seconds = time_bot.days, time_bot.seconds
-    hours = days * 24 + seconds // 3600
+    hs = days * 24 + seconds // 3600
+    hours = hs - days * 24
     minutes = (seconds % 3600) // 60
-
-    time = f"{hours}ч. {minutes}мин"
+    if days >= 1:
+        time = f"{days} д. {hours} ч. {minutes} мин"
+    else:
+        time = f"{hours} ч. {minutes} мин"
     if user_info['datetime_end'] is None:
         sec = 299
         markup = ReplyKeyboardBuilder()
