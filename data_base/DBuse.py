@@ -252,9 +252,9 @@ async def advertising_value(tag, user: User):
                 await sql_add_value("dumbstats.advertising", "count", {"id": tag})
     elif tag.isdigit():
         if int(tag) != user.id:
+            await mongo_user_info(user.id, user.username)
             await mongo_easy_upsert('database', 'userinfo', {'_id': user.id},
                                     {'ref_parent': tag,  'name_surname': user.full_name})
-            await redis_just_one_write(f'Usrs: {user.id}: Ref', 1)
     else:
         url = f'https://pravdobot.com/cx79l1k.php?cnv_id={tag}'
         async with aiohttp.ClientSession() as session:
@@ -356,9 +356,16 @@ async def mongo_user_info(tg_id, username):
     today = datetime.today()
     today = today.strftime("%d-%m-%Y")
     time = datetime.now().strftime("%H:%M")
-    await mongo_easy_upsert('database', 'userinfo', {'_id': tg_id},
-                            {'username': str(username), 'datetime': f'{today}_{time}',
-                             'datetime_end': None, 'viewed_news': []})
+    try:
+        client = all_data().get_mongo()
+        database = client.database
+        collection = database['userinfo']
+        user_answer = {'_id': int(tg_id), 'username': str(username), 'datetime': f'{today}_{time}',
+                       'datetime_end': None, 'viewed_news': []}
+        await collection.insert_one(user_answer)
+    except Exception as error:
+        pass
+
 
 async def mongo_select_info(tg_id):
     try:
