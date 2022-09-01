@@ -52,7 +52,8 @@ async def start_base(message):
     await mongo_stat(user_id)
     await mongo_stat_new(user_id)
     await mongo_user_info(user_id, message.from_user.username)
-    if await mongo_ez_find_one('database', 'userinfo', {'_id': message.from_user.id, 'ref_parent': {'$exists': True}}):
+    if await mongo_ez_find_one('database', 'userinfo', {'_id': message.from_user.id, 'ref_parent': {'$exists': True},
+                                                        'datetime_end': {'$eq': None}}):
         await redis_just_one_write(f'Usrs: {message.from_user.id}: Ref', 1)
 
 
