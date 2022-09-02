@@ -499,7 +499,7 @@ async def stopwar_timer(message: Message, bot: Bot):
     else:
         await del_key(f'Usrs: {message.from_user.id}: count:')
         try:
-            await message.answer(text_1.replace('[YY:YY]', act_time), disable_web_page_preview=True)
+            await message.answer(text_1.replace('[YY:YY]', str(time)), disable_web_page_preview=True)
             await message.answer(text_2, disable_web_page_preview=True)
             await message.answer(text_3, reply_markup=nmarkup.as_markup(resize_keyboard=True),
                                  disable_web_page_preview=True)
