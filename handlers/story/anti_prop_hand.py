@@ -193,7 +193,7 @@ async def antip_already_not_involved(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_already_not_involved'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Хорошо, продолжим 👌'))
-    await redis_just_one_write('Usrs: {message.from_user.id}: Ukr_tv:', 1)
+    await redis_just_one_write(f'Usrs: {message.from_user.id}: Ukr_tv:', 1)
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
@@ -359,7 +359,7 @@ async def antip_lies_for_you(message: Message, state: FSMContext):
         nmarkup.row(types.KeyboardButton(text='Звезда 📺'))
     if await sql_select_row_like('assets', bigdata["HTB_tv_count"] + 1, {'name': "tv_HTB_lie_"}):
         nmarkup.add(types.KeyboardButton(text='НТВ 📺'))
-    if not await redis_just_one_read('Usrs: {message.from_user.id}: Ukr_tv:'):
+    if not await redis_just_one_read(f'Usrs: {message.from_user.id}: Ukr_tv:'):
         nmarkup.add(types.KeyboardButton(text='Украинское ТВ 📺'))
     nmarkup.adjust(2)
     nmarkup.row(types.KeyboardButton(text="Достаточно, закончим смотреть ложь по ТВ ✋"))
