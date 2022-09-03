@@ -7,7 +7,7 @@ from typing import Union
 from aiogram import Bot
 from aiogram.exceptions import TelegramBadRequest, TelegramNetworkError, TelegramForbiddenError
 from aiogram.types import Message, ReplyKeyboardRemove, InlineKeyboardMarkup, ReplyKeyboardMarkup, ForceReply, \
-    FSInputFile, InputFile
+    FSInputFile, InputFile, InputMediaVideo, InputMediaPhoto
 
 import bata
 from data_base.DBuse import sql_safe_select, sql_safe_insert, sql_safe_update, data_getter, sql_select_row_like, \
@@ -54,12 +54,16 @@ async def simple_media(message: Message, tag: str,
 
 async def simple_media_bot(bot: Bot, chat_id: int, tag: str,
                            reply_markup: Union[InlineKeyboardMarkup, ReplyKeyboardMarkup,
-                                               ReplyKeyboardRemove, ForceReply, None] = None):
+                                               ReplyKeyboardRemove, ForceReply, None] = None,
+                           custom_caption: str = None):
     try:
         """
-        You can use one tag. If there text with that tag, it will become caption
+        You can use one tag. If there text with that tag, it will become caption. You can pass custom caption
         """
-        text = await sql_safe_select("text", "texts", {"name": tag})
+        if custom_caption:
+            text = custom_caption
+        else:
+            text = await sql_safe_select("text", "texts", {"name": tag})
         media = await sql_safe_select("t_id", "assets", {"name": tag})
         if text is not False:
             try:
@@ -85,6 +89,25 @@ async def simple_media_bot(bot: Bot, chat_id: int, tag: str,
         print(err)
 
 
+async def simple_video_album(message: Message, tags: list[str], text_tag: str = None):
+    media_list, caption = list(), str()
+    if text_tag:
+        caption = await sql_safe_select("text", "texts", {"name": text_tag})
+    for tag in tags:
+        media = await sql_safe_select("t_id", "assets", {"name": tag})
+        if media:
+            media_list.append(InputMediaVideo(media=media))
+        else:
+            media_list.append(InputMediaPhoto(media=await sql_safe_select("t_id", "assets", {"name": 'ERROR_SORRY'})))
+    if media_list:
+        if caption:
+            media_list[-1].caption = caption
+        try:
+            await message.answer_media_group(media_list)
+        except TelegramBadRequest as err:
+            print(err)
+
+
 async def game_answer(message: Message, telegram_media_id: Union[int, InputFile] = None, text: str = None,
                       reply_markup: Union[InlineKeyboardMarkup, ReplyKeyboardMarkup,
                                           ReplyKeyboardRemove, ForceReply, None] = None):
@@ -106,6 +129,27 @@ def percentage_replace(text: str, symbol: str, part: int, base: int):
     except ZeroDivisionError:
         perc = 0
     return text.replace(symbol, str(round(perc)))
+
+
+class CoolPercReplacer:
+    def __init__(self, text: str, base: int):
+        self.text = text
+        self.base = base
+
+    def __str__(self):
+        return self.text
+
+    def __call__(self, *args, **kwargs):
+        return str(self.text)
+
+    def replace(self, symbol: str, part: int):
+        if self.text:
+            try:
+                perc = part / self.base * 100
+            except ZeroDivisionError:
+                perc = 0
+            self.text = self.text.replace(symbol, str(round(perc)))
+
 
 
 async def bot_send_spam(bot: Bot, user_id: Union[int, str], telegram_media_id: Union[int, InputFile] = None,

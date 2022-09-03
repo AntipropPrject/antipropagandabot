@@ -19,6 +19,7 @@ class propaganda_victim(StatesGroup):
     quiz_1 = State()
     quiz_2 = State()
     quiz_3 = State()
+    after_quizez = State()
     dialogue_start_over = State()
     ppl_propaganda = State()
     web = State()
