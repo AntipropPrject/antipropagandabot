@@ -48,8 +48,41 @@ async def simple_media(message: Message, tag: str,
                     media = await sql_safe_select("t_id", "assets", {"name": 'ERROR_SORRY'})
                     await logg.get_error(f'NO {tag}')
                     await message.answer_photo(media, reply_markup=reply_markup)
-    except TelegramBadRequest:
-        print("Странная ошибка")
+    except TelegramBadRequest as err:
+        print(err)
+
+
+async def simple_media_bot(bot: Bot, chat_id: int, tag: str,
+                           reply_markup: Union[InlineKeyboardMarkup, ReplyKeyboardMarkup,
+                                               ReplyKeyboardRemove, ForceReply, None] = None):
+    try:
+        """
+        You can use one tag. If there text with that tag, it will become caption
+        """
+        text = await sql_safe_select("text", "texts", {"name": tag})
+        media = await sql_safe_select("t_id", "assets", {"name": tag})
+        if text is not False:
+            try:
+                return await bot.send_photo(chat_id, media, caption=text, reply_markup=reply_markup)
+            except TelegramBadRequest:
+                try:
+                    return await bot.send_photo(chat_id, media, caption=text, reply_markup=reply_markup)
+                except TelegramBadRequest:
+                    media = await sql_safe_select("t_id", "assets", {"name": 'ERROR_SORRY'})
+                    await logg.get_error(f'NO {tag}')
+                    await bot.send_photo(chat_id, media, caption=text, reply_markup=reply_markup)
+        else:
+            try:
+                return await bot.send_photo(chat_id, media, reply_markup=reply_markup)
+            except TelegramBadRequest:
+                try:
+                    return await bot.send_photo(chat_id, media, reply_markup=reply_markup)
+                except TelegramBadRequest:
+                    media = await sql_safe_select("t_id", "assets", {"name": 'ERROR_SORRY'})
+                    await logg.get_error(f'NO {tag}')
+                    await bot.send_photo(chat_id, media, reply_markup=reply_markup)
+    except TelegramBadRequest as err:
+        print(err)
 
 
 async def game_answer(message: Message, telegram_media_id: Union[int, InputFile] = None, text: str = None,
@@ -69,7 +102,7 @@ async def game_answer(message: Message, telegram_media_id: Union[int, InputFile]
 
 def percentage_replace(text: str, symbol: str, part: int, base: int):
     try:
-        perc = part/base*100
+        perc = part / base * 100
     except ZeroDivisionError:
         perc = 0
     return text.replace(symbol, str(round(perc)))
