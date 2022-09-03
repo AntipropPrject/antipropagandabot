@@ -322,12 +322,10 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
         await mongo_update_stat(poll_answer.user.id, column='political_view', value='apolitical', options='$set')
         await mongo_update_stat_new(tg_id=poll_answer.user.id, column='polit_status', value='Аполитичный')
     if await redis_just_one_read(f'Usrs: {poll_answer.user.id}: INFOState:') == 'Жертва пропаганды':
-        text = await sql_safe_select("text", "texts", {"name": "antip_only_facts"})
+        text = await sql_safe_select("text", "texts", {"name": "antip_wolves"})
         await redis_just_one_write(f'Usrs: {poll_answer.user.id}: INFOState:', 'Жертва пропаганды')
 
         nmarkap = ReplyKeyboardBuilder()
-        nmarkap.row(types.KeyboardButton(text="Мне интересно 👌"))
-        nmarkap.add(types.KeyboardButton(text="Ну давай... 🤨"))
         nmarkap.row(types.KeyboardButton(text="Что такое пропаганда? 🤔"))
         await bot.send_message(poll_answer.user.id, text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
     else:
