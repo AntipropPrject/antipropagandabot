@@ -10,6 +10,7 @@ from data_base.DBuse import poll_write, sql_safe_select, mongo_add, mongo_select
 from resources.all_polls import web_prop, welc_message_one, people_prop
 from states import welcome_states
 from states.antiprop_states import propaganda_victim
+from utilts import simple_media, simple_media_bot
 
 flags = {"throttling_key": "True"}
 router = Router()
@@ -323,10 +324,10 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
         await mongo_update_stat_new(tg_id=poll_answer.user.id, column='polit_status', value='Аполитичный')
     if await redis_just_one_read(f'Usrs: {poll_answer.user.id}: INFOState:') == 'Жертва пропаганды':
         text = await sql_safe_select("text", "texts", {"name": "antip_wolves"})
-        await redis_just_one_write(f'Usrs: {poll_answer.user.id}: INFOState:', 'Жертва пропаганды')
-
         nmarkap = ReplyKeyboardBuilder()
         nmarkap.row(types.KeyboardButton(text="Что такое пропаганда? 🤔"))
+        await simple_media_bot(bot, poll_answer.user.id, 'antip_wolves', reply_markup=nmarkap.as_markup(resize_keyboard=True))
+        await redis_just_one_write(f'Usrs: {poll_answer.user.id}: INFOState:', 'Жертва пропаганды')
         await bot.send_message(poll_answer.user.id, text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
     else:
         markup = ReplyKeyboardBuilder()
