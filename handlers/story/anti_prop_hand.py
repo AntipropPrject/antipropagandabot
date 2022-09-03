@@ -1,7 +1,7 @@
 import asyncio
 from typing import List
 
-from aiogram import Router, F
+from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.exceptions import TelegramBadRequest
@@ -17,7 +17,7 @@ from filters.MapFilters import WebPropagandaFilter, TVPropagandaFilter, PplPropa
 from handlers.story import true_resons_hand
 from keyboards.map_keys import antip_why_kb, antip_killme_kb
 from states.antiprop_states import propaganda_victim
-from utilts import simple_media, dynamic_media_answer
+from utilts import simple_media, dynamic_media_answer, simple_media_bot
 
 flags = {"throttling_key": "True"}
 router = Router()
@@ -561,7 +561,7 @@ async def revealing_the_news(message: Message, state: FSMContext):
                  "Маргарита Симоньян", "Владимир Соловьев", "Никита Михалков")) is False:
             await antip_bad_people_lies(message, state)
         else:
-            await antip_truth_game_start(message, state)
+            await antip_funny_propaganda(message, state)
 
 
 @router.message((F.text.contains('Хватит, пропустим остальные источники 🙅‍♂️')), flags=flags)
@@ -593,7 +593,7 @@ async def antip_web_exit_1(message: Message, state: FSMContext):
         if key != "Яндекс" or key != "Википедия":
             redis.delete(key)
     if await state.get_state() == "propaganda_victim:options":
-        await antip_truth_game_start(message, state)
+        await antip_funny_propaganda(message, state)
         redis.delete(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:')
         return
     if set(await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:')).isdisjoint(
@@ -601,7 +601,7 @@ async def antip_web_exit_1(message: Message, state: FSMContext):
              "Маргарита Симоньян", "Владимир Соловьев", "Никита Михалков")) is False:
         await antip_bad_people_lies(message, state)
     else:
-        await antip_truth_game_start(message, state)
+        await antip_funny_propaganda(message, state)
 
 
 @router.message(PplPropagandaFilter(),
@@ -620,9 +620,53 @@ async def antip_bad_people_lies(message: Message, state: FSMContext):
 
 @router.message((F.text.contains('шаг')) | (F.text.contains('удивлен(а)')) | (F.text.contains('шоке')) | (
         F.text.contains('знал(а), что по ТВ')) | (F.text == 'Конечно!') | (F.text == 'Ну давай'), flags=flags)
-async def antip_truth_game_start(message: Message, state: FSMContext):
-    text = await sql_safe_select('text', 'texts', {'name': 'antip_truth_game_start'})
+async def antip_funny_propaganda(message: Message, state: FSMContext):
+    await state.set_state(propaganda_victim.quiz_1)
     nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Покажи варианты ✍️"))
+    await simple_media(message, 'antip_funny_propaganda', nmarkup.as_markup(resize_keyboard=True))
+
+
+@router.message((F.text == "Покажи варианты ✍️"), state=propaganda_victim.quiz_1, flags=flags)
+async def antip_quiz_1(message: Message, bot: Bot):
+    ptions = ['Около 3000 человек', 'Около 11000 человек', 'Около 25000 человек', 'Около 40000 человек']
+    await bot.send_poll(message.from_user.id, 'Сколько?', ptions, is_anonymous=False, correct_option_id=3)
+
+
+@router.poll_answer(state=propaganda_victim.quiz_1, flags=flags)
+async def antip_quiz_1_answer(poll_answer: types.PollAnswer, bot: Bot):
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Интересно 🤔"))
+    nmarkup.add(types.KeyboardButton(text="Продолжим 👉"))
+    await simple_media_bot(bot, poll_answer.user.id, 'antip_quiz_1_answer', nmarkup.as_markup(resize_keyboard=True))
+
+
+@router.message((F.text.in_({'Интересно 🤔', "Продолжим 👉"})), state=propaganda_victim.quiz_1, flags=flags)
+async def antip_how_much_they_lie(message: Message, state: FSMContext):
+    await state.set_state(propaganda_victim.quiz_2)
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Покажи варианты ✍️"))
+    await simple_media(message, 'antip_how_much_they_lie', nmarkup.as_markup(resize_keyboard=True))
+
+
+@router.message((F.text == "Покажи варианты ✍️"), state=propaganda_victim.quiz_2, flags=flags)
+async def antip_quiz_1(message: Message, bot: Bot):
+    ptions = ['Около 1000 скоплений', 'Около 4000 скоплений', 'Около 12000 скоплений', 'Около 39000 скоплений']
+    await bot.send_poll(message.from_user.id, 'Сколько?', ptions, is_anonymous=False, correct_option_id=3)
+
+
+@router.poll_answer(state=propaganda_victim.quiz_2, flags=flags)
+async def antip_quiz_2_answer(poll_answer: types.PollAnswer, bot: Bot):
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Продолжим 👉"))
+    nmarkup.add(types.KeyboardButton(text="Чтооо? 😳"))
+    await simple_media_bot(bot, poll_answer.user.id, 'antip_quiz_2_answer', nmarkup.as_markup(resize_keyboard=True))
+
+
+@router.message((F.text.in_({'Интересно 🤔', "Продолжим 👉"})), state=propaganda_victim.quiz_2, flags=flags)
+async def antip_not_only_numbers(message: Message):
+
+
     nmarkup.row(types.KeyboardButton(text="Начнем! 🚀"))
     nmarkup.row(types.KeyboardButton(text="Пропустим игру 🙅‍♀️"))
     nmarkup.adjust(2)
