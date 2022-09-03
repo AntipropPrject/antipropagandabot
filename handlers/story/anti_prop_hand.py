@@ -10,7 +10,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from bata import all_data
 from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
-from data_base.DBuse import poll_get, redis_just_one_read, sql_select_row_like, mongo_game_answer
+from data_base.DBuse import poll_get, redis_just_one_read, sql_select_row_like, mongo_game_answer, redis_just_one_write
 from data_base.DBuse import sql_safe_select, data_getter
 from filters.MapFilters import WebPropagandaFilter, TVPropagandaFilter, PplPropagandaFilter, \
     PoliticsFilter, WikiFilter, YandexPropagandaFilter
@@ -142,9 +142,7 @@ async def antip_all_yes_TV_2(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(
-    (F.text.in_({'Открой мне глаза 👀', "Ну удиви меня 🤔", "Покажи ложь на ТВ — мне интересно посмотреть! 📺"})),
-    flags=flags)
+@router.message((F.text.in_({'Открой мне глаза 👀', "Ну удиви меня 🤔"})), flags=flags)
 async def antip_censorship_lie(message: Message, state: FSMContext):
     await state.set_state(propaganda_victim.choose_TV)
     text = await sql_safe_select('text', 'texts', {'name': 'antip_censorship_lie'})
@@ -172,6 +170,30 @@ async def antip_pile_of_lies(message: Message, state: FSMContext):
     for channel in utv_list:
         nmarkup.row(types.KeyboardButton(text=channel))
     nmarkup.adjust(2, 2)
+    nmarkup.row(types.KeyboardButton(text='Украинское ТВ 📺'))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message((F.text == "Украинское ТВ 📺"), state=propaganda_victim.choose_TV, flags=flags)
+async def antip_ukrainian_lie_1(message: Message, state: FSMContext):
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text='Сюжет посмотрел(а). Что с ним не так? 🤔'))
+    await simple_media(message, 'antip_ukrainian_lie_1', nmarkup.as_markup(resize_keyboard=True))
+
+
+@router.message((F.text == "Сюжет посмотрел(а). Что с ним не так? 🤔"), state=propaganda_victim.choose_TV, flags=flags)
+async def antip_ukrainian_lie_2(message: Message, state: FSMContext):
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text='Продолжим 👉'))
+    await simple_media(message, 'antip_ukrainian_lie_2', nmarkup.as_markup(resize_keyboard=True))
+
+
+@router.message((F.text == "Продолжим 👉"), state=propaganda_victim.choose_TV, flags=flags)
+async def antip_already_not_involved(message: Message, state: FSMContext):
+    text = await sql_safe_select('text', 'texts', {'name': 'antip_already_not_involved'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text='Хорошо, продолжим 👌'))
+    await redis_just_one_write('Usrs: {message.from_user.id}: Ukr_tv:', 1)
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
@@ -248,7 +270,7 @@ async def russia_tv_first_reb(message: Message, state: FSMContext):
     if await sql_select_row_like('assets', count + 1, {'name': 'tv_first_lie_'}) is not False:
         nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет с 1 канала 📺"))
     nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал 🔄"))
-    nmarkup.row(types.KeyboardButton(text="Достаточно, мне все понятно ✋"))
+    nmarkup.row(types.KeyboardButton(text="Достаточно, закончим смотреть ложь по ТВ ✋"))
     await dynamic_media_answer(message, 'tv_first_reb_', count, nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -259,7 +281,7 @@ async def tv_russia24_reb(message: Message, state: FSMContext):
     if await sql_select_row_like('assets', count + 1, {'name': 'tv_24_lie_'}) is not False:
         nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет c России 1 / 24 📺"))
     nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал 🔄"))
-    nmarkup.row(types.KeyboardButton(text="Достаточно, мне все понятно ✋"))
+    nmarkup.row(types.KeyboardButton(text="Достаточно, закончим смотреть ложь по ТВ ✋"))
     await dynamic_media_answer(message, 'tv_24_reb_', count, nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -270,7 +292,7 @@ async def tv_HTB_reb(message: Message, state: FSMContext):
     if await sql_select_row_like('assets', count + 1, {'name': 'tv_HTB_lie_'}) is not False:
         nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет НТВ 📺"))
     nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал 🔄"))
-    nmarkup.row(types.KeyboardButton(text="Достаточно, мне все понятно ✋"))
+    nmarkup.row(types.KeyboardButton(text="Достаточно, закончим смотреть ложь по ТВ ✋"))
     await dynamic_media_answer(message, 'tv_HTB_reb_', count, nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -281,11 +303,20 @@ async def tv_star_reb(message: Message, state: FSMContext):
     if await sql_select_row_like('assets', count + 1, {'name': 'tv_star_lie_'}) is not False:
         nmarkup.row(types.KeyboardButton(text="Покажи еще один сюжет с телеканала Звезда 📺"))
     nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал 🔄"))
-    nmarkup.row(types.KeyboardButton(text="Достаточно, мне все понятно ✋"))
+    nmarkup.row(types.KeyboardButton(text="Достаточно, закончим смотреть ложь по ТВ ✋"))
     await dynamic_media_answer(message, 'tv_star_reb_', count, nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.contains('Достаточно') & (F.text.contains('понятно ✋'))), flags=flags)
+@router.message((F.text.contains('Достаточно') & (F.text.contains('по ТВ ✋'))), flags=flags)
+async def antip_TV_how_about_more(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'antip_TV_how_about_more'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text='Нет, посмотрим ещё ложь по ТВ 📺'))
+    nmarkup.row(types.KeyboardButton(text='Да, продолжим 👌'))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message((F.text == 'Да, продолжим 👌'), flags=flags)
 async def antip_crossed_boy_1(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Посмотрел(а) 📺'))
@@ -315,8 +346,9 @@ async def antip_crossed_boy_3(message: Message):
     await message.answer(text2, reply_markup=antip_killme_kb(), disable_web_page_preview=True)
 
 
-@router.message((F.text.contains('другой телеканал')) | (F.text.contains('посмотреть еще')), flags=flags)
-async def antip_another_tv(message: Message, state: FSMContext):
+@router.message(((F.text.contains('другой телеканал')) | (F.text.contains('ещё ложь по ТВ')) |
+                                                         (F.text.contains('Хорошо, продолжим 👌'))), flags=flags)
+async def antip_lies_for_you(message: Message, state: FSMContext):
     bigdata = await state.get_data()
     nmarkup = ReplyKeyboardBuilder()
     if await sql_select_row_like('assets', bigdata["first_tv_count"] + 1, {'name': "tv_first_lie_"}):
@@ -327,6 +359,8 @@ async def antip_another_tv(message: Message, state: FSMContext):
         nmarkup.row(types.KeyboardButton(text='Звезда 📺'))
     if await sql_select_row_like('assets', bigdata["HTB_tv_count"] + 1, {'name': "tv_HTB_lie_"}):
         nmarkup.add(types.KeyboardButton(text='НТВ 📺'))
+    if not await redis_just_one_read('Usrs: {message.from_user.id}: Ukr_tv:'):
+        nmarkup.add(types.KeyboardButton(text='Украинское ТВ 📺'))
     nmarkup.adjust(2)
     nmarkup.row(types.KeyboardButton(text="Достаточно, мне все понятно ✋"))
     text = await sql_safe_select('text', 'texts', {'name': 'antip_lies_for_you'})

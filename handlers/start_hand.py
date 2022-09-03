@@ -13,9 +13,11 @@ from data_base.DBuse import mongo_user_info, sql_safe_select, advertising_value,
 from day_func import day_count
 from handlers.story import true_resons_hand
 from handlers.story import main_menu_hand
+from handlers.story.anti_prop_hand import antip_what_is_prop
 from handlers.story.putin_hand import stopwar_start
 from handlers.story.stopwar_hand import stopwar_first_manipulation_argument
 from handlers.story.true_resons_hand import reasons_who_to_blame
+from states.antiprop_states import propaganda_victim
 from states.donbass_states import donbass_state
 from states.main_menu_states import MainMenuStates
 from states.welcome_states import start_dialog
@@ -91,6 +93,12 @@ async def cmd_teststrike(message: Message, state: FSMContext):
 @router.message(commands=["putest"], flags=flags)
 async def cmd_putest(message: Message, state: FSMContext):
     await reasons_who_to_blame(message, state)
+
+
+@router.message(commands=["proptest"], flags=flags)
+async def cmd_putest(message: Message, state: FSMContext):
+    await state.set_state(propaganda_victim.start)
+    await antip_what_is_prop(message)
 
 
 @router.message(commands=["donbass"], flags=flags)
