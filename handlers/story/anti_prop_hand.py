@@ -349,6 +349,7 @@ async def antip_be_honest(message: Message):
 @router.message(((F.text.contains('другой телеканал')) | (F.text.contains('ещё ложь по ТВ')) |
                                                          (F.text.contains('Хорошо, продолжим 👌'))), flags=flags)
 async def antip_lies_for_you(message: Message, state: FSMContext):
+    await state.set_state(propaganda_victim.choose_TV)
     bigdata = await state.get_data()
     nmarkup = ReplyKeyboardBuilder()
     if await sql_select_row_like('assets', bigdata["first_tv_count"] + 1, {'name': "tv_first_lie_"}):
