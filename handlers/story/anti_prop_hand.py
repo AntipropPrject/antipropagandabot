@@ -340,7 +340,7 @@ async def antip_crossed_boy_3(message: Message):
 
 
 @router.message((F.text == "Какой ужас 😱") | (F.text == "Давай продолжим 😕"), flags=flags)
-async def antip_crossed_boy_3(message: Message):
+async def antip_be_honest(message: Message):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='crucified_man', value=message.text)
     text2 = await sql_safe_select('text', 'texts', {'name': 'antip_be_honest'})
     await message.answer(text2, reply_markup=antip_killme_kb(), disable_web_page_preview=True)
@@ -362,7 +362,7 @@ async def antip_lies_for_you(message: Message, state: FSMContext):
     if not await redis_just_one_read('Usrs: {message.from_user.id}: Ukr_tv:'):
         nmarkup.add(types.KeyboardButton(text='Украинское ТВ 📺'))
     nmarkup.adjust(2)
-    nmarkup.row(types.KeyboardButton(text="Достаточно, мне все понятно ✋"))
+    nmarkup.row(types.KeyboardButton(text="Достаточно, закончим смотреть ложь по ТВ ✋"))
     text = await sql_safe_select('text', 'texts', {'name': 'antip_lies_for_you'})
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
