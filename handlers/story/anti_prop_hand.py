@@ -85,10 +85,10 @@ async def antip_time_wasted(message: Message):
 async def antip_water_lie(message: Message, state: FSMContext):
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Продолжай ⏳"))
-    await state.set_state(propaganda_victim.start)
+    await state.set_state(propaganda_victim.next_2)
     await simple_media(message, 'antip_water_lie', nmarkap.as_markup(resize_keyboard=True))
 
-@router.message((F.text == "Продолжай ⌛️"), state=propaganda_victim.start, flags=flags)
+@router.message((F.text == "Продолжай ⌛️"), state=propaganda_victim.next_2, flags=flags)
 async def antip_cant_unsee(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_cant_unsee'})
     nmarkap = ReplyKeyboardBuilder()
