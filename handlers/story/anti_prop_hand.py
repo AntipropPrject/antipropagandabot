@@ -1065,8 +1065,8 @@ async def antip_people_conflicts(message: Message):
 async def antip_zombie_everywere(message: Message):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='breaking_conflicts', value=message.text)
     b_all = await mongo_count_docs('database', 'statistics_new', {'breaking_conflicts': {'$exists': True}})
-    b_no = await mongo_count_docs('database', 'statistics_new', {'family_conflicts': "Нет, таких нет 🙏"})
-    b_yes = await mongo_count_docs('database', 'statistics_new', {'family_conflicts': "Да, такие есть 🤐"})
+    b_no = await mongo_count_docs('database', 'statistics_new', {'breaking_conflicts': "Нет, таких нет 🙏"})
+    b_yes = await mongo_count_docs('database', 'statistics_new', {'breaking_conflicts': "Да, такие есть 🤐"})
     if 'Нет' in await redis_just_one_read(f'Usrs: {message.from_user.id}: Antip: family:') \
             and 'Нет' in message.text:
         text_tag = 'antip_zombie_everywere_not_you'
@@ -1145,7 +1145,7 @@ async def antip_good_idea(message: Message):
                 state=propaganda_victim.final, flags=flags)
 async def antip_best_of_the_best(message: Message):
     if 'неинтересно' in message.text:
-        text = await sql_safe_select('text', 'texts', {'name': 'antip_best_of_the_best'})
+        text = await sql_safe_select('text', 'texts', {'name': 'antip_to_the_point'})
         await message.answer(text)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="О чём? 🤔"))
