@@ -74,7 +74,8 @@ async def antip_TV_makes_them_bad(message: Message):
     nmarkap.row(types.KeyboardButton(text="Это и так понятно 👌"))
     await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
-@router.message((F.text == 'Это интересно 👌'), flags=flags)
+@router.message(((F.text == 'Это интересно 👌') | F.text.contains('Хорошо, убедил') |
+                 F.text.contains('Ладно, посмотрю')), flags=flags)
 async def antip_time_wasted(message: Message):
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="В чём подвох? 🤔"))
