@@ -236,7 +236,7 @@ async def poll_answer_handler_tho(poll_answer: types.PollAnswer, bot: Bot, state
     text = await sql_safe_select("text", "texts", {"name": "start_people_belive"})
     await state.set_state(welcome_states.start_dialog.dialogue_10)
     await bot.send_message(poll_answer.user.id, text)
-    text2 = await sql_safe_select("text", "texts", {"name": "start_belive_TV"})
+    text2 = await sql_safe_select("text", "texts", {"name": "start_propagando_poll"})
     await bot.send_poll(poll_answer.user.id, text2,
                         people_prop, is_anonymous=False,
                         allows_multiple_answers=True,
