@@ -11,7 +11,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
 from data_base.DBuse import data_getter, sql_safe_select, redis_just_one_write, poll_write, mongo_game_answer
 from data_base.DBuse import redis_delete_from_list
-from filters.MapFilters import OperationWar, WarReason
+from filters.MapFilters import OperationWar, WarReason, PoliticsFilter
 from handlers.story import anti_prop_hand
 from handlers.story.nazi_hand import NaziState
 from handlers.story.preventive_strike import PreventStrikeState
@@ -30,6 +30,45 @@ class TruereasonsState(StatesGroup):
 flags = {"throttling_key": "True"}
 router = Router()
 router.message.filter(state=TruereasonsState)
+
+
+@router.message(PoliticsFilter(title='Сторонник войны'), ((F.text.contains('интересно')) | (F.text.contains('скучно'))),
+                flags=flags)
+async def war_point_now(message: Message, state: FSMContext):
+    if message.text in ['Продолжим 🇷🇺🇺🇦', 'Поговорим про военные действия на Украине 🇷🇺🇺🇦', '🤝 Продолжим']:
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='map_antiprop', value=message.text)
+    await mongo_update_stat(message.from_user.id, 'antiprop')
+    text = await sql_safe_select('text', 'texts', {'name': 'reasons_war_point_now'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message(PoliticsFilter(title='Аполитичный'),
+                (F.text.contains('интересно')) | (F.text.contains('скучно')), flags=flags)
+async def reasons_lets_figure(message: Message, state: FSMContext):
+    if message.text in ['Продолжим 🇷🇺🇺🇦', 'Поговорим про военные действия на Украине 🇷🇺🇺🇦', '🤝 Продолжим']:
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='map_antiprop', value=message.text)
+    text = await sql_safe_select('text', 'texts', {'name': 'reasons_lets_figure'})
+    await mongo_update_stat(message.from_user.id, 'antiprop')
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Давай попробуем 👌"))
+    nmarkup.row(types.KeyboardButton(text="Я не интересуюсь политикой 😐"))
+    nmarkup.row(types.KeyboardButton(text="Незачем, ведь эти цели - бессмысленны 🤬"))
+    nmarkup.adjust(2, 1)
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message((F.text.contains('интересно')) | (F.text.contains('скучно')), flags=flags)
+async def reasons_king_of_info(message: Message, state: FSMContext):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='map_antiprop', value=message.text)
+    await mongo_update_stat(message.from_user.id, 'antiprop')
+    text = await sql_safe_select('text', 'texts', {'name': 'reasons_king_of_info'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Хорошо 👌"))
+    nmarkup.row(
+        types.KeyboardButton(text="Подожди. Я так не говорил(а). С чего ты взял, что это ненастоящие цели? 🤷‍♂️"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text.contains('не')) & (F.text.contains('интересуюсь')) & (F.text.contains('политикой')),

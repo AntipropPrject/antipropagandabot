@@ -25,3 +25,4 @@ class propaganda_victim(StatesGroup):
     ppl_propaganda = State()
     web = State()
     final = State()
+    final_end = State()
