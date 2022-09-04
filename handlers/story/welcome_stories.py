@@ -343,7 +343,8 @@ async def start_donbas_results(message: Message):
     await redis_just_one_write(f'Usrs: {message.from_user.id}: StartDonbas:', message.text)
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Продолжай ⌛️"))
-    await message.answer_photo(media, text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+    await simple_media(message, 'start_donbas_results', nmarkap.as_markup(resize_keyboard=True),
+                       custom_caption=text)
 
 
 @router.message((F.text == "Продолжай ⌛️"), flags=flags)
