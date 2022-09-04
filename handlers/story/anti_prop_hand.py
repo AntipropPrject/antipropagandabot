@@ -654,7 +654,7 @@ async def skip_web(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.contains('Не надо')), flags=flags)
+@router.message(((F.text.contains('Не надо')) & ~(F.text.contains('интересно'))), flags=flags)
 async def antip_web_exit_1(message: Message, state: FSMContext):
     redis = all_data().get_data_red()
     for key in redis.scan_iter(f"Usrs: {message.from_user.id}: Start_answers: ethernet:"):
@@ -685,7 +685,7 @@ async def antip_bad_people_lies(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.contains('Интересно')) | (F.text.contains('и так')) | (F.text.contains('я всё равно')),
+@router.message((F.text.contains('Интересно 🤔')) | (F.text.contains('и так')) | (F.text.contains('я всё равно')),
                 state=(propaganda_victim.choose_TV, propaganda_victim.web, propaganda_victim.ppl_propaganda),
                 flags=flags)
 async def antip_funny_propaganda(message: Message, state: FSMContext):
