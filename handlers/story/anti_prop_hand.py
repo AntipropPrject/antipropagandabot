@@ -1333,8 +1333,16 @@ async def antip_look_at_it_yourself(message: Message, state: FSMContext):
     nmarkap.adjust(2)
     await simple_media(message, 'antip_look_at_it_yourself', reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
+@router.message((F.text.contains('Я не верю')), flags=flags, state=propaganda_victim.next_3)
+async def antip_look_at_it_yourself(message: Message, state: FSMContext):
+    nmarkap = ReplyKeyboardBuilder()
+    nmarkap.row(types.KeyboardButton(text='Продолжим 👌'))
+    text = await sql_safe_select('text', 'texts', {'name': 'antip_learn_yourself'})
+    await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+
+
 @router.message((F.text.contains('Спасибо, не знал(а)') | (F.text.contains('Ничего нового')) |
-                 (F.text.contains('Я не верю')) | (F.text.contains('Не надо, двигаемся дальше'))), flags=flags)
+                  (F.text.contains('Не надо, двигаемся дальше')) | (F.text.contains('Продолжим 👌'))), flags=flags)
 async def antip_forbidden_truth(message: Message, state: FSMContext):
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.add(types.KeyboardButton(text='Давай 🤔'))
