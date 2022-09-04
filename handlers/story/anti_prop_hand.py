@@ -52,11 +52,11 @@ async def antip_black_and_white(message: Message):
     nmarkap.add(types.KeyboardButton(text="Хорошо, убедил 👌"))
     nmarkap.row(types.KeyboardButton(text="Ладно, посмотрю 🤷️"))
     tv_answers = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: tv:')
-    polit_status = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: NewPolitStat:')
+    polit_status = await redis_just_one_read(f'Usrs: {message.from_user.id}: Start_answers: NewPolitStat:')
     print(tv_answers)
     print(polit_status)
-    if 'Нет, не верю ни слову' in tv_answers or 'Не знаю, потому что' in tv_answers:
-        if 'Противник войны' in polit_status:
+    if 'Нет, не верю ни слову ⛔' in tv_answers or 'Не знаю, потому что' in tv_answers:
+        if 'Противник войны 🕊' == polit_status:
             nmarkap.row(types.KeyboardButton(text="Всё равно не хочу смотреть ложь по ТВ 🙅‍♂️"))
 
     nmarkap.adjust(2, 1)
