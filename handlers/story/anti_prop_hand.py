@@ -73,7 +73,8 @@ async def antip_TV_makes_them_bad(message: Message):
     await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == 'Это интересно 👌'), flags=flags)
+@router.message(((F.text == 'Это интересно 👌') | F.text.contains('Хорошо, убедил') |
+                 F.text.contains('Ладно, посмотрю')), flags=flags)
 async def antip_time_wasted(message: Message):
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="В чём подвох? 🤔"))
@@ -85,11 +86,11 @@ async def antip_time_wasted(message: Message):
 async def antip_water_lie(message: Message, state: FSMContext):
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Продолжай ⏳"))
-    await state.set_state(propaganda_victim.start)
+    await state.set_state(propaganda_victim.next_2)
     await simple_media(message, 'antip_water_lie', nmarkap.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Продолжай ⌛️"), state=propaganda_victim.start, flags=flags)
+@router.message((F.text == "Продолжай ⏳"), state=propaganda_victim.next_2, flags=flags)
 async def antip_cant_unsee(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_cant_unsee'})
     nmarkap = ReplyKeyboardBuilder()
@@ -103,6 +104,7 @@ async def antip_cant_unsee(message: Message):
 @router.message((F.text.contains('Это намеренная ложь, но и на') | F.text.contains('Не знаю 🤷‍♂️')
                  | F.text.contains('Это намеренная ложь') | F.text.contains('Это случайность')), flags=flags)
 async def antip_eye_log(message: Message, state: FSMContext):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='antip_eye_log', value=message.text)
     if 'Это намеренная ложь, но и на' in message.text:
         text_fake = await sql_safe_select('text', 'texts', {'name': 'antip_eye_log'})
         await message.answer(text_fake)
@@ -110,11 +112,11 @@ async def antip_eye_log(message: Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='corpses', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'antip_how_could_they'})
     start_warbringers_count = await mongo_count_docs('database', 'statistics_new',
-                                                     {'NewPolitStat_start': 'Сторонник спецоперации'})
+                                                     {'antip_eye_log': 'Это намеренная ложь 🗣'})
     start_peacefull_count = await mongo_count_docs('database', 'statistics_new',
-                                                   {'NewPolitStat_start': 'Противник войны'})
+                                                   {'antip_eye_log': 'Это случайность 🤷‍♀️️♀'})
     start_doubting_count = await mongo_count_docs('database', 'statistics_new',
-                                                  {'NewPolitStat_start': 'Сомневающийся'})
+                                                  {'antip_eye_log': 'Не знаю 🤷‍♂️'})
     all_count = start_doubting_count + start_peacefull_count + start_warbringers_count
     start_war_percentage = str(round(start_warbringers_count / all_count * 100))
     start_peace_percentage = str(round(start_peacefull_count / all_count * 100))
@@ -441,8 +443,7 @@ async def antip_lies_for_you(message: Message, state: FSMContext):
 @router.message(WebPropagandaFilter(), commands=["test"])
 async def antip_not_only_TV(message: Message, web_lies_list: List[str], state: FSMContext):
     await state.set_state(propaganda_victim.web)
-    if 'шаг' not in message.text:
-        await mongo_update_stat_new(tg_id=message.from_user.id, column='grade_tv', value=message.text)
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='grade_tv', value=message.text)
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Покажи новость 👀"))
     all_answers_user = web_lies_list.copy()
