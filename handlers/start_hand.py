@@ -98,7 +98,7 @@ async def cmd_putest(message: Message, state: FSMContext):
 @router.message(commands=["proptest"], flags=flags)
 async def cmd_putest(message: Message, state: FSMContext):
     await state.set_state(propaganda_victim.start)
-    await antip_what_is_prop(message)
+    await antip_what_is_prop(message, state)
 
 
 @router.message(commands=["donbass"], flags=flags)
