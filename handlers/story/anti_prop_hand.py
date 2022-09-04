@@ -67,14 +67,28 @@ async def antip_just_a_little(message: Message):
 async def antip_TV_makes_them_bad(message: Message):
     if 'Всё равно не хочу смотреть ложь' in message.text:
         await message.answer('Хорошо 👌')
+    var_true =  await mongo_count_docs('database', 'statistics_new', {'stopwar_continue_or_peace_results': 'Продолжать военную операцию ⚔️'})
+    trust = await mongo_count_docs('database', 'statistics_new', {'tv_love_gen': 'Да, полностью доверяю ✅'})
+    dont_trust = await mongo_count_docs('database', 'statistics_new', {'tv_love_gen': 'Нет, не верю ни слову ⛔'})
+    maybe_trust = await mongo_count_docs('database', 'statistics_new', {'tv_love_gen': 'Скорее да 👍'})
+    maybe_dont_trust = await mongo_count_docs('database', 'statistics_new', {'tv_love_gen': 'Скорее нет 👎'})
     text = await sql_safe_select('text', 'texts', {'name': 'antip_TV_makes_them_bad'})
-    text = text.replace('AA', '')
-    text = text.replace('BB', '')
-    text = text.replace('CC', '')
-    text = text.replace('DD', '')
-    text = text.replace('AA', '')
-    text = text.replace('AA', '')
-    text = text.replace('AA', '')
+    try:
+        trust = str(round(trust / var_true * 100))
+        dont_trust = str(round(dont_trust / var_true * 100))
+        maybe_trust = str(round(maybe_trust / var_true * 100))
+        maybe_dont_trust = str(round(maybe_dont_trust / var_true * 100))
+
+        text = text.replace('AA', trust)
+        text = text.replace('BB', maybe_trust)
+        text = text.replace('CC', maybe_dont_trust)
+        text = text.replace('DD', dont_trust)
+    except:
+        text = text.replace('AA', 'N/A')
+        text = text.replace('BB', 'N/A')
+        text = text.replace('CC', 'N/A')
+        text = text.replace('DD', 'N/A')
+
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Интересно 🤔"))
     nmarkap.row(types.KeyboardButton(text="Это и так понятно 👌"))
