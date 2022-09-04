@@ -31,13 +31,13 @@ class INFOStateFilter(BaseFilter):
         return False
 
 
-class YandexPropagandaFilter(BaseFilter):
+class NotYandexPropagandaFilter(BaseFilter):
 
     async def __call__(self, message: Message) -> Union[bool, Dict[str, Any]]:
         if await redis_check(f'Usrs: {message.from_user.id}: Start_answers: Yandex'):
-            return True
-        else:
             return False
+        else:
+            return True
 
 
 class PoliticsFilter(BaseFilter):
