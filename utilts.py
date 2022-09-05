@@ -7,7 +7,9 @@ from typing import Union
 from aiogram import Bot
 from aiogram.exceptions import TelegramBadRequest, TelegramNetworkError, TelegramForbiddenError
 from aiogram.types import Message, ReplyKeyboardRemove, InlineKeyboardMarkup, ReplyKeyboardMarkup, ForceReply, \
-    FSInputFile, InputFile, InputMediaVideo, InputMediaPhoto
+    FSInputFile, InputFile, InputMediaVideo, InputMediaPhoto, BotCommandScopeChat, BotCommandScopeDefault, \
+    BotCommandScopeAllPrivateChats, BotCommandScopeAllGroupChats, BotCommandScopeAllChatAdministrators, \
+    BotCommandScopeChatAdministrators, BotCommandScopeChatMember, BotCommand
 
 import bata
 from data_base.DBuse import sql_safe_select, sql_safe_insert, sql_safe_update, data_getter, sql_select_row_like, \
@@ -207,6 +209,46 @@ async def ref_spy_sender(bot: Bot, child_telegram_id: str | int, message_to_send
         await bot.send_message(parent_id, message_to_send)
     except TelegramBadRequest as error:
         await logg.get_error(f"Bad referal parent!! | {error}", __file__)
+
+
+class MasterCommander:
+
+    def __init__(self, bot: Bot, scope_lvl: str = 'default', chat_id: int = None, user_id: int = None):
+        self.bot = bot
+        if scope_lvl == 'default':
+            self.scope = BotCommandScopeDefault()
+        elif scope_lvl == 'all_private_chats':
+            self.scope = BotCommandScopeAllPrivateChats()
+        elif scope_lvl == 'all_group_chats':
+            self.scope = BotCommandScopeAllGroupChats()
+        elif scope_lvl == 'all_chat_administrators':
+            self.scope = BotCommandScopeAllChatAdministrators()
+        elif scope_lvl == 'chat' and chat_id:
+            self.scope = BotCommandScopeChat(chat_id=chat_id)
+        elif scope_lvl == 'chat_administrators' and chat_id:
+            self.scope = BotCommandScopeChatAdministrators(chat_id=chat_id)
+        elif scope_lvl == 'chat_member' and chat_id and user_id:
+            self.scope = BotCommandScopeChatMember(chat_id=chat_id, user_id=user_id)
+
+    async def clear(self):
+        await self.bot.delete_my_commands(scope=self.scope)
+
+    async def add(self, new_commands: dict, check_default_scope: bool = True):
+        """Pass to this method dictionaty, where keys are commands and values is commands descriptions:\n
+        new_commands = {'comm1': 'comm1 description', 'comm2': 'comm1 description'}"""
+        command_list = await self.bot.get_my_commands(scope=self.scope)
+        if check_default_scope:
+            command_list.extend(await self.bot.get_my_commands(scope=BotCommandScopeDefault()))
+        for command in new_commands:
+            command_list.append(BotCommand(command=command, description=new_commands[command]))
+        await self.bot.set_my_commands(commands=command_list, scope=self.scope)
+
+    async def rewrite(self, new_commands: dict):
+        """This method is similar to .add but will rewrite all commands listm no matter what commands are avaliable"""
+        command_list = list()
+        for command in new_commands:
+            command_list.append(BotCommand(command=command, description=new_commands[command]))
+        await self.bot.set_my_commands(commands=command_list, scope=self.scope)
 
 
 class Phoenix:

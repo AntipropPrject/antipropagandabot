@@ -648,9 +648,9 @@ async def redis_media_counter_get(user_id):
         await logg.get_error(f"redis get | {error}", __file__)
 
 
-async def redis_just_one_write(key, value):
+async def redis_just_one_write(key, value, ttl: int = None):
     try:
-        all_data().get_data_red().set(key, value)
+        all_data().get_data_red().set(key, value, ex=ttl)
     except Exception as error:
         await logg.get_error(f"{error}", __file__)
 

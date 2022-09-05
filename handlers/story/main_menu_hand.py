@@ -1,4 +1,4 @@
-from aiogram import Router, F
+from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message
@@ -151,8 +151,8 @@ async def mainmenu_here_we_go_again(message: Message, state: FSMContext):
 
 
 @router.message(F.text == "Да, я готов(а) начать сейчас 🇷🇺🇺🇦", state=MainMenuStates.again, flags=flags)
-async def mainmenu_here_we_go_again_yeah(message: Message, state: FSMContext):
-    await start_hand.commands_start(message, state)
+async def mainmenu_here_we_go_again_yeah(message: Message, bot: Bot, state: FSMContext):
+    await start_hand.commands_start(message, bot, state)
 
 
 @router.message(((F.text == "Вернуться в Базу Лжи 👈") | (F.text == "База Лжи 👀")), flags=flags)
