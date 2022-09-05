@@ -21,12 +21,16 @@ import git
 
 async def simple_media(message: Message, tag: str,
                        reply_markup: Union[InlineKeyboardMarkup, ReplyKeyboardMarkup,
-                                           ReplyKeyboardRemove, ForceReply, None] = None):
+                                           ReplyKeyboardRemove, ForceReply, None] = None,
+                       custom_caption: str = None):
+    """
+    You can use one tag. If there text with that tag, it will become caption. You can pass custom caption
+    """
     try:
-        """
-        You can use one tag. If there text with that tag, it will become caption
-        """
-        text = await sql_safe_select("text", "texts", {"name": tag})
+        if custom_caption:
+            text = custom_caption
+        else:
+            text = await sql_safe_select("text", "texts", {"name": tag})
         media = await sql_safe_select("t_id", "assets", {"name": tag})
         if text is not False:
             try:
@@ -56,10 +60,10 @@ async def simple_media_bot(bot: Bot, chat_id: int, tag: str,
                            reply_markup: Union[InlineKeyboardMarkup, ReplyKeyboardMarkup,
                                                ReplyKeyboardRemove, ForceReply, None] = None,
                            custom_caption: str = None):
+    """
+    You can use one tag. If there text with that tag, it will become caption. You can pass custom caption
+    """
     try:
-        """
-        You can use one tag. If there text with that tag, it will become caption. You can pass custom caption
-        """
         if custom_caption:
             text = custom_caption
         else:
@@ -136,7 +140,7 @@ class CoolPercReplacer:
         self.text = text
         self.base = base
 
-    def __str__(self):
+    def __repr__(self):
         return self.text
 
     def __call__(self, *args, **kwargs):
