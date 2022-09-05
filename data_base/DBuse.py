@@ -1,9 +1,6 @@
-import re
 from datetime import datetime
 
-import aiohttp
 import psycopg2
-from aiogram.types import User
 from psycopg2 import sql
 
 from bata import all_data
@@ -242,24 +239,6 @@ async def sql_safe_update(table_name, data_dict, condition_dict):
         logg.get_info(f"{error}")
     except psycopg2.Error as error:
         await logg.get_error(f"{error}", __file__)
-
-
-async def advertising_value(tag, user: User):
-    if re.search("^adv_", tag):
-        all_tags = await data_getter("SELECT id FROM dumbstats.advertising")
-        for row in all_tags:
-            if tag in row:
-                await sql_add_value("dumbstats.advertising", "count", {"id": tag})
-    elif tag.isdigit():
-        if int(tag) != user.id:
-            await mongo_user_info(user.id, user.username)
-            await mongo_easy_upsert('database', 'userinfo', {'_id': user.id},
-                                    {'ref_parent': tag,  'name_surname': user.full_name})
-    else:
-        url = f'https://pravdobot.com/cx79l1k.php?cnv_id={tag}'
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url=url) as response:
-                resp = await response.read()
 
 
 """^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^MongoDB^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"""

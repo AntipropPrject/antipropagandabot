@@ -8,12 +8,13 @@ from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from bata import all_data
-from bot_statistics.stat import mongo_is_done, mongo_stat, mongo_stat_new
-from data_base.DBuse import mongo_user_info, sql_safe_select, advertising_value, mongo_ez_find_one, redis_just_one_write
+from bot_statistics.stat import mongo_is_done, mongo_stat, mongo_stat_new, advertising_value
+from data_base.DBuse import mongo_user_info, sql_safe_select, mongo_ez_find_one, redis_just_one_write
 from day_func import day_count
 from handlers.story import true_resons_hand
 from handlers.story import main_menu_hand
 from handlers.story.anti_prop_hand import antip_what_is_prop
+from handlers.story.main_menu_hand import mainmenu_really_menu
 from handlers.story.putin_hand import stopwar_start
 from handlers.story.stopwar_hand import stopwar_first_manipulation_argument
 from handlers.story.true_resons_hand import reasons_who_to_blame
@@ -57,7 +58,6 @@ async def start_base(message):
     if await mongo_ez_find_one('database', 'userinfo', {'_id': message.from_user.id, 'ref_parent': {'$exists': True},
                                                         'datetime_end': {'$eq': None}}):
         await redis_just_one_write(f'Usrs: {message.from_user.id}: Ref', 1)
-
 
 
 @router.message(commands=['menu'], flags=flags)
