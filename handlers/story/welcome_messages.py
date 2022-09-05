@@ -107,7 +107,7 @@ async def poll_filler(message: types.Message):
                 content_types=types.ContentType.TEXT, text_ignore_case=True, flags=flags)
 @router.message(welcome_states.start_dialog.dialogue_5, text_contains='Задавай', content_types=types.ContentType.TEXT,
                 text_ignore_case=True, flags=flags)  # Задаю первый вопрос и ставлю состояни
-async def message_6(message: types.Message, state: FSMContext):
+async def start_do_you_love_politics(message: types.Message, state: FSMContext):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Скорее да  🙂"), types.KeyboardButton(text="Скорее нет  🙅‍♂"))
     markup.row(types.KeyboardButton(text="Начал(а) интересоваться после 24 февраля 🇷🇺🇺🇦"))
@@ -116,9 +116,8 @@ async def message_6(message: types.Message, state: FSMContext):
     await state.set_state(welcome_states.start_dialog.dialogue_6)
 
 
-@router.message(
-    (F.text.contains('интересоваться после 24') | F.text.contains('Скорее да') | F.text.contains('продолжим')),
-    welcome_states.start_dialog.dialogue_6, flags=flags)
+@router.message((F.text.contains('Скорее да') | F.text.contains('продолжим')),
+                welcome_states.start_dialog.dialogue_6, flags=flags)
 async def message_6to7(message: types.Message, state: FSMContext):
     if 'продолжим' not in message.text:
         await mongo_update_stat_new(tg_id=message.from_user.id, column='interest_politics', value=message.text)
@@ -129,6 +128,16 @@ async def message_6to7(message: types.Message, state: FSMContext):
     await poll_write(f'Usrs: {message.from_user.id}: Start_answers: interest_in_politics:',
                      message.text[:-3].strip())
     await state.set_state(welcome_states.start_dialog.dialogue_extrafix)
+
+
+@router.message(F.text.contains('после 24 февраля'), welcome_states.start_dialog.dialogue_6, flags=flags)
+async def start_after_feb(message: types.Message, state: FSMContext):
+    await state.set_state(welcome_states.start_dialog.dialogue_6)
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='interest_politics', value=message.text)
+    text = await sql_safe_select("text", "texts", {"name": "start_after_feb"})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Хорошо, продолжим 👌"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text.contains('Скорее нет  🙅‍')), welcome_states.start_dialog.dialogue_6, flags=flags)
