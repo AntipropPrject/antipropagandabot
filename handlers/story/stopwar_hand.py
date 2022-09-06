@@ -493,7 +493,8 @@ async def stopwar_timer(message: Message, bot: Bot):
         await asyncio.sleep(1)
         await del_key(f'Usrs: {message.from_user.id}: count:')
         textend = await sql_safe_select('text', 'texts', {'name': 'stopwar_end_timer'})
-        await message.answer(textend, reply_markup=nmarkup.as_markup(resize_keyboard=True), parse_mode="HTML")
+        await message.answer(textend, reply_markup=nmarkup.as_markup(resize_keyboard=True), parse_mode="HTML",
+                             disable_web_page_preview=True)
         await bot.delete_message(chat_id=message.from_user.id, message_id=m_id)
         print('Countdown finished.')
     else:
@@ -520,7 +521,8 @@ async def stopwar_share_blindly(message: Message):
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
         textend = await sql_safe_select('text', 'texts', {'name': 'stopwar_end_timer'})
-        await message.answer(textend, reply_markup=nmarkup.as_markup(resize_keyboard=True), parse_mode="HTML")
+        await message.answer(textend, reply_markup=nmarkup.as_markup(resize_keyboard=True), parse_mode="HTML",
+                             disable_web_page_preview=True)
 
 
 @router.message((F.text == "Покажи инструкцию, как поделиться со всем списком контактов 📝"), flags=flags)
