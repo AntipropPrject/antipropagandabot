@@ -1282,7 +1282,7 @@ async def antip_best_of_the_best(message: Message):
     nmarkap.adjust(2)
     await simple_media(message, text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
-@router.message((F.text.contains('О чём? 🤔') | (F.text.contains('Готовь деньги 😉️'))), flags=flags)
+@router.message((F.text.contains('О чём? 🤔') | (F.text.contains('Готовь деньги'))), flags=flags)
 async def antip_many_links_normal(message: Message):
     user_answer = await mongo_select(message.from_user.id)
     print(user_answer)
