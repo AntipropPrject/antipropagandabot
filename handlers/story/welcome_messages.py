@@ -6,7 +6,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
 from data_base.DBuse import poll_write, sql_safe_select, mongo_add, mongo_select, redis_just_one_write, \
-    redis_just_one_read
+    redis_just_one_read, mongo_count_docs
 from resources.all_polls import web_prop, welc_message_one, people_prop
 from states import welcome_states
 from states.antiprop_states import propaganda_victim
@@ -38,6 +38,24 @@ async def message_2(message: types.Message, state: FSMContext):
 async def message_3(message: types.Message, state: FSMContext):  # Начало опроса
     await poll_write(f'Usrs: {message.from_user.id}: Start_answers: Is_it_war:', message.text)
     await mongo_update_stat_new(tg_id=message.from_user.id, column='war_or_not', value=message.text)
+    text_statistics = await sql_safe_select("text", "texts", {"name": "start_lets_start"})
+    war =  await mongo_count_docs('database', 'statistics_new', {'war_or_not': '2️⃣ Война'})
+    not_war = await mongo_count_docs('database', 'statistics_new', {'war_or_not': '1️⃣ Специальная военная операция (СВО)'})
+    FSB = await mongo_count_docs('database', 'statistics_new', {'FSB': "Да"})
+    all_count = war + not_war
+    war_result = str(round(war / all_count * 100))
+    not_war_result = str(round(not_war / all_count * 100))
+    try:
+        text_statistics.replace('XX', war_result)
+        text_statistics.replace('AA', str(round(war / FSB * 100)) if FSB >= 1 else 'N/A')
+        text_statistics.replace('YY', not_war_result)
+        text_statistics.replace('BB', str(round(not_war / FSB * 100)) if FSB >= 1 else 'N/A')
+    except:
+        text_statistics.replace('XX', 'N/A')
+        text_statistics.replace('AA', 'N/A')
+        text_statistics.replace('YY', 'N/A')
+        text_statistics.replace('BB', 'N/A')
+    await message.answer(text_statistics)
     markup = ReplyKeyboardBuilder()
     markup.add(types.KeyboardButton(text="Задавай 👌"))
     markup.add(types.KeyboardButton(text="А долго будешь допрашивать? ⏱"))
@@ -53,6 +71,26 @@ async def message_3(message: types.Message, state: FSMContext):  # Начало 
 async def start_lets_start_2(message: types.Message, state: FSMContext):  # Начало опроса
     await poll_write(f'Usrs: {message.from_user.id}: Start_answers: Is_it_war:', message.text)
     await mongo_update_stat_new(tg_id=message.from_user.id, column='war_or_not', value=message.text)
+    text_statistics = await sql_safe_select("text", "texts", {"name": "start_lets_start_2"})
+    war =  await mongo_count_docs('database', 'statistics_new', {'war_or_not': '2️⃣ Война'})
+    not_war = await mongo_count_docs('database', 'statistics_new', {'war_or_not': '1️⃣ Специальная военная операция (СВО)'})
+    FSB = await mongo_count_docs('database', 'statistics_new', {'FSB': "Да"})
+    all_count = war + not_war
+    war_result = str(round(war / all_count * 100))
+    not_war_result = str(round(not_war / all_count * 100))
+    try:
+        text_statistics.replace('XX', war_result)
+        text_statistics.replace('AA', str(round(war / FSB * 100)) if FSB >= 1 else 'N/A')
+        text_statistics.replace('YY', not_war_result)
+        text_statistics.replace('BB', str(round(not_war / FSB * 100)) if FSB >= 1 else 'N/A')
+    except:
+        text_statistics.replace('XX', 'N/A')
+        text_statistics.replace('AA', 'N/A')
+        text_statistics.replace('YY', 'N/A')
+        text_statistics.replace('BB', 'N/A')
+    await message.answer(text_statistics)
+
+
     markup = ReplyKeyboardBuilder()
     markup.add(types.KeyboardButton(text="Задавай 👌"))
     markup.add(types.KeyboardButton(text="А долго будешь допрашивать? ⏱"))
@@ -77,6 +115,7 @@ async def start_lets_start_stop(message: types.Message):
 @router.message(welcome_states.start_dialog.dialogue_4, text_contains=('выражать', 'незаконно'),
                 content_types=types.ContentType.TEXT, text_ignore_case=True, flags=flags)
 async def message_4(message: types.Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='FSB', value='Да')
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="1️⃣ Специальная военная операция (СВО)"))
     markup.row(types.KeyboardButton(text="2️⃣ Война"))
