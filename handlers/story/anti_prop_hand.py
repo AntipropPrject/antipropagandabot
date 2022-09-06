@@ -27,7 +27,7 @@ router = Router()
 router.message.filter(state=propaganda_victim)
 
 
-@router.message((F.text.contains('такое пропаганда')), flags=flags)
+@router.message((F.text.contains('такое пропаганда')), flags=flags, state=propaganda_victim.next_0)
 async def antip_what_is_prop(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_what_is_prop'})
     nmarkap = ReplyKeyboardBuilder()
