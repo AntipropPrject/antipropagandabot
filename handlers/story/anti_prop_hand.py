@@ -36,7 +36,7 @@ async def antip_what_is_prop(message: Message, state: FSMContext):
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == 'Продолжай ⏳'), flags=flags, state=propaganda_victim.next_0)
+@router.message((F.text == "Продолжай ⏳"), flags=flags, state=propaganda_victim.next_0)
 async def antip_black_and_white(message: Message):
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.add(types.KeyboardButton(text="Это интересно 👌"))
