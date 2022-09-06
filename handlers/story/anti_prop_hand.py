@@ -16,6 +16,7 @@ from data_base.DBuse import sql_safe_select, data_getter
 from filters.MapFilters import WebPropagandaFilter, TVPropagandaFilter, PplPropagandaFilter, \
     NotYandexPropagandaFilter
 from handlers.story import true_resons_hand
+from handlers.story.true_resons_hand import reasons_lets_figure, war_point_now, reasons_king_of_info
 from keyboards.map_keys import antip_killme_kb
 from resources.all_polls import antip_q1_options, antip_q2_options, antip_q3_options
 from states.antiprop_states import propaganda_victim
@@ -1221,7 +1222,6 @@ async def antip_look_at_it_yourself(message: Message, state: FSMContext):
     flags=flags)
 async def antip_ok(message: Message, state: FSMContext):
     if 'Спасибо' in message.text or 'нового' in message.text or 'не верю' in message.text:
-        print(message.text)
         await mongo_update_stat_new(tg_id=message.from_user.id, column='antip_look_at_it_yourself', value=message.text)
     await message.answer("Хорошо", reply_markup=ReplyKeyboardRemove())
     if await redis_just_one_read(f'Usrs: {message.from_user.id}: INFOState:') == 'Жертва пропаганды':
@@ -1285,8 +1285,7 @@ async def antip_best_of_the_best(message: Message):
 @router.message((F.text.contains('О чём? 🤔') | (F.text.contains('Готовь деньги'))), flags=flags)
 async def antip_many_links_normal(message: Message):
     user_answer = await mongo_select(message.from_user.id)
-    print(user_answer)
-    if 'Медуза / Дождь' in user_answer:
+    if 'Meduza / Дождь / Би-би-си' in user_answer['answers_4']:
         nmarkap = ReplyKeyboardBuilder()
         nmarkap.add(types.KeyboardButton(text="Готов(а) продолжить 👌"))
         text = await sql_safe_select('text', 'texts', {'name': 'antip_many_links_normal'})
@@ -1313,8 +1312,7 @@ async def antip_forbidden_truth(message: Message):
         fake_text = await sql_safe_select('text', 'texts', {'name': 'antip_bite_me'})
         await message.answer(fake_text)
     user_answer = await mongo_select(message.from_user.id)
-    print(user_answer)
-    if 'Википедия' not in user_answer:
+    if 'Википедия' not in user_answer['answers_4']:
         nmarkap = ReplyKeyboardBuilder()
         nmarkap.add(types.KeyboardButton(text="Там статьи может редактировать любой человек ✍️"))
         nmarkap.add(types.KeyboardButton(text="Википедия — проект Запада 🇺🇸"))
