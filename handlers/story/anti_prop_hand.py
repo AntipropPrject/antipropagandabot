@@ -137,6 +137,7 @@ async def antip_eye_log(message: Message, state: FSMContext):
                                                      {'antip_eye_log': 'Это намеренная ложь 🗣'})
     random = await mongo_count_docs('database', 'statistics_new',
                                                    {'antip_eye_log': 'Это случайность 🤷‍♀️️♀'})
+
     dont_know = await mongo_count_docs('database', 'statistics_new',
                                                   {'antip_eye_log': 'Не знаю 🤷‍♂️'})
     all_count = fake + random + dont_know
@@ -146,6 +147,7 @@ async def antip_eye_log(message: Message, state: FSMContext):
     text = text.replace('XX', start_war_percentage)
     text = text.replace('YY', start_peace_percentage)
     text = text.replace('ZZ', start_doubt_percentage)
+
     nmarkap = ReplyKeyboardBuilder()
     await state.set_state(propaganda_victim.next_1)
     nmarkap.row(types.KeyboardButton(text="Продолжай ⏳"))
