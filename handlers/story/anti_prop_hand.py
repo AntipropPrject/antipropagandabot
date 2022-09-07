@@ -800,7 +800,7 @@ async def antip_not_only_numbers(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_not_only_numbers'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="А на что ещё? 🤔"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await simple_media(text,"Минобороны:_Взятие_Кременной_4_раза", nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text == "А на что ещё? 🤔"), state=propaganda_victim.quiz_2, flags=flags)
