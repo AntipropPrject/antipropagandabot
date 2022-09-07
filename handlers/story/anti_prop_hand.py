@@ -790,18 +790,18 @@ async def antip_quiz_2_answer(poll_answer: types.PollAnswer, bot: Bot):
 
 
 @router.message((F.text.in_({'Продолжим 👉', "Чтооо? 😳"})), state=propaganda_victim.quiz_2, flags=flags)
-async def antip_noone_will_do_this(message: Message):
+async def antip_noone_will_do_this(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
+    await state.set_state(propaganda_victim.quiz_2)
     await simple_media(message, 'antip_noone_will_do_this', nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text == "Продолжай ⏳"), state=propaganda_victim.quiz_2, flags=flags)
 async def antip_not_only_numbers(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'antip_not_only_numbers'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="А на что ещё? 🤔"))
-    await simple_media(text,"Минобороны:_Взятие_Кременной_4_раза", nmarkup.as_markup(resize_keyboard=True))
+    await simple_media(message, 'antip_not_only_numbers', nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text == "А на что ещё? 🤔"), state=propaganda_victim.quiz_2, flags=flags)
