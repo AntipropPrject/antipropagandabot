@@ -1358,6 +1358,7 @@ async def antip_look_at_it_yourself(message: Message, state: FSMContext):
 @router.message((F.text.contains('Спасибо, не знал(а)') | (F.text.contains('Ничего нового')) |
                   (F.text.contains('Не надо, двигаемся дальше')) | (F.text.contains('Продолжим 👌'))), flags=flags)
 async def antip_forbidden_truth(message: Message, state: FSMContext):
+    await state.set_state(propaganda_victim.final)
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.add(types.KeyboardButton(text='Давай 🤔'))
     await message.answer('У меня есть анекдот', reply_markup=nmarkap.as_markup(resize_keyboard=True))
