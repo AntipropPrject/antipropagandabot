@@ -1304,7 +1304,7 @@ async def antip_forbidden_truth(message: Message):
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.add(types.KeyboardButton(text="Какой ресурс? 🤔"))
     nmarkap.add(types.KeyboardButton(text="Википедия что ли? 🙂"))
-    await message.answer(text)
+    await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 @router.message((F.text.contains('Какой ресурс? 🤔') | (F.text.contains('Википедия что ли? 🙂'))), flags=flags)
 async def antip_forbidden_truth(message: Message):
@@ -1320,13 +1320,13 @@ async def antip_forbidden_truth(message: Message):
         nmarkap.add(types.KeyboardButton(text="Случайно, вообще я доверяю Википедии 👌"))
         nmarkap.adjust(1, 2, 1)
         text = await sql_safe_select('text', 'texts', {'name': 'antip_why_not_wiki'})
-        await message.answer(text)
+        await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
     else:
         nmarkap = ReplyKeyboardBuilder()
         nmarkap.add(types.KeyboardButton(text="Расскажи 🙂️"))
         nmarkap.add(types.KeyboardButton(text="Не надо, двигаемся дальше 👉"))
         text = await sql_safe_select('text', 'texts', {'name': 'antip_two_words'})
-        await message.answer(text)
+        await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 @router.message((F.text.contains('Там статьи может редактировать любой человек') | (F.text.contains('Википедия — проект Запада')) |
                  (F.text.contains('Не пользуюсь / Не слышал(а)')) | (F.text.contains('Случайно, вообще я доверяю Википедии')) |
