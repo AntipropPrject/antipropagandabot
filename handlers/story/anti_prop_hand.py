@@ -16,7 +16,7 @@ from data_base.DBuse import sql_safe_select, data_getter
 from filters.MapFilters import WebPropagandaFilter, TVPropagandaFilter, PplPropagandaFilter, \
     NotYandexPropagandaFilter
 from handlers.story import true_resons_hand
-from handlers.story.true_resons_hand import reasons_lets_figure, war_point_now, reasons_king_of_info
+
 from keyboards.map_keys import antip_killme_kb
 from resources.all_polls import antip_q1_options, antip_q2_options, antip_q3_options
 from states.antiprop_states import propaganda_victim
@@ -1277,7 +1277,7 @@ async def antip_best_of_the_best(message: Message):
         await message.answer(fake_text)
     text = await sql_safe_select('text', 'texts', {'name': 'antip_best_of_the_best'})
     nmarkap = ReplyKeyboardBuilder()
-    nmarkap.add(types.KeyboardButton(text="О чём? 🤔"))
+    nmarkap.add(types.KeyboardButton(text='О чём? 🤔'))
     nmarkap.row(types.KeyboardButton(text="Готовь деньги 😉️"))
     nmarkap.adjust(2)
     await simple_media(message, text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
@@ -1295,7 +1295,7 @@ async def antip_many_links_normal(message: Message):
         nmarkap.add(types.KeyboardButton(text="Всё, я подписан(а)! ✅ Продолжим! 👌"))
         nmarkap.add(types.KeyboardButton(text="Я не буду подписываться. ❌ Но я готов(а) продолжить. 👌"))
         text = await sql_safe_select('text', 'texts', {'name': 'antip_many_links_zombie'})
-        await message.answer(text)
+        await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 @router.message((F.text.contains('Готов(а) продолжить') | (F.text.contains('я подписан(а)')) |
                  (F.text.contains('Я не буду подписываться.'))), flags=flags)
