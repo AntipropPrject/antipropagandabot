@@ -142,12 +142,13 @@ async def antip_eye_log(message: Message, state: FSMContext):
     dont_know = await mongo_count_docs('database', 'statistics_new',
                                                   {'antip_eye_log': 'Не знаю 🤷‍♂️'})
     all_count = fake + random + dont_know
-    start_war_percentage = str(round(fake / all_count * 100))
-    start_peace_percentage = str(round(random / all_count * 100))
-    start_doubt_percentage = str(round(dont_know / all_count * 100))
-    text = text.replace('XX', start_war_percentage)
-    text = text.replace('YY', start_peace_percentage)
-    text = text.replace('ZZ', start_doubt_percentage)
+    fake_result = str(round(fake / all_count * 100))
+    random_result = str(round(random / all_count * 100))
+    dont_know_result = str(round(dont_know / all_count * 100))
+    text = text.replace('XX', fake_result)
+    text = text.replace('YY', random_result)
+    text = text.replace('ZZ', dont_know_result)
+    text = text.replace('AA', random_result+dont_know_result)
 
     nmarkap = ReplyKeyboardBuilder()
     await state.set_state(propaganda_victim.next_1)
