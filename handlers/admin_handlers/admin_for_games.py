@@ -511,7 +511,7 @@ async def menu(message: types.Message, state: FSMContext):
         await sql_delete('assets', {'name': reb_tag})
     if st_text:
         if await sql_safe_insert('texts', {'text': st_text, 'name': st_tag}) is False:
-            await sql_safe_update('assets', {'t_id': reb_asset}, {'name': reb_tag})
+            await sql_safe_update('assets', {'t_id': reb_asset}, {'name': reb_tag}) 
         dick.update({'text_name': st_tag})
     else:
         dick.update({'text_name': None})
