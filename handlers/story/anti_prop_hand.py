@@ -128,9 +128,10 @@ async def antip_cant_unsee(message: Message):
                  | F.text.contains('Это намеренная ложь') | F.text.contains('Это случайность')), flags=flags)
 async def antip_eye_log(message: Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='antip_eye_log', value=message.text)
-    if 'Это намеренная ложь, но и на' in message.text:
+    if 'Это намеренная ложь, но' in message.text:
         text_fake = await sql_safe_select('text', 'texts', {'name': 'antip_eye_log'})
         await message.answer(text_fake)
+
     await state.update_data(antip_eye_log_answ=message.text)
     await mongo_update_stat_new(tg_id=message.from_user.id, column='corpses', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'antip_how_could_they'})
@@ -142,13 +143,19 @@ async def antip_eye_log(message: Message, state: FSMContext):
     dont_know = await mongo_count_docs('database', 'statistics_new',
                                                   {'antip_eye_log': 'Не знаю 🤷‍♂️'})
     all_count = fake + random + dont_know
-    fake_result = str(round(fake / all_count * 100))
-    random_result = str(round(random / all_count * 100))
-    dont_know_result = str(round(dont_know / all_count * 100))
-    text = text.replace('XX', fake_result)
-    text = text.replace('YY', random_result)
-    text = text.replace('ZZ', dont_know_result)
-    text = text.replace('AA', random_result+dont_know_result)
+    try:
+        fake_result = str(round(fake / all_count * 100))
+        random_result = int(round(random / all_count * 100))
+        dont_know_result = int(round(dont_know / all_count * 100))
+        text = text.replace('XX', fake_result)
+        text = text.replace('YY', str(random_result))
+        text = text.replace('ZZ', str(dont_know_result))
+        text = text.replace('AA', random_result+dont_know_result)
+    except:
+        text = text.replace('XX', 'N/A')
+        text = text.replace('YY', 'N/A')
+        text = text.replace('ZZ', 'N/A')
+        text = text.replace('AA', 'N/A')
 
     nmarkap = ReplyKeyboardBuilder()
     await state.set_state(propaganda_victim.next_1)
