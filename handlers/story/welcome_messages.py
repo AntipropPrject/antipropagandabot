@@ -374,20 +374,12 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
         await redis_just_one_write(f'Usrs: {poll_answer.user.id}: Politics:', 'Аполитичный')
         await mongo_update_stat(poll_answer.user.id, column='political_view', value='apolitical', options='$set')
         await mongo_update_stat_new(tg_id=poll_answer.user.id, column='polit_status', value='Аполитичный')
-    if await redis_just_one_read(f'Usrs: {poll_answer.user.id}: INFOState:') == 'Жертва пропаганды':
-        nmarkap = ReplyKeyboardBuilder()
-        nmarkap.row(types.KeyboardButton(text="Продолжай ⏳"))
-        nmarkap.row(types.KeyboardButton(text="Что такое пропаганда? 🤔"))
-        await state.set_state(propaganda_victim.next_0)
-        await redis_just_one_write(f'Usrs: {poll_answer.user.id}: INFOState:', 'Жертва пропаганды')
-        await simple_media_bot(bot, poll_answer.user.id, 'antip_wolves', reply_markup=nmarkap.as_markup(resize_keyboard=True))
-    else:
-        markup = ReplyKeyboardBuilder()
-        markup.row(types.KeyboardButton(text="Пропустим этот шаг 👉"))
-        markup.row(types.KeyboardButton(text="Покажи ложь на ТВ — мне интересно посмотреть! 📺"))
-        text = await sql_safe_select("text", "texts", {"name": "antip_all_no_TV"})
-        await bot.send_message(poll_answer.user.id, text, reply_markup=markup.as_markup(resize_keyboard=True),
-                               disable_web_page_preview=True)
+    nmarkap = ReplyKeyboardBuilder()
+    nmarkap.row(types.KeyboardButton(text="Продолжай ⏳"))
+    nmarkap.row(types.KeyboardButton(text="Что такое пропаганда? 🤔"))
+    await state.set_state(propaganda_victim.next_0)
+    await redis_just_one_write(f'Usrs: {poll_answer.user.id}: INFOState:', 'Жертва пропаганды')
+    await simple_media_bot(bot, poll_answer.user.id, 'antip_wolves', reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
 """    if data["answer_3"] == "Нет, не верю ни слову ⛔":
