@@ -40,7 +40,7 @@ async def adv_company(message: Message, bot: Bot, state: FSMContext, command: Co
 async def start_donbas_results(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'start_how_to_manipulate'})
     await state.set_state(welcome_states.start_dialog.big_story)
-    await redis_just_one_write(f'Usrs: {message.from_user.id}: StartDonbas:', message.text)
+    await redis_just_one_write(f'Usrs: {message.from_user.id}: StartDonbas:', 'Давай  👌')
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Готов(а) продолжить 👌"))
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
