@@ -1198,17 +1198,6 @@ async def antip_good_idea(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(((F.text == "Назови эти СМИ 👀") | (F.text == "Это мне неинтересно ️🙅‍♂️")),
-                state=propaganda_victim.final, flags=flags)
-async def antip_best_of_the_best(message: Message):
-    if 'неинтересно' in message.text:
-        text = await sql_safe_select('text', 'texts', {'name': 'antip_to_the_point'})
-        await message.answer(text)
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="О чём? 🤔"))
-    nmarkup.row(types.KeyboardButton(text="Готовь деньги 😉"))
-    await simple_media(message, 'antip_best_of_the_best', reply_markup=nmarkup.as_markup(resize_keyboard=True))
-
 
 # NOT VALID FROM HERE
 @router.message((F.text.contains('удивлён')) | (F.text == 'Продолжим 👌'), state=propaganda_victim.yandex,
@@ -1304,19 +1293,16 @@ async def antip_hole_in_deck(message: Message):
     nmarkup.add(types.KeyboardButton(text="Забавная картинка 🙂"))
     await simple_media(message, 'antip_hole_in_deck', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
-
 @router.message((F.text.contains('Назови эти СМИ 👀') | (F.text.contains('Это мне неинтересно ️🙅‍♂️'))), flags=flags)
 async def antip_best_of_the_best(message: Message):
-    if message.text == 'Это мне неинтересно ️🙅‍♂️':
+    if 'неинтересно' in message.text:
         fake_text = await sql_safe_select('text', 'texts', {'name': 'antip_to_the_point'})
         await message.answer(fake_text)
-    text = await sql_safe_select('text', 'texts', {'name': 'antip_best_of_the_best'})
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.add(types.KeyboardButton(text='О чём? 🤔'))
     nmarkap.row(types.KeyboardButton(text="Готовь деньги 😉️"))
     nmarkap.adjust(2)
-    await simple_media(message, text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
-
+    await simple_media(message, 'antip_best_of_the_best', reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 @router.message((F.text.contains('О чём? 🤔') | (F.text.contains('Готовь деньги'))), flags=flags)
 async def antip_many_links_normal(message: Message):
