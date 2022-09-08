@@ -35,6 +35,15 @@ async def adv_company(message: Message, bot: Bot, state: FSMContext, command: Co
     await commands_start(message, bot, state)
 
 
+@router.message(commands=['start2'], flags=flags)
+async def start_donbas_results(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'start_how_to_manipulate'})
+    await redis_just_one_write(f'Usrs: {message.from_user.id}: StartDonbas:', message.text)
+    nmarkap = ReplyKeyboardBuilder()
+    nmarkap.row(types.KeyboardButton(text="Готов(а) продолжить 👌"))
+    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+
+
 @router.callback_query(text="restarting")
 @router.message(commands=['start', 'restart'], state='*', flags=flags)
 async def commands_start(update: Message | CallbackQuery, bot: Bot, state: FSMContext):  # Первое сообщение
