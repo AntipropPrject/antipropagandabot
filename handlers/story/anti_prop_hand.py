@@ -814,9 +814,22 @@ async def antip_what_they_told_us(message: Message, state: FSMContext):
 
 @router.poll_answer(state=propaganda_victim.quiz_3, flags=flags)
 async def antip_unhumanity(poll_answer: types.PollAnswer, bot: Bot):
+    answers = poll_answer.option_ids
+    if answers == [0, 1, 2, 3, 4]:
+        tomongo = 'Отметил все'
+    else:
+        tomongo = 'Не отметил все'
+    await mongo_update_stat_new(tg_id=poll_answer.user.id, column='antiprop_quiz_3',
+                                value=tomongo)
+    l_all = await mongo_count_docs('database', 'statistics_new', {'antiprop_quiz_3': {'$exists': True}})
+    l_right = await mongo_count_docs('database', 'statistics_new', {'antiprop_quiz_3': 'Отметил все'})
+    txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'antip_unhumanity'}), l_all)
+    txt.replace('XX', l_right)
+
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Что же? 🤔"))
-    await simple_media_bot(bot, poll_answer.user.id, 'antip_unhumanity', nmarkup.as_markup(resize_keyboard=True))
+    await simple_media_bot(bot, poll_answer.user.id, 'antip_unhumanity', nmarkup.as_markup(resize_keyboard=True),
+                           custom_caption=txt())
 
 
 @router.message((F.text == "Что же? 🤔"), state=propaganda_victim.quiz_3, flags=flags)
