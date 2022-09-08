@@ -76,10 +76,10 @@ async def antip_TV_makes_them_bad(message: Message):
     maybe_dont_trust = await mongo_count_docs('database', 'statistics_new', {'tv_love_gen': 'Скорее нет 👎'})
     text = await sql_safe_select('text', 'texts', {'name': 'antip_TV_makes_them_bad'})
     try:
-        trust = str(round(var_true / trust * 100))
-        dont_trust = str(round(var_true / dont_trust * 100))
-        maybe_trust = str(round(var_true / maybe_trust * 100))
-        maybe_dont_trust = str(round(var_true / maybe_dont_trust * 100))
+        trust = str(round(var_true / trust * 100) if trust > 0 else 'N/A')
+        dont_trust = str(round(var_true / dont_trust * 100) if dont_trust > 0 else 'N/A')
+        maybe_trust = str(round(var_true / maybe_trust * 100) if maybe_trust > 0 else 'N/A')
+        maybe_dont_trust = str(round(var_true / maybe_dont_trust * 100) if maybe_dont_trust > 0 else 'N/A')
 
         text = text.replace('AA', trust)
         text = text.replace('BB', maybe_trust)
