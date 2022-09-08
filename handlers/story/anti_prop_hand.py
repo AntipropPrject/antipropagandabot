@@ -182,62 +182,6 @@ async def antip_stop_emotions(message: Message, state: FSMContext):
         await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(TVPropagandaFilter(option="Скорее да"), (F.text == "Хорошо 🤝"))
-async def antiprop_rather_yes_start(message: Message):
-    await mongo_update_stat_new(tg_id=message.from_user.id, column='corpses', value=message.text)
-    text = await sql_safe_select('text', 'texts', {'name': 'antip_rather_yes_TV'})
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Открой мне глаза 👀"))
-    nmarkup.row(types.KeyboardButton(text="Ну удиви меня 🤔"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
-
-
-@router.message(TVPropagandaFilter(option="Не знаю, потому что не смотрю ни новости по ТВ, ни их интернет-версию 🤷‍♂"),
-                (F.text == "Хорошо 🤝"))
-async def antiprop_rather_yes_start_no_tv(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'antiprop_rather_yes_start_no_tv'})
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Пропустим этот шаг 👉"))
-    nmarkup.row(types.KeyboardButton(text="Покажи ложь на ТВ — мне интересно посмотреть! 📺"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
-
-
-@router.message(TVPropagandaFilter(option="Да, полностью доверяю"), (F.text == "Хорошо 🤝"))
-async def antip_all_yes_TV(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'antip_all_yes_TV'})
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
-
-
-@router.message(TVPropagandaFilter(option="Скорее нет"), (F.text == "Хорошо 🤝"))
-async def rather_no_TV(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'antip_rather_no_TV'})
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Открой мне глаза 👀"))
-    nmarkup.row(types.KeyboardButton(text="Ну удиви меня 🤔"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
-
-
-@router.message(TVPropagandaFilter(option="Нет, не верю ни слову"), (F.text == "Хорошо 🤝"))
-async def antip_all_no_TV(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'antip_all_no_TV'})
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Пропустим этот шаг 👉"))
-    nmarkup.row(types.KeyboardButton(text="Покажи ложь на ТВ — мне интересно посмотреть! 📺"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
-
-
-@router.message(TVPropagandaFilter(option="Да, полностью доверяю"), (F.text == 'Продолжай ⏳'),
-                state=propaganda_victim.start, flags=flags)
-async def antip_all_yes_TV_2(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'antip_all_yes_TV_2'})
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Открой мне глаза 👀"))
-    nmarkup.row(types.KeyboardButton(text="Ну удиви меня 🤔"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
-
-
 @router.message((F.text.in_({'Открой мне глаза 👀', "Ну, удиви меня 🧐"})), flags=flags)
 async def antip_censorship_lie(message: Message, state: FSMContext):
     await state.set_state(propaganda_victim.choose_TV)
@@ -1198,7 +1142,6 @@ async def antip_good_idea(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-
 # NOT VALID FROM HERE
 @router.message((F.text.contains('удивлён')) | (F.text == 'Продолжим 👌'), state=propaganda_victim.yandex,
                 flags=flags)
@@ -1293,6 +1236,7 @@ async def antip_hole_in_deck(message: Message):
     nmarkup.add(types.KeyboardButton(text="Забавная картинка 🙂"))
     await simple_media(message, 'antip_hole_in_deck', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
+
 @router.message((F.text.contains('Назови эти СМИ 👀') | (F.text.contains('Это мне неинтересно ️🙅‍♂️'))), flags=flags)
 async def antip_best_of_the_best(message: Message):
     if 'неинтересно' in message.text:
@@ -1303,6 +1247,7 @@ async def antip_best_of_the_best(message: Message):
     nmarkap.row(types.KeyboardButton(text="Готовь деньги 😉️"))
     nmarkap.adjust(2)
     await simple_media(message, 'antip_best_of_the_best', reply_markup=nmarkap.as_markup(resize_keyboard=True))
+
 
 @router.message((F.text.contains('О чём? 🤔') | (F.text.contains('Готовь деньги'))), flags=flags)
 async def antip_many_links_normal(message: Message):
