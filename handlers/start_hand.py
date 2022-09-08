@@ -19,6 +19,7 @@ from handlers.story.main_menu_hand import mainmenu_really_menu
 from handlers.story.putin_hand import stopwar_start
 from handlers.story.stopwar_hand import stopwar_first_manipulation_argument
 from handlers.story.true_resons_hand import reasons_who_to_blame
+from states import welcome_states
 from states.antiprop_states import propaganda_victim
 from states.donbass_states import donbass_state
 from states.main_menu_states import MainMenuStates
@@ -33,6 +34,16 @@ router = Router()
 async def adv_company(message: Message, bot: Bot, state: FSMContext, command: CommandObject):
     asyncio.create_task(advertising_value(command.args, message.from_user))
     await commands_start(message, bot, state)
+
+
+@router.message(commands=['start2'], flags=flags)
+async def start_donbas_results(message: Message, state: FSMContext):
+    text = await sql_safe_select('text', 'texts', {'name': 'start_how_to_manipulate'})
+    await state.set_state(welcome_states.start_dialog.big_story)
+    await redis_just_one_write(f'Usrs: {message.from_user.id}: StartDonbas:', 'Давай  👌')
+    nmarkap = ReplyKeyboardBuilder()
+    nmarkap.row(types.KeyboardButton(text="Готов(а) продолжить 👌"))
+    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
 @router.callback_query(text="restarting")
