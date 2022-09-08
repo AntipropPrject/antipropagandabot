@@ -237,7 +237,7 @@ async def reasons_lie_no_more_3(message: Message):
 
 @router.message(WarReason(answer="💂 Предотвратить размещение военных баз НАТО на Украине"), flags=flags)
 async def reasons_big_bad_nato(message: Message):
-    await redis_delete_from_list(f'Usrs: {message.from_user.id}: Start_answers: Invasion:', welc_message_one[8])
+    await redis_delete_from_list(f'Usrs: {message.from_user.id}: Start_answers: Invasion:', welc_message_one[5])
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Давай 👌'))
     await simple_media(message, 'reasons_big_bad_NATO', nmarkup.as_markup(resize_keyboard=True))
@@ -254,8 +254,7 @@ async def reasons_NATO_is_coming(message: Message):
 @router.message(WarReason(answer="🤯 Предотвратить секретные разработки: биологическое оружие / ядерное оружие"),
                 flags=flags)
 async def reasons_biopigeons(message: Message):
-    await redis_delete_from_list(f'Usrs: {message.from_user.id}: Start_answers: Invasion:',
-                                 "🤯 Предотвратить секретные разработки: биологическое оружие / ядерное оружие")
+    await redis_delete_from_list(f'Usrs: {message.from_user.id}: Start_answers: Invasion:', welc_message_one[8])
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_bio_nuclear'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Хорошо, продолжим 👌'))

@@ -237,7 +237,7 @@ async def antip_all_yes_TV_2(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.in_({'Открой мне глаза 👀', "Ну удиви меня 🤔"})), flags=flags)
+@router.message((F.text.in_({'Открой мне глаза 👀', "Ну, удиви меня 🧐"})), flags=flags)
 async def antip_censorship_lie(message: Message, state: FSMContext):
     await state.set_state(propaganda_victim.choose_TV)
     text = await sql_safe_select('text', 'texts', {'name': 'antip_censorship_lie'})
@@ -814,16 +814,29 @@ async def antip_not_only_numbers(message: Message):
 @router.message((F.text == "А на что ещё? 🤔"), state=propaganda_victim.quiz_2, flags=flags)
 async def antip_what_they_told_us(message: Message, state: FSMContext):
     await state.set_state(propaganda_victim.quiz_3)
-    text = await sql_safe_select('text', 'texts', {'name': 'antip_not_only_numbers'})
+    text = await sql_safe_select('text', 'texts', {'name': 'antip_what_they_told_us'})
     await message.answer(text, disable_web_page_preview=True)
     await message.answer_poll('Какие?', antip_q3_options, allows_multiple_answers=True, is_anonymous=False)
 
 
 @router.poll_answer(state=propaganda_victim.quiz_3, flags=flags)
 async def antip_unhumanity(poll_answer: types.PollAnswer, bot: Bot):
+    answers = poll_answer.option_ids
+    if answers == [0, 1, 2, 3, 4]:
+        tomongo = 'Отметил все'
+    else:
+        tomongo = 'Не отметил все'
+    await mongo_update_stat_new(tg_id=poll_answer.user.id, column='antiprop_quiz_3',
+                                value=tomongo)
+    l_all = await mongo_count_docs('database', 'statistics_new', {'antiprop_quiz_3': {'$exists': True}})
+    l_right = await mongo_count_docs('database', 'statistics_new', {'antiprop_quiz_3': 'Отметил все'})
+    txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'antip_unhumanity'}), l_all)
+    txt.replace('XX', l_right)
+
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Что же? 🤔"))
-    await simple_media_bot(bot, poll_answer.user.id, 'antip_unhumanity', nmarkup.as_markup(resize_keyboard=True))
+    await simple_media_bot(bot, poll_answer.user.id, 'antip_unhumanity', nmarkup.as_markup(resize_keyboard=True),
+                           custom_caption=txt())
 
 
 @router.message((F.text == "Что же? 🤔"), state=propaganda_victim.quiz_3, flags=flags)

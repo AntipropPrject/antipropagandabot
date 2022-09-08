@@ -181,17 +181,19 @@ class SubscriberFilter(BaseFilter):
 
 async def manual_filter_truereasons(message, state):
     war_answers = await poll_get(f"Usrs: {message.from_user.id}: Start_answers: Invasion:")
-    if welc_message_one[8] in war_answers:
-        await true_resons_hand.reasons_big_bad_nato(message, state)
+    print(war_answers)
+    print(welc_message_one)
+    if welc_message_one[3] in war_answers:
+        await true_resons_hand.reasons_demilitarism(message)
+    elif welc_message_one[5] in war_answers:
+        await true_resons_hand.reasons_big_bad_nato(message)
+    elif welc_message_one[8] in war_answers:
+        await true_resons_hand.reasons_biopigeons(message)
     elif welc_message_one[0] in war_answers:
         await true_resons_hand.donbass_big_tragedy(message, state)
     elif welc_message_one[1] in war_answers:
         await true_resons_hand.prevent_strike_start(message, state)
     elif welc_message_one[2] in war_answers:
         await true_resons_hand.reasons_denazi(message, state)
-    elif welc_message_one[3] in war_answers:
-        await true_resons_hand.reasons_demilitarism(message, state)
-    elif welc_message_one[5] in war_answers:
-        await true_resons_hand.reasons_biopigeons(message, state)
     else:
         await true_resons_hand.reasons_normal_game_start(message, state)
