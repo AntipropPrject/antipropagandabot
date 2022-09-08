@@ -185,9 +185,9 @@ async def manual_filter_truereasons(message, state):
     print(welc_message_one)
     if welc_message_one[3] in war_answers:
         await true_resons_hand.reasons_demilitarism(message)
-    elif welc_message_one[8] in war_answers:
-        await true_resons_hand.reasons_big_bad_nato(message)
     elif welc_message_one[5] in war_answers:
+        await true_resons_hand.reasons_big_bad_nato(message)
+    elif welc_message_one[8] in war_answers:
         await true_resons_hand.reasons_biopigeons(message)
     elif welc_message_one[0] in war_answers:
         await true_resons_hand.donbass_big_tragedy(message, state)
