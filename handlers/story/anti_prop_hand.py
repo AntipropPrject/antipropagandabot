@@ -1325,13 +1325,13 @@ async def antip_many_links_normal(message: Message):
         nmarkap = ReplyKeyboardBuilder()
         nmarkap.add(types.KeyboardButton(text="Готов(а) продолжить 👌"))
         text = await sql_safe_select('text', 'texts', {'name': 'antip_many_links_normal'})
-        await message.answer(text)
+        await message.answer(text, disable_web_page_preview=True)
     else:
         nmarkap = ReplyKeyboardBuilder()
         nmarkap.add(types.KeyboardButton(text="Всё, я подписан(а)! ✅ Продолжим! 👌"))
         nmarkap.row(types.KeyboardButton(text="Я не буду подписываться. ❌ Но я готов(а) продолжить. 👌"))
         text = await sql_safe_select('text', 'texts', {'name': 'antip_many_links_zombie'})
-        await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+        await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text.contains('Готов(а) продолжить') | (F.text.contains('я подписан(а)')) |
