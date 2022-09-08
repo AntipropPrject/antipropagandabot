@@ -10,7 +10,7 @@ from data_base.DBuse import poll_write, sql_safe_select, mongo_add, mongo_select
 from resources.all_polls import web_prop, welc_message_one, people_prop
 from states import welcome_states
 from states.antiprop_states import propaganda_victim
-from utilts import simple_media, simple_media_bot
+from utilts import simple_media, simple_media_bot, CoolPercReplacer
 
 flags = {"throttling_key": "True"}
 router = Router()
@@ -33,76 +33,40 @@ async def message_2(message: types.Message, state: FSMContext):
     await state.set_state(welcome_states.start_dialog.dialogue_4)
 
 
-@router.message(welcome_states.start_dialog.dialogue_4, (F.text == '1️⃣ Специальная военная операция (СВО)'),
+@router.message(welcome_states.start_dialog.dialogue_4,
+                ((F.text == '1️⃣ Специальная военная операция (СВО)') | (F.text == "2️⃣ Война")),
                 flags=flags)
 async def message_3(message: types.Message, state: FSMContext):  # Начало опроса
     await poll_write(f'Usrs: {message.from_user.id}: Start_answers: Is_it_war:', message.text)
     await mongo_update_stat_new(tg_id=message.from_user.id, column='war_or_not', value=message.text)
+
+    all_count = await mongo_count_docs('database', 'statistics_new', {'war_or_not': {'$exists': True}})
+    war =  await mongo_count_docs('database', 'statistics_new', {'war_or_not': '2️⃣ Война'})
+    not_war = await mongo_count_docs('database', 'statistics_new',
+                                     {'war_or_not': '1️⃣ Специальная военная операция (СВО)'})
+    FSB_not_war = await mongo_count_docs('database', 'statistics_new',
+                                         {'FSB': "Да", 'war_or_not': '1️⃣ Специальная военная операция (СВО)'})
+    FSB_war = await mongo_count_docs('database', 'statistics_new', {'FSB': "Да", 'war_or_not': '2️⃣ Война'})
+
     text = await sql_safe_select("text", "texts", {"name": "start_lets_start"})
-    war =  await mongo_count_docs('database', 'statistics_new', {'war_or_not': '2️⃣ Война'})
-    not_war = await mongo_count_docs('database', 'statistics_new', {'war_or_not': '1️⃣ Специальная военная операция (СВО)'})
-    FSB = await mongo_count_docs('database', 'statistics_new', {'FSB': "Да"})
-    print(war)
-    print(not_war)
-    print(FSB)
-    all_count = war + not_war
-    war_result = str(round(war / all_count * 100))
-    not_war_result = str(round(not_war / all_count * 100))
-    print(all_count)
-    print(war_result)
-    print(not_war_result)
-    try:
-        text = text.replace('XX', war_result)
-        text = text.replace('AA', str(round(war / FSB * 100)) if FSB >= 1 else 'N/A')
-        text = text.replace('YY', not_war_result)
-        text = text.replace('BB', str(round(not_war / FSB * 100)) if FSB >= 1 else 'N/A')
-    except:
-        text = text.replace('XX', 'N/A')
-        text = text.replace('AA', 'N/A')
-        text = text.replace('YY', 'N/A')
-        text = text.replace('BB', 'N/A')
+    if '(СВО)' in message.text:
+        text = text.replace('[WAR_TERMIN]', 'специальной военной операции')
+    else:
+        text = text.replace('[WAR_TERMIN]', 'войне')
+
+    txt = CoolPercReplacer(text, all_count)
+    txt.replace('XX', not_war)
+    txt.replace('YY', war)
+    txt.base = not_war
+    txt.replace('AA', FSB_not_war)
+    txt.base = war
+    txt.replace('BB', FSB_war)
     markup = ReplyKeyboardBuilder()
     markup.add(types.KeyboardButton(text="Задавай 👌"))
     markup.add(types.KeyboardButton(text="А долго будешь допрашивать? ⏱"))
     markup.row(types.KeyboardButton(text="Стоп! Правильно «в Украине»! ☝️"))
     await state.update_data(answer_1=message.text)
-    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
-    # if на ты
-    await state.set_state(welcome_states.start_dialog.dialogue_5)
-
-
-@router.message(welcome_states.start_dialog.dialogue_4, (F.text == "2️⃣ Война"), flags=flags)
-async def start_lets_start_2(message: types.Message, state: FSMContext):  # Начало опроса
-    await poll_write(f'Usrs: {message.from_user.id}: Start_answers: Is_it_war:', message.text)
-    await mongo_update_stat_new(tg_id=message.from_user.id, column='war_or_not', value=message.text)
-    text = await sql_safe_select("text", "texts", {"name": "start_lets_start_2"})
-    war =  await mongo_count_docs('database', 'statistics_new', {'war_or_not': '2️⃣ Война'})
-    not_war = await mongo_count_docs('database', 'statistics_new', {'war_or_not': '1️⃣ Специальная военная операция (СВО)'})
-    FSB = await mongo_count_docs('database', 'statistics_new', {'FSB': "Да"})
-    print(war)
-    print(not_war)
-    print(FSB)
-    all_count = war + not_war
-    war_result = str(round(war / all_count * 100))
-    not_war_result = str(round(not_war / all_count * 100))
-    try:
-        text = text.replace('XX', war_result)
-        text = text.replace('AA', str(round(war / FSB * 100)) if FSB >= 1 else 'N/A')
-        text = text.replace('YY', not_war_result)
-        text = text.replace('BB', str(round(not_war / FSB * 100)) if FSB >= 1 else 'N/A')
-    except:
-        text = text.replace('XX', 'N/A')
-        text = text.replace('AA', 'N/A')
-        text = text.replace('YY', 'N/A')
-        text = text.replace('BB', 'N/A')
-
-    markup = ReplyKeyboardBuilder()
-    markup.add(types.KeyboardButton(text="Задавай 👌"))
-    markup.add(types.KeyboardButton(text="А долго будешь допрашивать? ⏱"))
-    markup.row(types.KeyboardButton(text="Стоп! Правильно «в Украине»! ☝️"))
-    await state.update_data(answer_1=message.text)
-    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
-    # if на ты
+    await message.answer(txt(), reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     await state.set_state(welcome_states.start_dialog.dialogue_5)
 
 
