@@ -807,7 +807,7 @@ async def antip_not_only_numbers(message: Message):
 @router.message((F.text == "А на что ещё? 🤔"), state=propaganda_victim.quiz_2, flags=flags)
 async def antip_what_they_told_us(message: Message, state: FSMContext):
     await state.set_state(propaganda_victim.quiz_3)
-    text = await sql_safe_select('text', 'texts', {'name': 'antip_not_only_numbers'})
+    text = await sql_safe_select('text', 'texts', {'name': 'antip_what_they_told_us'})
     await message.answer(text, disable_web_page_preview=True)
     await message.answer_poll('Какие?', antip_q3_options, allows_multiple_answers=True, is_anonymous=False)
 
