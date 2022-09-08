@@ -865,9 +865,18 @@ async def antip_torture(message: Message):
     await simple_video_album(message, ['antip_torture_v_1', 'antip_torture_v_2', 'antip_torture_v_3'])
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
-
 @router.message((F.text.contains('родолж')), state=propaganda_victim.quiz_3, flags=flags)
 async def antip_chicken_and_egg(message: Message, state: FSMContext):
+    text = await sql_safe_select('text', 'texts', {'name': 'antip_chicken_and_egg'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="В целом согласен(а) 😌"))
+    nmarkup.add(types.KeyboardButton(text="Продолжаем 👉"))
+    nmarkup.adjust(2)
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message(((F.text.contains('В целом согласен(а)')) | (F.text.contains('Продолжаем 👉'))), state=propaganda_victim.quiz_3, flags=flags)
+async def antip_german_list(message: Message, state: FSMContext):
     await state.set_state(propaganda_victim.after_quizez)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Интересно 👍"))
