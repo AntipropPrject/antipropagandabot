@@ -76,7 +76,7 @@ async def simple_media_bot(bot: Bot, chat_id: int, tag: str,
                 return await bot.send_photo(chat_id, media, caption=text, reply_markup=reply_markup)
             except TelegramBadRequest:
                 try:
-                    return await bot.send_photo(chat_id, media, caption=text, reply_markup=reply_markup)
+                    return await bot.send_video(chat_id, media, caption=text, reply_markup=reply_markup)
                 except TelegramBadRequest:
                     media = await sql_safe_select("t_id", "assets", {"name": 'ERROR_SORRY'})
                     await logg.get_error(f'NO {tag}')
@@ -86,7 +86,7 @@ async def simple_media_bot(bot: Bot, chat_id: int, tag: str,
                 return await bot.send_photo(chat_id, media, reply_markup=reply_markup)
             except TelegramBadRequest:
                 try:
-                    return await bot.send_photo(chat_id, media, reply_markup=reply_markup)
+                    return await bot.send_video(chat_id, media, reply_markup=reply_markup)
                 except TelegramBadRequest:
                     media = await sql_safe_select("t_id", "assets", {"name": 'ERROR_SORRY'})
                     await logg.get_error(f'NO {tag}')
