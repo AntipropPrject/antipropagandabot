@@ -18,7 +18,7 @@ from handlers.admin_handlers import admin_factory, marketing, admin_for_games, n
 from handlers.advertising import start_spam
 from handlers.other import status, other_file
 from handlers.story import preventive_strike, true_resons_hand, welcome_messages, nazi_hand, \
-    donbass_hand, main_menu_hand, anti_prop_hand, putin_hand, smi_hand, stopwar_hand, welcome_stories
+    donbass_hand, main_menu_hand, anti_prop_hand, putin_hand, smi_hand, stopwar_hand, welcome_stories, shop
 from middleware.trottling import ThrottlingMiddleware
 from utilts import happy_tester
 
@@ -89,6 +89,7 @@ async def main():
     dp.message.middleware(ThrottlingMiddleware())
     # Роутер для неподошедшего
     dp.include_router(other_file.router)
+    dp.include_router(shop.router)
 
     session = aiohttp.ClientSession()
     # use the session here
