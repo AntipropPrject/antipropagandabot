@@ -55,7 +55,7 @@ async def antip_just_a_little(message: Message):
     nmarkap.row(types.KeyboardButton(text="Ладно, посмотрю 🤷️"))
     tv_answers = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: tv:')
     polit_status = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: NewPolitStat:')
-    if 'Нет, не верю ни слову ⛔' in tv_answers\
+    if 'Нет, не верю ни слову ⛔' in tv_answers \
             or "Не знаю, потому что не смотрю ни новости по ТВ, ни их интернет-версию 🤷‍♂" in tv_answers:
         if 'Противник войны 🕊' in polit_status:
             nmarkap.row(types.KeyboardButton(text="Всё равно не хочу смотреть ложь по ТВ 🙅‍♂️"))
@@ -80,22 +80,25 @@ async def antip_TV_makes_them_bad(message: Message):
                                                 [{'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'},
                                                  {'tv_love_gen': 'Да, полностью доверяю ✅'}], hard_link=True)
     var_true_and_dont_trust = await mongo_count_docs('database', 'statistics_new',
-                                                [{'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'},
-                                                 {'tv_love_gen': 'Нет, не верю ни слову ⛔'}], hard_link=True)
+                                                     [{
+                                                          'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'},
+                                                      {'tv_love_gen': 'Нет, не верю ни слову ⛔'}], hard_link=True)
     var_true_and_maybe_trust = await mongo_count_docs('database', 'statistics_new',
-                                                [{'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'},
-                                                 {'tv_love_gen': 'Скорее да 👍'}], hard_link=True)
+                                                      [{
+                                                           'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'},
+                                                       {'tv_love_gen': 'Скорее да 👍'}], hard_link=True)
     var_true_and_maybe_dont_trust = await mongo_count_docs('database', 'statistics_new',
-                                                [{'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'},
-                                                 {'tv_love_gen': 'Скорее нет 👎'}], hard_link=True)
+                                                           [{
+                                                                'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'},
+                                                            {'tv_love_gen': 'Скорее нет 👎'}], hard_link=True)
 
     text = await sql_safe_select('text', 'texts', {'name': 'antip_TV_makes_them_bad'})
     try:
         trust = str(round(var_true_and_trust / trust * 100) if trust > 0 else 'N/A')
         dont_trust = str(round(var_true_and_dont_trust / dont_trust * 100) if dont_trust > 0 else 'N/A')
         maybe_trust = str(round(var_true_and_maybe_trust / maybe_trust * 100) if maybe_trust > 0 else 'N/A')
-        maybe_dont_trust = str(round(var_true_and_maybe_dont_trust / maybe_dont_trust * 100) if maybe_dont_trust > 0 else 'N/A')
-
+        maybe_dont_trust = str(
+            round(var_true_and_maybe_dont_trust / maybe_dont_trust * 100) if maybe_dont_trust > 0 else 'N/A')
 
         text = text.replace('AA', trust)
         text = text.replace('BB', maybe_trust)
@@ -692,7 +695,8 @@ async def antip_funny_propaganda(message: Message, state: FSMContext):
 @router.message((F.text == "Покажи варианты ✍️"), state=propaganda_victim.quiz_1, flags=flags)
 async def antip_quiz_1(message: Message, bot: Bot):
     await bot.send_poll(message.from_user.id, 'Сколько?', antip_q1_options,
-                        is_anonymous=False, correct_option_id=3, type='quiz')
+                        is_anonymous=False, correct_option_id=3, type='quiz',
+                        reply_markup=ReplyKeyboardRemove())
 
 
 @router.poll_answer(state=propaganda_victim.quiz_1, flags=flags)
@@ -730,7 +734,8 @@ async def antip_how_much_they_lie(message: Message, state: FSMContext):
 @router.message((F.text == "Покажи варианты ✍️"), state=propaganda_victim.quiz_2, flags=flags)
 async def antip_quiz_1(message: Message, bot: Bot):
     await bot.send_poll(message.from_user.id, 'Сколько?', antip_q2_options,
-                        is_anonymous=False, correct_option_id=3, type='quiz')
+                        is_anonymous=False, correct_option_id=3, type='quiz',
+                        reply_markup=ReplyKeyboardRemove())
 
 
 @router.poll_answer(state=propaganda_victim.quiz_2, flags=flags)
@@ -777,7 +782,8 @@ async def antip_what_they_told_us(message: Message, state: FSMContext):
     await state.set_state(propaganda_victim.quiz_3)
     text = await sql_safe_select('text', 'texts', {'name': 'antip_what_they_told_us'})
     await message.answer(text, disable_web_page_preview=True)
-    await message.answer_poll('Какие?', antip_q3_options, allows_multiple_answers=True, is_anonymous=False)
+    await message.answer_poll('Какие?', antip_q3_options, allows_multiple_answers=True, is_anonymous=False,
+                              reply_markup=ReplyKeyboardRemove())
 
 
 @router.poll_answer(state=propaganda_victim.quiz_3, flags=flags)
