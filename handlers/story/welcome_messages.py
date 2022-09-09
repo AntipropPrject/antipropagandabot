@@ -41,7 +41,7 @@ async def message_3(message: types.Message, state: FSMContext):  # Начало 
     await mongo_update_stat_new(tg_id=message.from_user.id, column='war_or_not', value=message.text)
 
     all_count = await mongo_count_docs('database', 'statistics_new', {'war_or_not': {'$exists': True}})
-    war =  await mongo_count_docs('database', 'statistics_new', {'war_or_not': '2️⃣ Война'})
+    war = await mongo_count_docs('database', 'statistics_new', {'war_or_not': '2️⃣ Война'})
     not_war = await mongo_count_docs('database', 'statistics_new',
                                      {'war_or_not': '1️⃣ Специальная военная операция (СВО)'})
     FSB_not_war = await mongo_count_docs('database', 'statistics_new',
@@ -57,10 +57,8 @@ async def message_3(message: types.Message, state: FSMContext):  # Начало 
     txt = CoolPercReplacer(text, all_count)
     txt.replace('XX', not_war)
     txt.replace('YY', war)
-    txt.base = not_war
-    txt.replace('AA', FSB_not_war)
-    txt.base = war
-    txt.replace('BB', FSB_war)
+    txt.replace('AA', FSB_not_war, temp_base=not_war)
+    txt.replace('BB', FSB_war, temp_base=war)
     markup = ReplyKeyboardBuilder()
     markup.add(types.KeyboardButton(text="Задавай 👌"))
     markup.add(types.KeyboardButton(text="А долго будешь допрашивать? ⏱"))
