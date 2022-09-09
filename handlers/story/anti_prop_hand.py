@@ -139,7 +139,7 @@ async def antip_cant_unsee(message: Message):
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Это намеренная ложь 🗣"))
     nmarkap.add(types.KeyboardButton(text="Это случайность 🤷‍♀️️"))
-    nmarkap.row(types.KeyboardButton(text="Это намеренная ложь, но и на Украине так же делают ☝️️️"))
+    nmarkap.row(types.KeyboardButton(text='Это намеренная ложь, но и на Украине так же делают ☝️'))
     nmarkap.add(types.KeyboardButton(text="Не знаю 🤷‍♂️"))
     nmarkap.adjust(2, 1, 1)
     await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
