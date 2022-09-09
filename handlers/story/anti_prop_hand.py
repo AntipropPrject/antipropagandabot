@@ -129,7 +129,7 @@ async def antip_cant_unsee(message: Message):
                  | F.text.contains('Это намеренная ложь') | F.text.contains('Это случайность')), flags=flags)
 async def antip_eye_log(message: Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='antip_eye_log', value=message.text)
-    if 'Это намеренная ложь, но' in message.text:
+    if 'Это намеренная ложь, но' not in message.text:
         text_fake = await sql_safe_select('text', 'texts', {'name': 'antip_eye_log'})
         await message.answer(text_fake)
 
