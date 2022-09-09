@@ -999,7 +999,8 @@ async def antip_propaganda_here_too(message: Message, state: FSMContext):
     await simple_media(message, 'antip_propaganda_here_too', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Продолжай 🤔"), state=propaganda_victim.yandex, flags=flags)
+@router.message(((F.text == "Продолжай 🤔") | (F.text == "Расскажи, интересно! 👌")),
+                state=propaganda_victim.yandex, flags=flags)
 async def antip_they_lie_to_you(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Посмотрел(а) 📺"))
