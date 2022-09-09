@@ -864,7 +864,7 @@ async def antip_german_list(message: Message, state: FSMContext):
 async def antip_return_to_german_list(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_return_to_german_list'})
     await message.answer(text)
-    await antip_chicken_and_egg(message, state)
+    await antip_chicken_and_egg(message)
 
 
 @router.message(((F.text == "Интересно 👍") | (F.text == "Скучновато 👎")),
