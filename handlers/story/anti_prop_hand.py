@@ -54,9 +54,9 @@ async def antip_just_a_little(message: Message):
     nmarkap.add(types.KeyboardButton(text="Хорошо, убедил 👌"))
     nmarkap.row(types.KeyboardButton(text="Ладно, посмотрю 🤷️"))
     tv_answers = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: tv:')
-    polit_status = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: NewPolitStat:')
-    if 'Нет, не верю ни слову ⛔' in tv_answers \
-            or "Не знаю, потому что не смотрю ни новости по ТВ, ни их интернет-версию 🤷‍♂" in tv_answers:
+    polit_status = await redis_just_one_read(f'Usrs: {message.from_user.id}: Start_answers: NewPolitStat:')
+    if 'Нет, не верю ни слову ⛔' == tv_answers \
+            or "Не знаю, потому что не смотрю ни новости по ТВ, ни их интернет-версию 🤷‍♂" == tv_answers:
         if 'Противник войны 🕊' == polit_status:
             nmarkap.row(types.KeyboardButton(text="Всё равно не хочу смотреть ложь по ТВ 🙅‍♂️"))
 
@@ -67,7 +67,7 @@ async def antip_just_a_little(message: Message):
 
 @router.message(((F.text.contains('Всё равно не хочу смотреть ложь')) | (F.text.contains('удивлен(а)')) | (
         F.text.contains('что по ТВ врут')) | (F.text.contains('Честно говоря, я в шоке'))), flags=flags)
-async def antip_TV_makes_them_bad(message: Message):
+async def antip_TV_makes_them_bad(message: Message, state: FSMContext):
     if 'Всё равно не хочу смотреть ложь' in message.text:
         await message.answer('Хорошо 👌')
 
@@ -109,7 +109,7 @@ async def antip_TV_makes_them_bad(message: Message):
         text = text.replace('BB', 'N/A')
         text = text.replace('CC', 'N/A')
         text = text.replace('DD', 'N/A')
-
+    await state.set_state(propaganda_victim.start)
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Интересно 🤔"))
     nmarkap.row(types.KeyboardButton(text="Это и так понятно 👌"))
