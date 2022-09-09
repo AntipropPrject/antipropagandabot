@@ -7,6 +7,7 @@ class propaganda_victim(StatesGroup):
     next_1 = State()
     next_2 = State()
     next_3 = State()
+    fake_tv = State()
     choose_TV = State()
     ukrainian_TV = State()
     options = State()

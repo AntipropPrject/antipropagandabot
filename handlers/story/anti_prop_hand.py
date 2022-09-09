@@ -38,15 +38,16 @@ async def antip_what_is_prop(message: Message, state: FSMContext):
 
 
 @router.message((F.text == "Продолжай ⏳"), flags=flags, state=propaganda_victim.next_0)
-async def antip_black_and_white(message: Message):
+async def antip_black_and_white(message: Message, state: FSMContext):
     nmarkap = ReplyKeyboardBuilder()
+    await state.set_state(propaganda_victim.fake_tv)
     nmarkap.add(types.KeyboardButton(text="Это интересно 👌"))
     nmarkap.row(types.KeyboardButton(text="Не хочу смотреть ложь по ТВ 🙅‍♀️"))
     nmarkap.adjust(2)
     await simple_media(message, 'antip_black_and_white', nmarkap.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == 'Не хочу смотреть ложь по ТВ 🙅‍♀️'), flags=flags)
+@router.message((F.text == 'Не хочу смотреть ложь по ТВ 🙅‍♀️'), state=propaganda_victim.fake_tv, flags=flags)
 async def antip_just_a_little(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_just_a_little'})
     nmarkap = ReplyKeyboardBuilder()
@@ -68,18 +69,35 @@ async def antip_just_a_little(message: Message):
 async def antip_TV_makes_them_bad(message: Message):
     if 'Всё равно не хочу смотреть ложь' in message.text:
         await message.answer('Хорошо 👌')
-    var_true = await mongo_count_docs('database', 'statistics_new',
-                                      {'stopwar_continue_or_peace_results': 'Продолжать военную операцию ⚔️'})
+
     trust = await mongo_count_docs('database', 'statistics_new', {'tv_love_gen': 'Да, полностью доверяю ✅'})
     dont_trust = await mongo_count_docs('database', 'statistics_new', {'tv_love_gen': 'Нет, не верю ни слову ⛔'})
     maybe_trust = await mongo_count_docs('database', 'statistics_new', {'tv_love_gen': 'Скорее да 👍'})
     maybe_dont_trust = await mongo_count_docs('database', 'statistics_new', {'tv_love_gen': 'Скорее нет 👎'})
+
+    var_true_and_trust = await mongo_count_docs('database', 'statistics_new',
+                                                [{'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'},
+                                                 {'tv_love_gen': 'Да, полностью доверяю ✅'}], hard_link=True)
+    var_true_and_dont_trust = await mongo_count_docs('database', 'statistics_new',
+                                                [{'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'},
+                                                 {'tv_love_gen': 'Нет, не верю ни слову ⛔'}], hard_link=True)
+    var_true_and_maybe_trust = await mongo_count_docs('database', 'statistics_new',
+                                                [{'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'},
+                                                 {'tv_love_gen': 'Скорее да 👍'}], hard_link=True)
+    var_true_and_maybe_dont_trust = await mongo_count_docs('database', 'statistics_new',
+                                                [{'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'},
+                                                 {'tv_love_gen': 'Скорее нет 👎'}], hard_link=True)
+
     text = await sql_safe_select('text', 'texts', {'name': 'antip_TV_makes_them_bad'})
+    print(trust)
+    print(dont_trust)
+    print(maybe_trust)
+    print(maybe_dont_trust)
     try:
-        trust = str(round(var_true / trust * 100) if trust > 0 else 'N/A')
-        dont_trust = str(round(var_true / dont_trust * 100) if dont_trust > 0 else 'N/A')
-        maybe_trust = str(round(var_true / maybe_trust * 100) if maybe_trust > 0 else 'N/A')
-        maybe_dont_trust = str(round(var_true / maybe_dont_trust * 100) if maybe_dont_trust > 0 else 'N/A')
+        trust = str(round(var_true_and_trust / trust * 100) if trust > 0 else 'N/A')
+        dont_trust = str(round(var_true_and_dont_trust / dont_trust * 100) if dont_trust > 0 else 'N/A')
+        maybe_trust = str(round(var_true_and_maybe_trust / maybe_trust * 100) if maybe_trust > 0 else 'N/A')
+        maybe_dont_trust = str(round(var_true_and_maybe_dont_trust / maybe_dont_trust * 100) if maybe_dont_trust > 0 else 'N/A')
         print(trust)
         print(dont_trust)
         print(maybe_trust)
@@ -102,7 +120,7 @@ async def antip_TV_makes_them_bad(message: Message):
 
 
 @router.message(((F.text == 'Это интересно 👌') | F.text.contains('Хорошо, убедил') |
-                 F.text.contains('Ладно, посмотрю')), flags=flags)
+                 F.text.contains('Ладно, посмотрю')), state=propaganda_victim.fake_tv, flags=flags)
 async def antip_time_wasted(message: Message):
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="В чём подвох? 🤔"))
