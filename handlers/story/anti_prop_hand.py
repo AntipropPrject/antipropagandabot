@@ -39,12 +39,13 @@ async def antip_what_is_prop(message: Message, state: FSMContext):
 
 @router.message((F.text == "Продолжай ⏳"), flags=flags, state=propaganda_victim.next_0)
 async def antip_black_and_white(message: Message, state: FSMContext):
+    text = await sql_safe_select('text', 'texts', {'name': 'antip_black_and_white'})
     nmarkap = ReplyKeyboardBuilder()
     await state.set_state(propaganda_victim.fake_tv)
     nmarkap.add(types.KeyboardButton(text="Это интересно 👌"))
     nmarkap.row(types.KeyboardButton(text="Не хочу смотреть ложь по ТВ 🙅‍♀️"))
     nmarkap.adjust(2)
-    await simple_media(message, 'antip_black_and_white', nmarkap.as_markup(resize_keyboard=True))
+    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text == 'Не хочу смотреть ложь по ТВ 🙅‍♀️'), state=propaganda_victim.fake_tv, flags=flags)
