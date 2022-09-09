@@ -80,6 +80,10 @@ async def antip_TV_makes_them_bad(message: Message):
         dont_trust = str(round(var_true / dont_trust * 100) if dont_trust > 0 else 'N/A')
         maybe_trust = str(round(var_true / maybe_trust * 100) if maybe_trust > 0 else 'N/A')
         maybe_dont_trust = str(round(var_true / maybe_dont_trust * 100) if maybe_dont_trust > 0 else 'N/A')
+        print(trust)
+        print(dont_trust)
+        print(maybe_trust)
+        print(maybe_dont_trust)
 
         text = text.replace('AA', trust)
         text = text.replace('BB', maybe_trust)
@@ -126,24 +130,30 @@ async def antip_cant_unsee(message: Message):
 
 
 @router.message((F.text.contains('Это намеренная ложь, но и на') | F.text.contains('Не знаю 🤷‍♂️')
-                 | F.text.contains('Это намеренная ложь') | F.text.contains('Это случайность')), flags=flags)
+                 | F.text.contains('Это намеренная ложь') | F.text.contains('Это случайность')),
+                state=propaganda_victim.next_2, flags=flags)
 async def antip_eye_log(message: Message, state: FSMContext):
+    print(message.text)
     await mongo_update_stat_new(tg_id=message.from_user.id, column='antip_eye_log', value=message.text)
     if 'Это намеренная ложь, но' not in message.text:
         text_fake = await sql_safe_select('text', 'texts', {'name': 'antip_eye_log'})
         await message.answer(text_fake)
-
+        print(1)
+    print(2)
     await state.update_data(antip_eye_log_answ=message.text)
     await mongo_update_stat_new(tg_id=message.from_user.id, column='corpses', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'antip_how_could_they'})
     fake = await mongo_count_docs('database', 'statistics_new',
                                   {'antip_eye_log': 'Это намеренная ложь 🗣'})
     random = await mongo_count_docs('database', 'statistics_new',
-                                    {'antip_eye_log': 'Это случайность 🤷‍♀️️♀'})
+                                    {'antip_eye_log': 'Это случайность 🤷‍♀️️'})
 
     dont_know = await mongo_count_docs('database', 'statistics_new',
                                        {'antip_eye_log': 'Не знаю 🤷‍♂️'})
     all_count = fake + random + dont_know
+    print(fake)
+    print(random)
+    print(dont_know)
     try:
         fake_result = str(round(fake / all_count * 100))
         random_result = int(round(random / all_count * 100))
@@ -151,7 +161,7 @@ async def antip_eye_log(message: Message, state: FSMContext):
         text = text.replace('XX', fake_result)
         text = text.replace('YY', str(random_result))
         text = text.replace('ZZ', str(dont_know_result))
-        text = text.replace('AA', random_result + dont_know_result)
+        text = text.replace('AA', str(random_result + dont_know_result))
     except:
         text = text.replace('XX', 'N/A')
         text = text.replace('YY', 'N/A')
