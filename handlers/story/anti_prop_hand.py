@@ -288,7 +288,6 @@ async def antiprop_tv_24(message: Message, state: FSMContext):
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Сюжет посмотрел(а).Что с ним не так? 🤔"))
         await dynamic_media_answer(message, 'tv_24_lie_', count, nmarkup.as_markup(resize_keyboard=True))
-
     except TelegramBadRequest:
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Хочу выбрать другой телеканал 🔄"))
