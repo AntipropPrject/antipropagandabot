@@ -57,7 +57,7 @@ async def antip_just_a_little(message: Message):
     polit_status = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: NewPolitStat:')
     if 'Нет, не верю ни слову ⛔' in tv_answers \
             or "Не знаю, потому что не смотрю ни новости по ТВ, ни их интернет-версию 🤷‍♂" in tv_answers:
-        if 'Противник войны 🕊' in polit_status:
+        if 'Противник войны 🕊' == polit_status:
             nmarkap.row(types.KeyboardButton(text="Всё равно не хочу смотреть ложь по ТВ 🙅‍♂️"))
 
     nmarkap.adjust(2, 1)
