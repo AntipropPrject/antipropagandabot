@@ -685,7 +685,8 @@ async def antip_bad_people_lies(message: Message, state: FSMContext):
 
 
 @router.message((F.text.contains('Интересно 🤔')) | (F.text.contains('и так')) | (F.text.contains('я всё равно')),
-                state=(propaganda_victim.choose_TV, propaganda_victim.web, propaganda_victim.ppl_propaganda),
+                state=(propaganda_victim.choose_TV, propaganda_victim.web, propaganda_victim.ppl_propaganda,
+                       propaganda_victim.fake_tv),
                 flags=flags)
 async def antip_funny_propaganda(message: Message, state: FSMContext):
     await state.set_state(propaganda_victim.quiz_1)
