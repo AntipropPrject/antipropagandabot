@@ -146,7 +146,7 @@ async def antip_cant_unsee(message: Message):
                 state=propaganda_victim.next_2, flags=flags)
 async def antip_eye_log(message: Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='antip_eye_log', value=message.text)
-    if 'Это намеренная ложь, но' not in message.text:
+    if 'Это намеренная ложь, но и на Украине так же делают ☝️' == message.text:
         text_fake = await sql_safe_select('text', 'texts', {'name': 'antip_eye_log'})
         await message.answer(text_fake)
     await state.update_data(antip_eye_log_answ=message.text)
@@ -180,16 +180,18 @@ async def antip_eye_log(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.contains('Продолжай ⏳') | F.text.contains('Хорошо 🤝️')),
+@router.message((F.text.contains('Продолжай') | F.text.contains('Хорошо 🤝')),
                 state=propaganda_victim.next_1, flags=flags)
 async def antip_stop_emotions(message: Message, state: FSMContext):
     data = await state.get_data()
-    if data['antip_eye_log_answ'] == 'Это намеренная ложь 🗣':
+    if data['antip_eye_log_answ'] != 'Это намеренная ложь 🗣' and 'Хорошо' not in message.text:
         text = await sql_safe_select('text', 'texts', {'name': 'antip_listen_to_facts'})
         nmarkap = ReplyKeyboardBuilder()
         nmarkap.row(types.KeyboardButton(text="Хорошо 🤝"))
+        await state.set_state(propaganda_victim.next_1)
         await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
     else:
+        await state.set_state(propaganda_victim.start)
         text = await sql_safe_select('text', 'texts', {'name': 'antip_bad_statistics'})
         nmarkap = ReplyKeyboardBuilder()
         await state.set_state(propaganda_victim.start)
