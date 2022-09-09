@@ -11,7 +11,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from bata import all_data
 from bot_statistics.stat import mongo_update_stat_new
 from data_base.DBuse import poll_get, redis_just_one_read, sql_select_row_like, mongo_game_answer, mongo_count_docs, \
-    redis_just_one_write, mongo_select
+    redis_just_one_write, mongo_select, mongo_ez_find_one
 from data_base.DBuse import sql_safe_select, data_getter
 from filters.MapFilters import WebPropagandaFilter, TVPropagandaFilter, PplPropagandaFilter, \
     NotYandexPropagandaFilter
@@ -1276,12 +1276,12 @@ async def antip_best_of_the_best(message: Message):
 
 @router.message((F.text.contains('О чём? 🤔') | (F.text.contains('Готовь деньги'))), flags=flags)
 async def antip_many_links_normal(message: Message):
-    user_answer = await mongo_select(message.from_user.id)
-    if 'Meduza / Дождь / Би-би-си' in user_answer['answers_4']:
+    user_answer = await mongo_ez_find_one('database', 'statistics_new', {'_id': message.from_user.id})
+    if 'Meduza / Дождь / Би-би-си' in user_answer['web_prop_ex']:
         nmarkap = ReplyKeyboardBuilder()
         nmarkap.add(types.KeyboardButton(text="Готов(а) продолжить 👌"))
         text = await sql_safe_select('text', 'texts', {'name': 'antip_many_links_normal'})
-        await message.answer(text, disable_web_page_preview=True)
+        await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     else:
         nmarkap = ReplyKeyboardBuilder()
         nmarkap.add(types.KeyboardButton(text="Всё, я подписан(а)! ✅ Продолжим! 👌"))
