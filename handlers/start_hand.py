@@ -159,4 +159,3 @@ async def commands_restore(message: Message, bot: Bot, state: FSMContext):
 @router.message(commands=["test_reasons"], flags=flags)
 async def commands_restore(message: Message, bot: Bot, state: FSMContext):
     await antip_only_tip_of_the_berg(message, state)
-    
