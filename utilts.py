@@ -148,10 +148,13 @@ class CoolPercReplacer:
     def __call__(self, *args, **kwargs):
         return str(self.text)
 
-    def replace(self, symbol: str, part: int):
+    def replace(self, symbol: str, part: int, *args, temp_base: int = None):
+        whole = self.base
+        if temp_base:
+            whole = temp_base
         if self.text:
             try:
-                perc = part / self.base * 100
+                perc = part / whole * 100
             except ZeroDivisionError:
                 perc = 0
             self.text = self.text.replace(symbol, str(round(perc)))
