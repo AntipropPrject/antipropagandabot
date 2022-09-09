@@ -38,15 +38,16 @@ async def antip_what_is_prop(message: Message, state: FSMContext):
 
 
 @router.message((F.text == "Продолжай ⏳"), flags=flags, state=propaganda_victim.next_0)
-async def antip_black_and_white(message: Message):
+async def antip_black_and_white(message: Message, state: FSMContext):
     nmarkap = ReplyKeyboardBuilder()
+    await state.set_state(propaganda_victim.fake_tv)
     nmarkap.add(types.KeyboardButton(text="Это интересно 👌"))
     nmarkap.row(types.KeyboardButton(text="Не хочу смотреть ложь по ТВ 🙅‍♀️"))
     nmarkap.adjust(2)
     await simple_media(message, 'antip_black_and_white', nmarkap.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == 'Не хочу смотреть ложь по ТВ 🙅‍♀️'), flags=flags)
+@router.message((F.text == 'Не хочу смотреть ложь по ТВ 🙅‍♀️'), state=propaganda_victim.fake_tv, flags=flags)
 async def antip_just_a_little(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_just_a_little'})
     nmarkap = ReplyKeyboardBuilder()
@@ -54,8 +55,9 @@ async def antip_just_a_little(message: Message):
     nmarkap.row(types.KeyboardButton(text="Ладно, посмотрю 🤷️"))
     tv_answers = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: tv:')
     polit_status = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: NewPolitStat:')
-    if 'Нет, не верю ни слову' in tv_answers or 'Не знаю, потому что' in tv_answers:
-        if 'Противник войны' in polit_status:
+    if 'Нет, не верю ни слову ⛔' in tv_answers\
+            or "Не знаю, потому что не смотрю ни новости по ТВ, ни их интернет-версию 🤷‍♂" in tv_answers:
+        if 'Противник войны 🕊' in polit_status:
             nmarkap.row(types.KeyboardButton(text="Всё равно не хочу смотреть ложь по ТВ 🙅‍♂️"))
 
     nmarkap.adjust(2, 1)
@@ -68,18 +70,32 @@ async def antip_just_a_little(message: Message):
 async def antip_TV_makes_them_bad(message: Message):
     if 'Всё равно не хочу смотреть ложь' in message.text:
         await message.answer('Хорошо 👌')
-    var_true = await mongo_count_docs('database', 'statistics_new',
-                                      {'stopwar_continue_or_peace_results': 'Продолжать военную операцию ⚔️'})
+
     trust = await mongo_count_docs('database', 'statistics_new', {'tv_love_gen': 'Да, полностью доверяю ✅'})
     dont_trust = await mongo_count_docs('database', 'statistics_new', {'tv_love_gen': 'Нет, не верю ни слову ⛔'})
     maybe_trust = await mongo_count_docs('database', 'statistics_new', {'tv_love_gen': 'Скорее да 👍'})
     maybe_dont_trust = await mongo_count_docs('database', 'statistics_new', {'tv_love_gen': 'Скорее нет 👎'})
+
+    var_true_and_trust = await mongo_count_docs('database', 'statistics_new',
+                                                [{'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'},
+                                                 {'tv_love_gen': 'Да, полностью доверяю ✅'}], hard_link=True)
+    var_true_and_dont_trust = await mongo_count_docs('database', 'statistics_new',
+                                                [{'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'},
+                                                 {'tv_love_gen': 'Нет, не верю ни слову ⛔'}], hard_link=True)
+    var_true_and_maybe_trust = await mongo_count_docs('database', 'statistics_new',
+                                                [{'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'},
+                                                 {'tv_love_gen': 'Скорее да 👍'}], hard_link=True)
+    var_true_and_maybe_dont_trust = await mongo_count_docs('database', 'statistics_new',
+                                                [{'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'},
+                                                 {'tv_love_gen': 'Скорее нет 👎'}], hard_link=True)
+
     text = await sql_safe_select('text', 'texts', {'name': 'antip_TV_makes_them_bad'})
     try:
-        trust = str(round(var_true / trust * 100) if trust > 0 else 'N/A')
-        dont_trust = str(round(var_true / dont_trust * 100) if dont_trust > 0 else 'N/A')
-        maybe_trust = str(round(var_true / maybe_trust * 100) if maybe_trust > 0 else 'N/A')
-        maybe_dont_trust = str(round(var_true / maybe_dont_trust * 100) if maybe_dont_trust > 0 else 'N/A')
+        trust = str(round(var_true_and_trust / trust * 100) if trust > 0 else 'N/A')
+        dont_trust = str(round(var_true_and_dont_trust / dont_trust * 100) if dont_trust > 0 else 'N/A')
+        maybe_trust = str(round(var_true_and_maybe_trust / maybe_trust * 100) if maybe_trust > 0 else 'N/A')
+        maybe_dont_trust = str(round(var_true_and_maybe_dont_trust / maybe_dont_trust * 100) if maybe_dont_trust > 0 else 'N/A')
+
 
         text = text.replace('AA', trust)
         text = text.replace('BB', maybe_trust)
@@ -98,7 +114,7 @@ async def antip_TV_makes_them_bad(message: Message):
 
 
 @router.message(((F.text == 'Это интересно 👌') | F.text.contains('Хорошо, убедил') |
-                 F.text.contains('Ладно, посмотрю')), flags=flags)
+                 F.text.contains('Ладно, посмотрю')), state=propaganda_victim.fake_tv, flags=flags)
 async def antip_time_wasted(message: Message):
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="В чём подвох? 🤔"))
@@ -126,20 +142,20 @@ async def antip_cant_unsee(message: Message):
 
 
 @router.message((F.text.contains('Это намеренная ложь, но и на') | F.text.contains('Не знаю 🤷‍♂️')
-                 | F.text.contains('Это намеренная ложь') | F.text.contains('Это случайность')), flags=flags)
+                 | F.text.contains('Это намеренная ложь') | F.text.contains('Это случайность')),
+                state=propaganda_victim.next_2, flags=flags)
 async def antip_eye_log(message: Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='antip_eye_log', value=message.text)
     if 'Это намеренная ложь, но' not in message.text:
         text_fake = await sql_safe_select('text', 'texts', {'name': 'antip_eye_log'})
         await message.answer(text_fake)
-
     await state.update_data(antip_eye_log_answ=message.text)
     await mongo_update_stat_new(tg_id=message.from_user.id, column='corpses', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'antip_how_could_they'})
     fake = await mongo_count_docs('database', 'statistics_new',
                                   {'antip_eye_log': 'Это намеренная ложь 🗣'})
     random = await mongo_count_docs('database', 'statistics_new',
-                                    {'antip_eye_log': 'Это случайность 🤷‍♀️️♀'})
+                                    {'antip_eye_log': 'Это случайность 🤷‍♀️️'})
 
     dont_know = await mongo_count_docs('database', 'statistics_new',
                                        {'antip_eye_log': 'Не знаю 🤷‍♂️'})
@@ -151,7 +167,7 @@ async def antip_eye_log(message: Message, state: FSMContext):
         text = text.replace('XX', fake_result)
         text = text.replace('YY', str(random_result))
         text = text.replace('ZZ', str(dont_know_result))
-        text = text.replace('AA', random_result + dont_know_result)
+        text = text.replace('AA', str(random_result + dont_know_result))
     except:
         text = text.replace('XX', 'N/A')
         text = text.replace('YY', 'N/A')
