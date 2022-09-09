@@ -72,12 +72,12 @@ async def reset(message: Message, state: FSMContext):
         await state.set_state(admin.add_media)
         await message.answer('Хорошо, отправьте мне другое медиа', reply_markup=middle_admin_keyboard())
     elif stt == 'admin:confirm_edit_text':
-        await state.set_state(admin.edit_media_test)
-        await message.answer('Хорошо, отправьте мне медиа, на которое вы хотите заменить старое',
-                             reply_markup=middle_admin_keyboard())
-    elif stt == 'admin:confirm_edit_media':
         await state.set_state(admin_home.text_edit)
         await message.answer('Хорошо, отправьте мне текст, который заменит старый',
+                             reply_markup=middle_admin_keyboard())
+    elif stt == 'admin:confirm_edit_media':
+        await state.set_state(admin.edit_media_test)
+        await message.answer('Хорошо, отправьте мне медиа, на которое вы хотите заменить старое',
                              reply_markup=middle_admin_keyboard())
     else:
         await state.set_state(admin.home)
