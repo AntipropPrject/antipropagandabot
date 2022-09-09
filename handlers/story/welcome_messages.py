@@ -239,9 +239,8 @@ async def poll_answer_handler_tho(poll_answer: types.PollAnswer, bot: Bot, state
         await mongo_update_stat_new(tg_id=poll_answer.user.id, column='web_prop_gen', value='Только "Я не знаю"')
     elif {2, 3, 4, 5, 7}.isdisjoint(set(lst_answers)) is False:  # red
         await mongo_update_stat_new(tg_id=poll_answer.user.id, column='web_prop_gen', value='Хотя бы один красный')
-    elif {1, 6}.isdisjoint(set(lst_answers)) is False:  # green
-        await mongo_update_stat_new(tg_id=poll_answer.user.id, column='web_prop_gen',
-                                    value='Есть зелёные и нет красных')
+    elif {6}.isdisjoint(set(lst_answers)) is False:  # green
+        await mongo_update_stat_new(tg_id=poll_answer.user.id, column='web_prop_gen', value='Есть зелёные и нет красных')
 
     await state.update_data(answer_4=poll_answer.option_ids)
     await mongo_update_stat_new(tg_id=poll_answer.user.id, column='web_prop_ex', value=lst_str)

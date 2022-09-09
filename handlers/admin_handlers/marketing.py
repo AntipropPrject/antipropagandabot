@@ -49,6 +49,7 @@ async def marketing_new_link(message: Message, bot: Bot, state: FSMContext):
         nmarkup.row(types.KeyboardButton(text="Проверить все ссылки"))
         nmarkup.row(types.KeyboardButton(text="Вернуться в меню администрирования"))
         await state.set_state(admin.marketing)
+        bot_link = f'https://t.me/{(await bot.get_me()).username.replace(" ", "_")}?start={link}'
         await message.answer(f'Создание ссылки под названием {label} успешно завершено:\n{bot_link}',
                              reply_markup=nmarkup.as_markup(resize_keyboard=True))
     # ДОБАВИТЬ СОЗДАНИЕ ТАБЛИЦЫ ЛИБО СЮДА, ЛИБО ЕЩЕ КУДА-ТО ПРИ СТАРТЕ
