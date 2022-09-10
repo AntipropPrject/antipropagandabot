@@ -1,61 +1,98 @@
 import asyncio
 
-from aiogram import Router, F
+from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.filters.command import CommandStart, CommandObject
 from aiogram.dispatcher.fsm.context import FSMContext
-from aiogram.types import Message
-from aiogram.utils.keyboard import ReplyKeyboardBuilder
+from aiogram.types import Message, BotCommandScopeChat, User, CallbackQuery
+from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 from bata import all_data
-from bot_statistics.stat import mongo_is_done, mongo_stat, mongo_stat_new
-from data_base.DBuse import mongo_user_info, sql_safe_select, advertising_value, mongo_ez_find_one, redis_just_one_write
+from bot_statistics.stat import mongo_is_done, mongo_stat, mongo_stat_new, advertising_value
+from data_base.DBuse import mongo_user_info, sql_safe_select, mongo_ez_find_one, redis_just_one_write, \
+    redis_just_one_read
 from day_func import day_count
 from handlers.story import true_resons_hand
 from handlers.story import main_menu_hand
+from handlers.story.anti_prop_hand import antip_what_is_prop, antip_only_tip_of_the_berg
+from handlers.story.main_menu_hand import mainmenu_really_menu
 from handlers.story.putin_hand import stopwar_start
 from handlers.story.stopwar_hand import stopwar_first_manipulation_argument
 from handlers.story.true_resons_hand import reasons_who_to_blame
+from states import welcome_states
+from states.antiprop_states import propaganda_victim
 from states.donbass_states import donbass_state
 from states.main_menu_states import MainMenuStates
 from states.welcome_states import start_dialog
+from utilts import MasterCommander
 
 flags = {"throttling_key": "True"}
 router = Router()
 
 
 @router.message(CommandStart(command_magic=F.args), flags=flags)
-async def adv_company(message: Message, state: FSMContext, command: CommandObject):
+async def adv_company(message: Message, bot: Bot, state: FSMContext, command: CommandObject):
     asyncio.create_task(advertising_value(command.args, message.from_user))
-    await commands_start(message, state)
+    await commands_start(message, bot, state)
 
 
-@router.message(commands=['start', 'help', 'restart'], state='*', flags=flags)
-async def commands_start(message: Message, state: FSMContext):  # Первое сообщение
-    asyncio.create_task(start_base(message))
+@router.message(commands=['start2'], flags=flags)
+async def start_donbas_results(message: Message, state: FSMContext):
+    text = await sql_safe_select('text', 'texts', {'name': 'start_how_to_manipulate'})
+    await state.set_state(welcome_states.start_dialog.big_story)
+    await redis_just_one_write(f'Usrs: {message.from_user.id}: StartDonbas:', 'Давай  👌')
+    nmarkap = ReplyKeyboardBuilder()
+    nmarkap.row(types.KeyboardButton(text="Готов(а) продолжить 👌"))
+    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+
+
+@router.callback_query(text="restarting")
+@router.message(commands=['start', 'restart'], state='*', flags=flags)
+async def commands_start(update: Message | CallbackQuery, bot: Bot, state: FSMContext):  # Первое сообщение
+    user_obj = update.from_user
+    if isinstance(update, CallbackQuery):
+        await update.answer()
+    else:
+        user_info = await mongo_ez_find_one('database', 'userinfo', {'_id': user_obj.id})
+        if user_info:
+            if user_info.get('datetime_end', False) is None:
+                inmarkup = InlineKeyboardBuilder()
+                inmarkup.add(types.InlineKeyboardButton(text="♻️ Начать заново! ♻️", callback_data="restarting"))
+                text = await sql_safe_select("text", "texts", {"name": "restart_are_you_sure"})
+                await update.answer(text, reply_markup=inmarkup.as_markup())
+                return
+        else:
+            await MasterCommander(bot, 'chat', user_obj.id).rewrite({})
+    asyncio.create_task(start_base(user_obj))
     await state.clear()
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Начнём 🇷🇺🇺🇦"))
     markup.row(types.KeyboardButton(text="А с чего мне тебе верить? 🤔"))
     markup.row(types.KeyboardButton(text="Сначала расскажи про 50 000 руб за ложь 💵"))
     text = await sql_safe_select("text", "texts", {"name": "start_hello"})
-    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await bot.send_message(user_obj.id, text,
+                           reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     await state.set_state(start_dialog.big_story)
 
 
-async def start_base(message):
+async def start_are_you_sure(message):
+    text = await sql_safe_select("text", "texts", {"name": "restart_are_you_sure"})
+    await redis_just_one_write(f'Usrs: {message.from_user.id}: want_to_restart', 'True', ttl=120)
+
+
+
+async def start_base(user: User):
     await day_count()
-    user_id = message.from_user.id  # if old is None:
+    user_id = user.id  # if old is None:
     redis = all_data().get_data_red()
-    for key in redis.scan_iter(f"Usrs: {message.from_user.id}:*"):
+    for key in redis.scan_iter(f"Usrs: {user.id}:*"):
         redis.delete(key)
     await mongo_stat(user_id)
     await mongo_stat_new(user_id)
-    await mongo_user_info(user_id, message.from_user.username)
-    if await mongo_ez_find_one('database', 'userinfo', {'_id': message.from_user.id, 'ref_parent': {'$exists': True},
+    await mongo_user_info(user_id, user.username)
+    if await mongo_ez_find_one('database', 'userinfo', {'_id': user.id, 'ref_parent': {'$exists': True},
                                                         'datetime_end': {'$eq': None}}):
-        await redis_just_one_write(f'Usrs: {message.from_user.id}: Ref', 1)
-
+        await redis_just_one_write(f'Usrs: {user.id}: Ref', 1)
 
 
 @router.message(commands=['menu'], flags=flags)
@@ -93,6 +130,12 @@ async def cmd_putest(message: Message, state: FSMContext):
     await reasons_who_to_blame(message, state)
 
 
+@router.message(commands=["proptest"], flags=flags)
+async def cmd_putest(message: Message, state: FSMContext):
+    await state.set_state(propaganda_victim.start)
+    await antip_what_is_prop(message, state)
+
+
 @router.message(commands=["donbass"], flags=flags)
 async def cmd_donbass(message: Message, state: FSMContext):
     await state.clear()
@@ -106,3 +149,13 @@ async def cmd_donbass(message: Message, state: FSMContext):
 @router.message(commands=["teststop"], flags=flags)
 async def cmd_donbass(message: Message, state: FSMContext):
     await stopwar_start(message, state)
+
+
+@router.message(commands=["commands_restore"], flags=flags)
+async def commands_restore(message: Message, bot: Bot, state: FSMContext):
+    await MasterCommander(bot, 'chat', message.from_user.id).clear()
+
+
+@router.message(commands=["test_reasons"], flags=flags)
+async def commands_restore(message: Message, bot: Bot, state: FSMContext):
+    await antip_only_tip_of_the_berg(message, state)

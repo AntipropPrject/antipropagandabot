@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<dataSource name="Production MongoDB (WARNING)">
-  <database-model serializer="dbm" dbms="MONGO" family-id="MONGO" format-version="4.40">
+<dataSource name="ЕБАНЫЙ ПРОД НЕ ТРОГАТЬ!">
+  <database-model serializer="dbm" dbms="MONGO" family-id="MONGO" format-version="4.43">
     <root id="1">
       <ServerVersion>5.0.9</ServerVersion>
     </root>
@@ -12,50 +12,47 @@
     <table id="7" parent="4" name="admins"/>
     <table id="8" parent="4" name="spam_news_main"/>
     <table id="9" parent="4" name="statistics"/>
-    <table id="10" parent="4" name="user_games"/>
-    <table id="11" parent="4" name="useranswer"/>
-    <table id="12" parent="4" name="userinfo"/>
-    <column id="13" parent="7" name="_id">
+    <table id="10" parent="4" name="statistics_new"/>
+    <table id="11" parent="4" name="user_games"/>
+    <table id="12" parent="4" name="useranswer"/>
+    <table id="13" parent="4" name="userinfo"/>
+    <column id="14" parent="7" name="_id">
       <DataType>Int64|12s</DataType>
       <Position>1</Position>
     </column>
-    <column id="14" parent="8" name="_id">
+    <column id="15" parent="7" name="access">
+      <DataType>Array|2003s</DataType>
+      <Position>1</Position>
+    </column>
+    <column id="16" parent="8" name="_id">
       <DataType>ObjectId|12s</DataType>
       <Position>1</Position>
     </column>
-    <column id="15" parent="8" name="caption">
+    <column id="17" parent="8" name="caption">
       <DataType>String|12s</DataType>
       <Position>1</Position>
     </column>
-    <column id="16" parent="8" name="media">
+    <column id="18" parent="8" name="media">
       <DataType>String|12s</DataType>
       <Position>1</Position>
     </column>
-    <column id="17" parent="9" name="_id">
+    <column id="19" parent="9" name="_id">
       <DataType>Int64|12s</DataType>
       <Position>1</Position>
     </column>
-    <column id="18" parent="9" name="antiprop">
+    <column id="20" parent="9" name="antiprop">
       <DataType>Int32|4s</DataType>
       <Position>1</Position>
     </column>
-    <column id="19" parent="9" name="donbass">
+    <column id="21" parent="9" name="come">
       <DataType>Int32|4s</DataType>
       <Position>1</Position>
     </column>
-    <column id="20" parent="9" name="political_view">
-      <DataType>String|12s</DataType>
-      <Position>1</Position>
-    </column>
-    <column id="21" parent="9" name="war_aims">
+    <column id="22" parent="9" name="donbass">
       <DataType>Int32|4s</DataType>
       <Position>1</Position>
     </column>
-    <column id="22" parent="9" name="come">
-      <DataType>Int32|4s</DataType>
-      <Position>1</Position>
-    </column>
-    <column id="23" parent="9" name="start">
+    <column id="23" parent="9" name="end">
       <DataType>Int32|4s</DataType>
       <Position>1</Position>
     </column>
@@ -63,96 +60,372 @@
       <DataType>Int32|4s</DataType>
       <Position>1</Position>
     </column>
-    <column id="25" parent="9" name="end">
-      <DataType>Int32|4s</DataType>
-      <Position>2</Position>
+    <column id="25" parent="9" name="political_view">
+      <DataType>String|12s</DataType>
+      <Position>1</Position>
     </column>
     <column id="26" parent="9" name="prevent_strike">
       <DataType>Int32|4s</DataType>
-      <Position>2</Position>
+      <Position>1</Position>
     </column>
     <column id="27" parent="9" name="putin">
       <DataType>Int32|4s</DataType>
-      <Position>3</Position>
+      <Position>1</Position>
     </column>
-    <column id="28" parent="9" name="faith">
+    <column id="28" parent="9" name="start">
+      <DataType>Int32|4s</DataType>
+      <Position>1</Position>
+    </column>
+    <column id="29" parent="9" name="war_aims">
+      <DataType>Int32|4s</DataType>
+      <Position>1</Position>
+    </column>
+    <column id="30" parent="9" name="faith">
       <DataType>String|12s</DataType>
-      <Position>3</Position>
+      <Position>2</Position>
     </column>
-    <column id="29" parent="10" name="_id">
+    <column id="31" parent="10" name="_id">
       <DataType>Int64|12s</DataType>
       <Position>1</Position>
     </column>
-    <column id="30" parent="10" name="mistakeorlie">
-      <DataType>Array|2003s</DataType>
-      <Position>1</Position>
-    </column>
-    <column id="31" parent="10" name="truthgame">
-      <DataType>Array|2003s</DataType>
-      <Position>1</Position>
-    </column>
-    <column id="32" parent="10" name="normal_game">
-      <DataType>Array|2003s</DataType>
-      <Position>1</Position>
-    </column>
-    <column id="33" parent="10" name="putin_lies">
-      <DataType>Array|2003s</DataType>
-      <Position>1</Position>
-    </column>
-    <column id="34" parent="10" name="ucraine_or_not_game">
-      <DataType>Array|2003s</DataType>
-      <Position>2</Position>
-    </column>
-    <column id="35" parent="10" name="putin_old_lies">
-      <DataType>Array|2003s</DataType>
-      <Position>2</Position>
-    </column>
-    <column id="36" parent="11" name="_id">
-      <DataType>Int64|12s</DataType>
-      <Position>1</Position>
-    </column>
-    <column id="37" parent="11" name="other_answer">
-      <DataType>list|4999545s</DataType>
-      <Position>1</Position>
-    </column>
-    <column id="38" parent="11" name="answers_1">
+    <column id="32" parent="10" name="antip_look_at_it_yourself">
       <DataType>String|12s</DataType>
       <Position>1</Position>
     </column>
-    <column id="39" parent="11" name="answers_2">
+    <column id="33" parent="10" name="can_ask_u_answ">
+      <DataType>String|12s</DataType>
+      <Position>1</Position>
+    </column>
+    <column id="34" parent="10" name="come">
+      <DataType>Boolean|12s</DataType>
+      <Position>1</Position>
+    </column>
+    <column id="35" parent="10" name="datetime">
+      <DataType>ISODate|91s</DataType>
+      <Position>1</Position>
+    </column>
+    <column id="36" parent="10" name="do_you_need_war_1">
+      <DataType>String|12s</DataType>
+      <Position>1</Position>
+    </column>
+    <column id="37" parent="10" name="donbass_end">
+      <DataType>String|12s</DataType>
+      <Position>1</Position>
+    </column>
+    <column id="38" parent="10" name="faith">
+      <DataType>String|12s</DataType>
+      <Position>1</Position>
+    </column>
+    <column id="39" parent="10" name="nazi_end">
+      <DataType>String|12s</DataType>
+      <Position>1</Position>
+    </column>
+    <column id="40" parent="10" name="normal_game_stats">
+      <DataType>String|12s</DataType>
+      <Position>1</Position>
+    </column>
+    <column id="41" parent="10" name="polit_status">
+      <DataType>String|12s</DataType>
+      <Position>1</Position>
+    </column>
+    <column id="42" parent="10" name="prevent_first_qstn">
+      <DataType>String|12s</DataType>
+      <Position>1</Position>
+    </column>
+    <column id="43" parent="10" name="prevent_strike_convinced">
+      <DataType>String|12s</DataType>
+      <Position>1</Position>
+    </column>
+    <column id="44" parent="10" name="reaction_on_anecdot">
+      <DataType>String|12s</DataType>
+      <Position>1</Position>
+    </column>
+    <column id="45" parent="10" name="start_are_you_ready">
+      <DataType>String|12s</DataType>
+      <Position>1</Position>
+    </column>
+    <column id="46" parent="10" name="tv_love_gen">
+      <DataType>String|12s</DataType>
+      <Position>1</Position>
+    </column>
+    <column id="47" parent="10" name="war_aims_ex">
+      <DataType>Array|2003s</DataType>
+      <Position>1</Position>
+    </column>
+    <column id="48" parent="10" name="antip_yandex_rupor">
+      <DataType>String|12s</DataType>
+      <Position>2</Position>
+    </column>
+    <column id="49" parent="10" name="corpses">
+      <DataType>String|12s</DataType>
+      <Position>2</Position>
+    </column>
+    <column id="50" parent="10" name="do_you_need_war_2">
+      <DataType>String|12s</DataType>
+      <Position>2</Position>
+    </column>
+    <column id="51" parent="10" name="donbass_ex">
       <DataType>Array|2003s</DataType>
       <Position>2</Position>
     </column>
-    <column id="40" parent="11" name="answers_3">
+    <column id="52" parent="10" name="false_on_prop">
+      <DataType>String|12s</DataType>
+      <Position>2</Position>
+    </column>
+    <column id="53" parent="10" name="nazi_ex">
+      <DataType>Array|2003s</DataType>
+      <Position>2</Position>
+    </column>
+    <column id="54" parent="10" name="not_love_putin_descr">
+      <DataType>String|12s</DataType>
+      <Position>2</Position>
+    </column>
+    <column id="55" parent="10" name="prevent_fourth_qstn">
+      <DataType>String|12s</DataType>
+      <Position>2</Position>
+    </column>
+    <column id="56" parent="10" name="prevent_strike_fin">
+      <DataType>String|12s</DataType>
+      <Position>2</Position>
+    </column>
+    <column id="57" parent="10" name="real_reasons_wanted">
+      <DataType>String|12s</DataType>
+      <Position>2</Position>
+    </column>
+    <column id="58" parent="10" name="start_continue_or_peace_results">
+      <DataType>String|12s</DataType>
+      <Position>2</Position>
+    </column>
+    <column id="59" parent="10" name="war_aims_gen">
+      <DataType>String|12s</DataType>
+      <Position>2</Position>
+    </column>
+    <column id="60" parent="10" name="crucified_man">
       <DataType>String|12s</DataType>
       <Position>3</Position>
     </column>
-    <column id="41" parent="11" name="answers_4">
+    <column id="61" parent="10" name="false_on_tv">
+      <DataType>String|12s</DataType>
+      <Position>3</Position>
+    </column>
+    <column id="62" parent="10" name="neo-nazi">
+      <DataType>String|12s</DataType>
+      <Position>3</Position>
+    </column>
+    <column id="63" parent="10" name="now_he_normal">
+      <DataType>String|12s</DataType>
+      <Position>3</Position>
+    </column>
+    <column id="64" parent="10" name="prevent_second_qstn">
+      <DataType>String|12s</DataType>
+      <Position>3</Position>
+    </column>
+    <column id="65" parent="10" name="prevent_strike_start">
+      <DataType>String|12s</DataType>
+      <Position>3</Position>
+    </column>
+    <column id="66" parent="10" name="start_dam_results">
+      <DataType>String|12s</DataType>
+      <Position>3</Position>
+    </column>
+    <column id="67" parent="10" name="war_or_not">
+      <DataType>String|12s</DataType>
+      <Position>3</Position>
+    </column>
+    <column id="68" parent="10" name="false_on_web_prop">
+      <DataType>String|12s</DataType>
+      <Position>4</Position>
+    </column>
+    <column id="69" parent="10" name="no_putin_will_stop">
+      <DataType>String|12s</DataType>
+      <Position>4</Position>
+    </column>
+    <column id="70" parent="10" name="on_ucraine_or_not">
+      <DataType>String|12s</DataType>
+      <Position>4</Position>
+    </column>
+    <column id="71" parent="10" name="prevent_third_qstn">
+      <DataType>String|12s</DataType>
+      <Position>4</Position>
+    </column>
+    <column id="72" parent="10" name="start_donbas_results">
+      <DataType>String|12s</DataType>
+      <Position>4</Position>
+    </column>
+    <column id="73" parent="10" name="web_prop_ex">
       <DataType>Array|2003s</DataType>
       <Position>4</Position>
     </column>
-    <column id="42" parent="11" name="answers_5">
+    <column id="74" parent="10" name="first_button">
+      <DataType>String|12s</DataType>
+      <Position>5</Position>
+    </column>
+    <column id="75" parent="10" name="prop_ex">
       <DataType>Array|2003s</DataType>
       <Position>5</Position>
     </column>
-    <column id="43" parent="12" name="_id">
+    <column id="76" parent="10" name="start_donbass">
+      <DataType>String|12s</DataType>
+      <Position>5</Position>
+    </column>
+    <column id="77" parent="10" name="web_prop_gen">
+      <DataType>String|12s</DataType>
+      <Position>5</Position>
+    </column>
+    <column id="78" parent="10" name="game_false_or_true">
+      <DataType>String|12s</DataType>
+      <Position>6</Position>
+    </column>
+    <column id="79" parent="10" name="prop_gen">
+      <DataType>String|12s</DataType>
+      <Position>6</Position>
+    </column>
+    <column id="80" parent="10" name="start_nazi">
+      <DataType>String|12s</DataType>
+      <Position>6</Position>
+    </column>
+    <column id="81" parent="10" name="why_not_wiki">
+      <DataType>Array|2003s</DataType>
+      <Position>6</Position>
+    </column>
+    <column id="82" parent="10" name="game_i_show_u">
+      <DataType>String|12s</DataType>
+      <Position>7</Position>
+    </column>
+    <column id="83" parent="10" name="prop_machine_1">
+      <DataType>String|12s</DataType>
+      <Position>7</Position>
+    </column>
+    <column id="84" parent="10" name="start_now_you_putin_results">
+      <DataType>String|12s</DataType>
+      <Position>7</Position>
+    </column>
+    <column id="85" parent="10" name="will_they_stop">
+      <DataType>String|12s</DataType>
+      <Position>7</Position>
+    </column>
+    <column id="86" parent="10" name="game_ru_or_usr">
+      <DataType>String|12s</DataType>
+      <Position>8</Position>
+    </column>
+    <column id="87" parent="10" name="prop_machine_2">
+      <DataType>String|12s</DataType>
+      <Position>8</Position>
+    </column>
+    <column id="88" parent="10" name="start_trolley_1_result">
+      <DataType>String|12s</DataType>
+      <Position>8</Position>
+    </column>
+    <column id="89" parent="10" name="grade_tv">
+      <DataType>String|12s</DataType>
+      <Position>9</Position>
+    </column>
+    <column id="90" parent="10" name="start_trolley_2_result">
+      <DataType>String|12s</DataType>
+      <Position>9</Position>
+    </column>
+    <column id="91" parent="10" name="how_it_helped">
+      <DataType>String|12s</DataType>
+      <Position>10</Position>
+    </column>
+    <column id="92" parent="10" name="started_putin">
+      <DataType>String|12s</DataType>
+      <Position>10</Position>
+    </column>
+    <column id="93" parent="10" name="how_putin_ends">
+      <DataType>String|12s</DataType>
+      <Position>11</Position>
+    </column>
+    <column id="94" parent="10" name="started_putin_lies">
+      <DataType>String|12s</DataType>
+      <Position>11</Position>
+    </column>
+    <column id="95" parent="10" name="interest_politics">
+      <DataType>String|12s</DataType>
+      <Position>12</Position>
+    </column>
+    <column id="96" parent="10" name="timer">
+      <DataType>String|12s</DataType>
+      <Position>12</Position>
+    </column>
+    <column id="97" parent="10" name="map_antiprop">
+      <DataType>String|12s</DataType>
+      <Position>13</Position>
+    </column>
+    <column id="98" parent="11" name="_id">
       <DataType>Int64|12s</DataType>
       <Position>1</Position>
     </column>
-    <column id="44" parent="12" name="datetime">
-      <DataType>String|12s</DataType>
+    <column id="99" parent="11" name="mistakeorlie">
+      <DataType>Array|2003s</DataType>
       <Position>1</Position>
     </column>
-    <column id="45" parent="12" name="username">
-      <DataType>String|12s</DataType>
+    <column id="100" parent="11" name="normal_game">
+      <DataType>Array|2003s</DataType>
       <Position>1</Position>
     </column>
-    <column id="46" parent="12" name="viewed_news">
-      <DataType>list|4999545s</DataType>
+    <column id="101" parent="11" name="putin_lies">
+      <DataType>Array|2003s</DataType>
+      <Position>1</Position>
+    </column>
+    <column id="102" parent="11" name="truthgame">
+      <DataType>Array|2003s</DataType>
+      <Position>1</Position>
+    </column>
+    <column id="103" parent="11" name="ucraine_or_not_game">
+      <DataType>Array|2003s</DataType>
+      <Position>1</Position>
+    </column>
+    <column id="104" parent="11" name="putin_old_lies">
+      <DataType>Array|2003s</DataType>
       <Position>2</Position>
     </column>
-    <column id="47" parent="12" name="datetime_end">
-      <DataType>ISODate|91s</DataType>
+    <column id="105" parent="12" name="_id">
+      <DataType>Int64|12s</DataType>
+      <Position>1</Position>
+    </column>
+    <column id="106" parent="12" name="answers_1">
+      <DataType>String|12s</DataType>
+      <Position>1</Position>
+    </column>
+    <column id="107" parent="12" name="other_answer">
+      <DataType>list|4999545s</DataType>
+      <Position>1</Position>
+    </column>
+    <column id="108" parent="12" name="answers_2">
+      <DataType>Array|2003s</DataType>
+      <Position>2</Position>
+    </column>
+    <column id="109" parent="12" name="answers_3">
+      <DataType>String|12s</DataType>
+      <Position>3</Position>
+    </column>
+    <column id="110" parent="12" name="answers_4">
+      <DataType>Array|2003s</DataType>
+      <Position>4</Position>
+    </column>
+    <column id="111" parent="12" name="answers_5">
+      <DataType>Array|2003s</DataType>
+      <Position>5</Position>
+    </column>
+    <column id="112" parent="13" name="_id">
+      <DataType>Int64|12s</DataType>
+      <Position>1</Position>
+    </column>
+    <column id="113" parent="13" name="datetime">
+      <DataType>String|12s</DataType>
+      <Position>1</Position>
+    </column>
+    <column id="114" parent="13" name="datetime_end">
+      <DataType>String|12s</DataType>
+      <Position>1</Position>
+    </column>
+    <column id="115" parent="13" name="username">
+      <DataType>String|12s</DataType>
+      <Position>1</Position>
+    </column>
+    <column id="116" parent="13" name="viewed_news">
+      <DataType>list|4999545s</DataType>
       <Position>2</Position>
     </column>
   </database-model>

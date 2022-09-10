@@ -1,4 +1,4 @@
-from aiogram import Router, types, F
+from aiogram import Router, types, F, Bot
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
@@ -11,6 +11,7 @@ from filters.isAdmin import IsSudo
 from keyboards.admin_keys import redct_editors
 from log import logg
 from states.admin_states import admin
+from utilts import MasterCommander
 
 router = Router()
 router.message.filter(state=admin)
@@ -38,13 +39,13 @@ async def sadmins(message: Message, state: FSMContext):
 async def sadmins_select(message: Message):
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Посмотреть редакторов'")
     admins_list = await mongo_all_admins()
-    text = ''
     for cool_admin in admins_list:
+        text = ''
         name = (await mongo_select_info(cool_admin['_id']))['username']
         levels = "\n - ".join([(str(lvl)) for lvl in cool_admin['access']])
         text = text + f"Пользователь — @{name}\n" \
                       f"ID — <code>{cool_admin['_id']}</code>\n" \
-                      f"Уровни доступа:\n<i> - {levels}</i>"
+                      f"Уровни доступа:\n<i> - {levels}</i>\n"
         await message.answer(text)
 
 
@@ -76,7 +77,7 @@ async def admins_add_lvl_choose(message: Message, state: FSMContext):
 
 
 @router.message(IsSudo(), F.text.in_(set(access_levels)), state=admin.add)
-async def admins_add_lvl_done(message: Message, state: FSMContext):
+async def admins_add_lvl_done(message: Message, bot: Bot, state: FSMContext):
     new_admin_id = (await state.get_data())['new_admin_id']
     # проверка есть ли человек в общей базе
     if await mongo_select_info(new_admin_id):
@@ -87,6 +88,7 @@ async def admins_add_lvl_done(message: Message, state: FSMContext):
         await message.answer(f"Уровень доступа {message.text} добавлен для пользователя {new_admin_id}")
         await logg.admin_logs(message.from_user.id, message.from_user.username,
                               f"Новый уровень доступа для'{new_admin_id}': {message.text}")
+        await MasterCommander(bot, 'chat', new_admin_id).add({'admin': 'Админка'})
         await state.clear()
         await sadmins(message, state)
     else:

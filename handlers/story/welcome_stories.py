@@ -6,10 +6,10 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from bata import all_data
 from bot_statistics.stat import mongo_update_stat_new
 from data_base.DBuse import poll_write, sql_safe_select, redis_just_one_write, \
-    poll_get, redis_just_one_read
+    poll_get, redis_just_one_read, mongo_count_docs
 from log.logg import get_logger
 from states.welcome_states import start_dialog
-from utilts import simple_media, ref_spy_sender
+from utilts import simple_media, ref_spy_sender, CoolPercReplacer
 
 flags = {"throttling_key": "True"}
 router = Router()
@@ -71,8 +71,8 @@ async def start_trolley_1_result(message: Message):
         count_right = await collection.count_documents({'start_trolley_1_result': "Сверну направо ➡️"})
         count_straight = await collection.count_documents({'start_trolley_1_result': 'Продолжу ехать прямо ⬆️'})
         all_people = count_straight + count_right
-        text = text.replace('XX', f"{(round(count_straight/all_people * 100, 1) if all_people > 0 else 'N/A')}")
-        text = text.replace('YY', f"{(round(count_right/all_people * 100, 1) if all_people > 0 else 'N/A')}")
+        text = text.replace('XX', f"{(round(count_straight / all_people * 100, 1) if all_people > 0 else 'N/A')}")
+        text = text.replace('YY', f"{(round(count_right / all_people * 100, 1) if all_people > 0 else 'N/A')}")
     except:
         text = text.replace('XX', 'N/A')
         text = text.replace('YY', 'N/A')
@@ -93,31 +93,34 @@ async def start_trolley_2(message: Message):
 async def start_trolley_2_result(message: Message):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='start_trolley_2_result',
                                 value=message.text)
-    text = await sql_safe_select('text', 'texts', {'name': 'start_trolley_2_result'})
+    if message.text == "Ничего не буду делать 🙅‍♂️" and \
+            await mongo_count_docs('database', 'statistics_new',
+                                   {'_id': message.from_user.id, 'start_trolley_1_result': "Сверну направо ➡️"}):
+        text_tag = 'start_trolley_2_peace_result'
+    else:
+        text_tag = 'start_trolley_2_result'
+    text = await sql_safe_select('text', 'texts', {'name': text_tag})
 
-    try:
-        client = all_data().get_mongo()
-        database = client.database
-        collection = database['statistics_new']
-        passive = await collection.count_documents({'start_trolley_2_result': 'Ничего не буду делать 🙅‍♂️'})
-        active = await collection.count_documents({'start_trolley_2_result': 'Столкну толстяка с моста ⬇️'})
-        ZZ = (await collection.count_documents({'start_trolley_1_result': "Сверну направо ➡️"})) - \
-             (await collection.count_documents({'start_trolley_2_result': 'Столкну толстяка с моста ⬇️'}))
-        all_people = passive + active
-        text = text.replace('XX', f"{(round(passive/all_people * 100, 1) if all_people > 0 else 'N/A')}")
-        text = text.replace('YY', f"{(round(active/all_people * 100, 1) if all_people > 0 else 'N/A')}")
-        text = text.replace('ZZ', f"{(round(ZZ/all_people * 100, 1) if all_people > 0 else 'N/A')}")
-    except:
-        text = text.replace('XX', 'N/A')
-        text = text.replace('YY', 'N/A')
-        text = text.replace('ZZ', 'N/A')
-
+    fat_all = await mongo_count_docs('database', 'statistics_new', {'start_trolley_2_result': {'$exists': True}})
+    fat_not = await mongo_count_docs('database', 'statistics_new',
+                                     {'start_trolley_2_result': "Ничего не буду делать 🙅‍♂️"})
+    fat_kill = await mongo_count_docs('database', 'statistics_new',
+                                      {'start_trolley_2_result': "Столкну толстяка с моста ⬇️"})
+    right_turn = await mongo_count_docs('database', 'statistics_new',
+                                        {'start_trolley_1_result': "Сверну направо ➡️"})
+    txt = CoolPercReplacer(text, fat_all)
+    txt.replace('XX', fat_not)
+    txt.replace('YY', fat_kill)
+    txt.replace('ZZ', right_turn - fat_kill)
     nmarkap = ReplyKeyboardBuilder()
-    nmarkap.row(types.KeyboardButton(text="В отличии от рабочего на путях, толстяк не замешан в этой ситуации 🤔"))
-    nmarkap.row(types.KeyboardButton(text="Во втором случае мы лишь наблюдаем, а не участвуем — это другое 👀"))
-    nmarkap.row(types.KeyboardButton(text="Убивать своими руками — это совсем другое ☝️"))
-    nmarkap.row(types.KeyboardButton(text="Я не знаю / Другая причина 🤷‍♀️"))
-    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+    if text_tag != 'start_trolley_2_peace_result':
+        nmarkap.row(types.KeyboardButton(text="В отличии от рабочего на путях, толстяк не замешан в этой ситуации 🤔"))
+        nmarkap.row(types.KeyboardButton(text="Во втором случае мы лишь наблюдаем, а не участвуем — это другое 👀"))
+        nmarkap.row(types.KeyboardButton(text="Убивать своими руками — это совсем другое ☝️"))
+        nmarkap.row(types.KeyboardButton(text="Я не знаю / Другая причина 🤷‍♀️"))
+    await message.answer(txt(), disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+    if text_tag == 'start_trolley_2_peace_result':
+        await start_are_you_ready(message)
 
 
 @router.message((F.text.contains('другое')) | (F.text.contains('Другая причина')) |
@@ -128,12 +131,16 @@ async def start_trolley_2_result_answers(message: Message):
     text = None
     if 'толстяк не замешан' in message.text:
         text = await sql_safe_select('text', 'texts', {'name': 'start_worker_is_guilty'})
-    elif 'мы лишь наблюдаем' in message.text:
+    elif 'не участвуем' in message.text:
         text = await sql_safe_select('text', 'texts', {'name': 'start_fatty_in_trolley'})
     elif 'это совсем другое' in message.text:
         text = await sql_safe_select('text', 'texts', {'name': 'start_fatty_to_trap'})
     if text:
         await message.answer(text, disable_web_page_preview=True)
+    await start_are_you_ready(message)
+
+
+async def start_are_you_ready(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'start_are_you_ready'})
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Продолжим 👌"))
@@ -194,8 +201,8 @@ async def start_dam_results(message: Message):
         passive = await collection.count_documents({'start_dam_results': 'Ничего не  буду делать  🙅‍♂️'})
         active = await collection.count_documents({'start_dam_results': 'Взорву дамбу 💥'})
         all_people = passive + active
-        text = text.replace('XX', f"{(round(passive/all_people * 100, 1) if all_people > 0 else 'N/A')}")
-        text = text.replace('YY', f"{(round(active/all_people * 100, 1) if all_people > 0 else 'N/A')}")
+        text = text.replace('XX', f"{(round(passive / all_people * 100, 1) if all_people > 0 else 'N/A')}")
+        text = text.replace('YY', f"{(round(active / all_people * 100, 1) if all_people > 0 else 'N/A')}")
     except Exception as e:
         print(e)
         text = text.replace('XX', 'N/A')
@@ -239,7 +246,6 @@ async def start_continue_or_peace_results(message: Message):
         text = text.replace('XX', 'N/A')
         text = text.replace('YY', 'N/A')
         text = text.replace('ZZ', 'N/A')
-
 
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Задавай 👌"))
@@ -326,7 +332,6 @@ async def start_donbas_results(message: Message):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='start_donbas_results',
                                 value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'start_donbas_results'})
-    media = await sql_safe_select('t_id', 'assets', {'name': 'start_donbas_results'})
     try:
         client = all_data().get_mongo()
         database = client.database
@@ -343,7 +348,8 @@ async def start_donbas_results(message: Message):
     await redis_just_one_write(f'Usrs: {message.from_user.id}: StartDonbas:', message.text)
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Продолжай ⌛️"))
-    await message.answer_photo(media, text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+    await simple_media(message, 'start_donbas_results', nmarkap.as_markup(resize_keyboard=True),
+                       custom_caption=text)
 
 
 @router.message((F.text == "Продолжай ⌛️"), flags=flags)
@@ -351,7 +357,7 @@ async def start_donbas_putin(message: Message):
     await simple_media(message, 'start_donbas_putin')
     nmarkap = ReplyKeyboardBuilder()
     if (await redis_just_one_read(f'Usrs: {message.from_user.id}: StartDonbas:')) == "Знал(а) ✅" or (
-            await redis_just_one_read(f'Usrs: {message.from_user.id}: Start_answers: NewPolitStat:')) ==\
+            await redis_just_one_read(f'Usrs: {message.from_user.id}: Start_answers: NewPolitStat:')) == \
             'Противник войны 🕊':
         await start_remember_money(message)
     else:

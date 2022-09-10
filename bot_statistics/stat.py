@@ -1,7 +1,11 @@
 import datetime
+import re
+
+import aiohttp
+from aiogram.types import User
 
 from bata import all_data
-from data_base.DBuse import mongo_select_info
+from data_base.DBuse import mongo_select_info, data_getter, sql_add_value, mongo_user_info, mongo_easy_upsert
 from log import logg
 
 client = all_data().get_mongo()
@@ -79,3 +83,28 @@ async def mongo_is_done(p_id):
         return collection['end']
     except KeyError:
         pass
+
+
+async def advertising_value(tag, user: User):
+    origin = ''
+    if re.search("^adv_", tag):
+        all_tags = await data_getter("SELECT id FROM dumbstats.advertising")
+        for row in all_tags:
+            if tag in row:
+                await sql_add_value("dumbstats.advertising", "count", {"id": tag})
+        origin = 'Internal'
+    elif tag.isdigit():
+        if int(tag) != user.id:
+            origin = 'Referal'
+            await mongo_user_info(user.id, user.username)
+            await mongo_easy_upsert('database', 'userinfo', {'_id': user.id},
+                                    {'ref_parent': tag,  'name_surname': user.full_name})
+    else:
+        origin = 'Tracker'
+        url = f'https://pravdobot.com/cx79l1k.php?cnv_id={tag}'
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url=url) as response:
+                status = response.status
+                print(status)
+    await mongo_stat_new(user.id)
+    await mongo_update_stat_new(user.id, 'origin', value=origin)

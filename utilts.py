@@ -7,7 +7,9 @@ from typing import Union
 from aiogram import Bot
 from aiogram.exceptions import TelegramBadRequest, TelegramNetworkError, TelegramForbiddenError
 from aiogram.types import Message, ReplyKeyboardRemove, InlineKeyboardMarkup, ReplyKeyboardMarkup, ForceReply, \
-    FSInputFile, InputFile
+    FSInputFile, InputFile, InputMediaVideo, InputMediaPhoto, BotCommandScopeChat, BotCommandScopeDefault, \
+    BotCommandScopeAllPrivateChats, BotCommandScopeAllGroupChats, BotCommandScopeAllChatAdministrators, \
+    BotCommandScopeChatAdministrators, BotCommandScopeChatMember, BotCommand
 
 import bata
 from data_base.DBuse import sql_safe_select, sql_safe_insert, sql_safe_update, data_getter, sql_select_row_like, \
@@ -21,12 +23,16 @@ import git
 
 async def simple_media(message: Message, tag: str,
                        reply_markup: Union[InlineKeyboardMarkup, ReplyKeyboardMarkup,
-                                           ReplyKeyboardRemove, ForceReply, None] = None):
+                                           ReplyKeyboardRemove, ForceReply, None] = None,
+                       custom_caption: str = None):
+    """
+    You can use one tag. If there text with that tag, it will become caption. You can pass custom caption
+    """
     try:
-        """
-        You can use one tag. If there text with that tag, it will become caption
-        """
-        text = await sql_safe_select("text", "texts", {"name": tag})
+        if custom_caption:
+            text = custom_caption
+        else:
+            text = await sql_safe_select("text", "texts", {"name": tag})
         media = await sql_safe_select("t_id", "assets", {"name": tag})
         if text is not False:
             try:
@@ -48,8 +54,64 @@ async def simple_media(message: Message, tag: str,
                     media = await sql_safe_select("t_id", "assets", {"name": 'ERROR_SORRY'})
                     await logg.get_error(f'NO {tag}')
                     await message.answer_photo(media, reply_markup=reply_markup)
-    except TelegramBadRequest:
-        print("Странная ошибка")
+    except TelegramBadRequest as err:
+        print(err)
+
+
+async def simple_media_bot(bot: Bot, chat_id: int, tag: str,
+                           reply_markup: Union[InlineKeyboardMarkup, ReplyKeyboardMarkup,
+                                               ReplyKeyboardRemove, ForceReply, None] = None,
+                           custom_caption: str = None):
+    """
+    You can use one tag. If there text with that tag, it will become caption. You can pass custom caption
+    """
+    try:
+        if custom_caption:
+            text = custom_caption
+        else:
+            text = await sql_safe_select("text", "texts", {"name": tag})
+        media = await sql_safe_select("t_id", "assets", {"name": tag})
+        if text is not False:
+            try:
+                return await bot.send_photo(chat_id, media, caption=text, reply_markup=reply_markup)
+            except TelegramBadRequest:
+                try:
+                    return await bot.send_video(chat_id, media, caption=text, reply_markup=reply_markup)
+                except TelegramBadRequest:
+                    media = await sql_safe_select("t_id", "assets", {"name": 'ERROR_SORRY'})
+                    await logg.get_error(f'NO {tag}')
+                    await bot.send_photo(chat_id, media, caption=text, reply_markup=reply_markup)
+        else:
+            try:
+                return await bot.send_photo(chat_id, media, reply_markup=reply_markup)
+            except TelegramBadRequest:
+                try:
+                    return await bot.send_video(chat_id, media, reply_markup=reply_markup)
+                except TelegramBadRequest:
+                    media = await sql_safe_select("t_id", "assets", {"name": 'ERROR_SORRY'})
+                    await logg.get_error(f'NO {tag}')
+                    await bot.send_photo(chat_id, media, reply_markup=reply_markup)
+    except TelegramBadRequest as err:
+        print(err)
+
+
+async def simple_video_album(message: Message, tags: list[str], text_tag: str = None):
+    media_list, caption = list(), str()
+    if text_tag:
+        caption = await sql_safe_select("text", "texts", {"name": text_tag})
+    for tag in tags:
+        media = await sql_safe_select("t_id", "assets", {"name": tag})
+        if media:
+            media_list.append(InputMediaVideo(media=media))
+        else:
+            media_list.append(InputMediaPhoto(media=await sql_safe_select("t_id", "assets", {"name": 'ERROR_SORRY'})))
+    if media_list:
+        if caption:
+            media_list[-1].caption = caption
+        try:
+            await message.answer_media_group(media_list)
+        except TelegramBadRequest as err:
+            print(err)
 
 
 async def game_answer(message: Message, telegram_media_id: Union[int, InputFile] = None, text: str = None,
@@ -69,10 +131,34 @@ async def game_answer(message: Message, telegram_media_id: Union[int, InputFile]
 
 def percentage_replace(text: str, symbol: str, part: int, base: int):
     try:
-        perc = part/base*100
+        perc = part / base * 100
     except ZeroDivisionError:
         perc = 0
     return text.replace(symbol, str(round(perc)))
+
+
+class CoolPercReplacer:
+    def __init__(self, text: str, base: int):
+        self.text = text
+        self.base = base
+
+    def __repr__(self):
+        return self.text
+
+    def __call__(self, *args, **kwargs):
+        return str(self.text)
+
+    def replace(self, symbol: str, part: int, *args, temp_base: int = None):
+        whole = self.base
+        if temp_base:
+            whole = temp_base
+        if self.text:
+            try:
+                perc = part / whole * 100
+            except ZeroDivisionError:
+                perc = 0
+            self.text = self.text.replace(symbol, str(round(perc)))
+
 
 
 async def bot_send_spam(bot: Bot, user_id: Union[int, str], telegram_media_id: Union[int, InputFile] = None,
@@ -126,6 +212,46 @@ async def ref_spy_sender(bot: Bot, child_telegram_id: str | int, message_to_send
         await bot.send_message(parent_id, message_to_send)
     except TelegramBadRequest as error:
         await logg.get_error(f"Bad referal parent!! | {error}", __file__)
+
+
+class MasterCommander:
+
+    def __init__(self, bot: Bot, scope_lvl: str = 'default', chat_id: int = None, user_id: int = None):
+        self.bot = bot
+        if scope_lvl == 'default':
+            self.scope = BotCommandScopeDefault()
+        elif scope_lvl == 'all_private_chats':
+            self.scope = BotCommandScopeAllPrivateChats()
+        elif scope_lvl == 'all_group_chats':
+            self.scope = BotCommandScopeAllGroupChats()
+        elif scope_lvl == 'all_chat_administrators':
+            self.scope = BotCommandScopeAllChatAdministrators()
+        elif scope_lvl == 'chat' and chat_id:
+            self.scope = BotCommandScopeChat(chat_id=chat_id)
+        elif scope_lvl == 'chat_administrators' and chat_id:
+            self.scope = BotCommandScopeChatAdministrators(chat_id=chat_id)
+        elif scope_lvl == 'chat_member' and chat_id and user_id:
+            self.scope = BotCommandScopeChatMember(chat_id=chat_id, user_id=user_id)
+
+    async def clear(self):
+        await self.bot.delete_my_commands(scope=self.scope)
+
+    async def add(self, new_commands: dict, check_default_scope: bool = True):
+        """Pass to this method dictionaty, where keys are commands and values is commands descriptions:\n
+        new_commands = {'comm1': 'comm1 description', 'comm2': 'comm1 description'}"""
+        command_list = await self.bot.get_my_commands(scope=self.scope)
+        if check_default_scope:
+            command_list.extend(await self.bot.get_my_commands(scope=BotCommandScopeDefault()))
+        for command in new_commands:
+            command_list.append(BotCommand(command=command, description=new_commands[command]))
+        await self.bot.set_my_commands(commands=command_list, scope=self.scope)
+
+    async def rewrite(self, new_commands: dict):
+        """This method is similar to .add but will rewrite all commands listm no matter what commands are avaliable"""
+        command_list = list()
+        for command in new_commands:
+            command_list.append(BotCommand(command=command, description=new_commands[command]))
+        await self.bot.set_my_commands(commands=command_list, scope=self.scope)
 
 
 class Phoenix:

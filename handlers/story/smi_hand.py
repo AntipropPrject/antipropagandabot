@@ -6,7 +6,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from bot_statistics.stat import mongo_update_stat_new
 from data_base.DBuse import *
-from handlers.story.anti_prop_hand import antip_truth_game_start, antip_web_exit_1
+from handlers.story.anti_prop_hand import antip_funny_propaganda, antip_web_exit_1
 from states.antiprop_states import propaganda_victim
 
 flags = {"throttling_key": "True"}
@@ -146,7 +146,7 @@ async def sme_statement_start_over(message: Message, state: FSMContext):
     try:
         person = person_list[0]
     except IndexError:
-        await antip_truth_game_start(message, state)
+        await antip_funny_propaganda(message, state)
     else:
         nmarkup = ReplyKeyboardBuilder()
         options = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')

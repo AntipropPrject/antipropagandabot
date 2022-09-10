@@ -6,7 +6,7 @@ from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.dispatcher.fsm.state import StatesGroup, State
-from aiogram.types import Message
+from aiogram.types import Message, BotCommand, BotCommandScope, BotCommandScopeChat
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
@@ -15,7 +15,7 @@ from data_base.DBuse import sql_safe_select, redis_just_one_write, redis_just_on
 from handlers.story.main_menu_hand import mainmenu_really_menu
 from log import logg
 from states.main_menu_states import MainMenuStates
-from utilts import simple_media, percentage_replace, ref_master, ref_spy_sender
+from utilts import simple_media, percentage_replace, ref_master, ref_spy_sender, MasterCommander
 
 
 class StopWarState(StatesGroup):
@@ -493,7 +493,8 @@ async def stopwar_timer(message: Message, bot: Bot):
         await asyncio.sleep(1)
         await del_key(f'Usrs: {message.from_user.id}: count:')
         textend = await sql_safe_select('text', 'texts', {'name': 'stopwar_end_timer'})
-        await message.answer(textend, reply_markup=nmarkup.as_markup(resize_keyboard=True), parse_mode="HTML")
+        await message.answer(textend, reply_markup=nmarkup.as_markup(resize_keyboard=True), parse_mode="HTML",
+                             disable_web_page_preview=True)
         await bot.delete_message(chat_id=message.from_user.id, message_id=m_id)
         print('Countdown finished.')
     else:
@@ -520,7 +521,8 @@ async def stopwar_share_blindly(message: Message):
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
         textend = await sql_safe_select('text', 'texts', {'name': 'stopwar_end_timer'})
-        await message.answer(textend, reply_markup=nmarkup.as_markup(resize_keyboard=True), parse_mode="HTML")
+        await message.answer(textend, reply_markup=nmarkup.as_markup(resize_keyboard=True), parse_mode="HTML",
+                             disable_web_page_preview=True)
 
 
 @router.message((F.text == "Покажи инструкцию, как поделиться со всем списком контактов 📝"), flags=flags)
@@ -536,7 +538,7 @@ async def stopwar_bulk_forwarding(message: Message):
 
 
 @router.message((F.text == "Перейти в главное меню 👇"), flags=flags)
-async def main_menu(message: Message, state: FSMContext):
+async def main_menu(message: Message, bot: Bot, state: FSMContext):
     timer = await redis_just_one_read(f'Usrs: {message.from_user.id}: count:')
     if timer == '1':
         await message.answer('Пожалуйста, дождитесь окончания таймера,'
@@ -544,6 +546,8 @@ async def main_menu(message: Message, state: FSMContext):
                              ' это время зря — поделитесь мной со своими родственниками,'
                              ' друзьями и знакомыми! 🙏')
     else:
+        await MasterCommander(bot, 'chat', message.from_user.id).add({'menu': 'Главное меню'},
+                                                                     check_default_scope=False)
         await mongo_update_stat_new(tg_id=message.from_user.id, column='main_menu', value='Да')
         await state.set_state(MainMenuStates.main)
         await mainmenu_really_menu(message, state)

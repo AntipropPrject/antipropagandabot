@@ -6,10 +6,11 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
 from data_base.DBuse import poll_write, sql_safe_select, mongo_add, mongo_select, redis_just_one_write, \
-    redis_just_one_read
+    redis_just_one_read, mongo_count_docs
 from resources.all_polls import web_prop, welc_message_one, people_prop
 from states import welcome_states
 from states.antiprop_states import propaganda_victim
+from utilts import simple_media, simple_media_bot, CoolPercReplacer
 
 flags = {"throttling_key": "True"}
 router = Router()
@@ -32,34 +33,38 @@ async def message_2(message: types.Message, state: FSMContext):
     await state.set_state(welcome_states.start_dialog.dialogue_4)
 
 
-@router.message(welcome_states.start_dialog.dialogue_4, (F.text == '1️⃣ Специальная военная операция (СВО)'),
+@router.message(welcome_states.start_dialog.dialogue_4,
+                ((F.text == '1️⃣ Специальная военная операция (СВО)') | (F.text == "2️⃣ Война")),
                 flags=flags)
 async def message_3(message: types.Message, state: FSMContext):  # Начало опроса
     await poll_write(f'Usrs: {message.from_user.id}: Start_answers: Is_it_war:', message.text)
     await mongo_update_stat_new(tg_id=message.from_user.id, column='war_or_not', value=message.text)
-    markup = ReplyKeyboardBuilder()
-    markup.add(types.KeyboardButton(text="Задавай 👌"))
-    markup.add(types.KeyboardButton(text="А долго будешь допрашивать? ⏱"))
-    markup.row(types.KeyboardButton(text="Стоп! Правильно «в Украине»! ☝️"))
-    await state.update_data(answer_1=message.text)
+
+    all_count = await mongo_count_docs('database', 'statistics_new', {'war_or_not': {'$exists': True}})
+    war = await mongo_count_docs('database', 'statistics_new', {'war_or_not': '2️⃣ Война'})
+    not_war = await mongo_count_docs('database', 'statistics_new',
+                                     {'war_or_not': '1️⃣ Специальная военная операция (СВО)'})
+    FSB_not_war = await mongo_count_docs('database', 'statistics_new',
+                                         {'FSB': "Да", 'war_or_not': '1️⃣ Специальная военная операция (СВО)'})
+    FSB_war = await mongo_count_docs('database', 'statistics_new', {'FSB': "Да", 'war_or_not': '2️⃣ Война'})
+
     text = await sql_safe_select("text", "texts", {"name": "start_lets_start"})
-    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
-    # if на ты
-    await state.set_state(welcome_states.start_dialog.dialogue_5)
+    if '(СВО)' in message.text:
+        text = text.replace('[WAR_TERMIN]', 'специальной военной операции')
+    else:
+        text = text.replace('[WAR_TERMIN]', 'войне')
 
-
-@router.message(welcome_states.start_dialog.dialogue_4, (F.text == "2️⃣ Война"), flags=flags)
-async def start_lets_start_2(message: types.Message, state: FSMContext):  # Начало опроса
-    await poll_write(f'Usrs: {message.from_user.id}: Start_answers: Is_it_war:', message.text)
-    await mongo_update_stat_new(tg_id=message.from_user.id, column='war_or_not', value=message.text)
+    txt = CoolPercReplacer(text, all_count)
+    txt.replace('XX', not_war)
+    txt.replace('YY', war)
+    txt.replace('AA', FSB_not_war, temp_base=not_war)
+    txt.replace('BB', FSB_war, temp_base=war)
     markup = ReplyKeyboardBuilder()
     markup.add(types.KeyboardButton(text="Задавай 👌"))
     markup.add(types.KeyboardButton(text="А долго будешь допрашивать? ⏱"))
     markup.row(types.KeyboardButton(text="Стоп! Правильно «в Украине»! ☝️"))
     await state.update_data(answer_1=message.text)
-    text = await sql_safe_select("text", "texts", {"name": "start_lets_start_2"})
-    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
-    # if на ты
+    await message.answer(txt(), reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     await state.set_state(welcome_states.start_dialog.dialogue_5)
 
 
@@ -76,6 +81,7 @@ async def start_lets_start_stop(message: types.Message):
 @router.message(welcome_states.start_dialog.dialogue_4, text_contains=('выражать', 'незаконно'),
                 content_types=types.ContentType.TEXT, text_ignore_case=True, flags=flags)
 async def message_4(message: types.Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='FSB', value='Да')
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="1️⃣ Специальная военная операция (СВО)"))
     markup.row(types.KeyboardButton(text="2️⃣ Война"))
@@ -106,7 +112,7 @@ async def poll_filler(message: types.Message):
                 content_types=types.ContentType.TEXT, text_ignore_case=True, flags=flags)
 @router.message(welcome_states.start_dialog.dialogue_5, text_contains='Задавай', content_types=types.ContentType.TEXT,
                 text_ignore_case=True, flags=flags)  # Задаю первый вопрос и ставлю состояни
-async def message_6(message: types.Message, state: FSMContext):
+async def start_do_you_love_politics(message: types.Message, state: FSMContext):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Скорее да  🙂"), types.KeyboardButton(text="Скорее нет  🙅‍♂"))
     markup.row(types.KeyboardButton(text="Начал(а) интересоваться после 24 февраля 🇷🇺🇺🇦"))
@@ -115,9 +121,8 @@ async def message_6(message: types.Message, state: FSMContext):
     await state.set_state(welcome_states.start_dialog.dialogue_6)
 
 
-@router.message(
-    (F.text.contains('интересоваться после 24') | F.text.contains('Скорее да') | F.text.contains('продолжим')),
-    welcome_states.start_dialog.dialogue_6, flags=flags)
+@router.message((F.text.contains('Скорее да') | F.text.contains('продолжим')),
+                welcome_states.start_dialog.dialogue_6, flags=flags)
 async def message_6to7(message: types.Message, state: FSMContext):
     if 'продолжим' not in message.text:
         await mongo_update_stat_new(tg_id=message.from_user.id, column='interest_politics', value=message.text)
@@ -128,6 +133,16 @@ async def message_6to7(message: types.Message, state: FSMContext):
     await poll_write(f'Usrs: {message.from_user.id}: Start_answers: interest_in_politics:',
                      message.text[:-3].strip())
     await state.set_state(welcome_states.start_dialog.dialogue_extrafix)
+
+
+@router.message(F.text.contains('после 24 февраля'), welcome_states.start_dialog.dialogue_6, flags=flags)
+async def start_after_feb(message: types.Message, state: FSMContext):
+    await state.set_state(welcome_states.start_dialog.dialogue_6)
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='interest_politics', value=message.text)
+    text = await sql_safe_select("text", "texts", {"name": "start_after_feb"})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Хорошо, продолжим 👌"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text.contains('Скорее нет  🙅‍')), welcome_states.start_dialog.dialogue_6, flags=flags)
@@ -224,9 +239,8 @@ async def poll_answer_handler_tho(poll_answer: types.PollAnswer, bot: Bot, state
         await mongo_update_stat_new(tg_id=poll_answer.user.id, column='web_prop_gen', value='Только "Я не знаю"')
     elif {2, 3, 4, 5, 7}.isdisjoint(set(lst_answers)) is False:  # red
         await mongo_update_stat_new(tg_id=poll_answer.user.id, column='web_prop_gen', value='Хотя бы один красный')
-    elif {1, 6}.isdisjoint(set(lst_answers)) is False:  # green
-        await mongo_update_stat_new(tg_id=poll_answer.user.id, column='web_prop_gen',
-                                    value='Есть зелёные и нет красных')
+    elif {6}.isdisjoint(set(lst_answers)) is False:  # green
+        await mongo_update_stat_new(tg_id=poll_answer.user.id, column='web_prop_gen', value='Есть зелёные и нет красных')
 
     await state.update_data(answer_4=poll_answer.option_ids)
     await mongo_update_stat_new(tg_id=poll_answer.user.id, column='web_prop_ex', value=lst_str)
@@ -321,22 +335,12 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
         await redis_just_one_write(f'Usrs: {poll_answer.user.id}: Politics:', 'Аполитичный')
         await mongo_update_stat(poll_answer.user.id, column='political_view', value='apolitical', options='$set')
         await mongo_update_stat_new(tg_id=poll_answer.user.id, column='polit_status', value='Аполитичный')
-    if await redis_just_one_read(f'Usrs: {poll_answer.user.id}: INFOState:') == 'Жертва пропаганды':
-        text = await sql_safe_select("text", "texts", {"name": "antip_only_facts"})
-        await redis_just_one_write(f'Usrs: {poll_answer.user.id}: INFOState:', 'Жертва пропаганды')
-
-        nmarkap = ReplyKeyboardBuilder()
-        nmarkap.row(types.KeyboardButton(text="Мне интересно 👌"))
-        nmarkap.add(types.KeyboardButton(text="Ну давай... 🤨"))
-        nmarkap.row(types.KeyboardButton(text="Что такое пропаганда? 🤔"))
-        await bot.send_message(poll_answer.user.id, text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
-    else:
-        markup = ReplyKeyboardBuilder()
-        markup.row(types.KeyboardButton(text="Пропустим этот шаг 👉"))
-        markup.row(types.KeyboardButton(text="Покажи ложь на ТВ — мне интересно посмотреть! 📺"))
-        text = await sql_safe_select("text", "texts", {"name": "antip_all_no_TV"})
-        await bot.send_message(poll_answer.user.id, text, reply_markup=markup.as_markup(resize_keyboard=True),
-                               disable_web_page_preview=True)
+    nmarkap = ReplyKeyboardBuilder()
+    nmarkap.row(types.KeyboardButton(text="Продолжай ⏳"))
+    nmarkap.row(types.KeyboardButton(text="Что такое пропаганда? 🤔"))
+    await state.set_state(propaganda_victim.next_0)
+    await redis_just_one_write(f'Usrs: {poll_answer.user.id}: INFOState:', 'Жертва пропаганды')
+    await simple_media_bot(bot, poll_answer.user.id, 'antip_wolves', reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
 """    if data["answer_3"] == "Нет, не верю ни слову ⛔":
