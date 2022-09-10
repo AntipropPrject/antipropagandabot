@@ -114,7 +114,7 @@ async def antip_TV_makes_them_bad(message: Message):
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Интересно 🤔"))
     nmarkap.row(types.KeyboardButton(text="Это и так понятно 👌"))
-    await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+    await message.answer(text,disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
 @router.message(((F.text == 'Это интересно 👌') | F.text.contains('Хорошо, убедил') |
@@ -143,7 +143,7 @@ async def antip_cant_unsee(message: Message):
     nmarkap.row(types.KeyboardButton(text='Это намеренная ложь, но и на Украине так же делают ☝️'))
     nmarkap.add(types.KeyboardButton(text="Не знаю 🤷‍♂️"))
     nmarkap.adjust(2, 1, 1)
-    await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text.contains('Это намеренная ложь, но и на') | F.text.contains('Не знаю 🤷‍♂️')
@@ -182,7 +182,7 @@ async def antip_eye_log(message: Message, state: FSMContext):
     nmarkap = ReplyKeyboardBuilder()
     await state.set_state(propaganda_victim.next_1)
     nmarkap.row(types.KeyboardButton(text="Продолжай ⏳"))
-    await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text.contains('Продолжай') | F.text.contains('Хорошо 🤝')),
