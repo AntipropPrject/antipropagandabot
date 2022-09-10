@@ -157,13 +157,16 @@ async def antip_eye_log(message: Message, state: FSMContext):
     await state.update_data(antip_eye_log_answ=message.text)
     await mongo_update_stat_new(tg_id=message.from_user.id, column='corpses', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'antip_how_could_they'})
-    fake = await mongo_count_docs('database', 'statistics_new',
+    fake_1 = await mongo_count_docs('database', 'statistics_new',
                                   {'antip_eye_log': 'Это намеренная ложь 🗣'})
+    fake_2 = await mongo_count_docs('database', 'statistics_new',
+                                  {'antip_eye_log': 'Это намеренная ложь, но и на Украине так же делают ☝️'})
     random = await mongo_count_docs('database', 'statistics_new',
                                     {'antip_eye_log': 'Это случайность 🤷‍♀️️'})
 
     dont_know = await mongo_count_docs('database', 'statistics_new',
                                        {'antip_eye_log': 'Не знаю 🤷‍♂️'})
+    fake = fake_1+fake_2
     all_count = fake + random + dont_know
     try:
         fake_result = str(round(fake / all_count * 100))
