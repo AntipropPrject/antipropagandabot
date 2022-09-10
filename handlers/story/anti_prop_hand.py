@@ -1370,12 +1370,11 @@ async def antip_forbidden_truth(message: Message, state: FSMContext):
 
 @router.message((F.text.in_({'Продолжай ⏳', "Забавная картинка 🙂"})), state=propaganda_victim.final_end, flags=flags)
 async def antip_how_they_made_it(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'antip_how_they_made_it'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Какой ужас 😯"))
     nmarkup.add(types.KeyboardButton(text="Смешно 🙂"))
     nmarkup.add(types.KeyboardButton(text="Продолжим 👉"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await simple_media(message, 'antip_how_they_made_it', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text.in_({"Какой ужас 😯", "Смешно 🙂", "Продолжим 👉"})),
