@@ -1385,6 +1385,6 @@ async def antip_only_tip_of_the_berg(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Очень интересно 👍"))
     nmarkup.add(types.KeyboardButton(text="Интересно, но слегка затянуто 🤏"))
-    nmarkup.add(types.KeyboardButton(text="Довольно скучно 🥱"))
-    nmarkup.row(types.KeyboardButton(text="Где-то интересно, где-то скучно 🙂"))
+    nmarkup.row(types.KeyboardButton(text="Довольно скучно 🥱"))
+    nmarkup.add(types.KeyboardButton(text="Где-то интересно, где-то скучно 🙂"))
     await simple_media(message, 'antip_only_tip_of_the_berg', reply_markup=nmarkup.as_markup(resize_keyboard=True))
