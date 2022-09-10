@@ -32,7 +32,7 @@ router = Router()
 router.message.filter(state=TruereasonsState)
 
 
-@router.message(PoliticsFilter(title='Сторонник войны'), ((F.text.contains('интересно')) | (F.text.contains('скучно'))),
+@router.message(PoliticsFilter(title='Сторонник войны'), ((F.text.contains('нтересно')) | (F.text.contains('скучно'))),
                 flags=flags)
 async def war_point_now(message: Message):
     if message.text in ['Продолжим 🇷🇺🇺🇦', 'Поговорим про военные действия на Украине 🇷🇺🇺🇦', '🤝 Продолжим']:
@@ -45,7 +45,7 @@ async def war_point_now(message: Message):
 
 
 @router.message(PoliticsFilter(title='Аполитичный'),
-                (F.text.contains('интересно')) | (F.text.contains('скучно')), flags=flags)
+                (F.text.contains('нтересно')) | (F.text.contains('скучно')), flags=flags)
 async def reasons_lets_figure(message: Message):
     if message.text in ['Продолжим 🇷🇺🇺🇦', 'Поговорим про военные действия на Украине 🇷🇺🇺🇦', '🤝 Продолжим']:
         await mongo_update_stat_new(tg_id=message.from_user.id, column='map_antiprop', value=message.text)
@@ -59,7 +59,7 @@ async def reasons_lets_figure(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.contains('интересно')) | (F.text.contains('скучно')), flags=flags)
+@router.message((F.text.contains('нтересно')) | (F.text.contains('скучно')), flags=flags)
 async def reasons_king_of_info(message: Message):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='map_antiprop', value=message.text)
     await mongo_update_stat(message.from_user.id, 'antiprop')
@@ -86,10 +86,10 @@ async def reasons_true_reason_for_all(message: Message):
 
 
 @router.message(((F.text.contains('цели')) & (F.text.contains('бессмысленны')) & (F.text.contains('Не'))), flags=flags)
-async def reasons_king_of_info(message: Message, state: FSMContext):
+async def to_reasons_king_of_info(message: Message, state: FSMContext):
     await redis_just_one_write(f'Usrs: {message.from_user.id}: Politics:', 'Сторонник войны')
     await state.set_state(anti_prop_hand.propaganda_victim.final)
-    await reasons_king_of_info(message, state)
+    await reasons_king_of_info(message)
 
 
 @router.message((F.text == "Подожди. Я так не говорил(а). С чего ты взял, что это ненастоящие цели? 🤷‍♂️"),
@@ -108,7 +108,7 @@ async def reasons_not_so_fast(message: Message):
 
 @router.message((F.text == "Давай поговорим о целях 👌"), flags=flags)
 async def reasons_now_you_nothing(message: Message, state: FSMContext):
-    await war_point_now(message, state)
+    await war_point_now(message)
 
 
 @router.message((F.text == "Давай попробуем 👌"), flags=flags)
@@ -118,7 +118,7 @@ async def reasons_now_you_fucked(message: Message, state: FSMContext):
     for thing in base_list:
         await poll_write(f'Usrs: {message.from_user.id}: Start_answers: Invasion:', thing)
     await redis_just_one_write(f'Usrs: {message.from_user.id}: Politics:', 'Аполитичный')
-    await war_point_now(message, state)
+    await war_point_now(message)
 
 
 @router.message((F.text == "Хорошо!"), flags=flags)

@@ -39,12 +39,13 @@ async def antip_what_is_prop(message: Message, state: FSMContext):
 
 @router.message((F.text == "Продолжай ⏳"), flags=flags, state=propaganda_victim.next_0)
 async def antip_black_and_white(message: Message, state: FSMContext):
+    text = await sql_safe_select('text', 'texts', {'name': 'antip_black_and_white'})
     nmarkap = ReplyKeyboardBuilder()
     await state.set_state(propaganda_victim.fake_tv)
     nmarkap.add(types.KeyboardButton(text="Это интересно 👌"))
     nmarkap.row(types.KeyboardButton(text="Не хочу смотреть ложь по ТВ 🙅‍♀️"))
     nmarkap.adjust(2)
-    await simple_media(message, 'antip_black_and_white', nmarkap.as_markup(resize_keyboard=True))
+    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text == 'Не хочу смотреть ложь по ТВ 🙅‍♀️'), state=propaganda_victim.fake_tv, flags=flags)
@@ -139,7 +140,7 @@ async def antip_cant_unsee(message: Message):
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Это намеренная ложь 🗣"))
     nmarkap.add(types.KeyboardButton(text="Это случайность 🤷‍♀️️"))
-    nmarkap.row(types.KeyboardButton(text="Это намеренная ложь, но и на Украине так же делают ☝️️️"))
+    nmarkap.row(types.KeyboardButton(text='Это намеренная ложь, но и на Украине так же делают ☝️'))
     nmarkap.add(types.KeyboardButton(text="Не знаю 🤷‍♂️"))
     nmarkap.adjust(2, 1, 1)
     await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
@@ -688,7 +689,8 @@ async def antip_bad_people_lies(message: Message, state: FSMContext):
 
 
 @router.message((F.text.contains('Интересно 🤔')) | (F.text.contains('и так')) | (F.text.contains('я всё равно')),
-                state=(propaganda_victim.choose_TV, propaganda_victim.web, propaganda_victim.ppl_propaganda),
+                state=(propaganda_victim.choose_TV, propaganda_victim.web, propaganda_victim.ppl_propaganda,
+                       propaganda_victim.fake_tv),
                 flags=flags)
 async def antip_funny_propaganda(message: Message, state: FSMContext):
     await state.set_state(propaganda_victim.quiz_1)
@@ -865,7 +867,7 @@ async def antip_german_list(message: Message, state: FSMContext):
 async def antip_return_to_german_list(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_return_to_german_list'})
     await message.answer(text)
-    await antip_chicken_and_egg(message, state)
+    await antip_chicken_and_egg(message)
 
 
 @router.message(((F.text == "Интересно 👍") | (F.text == "Скучновато 👎")),
@@ -1259,6 +1261,7 @@ async def antip_hole_in_deck(message: Message):
     txt.replace('YY', a_haha)
     txt.replace('ZZ', a_meh)
     await message.answer(txt())
+    await asyncio.sleep(1.5)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
     nmarkup.add(types.KeyboardButton(text="Забавная картинка 🙂"))
