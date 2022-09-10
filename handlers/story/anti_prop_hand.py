@@ -160,7 +160,7 @@ async def antip_eye_log(message: Message, state: FSMContext):
     fake_1 = await mongo_count_docs('database', 'statistics_new',
                                   {'antip_eye_log': 'Это намеренная ложь 🗣'})
     fake_2 = await mongo_count_docs('database', 'statistics_new',
-                                  {'antip_eye_log': "Это намеренная ложь, но и на Украине так же делают ☝️️️"})
+                                  {'antip_eye_log': 'Это намеренная ложь, но и на Украине так же делают ☝️'})
     random = await mongo_count_docs('database', 'statistics_new',
                                     {'antip_eye_log': 'Это случайность 🤷‍♀️️'})
 
