@@ -138,6 +138,11 @@ def percentage_replace(text: str, symbol: str, part: int, base: int):
 
 
 class CoolPercReplacer:
+    """
+    Easy replacer for percentage.\n
+    text: text where replace is needed\n
+    base: base number to calculate (100%)
+    """
     def __init__(self, text: str, base: int):
         self.text = text
         self.base = base
@@ -149,6 +154,9 @@ class CoolPercReplacer:
         return str(self.text)
 
     def replace(self, symbol: str, part: int, *args, temp_base: int = None):
+        """symbol: placeholder needed to be replaced ('AA')\n
+        part: number to calculate percent from base\n
+        temp_base: replace object base (100%) for this calculation"""
         whole = self.base
         if temp_base:
             whole = temp_base
