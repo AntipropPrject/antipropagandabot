@@ -10,6 +10,7 @@ from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
 from data_base.DBuse import poll_write, sql_safe_select, mongo_add, mongo_select, redis_just_one_write, \
     redis_just_one_read, mongo_count_docs
 from resources.all_polls import web_prop, welc_message_one, people_prop
+from resources.variables import date_for_statistics
 from states import welcome_states
 from states.antiprop_states import propaganda_victim
 from utilts import simple_media, simple_media_bot, CoolPercReplacer
@@ -41,10 +42,6 @@ async def message_2(message: types.Message, state: FSMContext):
 async def message_3(message: types.Message, state: FSMContext):  # Начало опроса
     await poll_write(f'Usrs: {message.from_user.id}: Start_answers: Is_it_war:', message.text)
     await mongo_update_stat_new(tg_id=message.from_user.id, column='war_or_not', value=message.text)
-    format = "%Y-%m-%d %H:%M:%S.%f"
-    date = "2022-09-10 10:00:00.00"
-    date_for_statistics = datetime.strptime(date, format)
-
 
     all_count = await mongo_count_docs('database', 'statistics_new', [{'war_or_not': {'$exists': True}}, {'datetime': {'$gte': date_for_statistics}}], hard_link=True)
     war = await mongo_count_docs('database', 'statistics_new', [{'war_or_not': '2️⃣ Война'}, {'datetime': {'$gte': date_for_statistics}}], hard_link=True)
