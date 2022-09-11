@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
@@ -39,14 +41,18 @@ async def message_2(message: types.Message, state: FSMContext):
 async def message_3(message: types.Message, state: FSMContext):  # Начало опроса
     await poll_write(f'Usrs: {message.from_user.id}: Start_answers: Is_it_war:', message.text)
     await mongo_update_stat_new(tg_id=message.from_user.id, column='war_or_not', value=message.text)
+    format = "%Y-%m-%d %H:%M:%S.%f"
+    date = "2022-09-10 10:00:00.00"
+    date_for_statistics = datetime.strptime(date, format)
 
-    all_count = await mongo_count_docs('database', 'statistics_new', {'war_or_not': {'$exists': True}})
-    war = await mongo_count_docs('database', 'statistics_new', {'war_or_not': '2️⃣ Война'})
+
+    all_count = await mongo_count_docs('database', 'statistics_new', [{'war_or_not': {'$exists': True}}, {'$gte': {'datetime': date_for_statistics}}], hard_link=True)
+    war = await mongo_count_docs('database', 'statistics_new', [{'war_or_not': '2️⃣ Война'}, {'$gte': {'datetime': date_for_statistics}}], hard_link=True)
     not_war = await mongo_count_docs('database', 'statistics_new',
-                                     {'war_or_not': '1️⃣ Специальная военная операция (СВО)'})
+                                     [{'war_or_not': '1️⃣ Специальная военная операция (СВО)'}, {'$gte': {'datetime': date_for_statistics}}], hard_link=True)
     FSB_not_war = await mongo_count_docs('database', 'statistics_new',
-                                         {'FSB': "Да", 'war_or_not': '1️⃣ Специальная военная операция (СВО)'})
-    FSB_war = await mongo_count_docs('database', 'statistics_new', {'FSB': "Да", 'war_or_not': '2️⃣ Война'})
+                                         [{'FSB': "Да"}, {'war_or_not': '1️⃣ Специальная военная операция (СВО)'}, {'$gte': {'datetime': date_for_statistics}}], hard_link=True)
+    FSB_war = await mongo_count_docs('database', 'statistics_new', [{'FSB': "Да", 'war_or_not': '2️⃣ Война'}, {'$gte': {'datetime': date_for_statistics}}], hard_link=True)
 
     text = await sql_safe_select("text", "texts", {"name": "start_lets_start"})
     if '(СВО)' in message.text:
