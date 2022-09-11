@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime
 from typing import List
 
 from aiogram import Router, F, Bot
@@ -19,6 +20,7 @@ from handlers.story import true_resons_hand
 
 from keyboards.map_keys import antip_killme_kb
 from resources.all_polls import antip_q1_options, antip_q2_options, antip_q3_options
+from resources.variables import date_for_statistics
 from states.antiprop_states import propaganda_victim
 from utilts import simple_media, dynamic_media_answer, simple_media_bot, simple_video_album, CoolPercReplacer
 
@@ -72,26 +74,26 @@ async def antip_TV_makes_them_bad(message: Message):
     if 'Всё равно не хочу смотреть ложь' in message.text:
         await message.answer('Хорошо 👌')
 
-    trust = await mongo_count_docs('database', 'statistics_new', {'tv_love_gen': 'Да, полностью доверяю ✅'})
-    dont_trust = await mongo_count_docs('database', 'statistics_new', {'tv_love_gen': 'Нет, не верю ни слову ⛔'})
-    maybe_trust = await mongo_count_docs('database', 'statistics_new', {'tv_love_gen': 'Скорее да 👍'})
-    maybe_dont_trust = await mongo_count_docs('database', 'statistics_new', {'tv_love_gen': 'Скорее нет 👎'})
+    trust = await mongo_count_docs('database', 'statistics_new', [{'tv_love_gen': 'Да, полностью доверяю ✅'}, {'datetime': {'$gte': date_for_statistics}}], hard_link=True)
+    dont_trust = await mongo_count_docs('database', 'statistics_new', [{'tv_love_gen': 'Нет, не верю ни слову ⛔'}, {'datetime': {'$gte': date_for_statistics}}], hard_link=True)
+    maybe_trust = await mongo_count_docs('database', 'statistics_new', [{'tv_love_gen': 'Скорее да 👍'}, {'datetime': {'$gte': date_for_statistics}}], hard_link=True)
+    maybe_dont_trust = await mongo_count_docs('database', 'statistics_new', [{'tv_love_gen': 'Скорее нет 👎'}, {'datetime': {'$gte': date_for_statistics}}], hard_link=True)
 
     var_true_and_trust = await mongo_count_docs('database', 'statistics_new',
                                                 [{'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'},
-                                                 {'tv_love_gen': 'Да, полностью доверяю ✅'}], hard_link=True)
+                                                 {'tv_love_gen': 'Да, полностью доверяю ✅'}, {'datetime': {'$gte': date_for_statistics}}], hard_link=True)
     var_true_and_dont_trust = await mongo_count_docs('database', 'statistics_new',
                                                      [{
                                                           'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'},
-                                                      {'tv_love_gen': 'Нет, не верю ни слову ⛔'}], hard_link=True)
+                                                      {'tv_love_gen': 'Нет, не верю ни слову ⛔'}, {'datetime': {'$gte': date_for_statistics}}], hard_link=True)
     var_true_and_maybe_trust = await mongo_count_docs('database', 'statistics_new',
                                                       [{
                                                            'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'},
-                                                       {'tv_love_gen': 'Скорее да 👍'}], hard_link=True)
+                                                       {'tv_love_gen': 'Скорее да 👍'}, {'datetime': {'$gte': date_for_statistics}}], hard_link=True)
     var_true_and_maybe_dont_trust = await mongo_count_docs('database', 'statistics_new',
                                                            [{
                                                                 'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'},
-                                                            {'tv_love_gen': 'Скорее нет 👎'}], hard_link=True)
+                                                            {'tv_love_gen': 'Скорее нет 👎'}, {'datetime': {'$gte': date_for_statistics}}], hard_link=True)
 
     text = await sql_safe_select('text', 'texts', {'name': 'antip_TV_makes_them_bad'})
     try:
@@ -1220,20 +1222,10 @@ async def antip_ok(message: Message, state: FSMContext):
     if 'Спасибо' in message.text or 'нового' in message.text or 'не верю' in message.text:
         await mongo_update_stat_new(tg_id=message.from_user.id, column='antip_look_at_it_yourself', value=message.text)
     await message.answer("Хорошо", reply_markup=ReplyKeyboardRemove())
-    if await redis_just_one_read(f'Usrs: {message.from_user.id}: INFOState:') == 'Жертва пропаганды':
-        await asyncio.sleep(1)
-        nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(types.KeyboardButton(text="Давай"))
-        await message.answer("У меня есть анекдот", reply_markup=nmarkup.as_markup(resize_keyboard=True))
-    else:
-        polistate = await redis_just_one_read(f'Usrs: {message.from_user.id}: Politics:')
-        await asyncio.sleep(1)
-        if polistate == 'Аполитичный':
-            await reasons_lets_figure(message, state)
-        elif polistate == 'Сторонник войны':
-            await war_point_now(message, state)
-        elif polistate == 'Оппозиционер':
-            await reasons_king_of_info(message, state)
+    await asyncio.sleep(1)
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Давай"))
+    await message.answer("У меня есть анекдот", reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text == 'Давай 🤔'), state=propaganda_victim.final, flags=flags)
@@ -1261,7 +1253,7 @@ async def antip_hole_in_deck(message: Message):
     txt.replace('YY', a_haha)
     txt.replace('ZZ', a_meh)
     await message.answer(txt())
-    await asyncio.sleep(1.5)
+    await asyncio.sleep(1)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
     nmarkup.add(types.KeyboardButton(text="Забавная картинка 🙂"))
