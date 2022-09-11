@@ -157,7 +157,7 @@ class CoolPercReplacer:
                 perc = part / whole * 100
             except ZeroDivisionError:
                 perc = 0
-            self.text = self.text.replace(symbol, str(round(perc)))
+            self.text = self.text.replace(symbol, str(round(perc, 1)))
 
 
 
