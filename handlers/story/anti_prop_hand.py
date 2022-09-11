@@ -77,26 +77,26 @@ async def antip_TV_makes_them_bad(message: Message):
     date = "2022-09-10 10:00:00.00"
     date_for_statistics = datetime.strptime(date, format)
 
-    trust = await mongo_count_docs('database', 'statistics_new', [{'tv_love_gen': 'Да, полностью доверяю ✅'}, {'$gte': {'datetime': date_for_statistics}}], hard_link=True)
-    dont_trust = await mongo_count_docs('database', 'statistics_new', [{'tv_love_gen': 'Нет, не верю ни слову ⛔'}, {'$gte': {'datetime': date_for_statistics}}], hard_link=True)
-    maybe_trust = await mongo_count_docs('database', 'statistics_new', [{'tv_love_gen': 'Скорее да 👍'}, {'$gte': {'datetime': date_for_statistics}}], hard_link=True)
-    maybe_dont_trust = await mongo_count_docs('database', 'statistics_new', [{'tv_love_gen': 'Скорее нет 👎'}, {'$gte': {'datetime': date_for_statistics}}], hard_link=True)
+    trust = await mongo_count_docs('database', 'statistics_new', [{'tv_love_gen': 'Да, полностью доверяю ✅'}, {'datetime': {'$gte': date_for_statistics}}], hard_link=True)
+    dont_trust = await mongo_count_docs('database', 'statistics_new', [{'tv_love_gen': 'Нет, не верю ни слову ⛔'}, {'datetime': {'$gte': date_for_statistics}}], hard_link=True)
+    maybe_trust = await mongo_count_docs('database', 'statistics_new', [{'tv_love_gen': 'Скорее да 👍'}, {'datetime': {'$gte': date_for_statistics}}], hard_link=True)
+    maybe_dont_trust = await mongo_count_docs('database', 'statistics_new', [{'tv_love_gen': 'Скорее нет 👎'}, {'datetime': {'$gte': date_for_statistics}}], hard_link=True)
 
     var_true_and_trust = await mongo_count_docs('database', 'statistics_new',
                                                 [{'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'},
-                                                 {'tv_love_gen': 'Да, полностью доверяю ✅'}, {'$gte': {'datetime': date_for_statistics}}], hard_link=True)
+                                                 {'tv_love_gen': 'Да, полностью доверяю ✅'}, {'datetime': {'$gte': date_for_statistics}}], hard_link=True)
     var_true_and_dont_trust = await mongo_count_docs('database', 'statistics_new',
                                                      [{
                                                           'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'},
-                                                      {'tv_love_gen': 'Нет, не верю ни слову ⛔'}, {'$gte': {'datetime': date_for_statistics}}], hard_link=True)
+                                                      {'tv_love_gen': 'Нет, не верю ни слову ⛔'}, {'datetime': {'$gte': date_for_statistics}}], hard_link=True)
     var_true_and_maybe_trust = await mongo_count_docs('database', 'statistics_new',
                                                       [{
                                                            'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'},
-                                                       {'tv_love_gen': 'Скорее да 👍'}, {'$gte': {'datetime': date_for_statistics}}], hard_link=True)
+                                                       {'tv_love_gen': 'Скорее да 👍'}, {'datetime': {'$gte': date_for_statistics}}], hard_link=True)
     var_true_and_maybe_dont_trust = await mongo_count_docs('database', 'statistics_new',
                                                            [{
                                                                 'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'},
-                                                            {'tv_love_gen': 'Скорее нет 👎'}, {'$gte': {'datetime': date_for_statistics}}], hard_link=True)
+                                                            {'tv_love_gen': 'Скорее нет 👎'}, {'datetime': {'$gte': date_for_statistics}}], hard_link=True)
 
     text = await sql_safe_select('text', 'texts', {'name': 'antip_TV_makes_them_bad'})
     try:

@@ -46,13 +46,13 @@ async def message_3(message: types.Message, state: FSMContext):  # Начало 
     date_for_statistics = datetime.strptime(date, format)
 
 
-    all_count = await mongo_count_docs('database', 'statistics_new', [{'war_or_not': {'$exists': True}}, {'$gte': {'datetime': date_for_statistics}}], hard_link=True)
-    war = await mongo_count_docs('database', 'statistics_new', [{'war_or_not': '2️⃣ Война'}, {'$gte': {'datetime': date_for_statistics}}], hard_link=True)
+    all_count = await mongo_count_docs('database', 'statistics_new', [{'war_or_not': {'$exists': True}}, {'datetime': {'$gte': date_for_statistics}}], hard_link=True)
+    war = await mongo_count_docs('database', 'statistics_new', [{'war_or_not': '2️⃣ Война'}, {'datetime': {'$gte': date_for_statistics}}], hard_link=True)
     not_war = await mongo_count_docs('database', 'statistics_new',
-                                     [{'war_or_not': '1️⃣ Специальная военная операция (СВО)'}, {'$gte': {'datetime': date_for_statistics}}], hard_link=True)
+                                     [{'war_or_not': '1️⃣ Специальная военная операция (СВО)'}, {'datetime': {'$gte': date_for_statistics}}], hard_link=True)
     FSB_not_war = await mongo_count_docs('database', 'statistics_new',
-                                         [{'FSB': "Да"}, {'war_or_not': '1️⃣ Специальная военная операция (СВО)'}, {'$gte': {'datetime': date_for_statistics}}], hard_link=True)
-    FSB_war = await mongo_count_docs('database', 'statistics_new', [{'FSB': "Да", 'war_or_not': '2️⃣ Война'}, {'$gte': {'datetime': date_for_statistics}}], hard_link=True)
+                                         [{'FSB': "Да"}, {'war_or_not': '1️⃣ Специальная военная операция (СВО)'}, {'datetime': {'$gte': date_for_statistics}}], hard_link=True)
+    FSB_war = await mongo_count_docs('database', 'statistics_new', [{'FSB': "Да", 'war_or_not': '2️⃣ Война'}, {'datetime': {'$gte': date_for_statistics}}], hard_link=True)
 
     text = await sql_safe_select("text", "texts", {"name": "start_lets_start"})
     if '(СВО)' in message.text:
