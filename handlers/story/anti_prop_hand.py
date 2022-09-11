@@ -97,11 +97,11 @@ async def antip_TV_makes_them_bad(message: Message):
 
     text = await sql_safe_select('text', 'texts', {'name': 'antip_TV_makes_them_bad'})
     try:
-        trust = str(round(var_true_and_trust / trust * 100) if trust > 0 else 'N/A')
-        dont_trust = str(round(var_true_and_dont_trust / dont_trust * 100) if dont_trust > 0 else 'N/A')
-        maybe_trust = str(round(var_true_and_maybe_trust / maybe_trust * 100) if maybe_trust > 0 else 'N/A')
+        trust = str(round(var_true_and_trust / trust * 100, 1) if trust > 0 else 'N/A')
+        dont_trust = str(round(var_true_and_dont_trust / dont_trust * 100, 1) if dont_trust > 0 else 'N/A')
+        maybe_trust = str(round(var_true_and_maybe_trust / maybe_trust * 100, 1) if maybe_trust > 0 else 'N/A')
         maybe_dont_trust = str(
-            round(var_true_and_maybe_dont_trust / maybe_dont_trust * 100) if maybe_dont_trust > 0 else 'N/A')
+            round(var_true_and_maybe_dont_trust / maybe_dont_trust * 100, 1) if maybe_dont_trust > 0 else 'N/A')
 
         text = text.replace('AA', trust)
         text = text.replace('BB', maybe_trust)
