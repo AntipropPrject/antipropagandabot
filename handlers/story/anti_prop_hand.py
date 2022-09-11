@@ -1256,7 +1256,7 @@ async def antip_hole_in_deck(message: Message):
     txt.replace('YY', a_haha)
     txt.replace('ZZ', a_meh)
     await message.answer(txt())
-    await asyncio.sleep(1.5)
+    await asyncio.sleep(1)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
     nmarkup.add(types.KeyboardButton(text="Забавная картинка 🙂"))
