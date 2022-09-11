@@ -1220,20 +1220,10 @@ async def antip_ok(message: Message, state: FSMContext):
     if 'Спасибо' in message.text or 'нового' in message.text or 'не верю' in message.text:
         await mongo_update_stat_new(tg_id=message.from_user.id, column='antip_look_at_it_yourself', value=message.text)
     await message.answer("Хорошо", reply_markup=ReplyKeyboardRemove())
-    if await redis_just_one_read(f'Usrs: {message.from_user.id}: INFOState:') == 'Жертва пропаганды':
-        await asyncio.sleep(1)
-        nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(types.KeyboardButton(text="Давай"))
-        await message.answer("У меня есть анекдот", reply_markup=nmarkup.as_markup(resize_keyboard=True))
-    else:
-        polistate = await redis_just_one_read(f'Usrs: {message.from_user.id}: Politics:')
-        await asyncio.sleep(1)
-        if polistate == 'Аполитичный':
-            await reasons_lets_figure(message, state)
-        elif polistate == 'Сторонник войны':
-            await war_point_now(message, state)
-        elif polistate == 'Оппозиционер':
-            await reasons_king_of_info(message, state)
+    await asyncio.sleep(1)
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Давай"))
+    await message.answer("У меня есть анекдот", reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text == 'Давай 🤔'), state=propaganda_victim.final, flags=flags)
