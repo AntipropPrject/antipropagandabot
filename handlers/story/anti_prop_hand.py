@@ -854,7 +854,7 @@ async def antip_chicken_and_egg(message: Message):
 
 
 @router.message(((F.text.contains('В целом согласен(а)')) | (F.text.contains('Продолжаем 👉'))),
-                state=propaganda_victim.quiz_3, flags=flags)
+                state=(propaganda_victim.quiz_3, propaganda_victim.after_quizez), flags=flags)
 async def antip_german_list(message: Message, state: FSMContext):
     await state.set_state(propaganda_victim.after_quizez)
     nmarkup = ReplyKeyboardBuilder()
