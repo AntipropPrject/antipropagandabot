@@ -20,6 +20,7 @@ class propaganda_victim(StatesGroup):
     yandex = State()
     wiki = State()
     quiz_1 = State()
+    quiz_11 = State()
     quiz_2 = State()
     quiz_3 = State()
     after_quizez = State()

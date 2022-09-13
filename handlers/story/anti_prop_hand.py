@@ -680,11 +680,12 @@ async def antip_web_exit_1(message: Message, state: FSMContext):
 @router.message(PplPropagandaFilter(),
                 (F.text.contains('Это и так понятно 👌')) | (F.text.contains('Интересно 🤔')), flags=flags)
 async def antip_bad_people_lies(message: Message, state: FSMContext):
+    print(1)
     await state.set_state(propaganda_victim.ppl_propaganda)
+    persons = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
+    print(persons)
     text = await sql_safe_select('text', 'texts', {'name': 'antip_bad_people_lies'})
-    text = text.replace('[[первая красная личность]]',
-                        ((await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:'))[0]))
-
+    text = text.replace('[[первая красная личность]]', persons[0] if len(persons) > 0 else 'N/A')
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Начнём 🙂"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
@@ -709,7 +710,7 @@ async def antip_quiz_1(message: Message, bot: Bot):
 
 
 @router.poll_answer(state=propaganda_victim.quiz_1, flags=flags)
-async def antip_quiz_1_answer(poll_answer: types.PollAnswer, bot: Bot):
+async def antip_quiz_1_answer(poll_answer: types.PollAnswer, bot: Bot, state: FSMContext):
     answer = poll_answer.option_ids[0]
     await mongo_update_stat_new(tg_id=poll_answer.user.id, column='antiprop_quiz_1',
                                 value=antip_q1_options[answer])
@@ -726,13 +727,14 @@ async def antip_quiz_1_answer(poll_answer: types.PollAnswer, bot: Bot):
     txt.replace('DD', p40000)
 
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Интересно 🤔"))
+    nmarkup.row(types.KeyboardButton(text="Интереснo 🤔"))
     nmarkup.add(types.KeyboardButton(text="Продолжим 👉"))
+    await state.set_state(propaganda_victim.quiz_11)
     await simple_media_bot(bot, poll_answer.user.id, 'antip_quiz_1_answer', nmarkup.as_markup(resize_keyboard=True),
                            custom_caption=txt())
 
 
-@router.message((F.text.in_({'Интересно 🤔', "Продолжим 👉"})), state=propaganda_victim.quiz_1, flags=flags)
+@router.message((F.text.in_({'Интереснo 🤔', "Продолжим 👉"})), state=propaganda_victim.quiz_11, flags=flags)
 async def antip_how_much_they_lie(message: Message, state: FSMContext):
     await state.set_state(propaganda_victim.quiz_2)
     nmarkup = ReplyKeyboardBuilder()
