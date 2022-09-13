@@ -1218,7 +1218,7 @@ async def antip_look_at_it_yourself(message: Message, state: FSMContext):
 @router.message(((F.text.contains('удивлён')) | (F.text.contains('не верю'))),
                 state=propaganda_victim.yandex, flags=flags)
 @router.message(
-    (F.text == "Пропустим игру 🙅‍♀️") | (F.text == '🤝 Продолжим') | (F.text == 'Достаточно, двигаемся дальше  🙅‍♀️'),
+    (F.text == "Пропустим игру 🙅‍♀️") | (F.text == '🤝 Продолжим') | (F.text.contains('двигаемся дальше')),
     flags=flags)
 async def antip_ok(message: Message, state: FSMContext):
     if 'Спасибо' in message.text or 'нового' in message.text or 'не верю' in message.text:
@@ -1226,7 +1226,8 @@ async def antip_ok(message: Message, state: FSMContext):
     await message.answer("Хорошо", reply_markup=ReplyKeyboardRemove())
     await asyncio.sleep(1)
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Давай"))
+    nmarkup.row(types.KeyboardButton(text='Давай 🤔'))
+    await state.set_state(propaganda_victim.final)
     await message.answer("У меня есть анекдот", reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -1352,14 +1353,6 @@ async def antip_look_at_it_yourself(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_learn_yourself'})
     await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
-
-@router.message((F.text.contains('Спасибо, не знал(а)') | (F.text.contains('Ничего нового')) |
-                 (F.text.contains('Не надо, двигаемся дальше')) | (F.text.contains('Продолжим 👌'))), flags=flags)
-async def antip_forbidden_truth(message: Message, state: FSMContext):
-    await state.set_state(propaganda_victim.final)
-    nmarkap = ReplyKeyboardBuilder()
-    nmarkap.add(types.KeyboardButton(text='Давай 🤔'))
-    await message.answer('У меня есть анекдот', reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text.in_({'Продолжай ⏳', "Забавная картинка 🙂"})), state=propaganda_victim.final_end, flags=flags)
