@@ -1218,7 +1218,7 @@ async def antip_look_at_it_yourself(message: Message, state: FSMContext):
 @router.message(((F.text.contains('удивлён')) | (F.text.contains('не верю'))),
                 state=propaganda_victim.yandex, flags=flags)
 @router.message(
-    (F.text == "Пропустим игру 🙅‍♀️") | (F.text == '🤝 Продолжим') | (F.text == 'Достаточно, двигаемся дальше  🙅‍♀️'),
+    (F.text == "Пропустим игру 🙅‍♀️") | (F.text == '🤝 Продолжим') | (F.text == 'двигаемся дальше'),
     flags=flags)
 async def antip_ok(message: Message, state: FSMContext):
     if 'Спасибо' in message.text or 'нового' in message.text or 'не верю' in message.text:
