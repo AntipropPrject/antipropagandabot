@@ -96,9 +96,9 @@ async def start_trolley_2_result(message: Message):
     if message.text == "Ничего не буду делать 🙅‍♂️" and \
             await mongo_count_docs('database', 'statistics_new',
                                    {'_id': message.from_user.id, 'start_trolley_1_result': "Сверну направо ➡️"}):
-        text_tag = 'start_trolley_2_peace_result'
-    else:
         text_tag = 'start_trolley_2_result'
+    else:
+        text_tag = 'start_trolley_2_peace_result'
     text = await sql_safe_select('text', 'texts', {'name': text_tag})
 
     fat_all = await mongo_count_docs('database', 'statistics_new', {'start_trolley_2_result': {'$exists': True}})
