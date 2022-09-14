@@ -1212,6 +1212,7 @@ async def antip_clear_and_cool(message: Message):
     nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
+# ПРОВЕРИТЬ ВАЛИДНОСТЬ ДВУХ ПРЕДЫДУЩИХ ХЭНДЛЕРОВ
 
 @router.message((F.text == "Продолжай ⏳"), state=propaganda_victim.wiki, flags=flags)
 async def antip_look_at_it_yourself(message: Message, state: FSMContext):
@@ -1223,9 +1224,9 @@ async def antip_look_at_it_yourself(message: Message, state: FSMContext):
     await simple_media(message, 'antip_look_at_it_yourself', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(((F.text.contains('Спасибо, не знaл(а) 🙂')) | (F.text.contains('нового')) |  # не знaл - a - английская
+@router.message(((F.text.contains('не знaл(а) 🙂')) | (F.text.contains('нового')) |  # не знaл - a - английская
                  (F.text.contains('не верю'))),
-                state=propaganda_victim.wiki, flags=flags)
+                state=(propaganda_victim.wiki, propaganda_victim.next_3), flags=flags)
 @router.message(((F.text.contains('удивлён')) | (F.text.contains('не верю'))),
                 state=propaganda_victim.yandex, flags=flags)
 @router.message(
@@ -1358,7 +1359,7 @@ async def antip_look_at_it_yourself(message: Message, state: FSMContext):
 
 
 @router.message((F.text.contains('Я не верю')), flags=flags, state=propaganda_victim.next_3)
-async def antip_look_at_it_yourself(message: Message, state: FSMContext):
+async def antip_learn_yourself(message: Message, state: FSMContext):
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text='Продолжим 👌'))
     text = await sql_safe_select('text', 'texts', {'name': 'antip_learn_yourself'})
