@@ -28,7 +28,12 @@ services:
       - "2342:2342"
     volumes:
       - ./storage/redis/data:/data
-    command: --port 2342
+    env_file:
+      - .env
+    command:
+      - /bin/sh
+      - -c
+      - redis-server --requirepass "$${REDIS_PASSWORD:?REDIS_PASSWORD variable is not set}" --save 20 1 --loglevel warning --port 2342
 
   web:
     build: ../.
