@@ -1224,7 +1224,7 @@ async def antip_look_at_it_yourself(message: Message, state: FSMContext):
     await simple_media(message, 'antip_look_at_it_yourself', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(((F.text.contains('не знaл(а) 🙂')) | (F.text.contains('Ничего нового')) |  # не знaл - a - английская
+@router.message(((F.text.contains('не знaл(а)')) | (F.text.contains('Ничего нового')) |
                  (F.text.contains('не верю'))),
                 state=(propaganda_victim.wiki, propaganda_victim.next_3), flags=flags)
 @router.message(((F.text.contains('удивлён')) | (F.text.contains('не верю'))),
