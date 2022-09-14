@@ -740,14 +740,13 @@ async def antip_quiz_1_answer(poll_answer: types.PollAnswer, bot: Bot, state: FS
     txt.replace('DD', p40000)
 
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Интереснo 🤔"))
+    nmarkup.row(types.KeyboardButton(text="Интересно 🤔"))
     nmarkup.add(types.KeyboardButton(text="Продолжим 👉"))
-    await state.set_state(propaganda_victim.quiz_11)
     await simple_media_bot(bot, poll_answer.user.id, 'antip_quiz_1_answer', nmarkup.as_markup(resize_keyboard=True),
                            custom_caption=txt())
 
 
-@router.message((F.text.in_({'Интереснo 🤔', "Продолжим 👉"})), state=propaganda_victim.quiz_11, flags=flags)
+@router.message((F.text.in_({'Интересно 🤔', "Продолжим 👉"})), state=propaganda_victim.quiz_1, flags=flags)
 async def antip_how_much_they_lie(message: Message, state: FSMContext):
     await state.set_state(propaganda_victim.quiz_2)
     nmarkup = ReplyKeyboardBuilder()
