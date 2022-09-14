@@ -196,7 +196,7 @@ async def antip_eye_log(message: Message, state: FSMContext):
                 state=propaganda_victim.next_1, flags=flags)
 async def antip_stop_emotions(message: Message, state: FSMContext):
     data = await state.get_data()
-    if data['antip_eye_log_answ'] != 'Это намеренная ложь 🗣' and 'Хорошо' not in message.text:
+    if 'намеренная ложь' not in data['antip_eye_log_answ'] and 'Хорошо' not in message.text:
         text = await sql_safe_select('text', 'texts', {'name': 'antip_listen_to_facts'})
         nmarkap = ReplyKeyboardBuilder()
         nmarkap.row(types.KeyboardButton(text="Хорошо 🤝"))
@@ -386,11 +386,11 @@ async def antip_TV_how_about_more(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_TV_how_about_more'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Нет, посмотрим ещё ложь по ТВ 📺'))
-    nmarkup.row(types.KeyboardButton(text='Да, продолжим 👌'))
+    nmarkup.row(types.KeyboardButton(text='Да, закончим с ТВ 👌'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == 'Да, продолжим 👌'), flags=flags)
+@router.message((F.text == 'Да, закончим с ТВ 👌'), flags=flags)
 async def antip_crossed_boy_1(message: Message, state: FSMContext):
     await state.set_state(propaganda_victim.choose_TV)
     nmarkup = ReplyKeyboardBuilder()
@@ -661,7 +661,9 @@ async def skip_web(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(((F.text.contains('Не надо')) & ~(F.text.contains('интересно'))), flags=flags)
+@router.message(((F.text.contains('Не надо')) & ~(F.text.contains('интересно'))), state=(propaganda_victim.web,
+                                                                                         propaganda_victim.options),
+                flags=flags)
 async def antip_web_exit_1(message: Message, state: FSMContext):
     redis = all_data().get_data_red()
     for key in redis.scan_iter(f"Usrs: {message.from_user.id}: Start_answers: ethernet:"):
@@ -682,10 +684,8 @@ async def antip_web_exit_1(message: Message, state: FSMContext):
 @router.message(PplPropagandaFilter(),
                 (F.text.contains('Это и так понятно 👌')) | (F.text.contains('Интересно 🤔')), flags=flags)
 async def antip_bad_people_lies(message: Message, state: FSMContext):
-    print(1)
     await state.set_state(propaganda_victim.ppl_propaganda)
     persons = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
-    print(persons)
     text = await sql_safe_select('text', 'texts', {'name': 'antip_bad_people_lies'})
     text = text.replace('[[первая красная личность]]', persons[0] if len(persons) > 0 else 'N/A')
     nmarkup = ReplyKeyboardBuilder()
