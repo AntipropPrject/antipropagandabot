@@ -476,8 +476,10 @@ async def mongo_pop_admin_level(tg_id, level):
         collection = database['admins']
         if len(await mongo_select_admin_levels(tg_id)) <= 1:
             await collection.delete_one({'_id': int(tg_id)})
+            return 'Was deleted'
         else:
             await collection.update_one({'_id': int(tg_id)}, {'$pull': {'access': level}})
+            return 'Still admin'
     except Exception as error:
         await logg.get_error(f"mongo_pop_admin | {error}", __file__)
 

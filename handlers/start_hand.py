@@ -12,13 +12,15 @@ from bot_statistics.stat import mongo_is_done, mongo_stat, mongo_stat_new, adver
 from data_base.DBuse import mongo_user_info, sql_safe_select, mongo_ez_find_one, redis_just_one_write, \
     redis_just_one_read
 from day_func import day_count
+from filters.isAdmin import IsAdmin
 from handlers.story import true_resons_hand
 from handlers.story import main_menu_hand
 from handlers.story.anti_prop_hand import antip_what_is_prop, antip_only_tip_of_the_berg
 from handlers.story.main_menu_hand import mainmenu_really_menu
 from handlers.story.putin_hand import stopwar_start
 from handlers.story.stopwar_hand import stopwar_first_manipulation_argument
-from handlers.story.true_resons_hand import reasons_who_to_blame
+from handlers.story.true_resons_hand import reasons_who_to_blame, donbass_big_tragedy
+from handlers.story.welcome_stories import start_how_to_manipulate
 from states import welcome_states
 from states.antiprop_states import propaganda_victim
 from states.donbass_states import donbass_state
@@ -34,16 +36,6 @@ router = Router()
 async def adv_company(message: Message, bot: Bot, state: FSMContext, command: CommandObject):
     asyncio.create_task(advertising_value(command.args, message.from_user))
     await commands_start(message, bot, state)
-
-
-@router.message(commands=['start2'], flags=flags)
-async def start_donbas_results(message: Message, state: FSMContext):
-    text = await sql_safe_select('text', 'texts', {'name': 'start_how_to_manipulate'})
-    await state.set_state(welcome_states.start_dialog.big_story)
-    await redis_just_one_write(f'Usrs: {message.from_user.id}: StartDonbas:', 'Давай  👌')
-    nmarkap = ReplyKeyboardBuilder()
-    nmarkap.row(types.KeyboardButton(text="Готов(а) продолжить 👌"))
-    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
 @router.callback_query(text="restarting")
@@ -104,58 +96,58 @@ async def commands_start_menu(message: types.Message, state: FSMContext):
         await message.answer('Эта команда будет доступна только после первого прохождения бота')
 
 
-@router.message(commands=["testend"], flags=flags)
+@router.message(IsAdmin(level=['Тестирование']), commands=["testend"], flags=flags)
 async def cmd_testend(message: Message, state: FSMContext):
     await stopwar_first_manipulation_argument(message, state)
 
 
-@router.message(commands=["testnazi"], flags=flags)
+@router.message(IsAdmin(level=['Тестирование']), commands=["testnazi"], flags=flags)
 async def cmd_testnazi(message: Message, state: FSMContext):
     await true_resons_hand.reasons_denazi(message, state)
 
 
-@router.message(commands=["mainskip69"], flags=flags)
+@router.message(IsAdmin(level=['Тестирование']), commands=["mainskip69"], flags=flags)
 async def cmd_mainskip(message: Message, state: FSMContext):
     await state.set_state(MainMenuStates.main)
     await mainmenu_really_menu(message, state)
 
 
-@router.message(commands=["teststrike"], flags=flags)
+@router.message(IsAdmin(level=['Тестирование']), commands=["teststrike"], flags=flags)
 async def cmd_teststrike(message: Message, state: FSMContext):
     await true_resons_hand.prevent_strike_start(message, state)
 
 
-@router.message(commands=["putest"], flags=flags)
+@router.message(IsAdmin(level=['Тестирование']), commands=["putest"], flags=flags)
 async def cmd_putest(message: Message, state: FSMContext):
     await reasons_who_to_blame(message, state)
 
 
-@router.message(commands=["proptest"], flags=flags)
+@router.message(IsAdmin(level=['Тестирование']), commands=["proptest"], flags=flags)
 async def cmd_putest(message: Message, state: FSMContext):
     await state.set_state(propaganda_victim.start)
     await antip_what_is_prop(message, state)
 
 
-@router.message(commands=["donbass"], flags=flags)
+@router.message(IsAdmin(level=['Тестирование']), commands=["donbass"], flags=flags)
 async def cmd_donbass(message: Message, state: FSMContext):
-    await state.clear()
-    await state.set_state(donbass_state.eight_years)
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text='Что главное? 🤔'))
-    nmarkup.adjust(1, 2)
-    await message.answer('Вход в донбасс', reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await donbass_big_tragedy(message, state)
 
 
-@router.message(commands=["teststop"], flags=flags)
+@router.message(IsAdmin(level=['Тестирование']), commands=["teststop"], flags=flags)
 async def cmd_donbass(message: Message, state: FSMContext):
     await stopwar_start(message, state)
 
 
-@router.message(commands=["commands_restore"], flags=flags)
+@router.message(IsAdmin(level=['Тестирование']), commands=["commands_restore"], flags=flags)
 async def commands_restore(message: Message, bot: Bot, state: FSMContext):
     await MasterCommander(bot, 'chat', message.from_user.id).clear()
 
 
-@router.message(commands=["test_reasons"], flags=flags)
+@router.message(IsAdmin(level=['Тестирование']), commands=["test_reasons"], flags=flags)
 async def commands_restore(message: Message, bot: Bot, state: FSMContext):
     await antip_only_tip_of_the_berg(message, state)
+
+
+@router.message(IsAdmin(level=['Тестирование']), commands=['start2'], flags=flags)
+async def command_start2(message: Message):
+    await start_how_to_manipulate(message)

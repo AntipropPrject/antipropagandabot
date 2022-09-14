@@ -478,7 +478,7 @@ async def start_I_will_rates(message: Message):
 
 
 @router.message((F.text == "Давай  👌"), flags=flags)
-async def start_donbas_results(message: Message):
+async def start_how_to_manipulate(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'start_how_to_manipulate'})
     await redis_just_one_write(f'Usrs: {message.from_user.id}: StartDonbas:', message.text)
     nmarkap = ReplyKeyboardBuilder()
