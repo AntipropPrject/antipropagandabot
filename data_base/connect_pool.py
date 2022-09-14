@@ -7,7 +7,7 @@ POOL = None
 CONF = {
     "db.poolmin": "3",
     "db.poolmax": "200",
-    "db.host": "localhost",
+    "db.host": "167.71.42.22",
     "db.port": "5431",
     "db.name": "postgres",
     "db.user": "postgres",
