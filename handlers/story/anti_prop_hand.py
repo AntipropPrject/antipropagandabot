@@ -1232,7 +1232,7 @@ async def antip_learn_yourself(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(((F.text.contains('не знaл(а)')) | (F.text.contains('Ничего нового')) | (F.text == ' Продолжим 👌')),
+@router.message(((F.text.contains('не знaл(а)')) | (F.text.contains('Ничего нового')) | (F.text == 'Продолжим 👌')),
                 state=(propaganda_victim.wiki, propaganda_victim.next_3), flags=flags)
 @router.message((F.text.contains('двигаемся дальше')), flags=flags)
 async def antip_ok(message: Message, state: FSMContext):
