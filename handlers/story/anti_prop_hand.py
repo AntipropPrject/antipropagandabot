@@ -694,9 +694,9 @@ async def antip_web_exit_1(message: Message, state: FSMContext):
 
 @router.message(PplPropagandaFilter(),
                 (F.text.contains('Это и так понятно 👌')) | (F.text.contains('Интересно 🤔')), flags=flags)
-async def antip_bad_people_lies(message: Message, state: FSMContext):
+async def antip_bad_people_lies(message: Message, ppl_lies_list: List[str], state: FSMContext):
     await state.set_state(propaganda_victim.ppl_propaganda)
-    persons = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
+    persons = ppl_lies_list
     text = await sql_safe_select('text', 'texts', {'name': 'antip_bad_people_lies'})
     text = text.replace('[[первая красная личность]]', persons[0] if len(persons) > 0 else 'N/A')
     nmarkup = ReplyKeyboardBuilder()
