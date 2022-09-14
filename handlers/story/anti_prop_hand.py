@@ -857,9 +857,13 @@ async def antip_chicken_and_egg(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(((F.text.contains('В целом согласен(а)')) | (F.text.contains('Продолжаем 👉'))),
+@router.message(((F.text.contains('В целом согласен(а)')) | (F.text.contains('Продолжаем 👉')) | (F.text == "Хорошо, продолжим 👌")),
                 state=(propaganda_victim.quiz_3, propaganda_victim.after_quizez), flags=flags)
 async def antip_german_list(message: Message, state: FSMContext):
+    if 'Хорошо, продолжим' in message.text:
+        text = await sql_safe_select('text', 'texts', {'name': 'antip_return_to_german_list'})
+        await message.answer(text)
+        await asyncio.sleep(1)
     await state.set_state(propaganda_victim.after_quizez)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Интересно 👍"))
@@ -867,13 +871,6 @@ async def antip_german_list(message: Message, state: FSMContext):
     if not await redis_just_one_read(f'Usrs: {message.from_user.id}: Ukr_tv:'):
         nmarkup.row(types.KeyboardButton(text="Подожди. А украинскую пропаганду ты показать не хочешь? 🤔"))
     await simple_media(message, 'antip_german_list', nmarkup.as_markup(resize_keyboard=True))
-
-
-@router.message((F.text == "Хорошо, продолжим 👌"), state=propaganda_victim.after_quizez, flags=flags)
-async def antip_return_to_german_list(message: Message, state: FSMContext):
-    text = await sql_safe_select('text', 'texts', {'name': 'antip_return_to_german_list'})
-    await message.answer(text)
-    await antip_german_list(message)
 
 
 @router.message(((F.text == "Интересно 👍") | (F.text == "Скучновато 👎")),
