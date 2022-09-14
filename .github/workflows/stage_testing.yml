@@ -16,13 +16,7 @@ jobs:
       - name: 'Making .env'
         run: |
           touch .env
-          cat .env.example >> .env
-          echo \n >> .env
-          echo BOT_TOKEN = 5483385115:AAG3VIZEBtFlNnHiSzOhL4nf9ZluT-PNh34 >> .env
-          echo TEST_CHANNEL_ID = -1001270576526 >> .env
-          echo TEST_USER_ID = 5429649862 >> .env
-          echo PIPELINE = True >> .env
-          cat .env
+          ${{ secrets.ENV_TEST }}
       - name: 'Building containers'
         run: docker compose -f CI/DocTesting.yml build
       - name: 'Testing'
