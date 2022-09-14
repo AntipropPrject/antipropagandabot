@@ -99,7 +99,7 @@ class WebPropagandaFilter(BaseFilter):
 class PplPropagandaFilter(BaseFilter):
 
     async def __call__(self, message: Message) -> Union[bool, Dict[str, Any]]:
-        ppl_lies_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:')
+        ppl_lies_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
         bad_ppl_lies = ("Дмитрий Песков", "Сергей Лавров",
                         "Маргарита Симоньян", "Владимир Соловьев", "Никита Михалков")
         for bad_lie in bad_ppl_lies:
