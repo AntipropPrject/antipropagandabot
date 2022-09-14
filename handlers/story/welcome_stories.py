@@ -113,13 +113,13 @@ async def start_trolley_2_result(message: Message):
     txt.replace('YY', fat_kill)
     txt.replace('ZZ', right_turn - fat_kill)
     nmarkap = ReplyKeyboardBuilder()
-    if text_tag != 'start_trolley_2_result'
+    if text_tag != 'start_trolley_2_result':
         nmarkap.row(types.KeyboardButton(text="В отличии от рабочего на путях, толстяк не замешан в этой ситуации 🤔"))
         nmarkap.row(types.KeyboardButton(text="Во втором случае мы лишь наблюдаем, а не участвуем — это другое 👀"))
         nmarkap.row(types.KeyboardButton(text="Убивать своими руками — это совсем другое ☝️"))
         nmarkap.row(types.KeyboardButton(text="Я не знаю / Другая причина 🤷‍♀️"))
     await message.answer(txt(), disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
-    if text_tag == 'start_trolley_2_result'
+    if text_tag == 'start_trolley_2_result':
         await start_are_you_ready(message)
 
 
