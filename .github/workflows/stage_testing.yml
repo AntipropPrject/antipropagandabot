@@ -16,7 +16,7 @@ jobs:
       - name: 'Making .env'
         run: |
           touch .env
-          echo ${{ secrets.ENV_TEST }} >> .env
+          ${{ secrets.ENV_TEST }}
       - name: 'Building containers'
         run: docker compose -f CI/DocTesting.yml build
       - name: 'Testing'
