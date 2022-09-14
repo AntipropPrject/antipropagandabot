@@ -116,6 +116,7 @@ async def antip_TV_makes_them_bad(message: Message):
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Интересно 🤔"))
     nmarkap.row(types.KeyboardButton(text="Это и так понятно 👌"))
+    nmarkap.adjust(2)
     await message.answer(text,disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
