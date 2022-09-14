@@ -1,3 +1,4 @@
+import os
 import asyncio
 from aiogram import Dispatcher
 from aiogram.dispatcher.fsm.storage.redis import RedisStorage
