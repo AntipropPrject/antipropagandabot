@@ -1224,7 +1224,7 @@ async def antip_look_at_it_yourself(message: Message, state: FSMContext):
     await simple_media(message, 'antip_look_at_it_yourself', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(((F.text.contains('не знaл(а) 🙂')) | (F.text.contains('нового')) |  # не знaл - a - английская
+@router.message(((F.text.contains('не знaл(а) 🙂')) | (F.text.contains('Ничего нового')) |  # не знaл - a - английская
                  (F.text.contains('не верю'))),
                 state=(propaganda_victim.wiki, propaganda_victim.next_3), flags=flags)
 @router.message(((F.text.contains('удивлён')) | (F.text.contains('не верю'))),
@@ -1351,7 +1351,7 @@ async def antip_forbidden_truth(message: Message, state: FSMContext):
 @router.message((F.text.contains('Продолжай ⏳')), flags=flags, state=propaganda_victim.next_3)
 async def antip_look_at_it_yourself(message: Message, state: FSMContext):
     nmarkap = ReplyKeyboardBuilder()
-    nmarkap.add(types.KeyboardButton(text='Спасибо, не знал(а) 🙂'))
+    nmarkap.add(types.KeyboardButton(text='Спасибо, не знaл(а) 🙂'))
     nmarkap.add(types.KeyboardButton(text='Ничего нового 🤷‍♀️'))
     nmarkap.add(types.KeyboardButton(text='Я не верю 😕'))
     nmarkap.adjust(2)
