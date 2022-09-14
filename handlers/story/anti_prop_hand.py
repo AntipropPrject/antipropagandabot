@@ -1190,7 +1190,7 @@ async def antip_good_idea(message: Message):
 @router.message((F.text.contains('удивлён')) | (F.text == 'Продолжим 👌'), state=propaganda_victim.yandex,
                 flags=flags)
 @router.message(F.text == "Не надо, не интересно 🙅‍♂️", flags=flags)
-async def antip_clear_and_cool(message: Message, state: FSMContext):
+async def antip_why_not_wiki(message: Message, state: FSMContext):
     await state.set_state(propaganda_victim.wiki)
     text = await sql_safe_select('text', 'texts', {'name': 'antip_why_not_wiki'})
     nmarkup = ReplyKeyboardBuilder()
@@ -1232,7 +1232,7 @@ async def antip_learn_yourself(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(((F.text.contains('не знaл(а)')) | (F.text.contains('Ничего нового'))),
+@router.message(((F.text.contains('не знaл(а)')) | (F.text.contains('Ничего нового')) | (F.text == ' Продолжим 👌')),
                 state=(propaganda_victim.wiki, propaganda_victim.next_3), flags=flags)
 @router.message((F.text.contains('двигаемся дальше')), flags=flags)
 async def antip_ok(message: Message, state: FSMContext):
