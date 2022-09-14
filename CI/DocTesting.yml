@@ -29,7 +29,7 @@ services:
     volumes:
       - ./storage/redis/data:/data
     env_file:
-      - .env
+      - ../.env
     command:
       - /bin/sh
       - -c
