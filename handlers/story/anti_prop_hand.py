@@ -125,6 +125,7 @@ async def antip_time_wasted(message: Message):
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="В чём подвох? 🤔"))
     nmarkap.row(types.KeyboardButton(text="Я заметил(а)! 😯"))
+    nmarkap.adjust(2)
     await simple_media(message, 'antip_time_wasted', nmarkap.as_markup(resize_keyboard=True))
 
 
