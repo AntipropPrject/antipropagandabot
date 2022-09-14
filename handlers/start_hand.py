@@ -20,7 +20,7 @@ from handlers.story.main_menu_hand import mainmenu_really_menu
 from handlers.story.putin_hand import stopwar_start
 from handlers.story.stopwar_hand import stopwar_first_manipulation_argument
 from handlers.story.true_resons_hand import reasons_who_to_blame, donbass_big_tragedy
-from handlers.story.welcome_stories import start_how_to_manipulate
+from handlers.story.welcome_stories import start_how_to_manipulate, start_is_war_bad
 from states import welcome_states
 from states.antiprop_states import propaganda_victim
 from states.donbass_states import donbass_state
@@ -150,4 +150,4 @@ async def commands_restore(message: Message, bot: Bot, state: FSMContext):
 
 @router.message(IsAdmin(level=['Тестирование']), commands=['start2'], flags=flags)
 async def command_start2(message: Message):
-    await start_how_to_manipulate(message)
+    await start_is_war_bad(message)
