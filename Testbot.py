@@ -26,9 +26,9 @@ async def on_startup(dispatcher: Dispatcher) -> None:
     webhook = await bot.get_webhook_info()
     if webhook is not None:
         await bot.delete_webhook(drop_pending_updates=True)
-        await bot.set_webhook("https://kamaga777123.xyz/")
+        await bot.set_webhook(os.getenv('WEBHOOK'))
     else:
-        await bot.set_webhook("https://kamaga777123.xyz/")
+        await bot.set_webhook(os.getenv('WEBHOOK'))
 
 
     webhook = await bot.get_webhook_info()
@@ -38,7 +38,7 @@ async def on_startup(dispatcher: Dispatcher) -> None:
     print(webhook)
 
     print("🚀 Bot launched as Hoook!")
-    print(f"webhook: https://kamaga777123.xyz/")
+    print(f"webhook: {os.getenv('WEBHOOK')}")
 
 
 
