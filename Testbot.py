@@ -7,7 +7,7 @@ from aiohttp import web
 import bata
 from bata import all_data
 from export_to_csv import pg_mg
-from handlers import start_hand
+from handlers import start_hand, shop
 from handlers.admin_for_games_dir import mistakeorlie
 from handlers.admin_handlers import admin_factory, marketing, admin_for_games, new_admin_hand
 from handlers.other import status, other_file
@@ -98,6 +98,7 @@ def main():
 
     dp.message.middleware(ThrottlingMiddleware())
     # Роутер для неподошедшего
+    dp.include_router(shop.router)
     dp.include_router(other_file.router)
 
     # session = aiohttp.ClientSession()
