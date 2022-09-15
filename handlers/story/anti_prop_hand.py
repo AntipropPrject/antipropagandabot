@@ -688,7 +688,7 @@ async def antip_web_exit_1(message: Message, state: FSMContext):
             redis.delete(key)
     if await state.get_state() == "propaganda_victim:options":
         await antip_funny_propaganda(message, state)
-        redis.delete(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:')
+        redis.delete(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
         return
     propagandist_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
     if set(propagandist_list).isdisjoint(("Дмитрий Песков", "Сергей Лавров",
