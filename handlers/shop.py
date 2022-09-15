@@ -8,7 +8,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
 from data_base.DBuse import data_getter, sql_safe_select, mongo_game_answer, mongo_count_docs
-from utilts import simple_media, simple_media_bot, CoolPercReplacer
+from utilts import simple_media, simple_media_bot, CoolPercReplacer, simple_video_album
 from filters.MapFilters import PutinFilter
 from handlers.story.stopwar_hand import StopWarState
 from utilts import simple_media
@@ -147,6 +147,17 @@ async def shop_bucket(message: types.Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="Выйти из магазина ⬇"))
 
     await message.answer("Отлично!", reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
+    await simple_video_album(message, ['card1',
+                                       'card2',
+                                       'card3',
+                                       'card4',
+                                       'card5',
+                                       'card6',
+                                       'card7',
+                                       'card8',
+                                       'card9',
+                                       'card10',])
     text = await sql_safe_select("text", "texts", {"name": "shop_bucket"})
 
     data_dict = await state.get_data()
