@@ -4,26 +4,24 @@ from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.filters.command import CommandStart, CommandObject
 from aiogram.dispatcher.fsm.context import FSMContext
-from aiogram.types import Message, BotCommandScopeChat, User, CallbackQuery
+from aiogram.types import Message, User, CallbackQuery
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 from bata import all_data
 from bot_statistics.stat import mongo_is_done, mongo_stat, mongo_stat_new, advertising_value
-from data_base.DBuse import mongo_user_info, sql_safe_select, mongo_ez_find_one, redis_just_one_write, \
-    redis_just_one_read
+from data_base.DBuse import mongo_user_info, sql_safe_select, mongo_ez_find_one, redis_just_one_write
 from day_func import day_count
 from filters.isAdmin import IsAdmin
 from handlers.story import true_resons_hand
 from handlers.story import main_menu_hand
-from handlers.story.anti_prop_hand import antip_what_is_prop, antip_only_tip_of_the_berg
+from handlers.story.anti_prop_hand import antip_what_is_prop
 from handlers.story.main_menu_hand import mainmenu_really_menu
 from handlers.story.putin_hand import stopwar_start
 from handlers.story.stopwar_hand import stopwar_first_manipulation_argument
 from handlers.story.true_resons_hand import reasons_who_to_blame, donbass_big_tragedy
-from handlers.story.welcome_stories import start_how_to_manipulate, start_is_war_bad
-from states import welcome_states
+from handlers.story.welcome_messages import message_2
+from handlers.story.welcome_stories import start_how_to_manipulate
 from states.antiprop_states import propaganda_victim
-from states.donbass_states import donbass_state
 from states.main_menu_states import MainMenuStates
 from states.welcome_states import start_dialog
 from utilts import MasterCommander
@@ -145,7 +143,7 @@ async def commands_restore(message: Message, bot: Bot, state: FSMContext):
 
 @router.message(IsAdmin(level=['Тестирование']), commands=["test_reasons"], flags=flags)
 async def commands_restore(message: Message, bot: Bot, state: FSMContext):
-    await antip_only_tip_of_the_berg(message, state)
+    await message_2(message, state)
 
 
 @router.message(IsAdmin(level=['Тестирование']), commands=['polls_start'], flags=flags)
