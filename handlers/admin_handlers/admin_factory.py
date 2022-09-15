@@ -6,10 +6,11 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 import bata
 from data_base.DBuse import mongo_all_admins, mongo_select_info, mongo_add_admin, mongo_select_admin_levels, \
     mongo_edit_admin, \
-    mongo_pop_admin_level
+    mongo_pop_admin_level, mongo_ez_find_one
 from filters.isAdmin import IsSudo
 from keyboards.admin_keys import redct_editors
 from log import logg
+from resources.variables import all_test_commands
 from states.admin_states import admin
 from utilts import MasterCommander
 
@@ -89,6 +90,8 @@ async def admins_add_lvl_done(message: Message, bot: Bot, state: FSMContext):
         await logg.admin_logs(message.from_user.id, message.from_user.username,
                               f"Новый уровень доступа для'{new_admin_id}': {message.text}")
         await MasterCommander(bot, 'chat', new_admin_id).add({'admin': 'Админка'})
+        if message.text == 'Тестирование':
+            await MasterCommander(bot, 'chat', new_admin_id).add(all_test_commands)
         await state.clear()
         await sadmins(message, state)
     else:
@@ -126,12 +129,15 @@ async def admins_pop_not(message: Message, state: FSMContext):
 
 
 @router.message(F.text.in_(set(access_levels)), state=admin.pop)
-async def admins_pop_done(message: Message, state: FSMContext):
+async def admins_pop_done(message: Message, bot: Bot, state: FSMContext):
     old_admin_id = (await state.get_data())['old_admin_id']
     if await mongo_select_info(old_admin_id):
-        await mongo_pop_admin_level(old_admin_id, level=message.text)
-        await logg.admin_logs(message.from_user.id, message.from_user.username,
-                              f"У пользователя '{old_admin_id}' забран уровень доступа {message.text}")
+        result = await mongo_pop_admin_level(old_admin_id, level=message.text)
+        text = f"У пользователя '{old_admin_id}' забран уровень доступа {message.text}"
+        if result == 'Was deleted':
+            await MasterCommander(bot, 'chat', old_admin_id).clear()
+            text = text + '\n Пользователь больше не является администратором'
+        await logg.admin_logs(message.from_user.id, message.from_user.username, text)
         await message.answer(f"У пользователя '{old_admin_id}' забран уровень доступа {message.text}",
                              reply_markup=redct_editors())
         await state.clear()

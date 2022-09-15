@@ -12,7 +12,7 @@ from states.antiprop_states import propaganda_victim
 flags = {"throttling_key": "True"}
 router = Router()
 router.message.filter(state=propaganda_victim)
-messageDict = dict()
+
 
 
 @router.message((F.text.contains("Начнём 🙂")), flags=flags)
@@ -22,7 +22,6 @@ messageDict = dict()
 async def smi_statement(message: Message, state: FSMContext):
     if message.text == 'Начнём 🙂':
         await mongo_update_stat_new(tg_id=message.from_user.id, column='false_on_prop', value='Да')
-    messageDict.update({message.from_user.id: message})
     person_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
 
     data = await state.get_data()

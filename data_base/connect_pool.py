@@ -1,3 +1,4 @@
+import os
 from contextlib import contextmanager
 
 import psycopg2.extras
@@ -7,11 +8,11 @@ POOL = None
 CONF = {
     "db.poolmin": "3",
     "db.poolmax": "200",
-    "db.host": "167.71.42.22",
-    "db.port": "5431",
-    "db.name": "postgres",
-    "db.user": "postgres",
-    "db.password": "postgres",
+    "db.host": os.getenv('POSTGRES_HOST'),
+    "db.port": os.getenv('POSTGRES_PORT'),
+    "db.name": os.getenv('POSTGRES_BASE'),
+    "db.user": os.getenv('POSTGRES_USER'),
+    "db.password": os.getenv('POSTGRES_PASSWORD'),
 }
 
 

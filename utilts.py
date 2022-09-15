@@ -76,7 +76,7 @@ async def simple_media_bot(bot: Bot, chat_id: int, tag: str,
                 return await bot.send_photo(chat_id, media, caption=text, reply_markup=reply_markup)
             except TelegramBadRequest:
                 try:
-                    return await bot.send_photo(chat_id, media, caption=text, reply_markup=reply_markup)
+                    return await bot.send_video(chat_id, media, caption=text, reply_markup=reply_markup)
                 except TelegramBadRequest:
                     media = await sql_safe_select("t_id", "assets", {"name": 'ERROR_SORRY'})
                     await logg.get_error(f'NO {tag}')
@@ -86,7 +86,7 @@ async def simple_media_bot(bot: Bot, chat_id: int, tag: str,
                 return await bot.send_photo(chat_id, media, reply_markup=reply_markup)
             except TelegramBadRequest:
                 try:
-                    return await bot.send_photo(chat_id, media, reply_markup=reply_markup)
+                    return await bot.send_video(chat_id, media, reply_markup=reply_markup)
                 except TelegramBadRequest:
                     media = await sql_safe_select("t_id", "assets", {"name": 'ERROR_SORRY'})
                     await logg.get_error(f'NO {tag}')
@@ -138,6 +138,11 @@ def percentage_replace(text: str, symbol: str, part: int, base: int):
 
 
 class CoolPercReplacer:
+    """
+    Easy replacer for percentage.\n
+    text: text where replace is needed\n
+    base: base number to calculate (100%)
+    """
     def __init__(self, text: str, base: int):
         self.text = text
         self.base = base
@@ -149,6 +154,9 @@ class CoolPercReplacer:
         return str(self.text)
 
     def replace(self, symbol: str, part: int, *args, temp_base: int = None):
+        """symbol: placeholder needed to be replaced ('AA')\n
+        part: number to calculate percent from base\n
+        temp_base: replace object base (100%) for this calculation"""
         whole = self.base
         if temp_base:
             whole = temp_base
@@ -157,7 +165,7 @@ class CoolPercReplacer:
                 perc = part / whole * 100
             except ZeroDivisionError:
                 perc = 0
-            self.text = self.text.replace(symbol, str(round(perc)))
+            self.text = self.text.replace(symbol, str(round(perc, 1)))
 
 
 

@@ -96,9 +96,9 @@ async def start_trolley_2_result(message: Message):
     if message.text == "Ничего не буду делать 🙅‍♂️" and \
             await mongo_count_docs('database', 'statistics_new',
                                    {'_id': message.from_user.id, 'start_trolley_1_result': "Сверну направо ➡️"}):
-        text_tag = 'start_trolley_2_peace_result'
-    else:
         text_tag = 'start_trolley_2_result'
+    else:
+        text_tag = 'start_trolley_2_peace_result'
     text = await sql_safe_select('text', 'texts', {'name': text_tag})
 
     fat_all = await mongo_count_docs('database', 'statistics_new', {'start_trolley_2_result': {'$exists': True}})
@@ -478,7 +478,7 @@ async def start_I_will_rates(message: Message):
 
 
 @router.message((F.text == "Давай  👌"), flags=flags)
-async def start_donbas_results(message: Message):
+async def start_how_to_manipulate(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'start_how_to_manipulate'})
     await redis_just_one_write(f'Usrs: {message.from_user.id}: StartDonbas:', message.text)
     nmarkap = ReplyKeyboardBuilder()

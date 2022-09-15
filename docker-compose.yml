@@ -8,16 +8,14 @@ services:
       - "27017:27017"
     volumes:
       - ~/apps/mongo:/data/db
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=mongoOTPOR
-      - MONGO_INITDB_ROOT_PASSWORD=mongoOTPOR
+    env_file:
+      - .env
     command: mongod --quiet --logpath /dev/null
   db:
     image: postgres:12
     container_name: antiprop_posgres
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+    env_file:
+      - .env
     ports:
       - "5431:5432"
 
@@ -28,7 +26,12 @@ services:
       - "2342:2342"
     volumes:
       - ./storage/redis/data:/data
-    command: --port 2342
+    env_file:
+      - .env
+    command:
+      - /bin/sh
+      - -c
+      - redis-server --requirepass "$${REDIS_PASSWORD:?REDIS_PASSWORD variable is not set}" --save 20 1 --loglevel warning --port 2342
 
   web:
     build: .

@@ -15,15 +15,15 @@ class all_data():
         self.pg_pswd = os.getenv('POSTGRES_PASSWORD')
         self.pg_host = os.getenv('POSTGRES_HOST')
         self.pg_port = os.getenv('POSTGRES_PORT')
-        self.mg_user = os.getenv('MONGO_USER')
-        self.mg_pswd = os.getenv('MONGO_PASSWORD')
+        self.mg_user = os.getenv('MONGO_INITDB_ROOT_USERNAME')
+        self.mg_pswd = os.getenv('MONGO_INITDB_ROOT_PASSWORD')
         self.mg_host = os.getenv('MONGO_HOST')
         self.mg_port = os.getenv('MONGO_PORT')
         self.super_admins = (5429649862, 5177494340, 5581082758, 5316104187, 784006905, 5597084736, 5441287748)
         self.THROTTLE_TIME = 0.8
         self.commichannel = os.getenv('COMMIT_CH')
         self.masterchannel = os.getenv('MASTER_CH')
-        self.access_levels = ('Редактирование', 'Маркетинг')
+        self.access_levels = ('Редактирование', 'Маркетинг', 'Тестирование')
 # фывфывфдв
     def get_bot(self):
         return Bot(self.bot_token, parse_mode="HTML")
@@ -38,7 +38,7 @@ class all_data():
         return from_url(self.redis_url, decode_responses=True)
 
     def get_data_red(self):
-        return from_url('redis://localhost:2342/1', decode_responses=True)
+        return from_url(f'{self.redis_url}/1', decode_responses=True)
 
     def get_THROTTLE_TIME(self):
         return self.THROTTLE_TIME

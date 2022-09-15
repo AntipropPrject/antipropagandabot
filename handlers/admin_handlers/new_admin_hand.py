@@ -72,12 +72,12 @@ async def reset(message: Message, state: FSMContext):
         await state.set_state(admin.add_media)
         await message.answer('Хорошо, отправьте мне другое медиа', reply_markup=middle_admin_keyboard())
     elif stt == 'admin:confirm_edit_text':
-        await state.set_state(admin.edit_media_test)
-        await message.answer('Хорошо, отправьте мне медиа, на которое вы хотите заменить старое',
-                             reply_markup=middle_admin_keyboard())
-    elif stt == 'admin:confirm_edit_media':
         await state.set_state(admin_home.text_edit)
         await message.answer('Хорошо, отправьте мне текст, который заменит старый',
+                             reply_markup=middle_admin_keyboard())
+    elif stt == 'admin:confirm_edit_media':
+        await state.set_state(admin.edit_media_test)
+        await message.answer('Хорошо, отправьте мне медиа, на которое вы хотите заменить старое',
                              reply_markup=middle_admin_keyboard())
     else:
         await state.set_state(admin.home)
@@ -1003,7 +1003,7 @@ async def secretreborn2(message: types.Message, bot: Bot, state: FSMContext):
             await sql_safe_update('assets', {'t_id': media_id}, {'name': message.caption})
             print(f'Обновлено медиа под тегом {message.caption}')
         else:
-            await sql_safe_insert('assets', {'t_id': media_id, 'name': message.caption})
+            await sql_safe_insert('public', 'assets', {'t_id': media_id, 'name': message.caption})
             print(f'Создано новое медиа под тегом {message.caption}')
     else:
         await message.answer('Перешлите мне медиа из другого бота, или нажмите кнопку "Назад".')

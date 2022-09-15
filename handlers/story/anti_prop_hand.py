@@ -13,12 +13,12 @@ from bot_statistics.stat import mongo_update_stat_new
 from data_base.DBuse import poll_get, redis_just_one_read, sql_select_row_like, mongo_game_answer, mongo_count_docs, \
     redis_just_one_write, mongo_select, mongo_ez_find_one
 from data_base.DBuse import sql_safe_select, data_getter
-from filters.MapFilters import WebPropagandaFilter, TVPropagandaFilter, PplPropagandaFilter, \
+from filters.MapFilters import WebPropagandaFilter, PplPropagandaFilter, \
     NotYandexPropagandaFilter
 from handlers.story import true_resons_hand
-
 from keyboards.map_keys import antip_killme_kb
 from resources.all_polls import antip_q1_options, antip_q2_options, antip_q3_options
+from resources.variables import release_date
 from states.antiprop_states import propaganda_victim
 from utilts import simple_media, dynamic_media_answer, simple_media_bot, simple_video_album, CoolPercReplacer
 
@@ -39,12 +39,13 @@ async def antip_what_is_prop(message: Message, state: FSMContext):
 
 @router.message((F.text == "Продолжай ⏳"), flags=flags, state=propaganda_victim.next_0)
 async def antip_black_and_white(message: Message, state: FSMContext):
+    text = await sql_safe_select('text', 'texts', {'name': 'antip_black_and_white'})
     nmarkap = ReplyKeyboardBuilder()
     await state.set_state(propaganda_victim.fake_tv)
     nmarkap.add(types.KeyboardButton(text="Это интересно 👌"))
     nmarkap.row(types.KeyboardButton(text="Не хочу смотреть ложь по ТВ 🙅‍♀️"))
     nmarkap.adjust(2)
-    await simple_media(message, 'antip_black_and_white', nmarkap.as_markup(resize_keyboard=True))
+    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text == 'Не хочу смотреть ложь по ТВ 🙅‍♀️'), state=propaganda_victim.fake_tv, flags=flags)
@@ -71,34 +72,47 @@ async def antip_TV_makes_them_bad(message: Message):
     if 'Всё равно не хочу смотреть ложь' in message.text:
         await message.answer('Хорошо 👌')
 
-    trust = await mongo_count_docs('database', 'statistics_new', {'tv_love_gen': 'Да, полностью доверяю ✅'})
-    dont_trust = await mongo_count_docs('database', 'statistics_new', {'tv_love_gen': 'Нет, не верю ни слову ⛔'})
-    maybe_trust = await mongo_count_docs('database', 'statistics_new', {'tv_love_gen': 'Скорее да 👍'})
-    maybe_dont_trust = await mongo_count_docs('database', 'statistics_new', {'tv_love_gen': 'Скорее нет 👎'})
+    trust = await mongo_count_docs('database', 'statistics_new', [{'tv_love_gen': 'Да, полностью доверяю ✅'},
+                                                                  {'datetime': {'$gte': release_date['v2_1']}}],
+                                   hard_link=True)
+    dont_trust = await mongo_count_docs('database', 'statistics_new', [{'tv_love_gen': 'Нет, не верю ни слову ⛔'},
+                                                                       {'datetime': {'$gte': release_date['v2_1']}}],
+                                        hard_link=True)
+    maybe_trust = await mongo_count_docs('database', 'statistics_new',
+                                         [{'tv_love_gen': 'Скорее да 👍'}, {'datetime': {'$gte': release_date['v2_1']}}],
+                                         hard_link=True)
+    maybe_dont_trust = await mongo_count_docs('database', 'statistics_new', [{'tv_love_gen': 'Скорее нет 👎'}, {
+        'datetime': {'$gte': release_date['v2_1']}}], hard_link=True)
 
-    var_true_and_trust = await mongo_count_docs('database', 'statistics_new',
-                                                [{'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'},
-                                                 {'tv_love_gen': 'Да, полностью доверяю ✅'}], hard_link=True)
-    var_true_and_dont_trust = await mongo_count_docs('database', 'statistics_new',
-                                                     [{
-                                                          'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'},
-                                                      {'tv_love_gen': 'Нет, не верю ни слову ⛔'}], hard_link=True)
-    var_true_and_maybe_trust = await mongo_count_docs('database', 'statistics_new',
-                                                      [{
-                                                           'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'},
-                                                       {'tv_love_gen': 'Скорее да 👍'}], hard_link=True)
-    var_true_and_maybe_dont_trust = await mongo_count_docs('database', 'statistics_new',
-                                                           [{
-                                                                'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'},
-                                                            {'tv_love_gen': 'Скорее нет 👎'}], hard_link=True)
+    var_true_and_trust = await mongo_count_docs(
+        'database', 'statistics_new', [{'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'},
+                                       {'tv_love_gen': 'Да, полностью доверяю ✅'},
+                                       {'datetime': {'$gte': release_date['v2_1']}}], hard_link=True
+    )
+    var_true_and_dont_trust = await mongo_count_docs(
+        'database', 'statistics_new', [{
+            'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'},
+            {'tv_love_gen': 'Нет, не верю ни слову ⛔'},
+            {'datetime': {'$gte': release_date['v2_1']}}], hard_link=True)
+    var_true_and_maybe_trust = await mongo_count_docs(
+        'database', 'statistics_new', [{
+            'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'},
+            {'tv_love_gen': 'Скорее да 👍'},
+            {'datetime': {'$gte': release_date['v2_1']}}], hard_link=True)
+    var_true_and_maybe_dont_trust = await mongo_count_docs(
+        'database', 'statistics_new', [{
+            'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'},
+            {'tv_love_gen': 'Скорее нет 👎'},
+            {'datetime': {'$gte': release_date['v2_1']}}],
+        hard_link=True)
 
     text = await sql_safe_select('text', 'texts', {'name': 'antip_TV_makes_them_bad'})
     try:
-        trust = str(round(var_true_and_trust / trust * 100) if trust > 0 else 'N/A')
-        dont_trust = str(round(var_true_and_dont_trust / dont_trust * 100) if dont_trust > 0 else 'N/A')
-        maybe_trust = str(round(var_true_and_maybe_trust / maybe_trust * 100) if maybe_trust > 0 else 'N/A')
+        trust = str(round(var_true_and_trust / trust * 100, 1) if trust > 0 else 'N/A')
+        dont_trust = str(round(var_true_and_dont_trust / dont_trust * 100, 1) if dont_trust > 0 else 'N/A')
+        maybe_trust = str(round(var_true_and_maybe_trust / maybe_trust * 100, 1) if maybe_trust > 0 else 'N/A')
         maybe_dont_trust = str(
-            round(var_true_and_maybe_dont_trust / maybe_dont_trust * 100) if maybe_dont_trust > 0 else 'N/A')
+            round(var_true_and_maybe_dont_trust / maybe_dont_trust * 100, 1) if maybe_dont_trust > 0 else 'N/A')
 
         text = text.replace('AA', trust)
         text = text.replace('BB', maybe_trust)
@@ -113,7 +127,8 @@ async def antip_TV_makes_them_bad(message: Message):
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Интересно 🤔"))
     nmarkap.row(types.KeyboardButton(text="Это и так понятно 👌"))
-    await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+    nmarkap.adjust(2)
+    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
 @router.message(((F.text == 'Это интересно 👌') | F.text.contains('Хорошо, убедил') |
@@ -122,6 +137,7 @@ async def antip_time_wasted(message: Message):
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="В чём подвох? 🤔"))
     nmarkap.row(types.KeyboardButton(text="Я заметил(а)! 😯"))
+    nmarkap.adjust(2)
     await simple_media(message, 'antip_time_wasted', nmarkap.as_markup(resize_keyboard=True))
 
 
@@ -139,10 +155,10 @@ async def antip_cant_unsee(message: Message):
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Это намеренная ложь 🗣"))
     nmarkap.add(types.KeyboardButton(text="Это случайность 🤷‍♀️️"))
-    nmarkap.row(types.KeyboardButton(text="Это намеренная ложь, но и на Украине так же делают ☝️️️"))
+    nmarkap.row(types.KeyboardButton(text='Это намеренная ложь, но и на Украине так же делают ☝️'))
     nmarkap.add(types.KeyboardButton(text="Не знаю 🤷‍♂️"))
     nmarkap.adjust(2, 1, 1)
-    await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text.contains('Это намеренная ложь, но и на') | F.text.contains('Не знаю 🤷‍♂️')
@@ -156,13 +172,16 @@ async def antip_eye_log(message: Message, state: FSMContext):
     await state.update_data(antip_eye_log_answ=message.text)
     await mongo_update_stat_new(tg_id=message.from_user.id, column='corpses', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'antip_how_could_they'})
-    fake = await mongo_count_docs('database', 'statistics_new',
-                                  {'antip_eye_log': 'Это намеренная ложь 🗣'})
+    fake_1 = await mongo_count_docs('database', 'statistics_new',
+                                    {'antip_eye_log': 'Это намеренная ложь 🗣'})
+    fake_2 = await mongo_count_docs('database', 'statistics_new',
+                                    {'antip_eye_log': 'Это намеренная ложь, но и на Украине так же делают ☝️'})
     random = await mongo_count_docs('database', 'statistics_new',
                                     {'antip_eye_log': 'Это случайность 🤷‍♀️️'})
 
     dont_know = await mongo_count_docs('database', 'statistics_new',
                                        {'antip_eye_log': 'Не знаю 🤷‍♂️'})
+    fake = fake_1 + fake_2
     all_count = fake + random + dont_know
     try:
         fake_result = str(round(fake / all_count * 100))
@@ -181,19 +200,19 @@ async def antip_eye_log(message: Message, state: FSMContext):
     nmarkap = ReplyKeyboardBuilder()
     await state.set_state(propaganda_victim.next_1)
     nmarkap.row(types.KeyboardButton(text="Продолжай ⏳"))
-    await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text.contains('Продолжай') | F.text.contains('Хорошо 🤝')),
                 state=propaganda_victim.next_1, flags=flags)
 async def antip_stop_emotions(message: Message, state: FSMContext):
     data = await state.get_data()
-    if data['antip_eye_log_answ'] != 'Это намеренная ложь 🗣' and 'Хорошо' not in message.text:
+    if 'намеренная ложь' not in data['antip_eye_log_answ'] and 'Хорошо' not in message.text:
         text = await sql_safe_select('text', 'texts', {'name': 'antip_listen_to_facts'})
         nmarkap = ReplyKeyboardBuilder()
         nmarkap.row(types.KeyboardButton(text="Хорошо 🤝"))
         await state.set_state(propaganda_victim.next_1)
-        await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+        await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
     else:
         await state.set_state(propaganda_victim.start)
         text = await sql_safe_select('text', 'texts', {'name': 'antip_bad_statistics'})
@@ -378,11 +397,11 @@ async def antip_TV_how_about_more(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_TV_how_about_more'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Нет, посмотрим ещё ложь по ТВ 📺'))
-    nmarkup.row(types.KeyboardButton(text='Да, продолжим 👌'))
+    nmarkup.row(types.KeyboardButton(text='Да, закончим с ТВ 👌'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == 'Да, продолжим 👌'), flags=flags)
+@router.message((F.text == 'Да, закончим с ТВ 👌'), flags=flags)
 async def antip_crossed_boy_1(message: Message, state: FSMContext):
     await state.set_state(propaganda_victim.choose_TV)
     nmarkup = ReplyKeyboardBuilder()
@@ -650,10 +669,12 @@ async def skip_web(message: Message, state: FSMContext):
     text = text.replace('[[список неотсмотренных красных источников через запятую]]', lst_web_answers)
     text = text.replace('[[название следующего непросмотренного красного источника]]', next_channel)
     await state.update_data(not_viewed_chanel=answer_channel[0])
-    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(((F.text.contains('Не надо')) & ~(F.text.contains('интересно'))), flags=flags)
+@router.message(((F.text.contains('Не надо')) & ~(F.text.contains('интересно'))), state=(propaganda_victim.web,
+                                                                                         propaganda_victim.options),
+                flags=flags)
 async def antip_web_exit_1(message: Message, state: FSMContext):
     redis = all_data().get_data_red()
     for key in redis.scan_iter(f"Usrs: {message.from_user.id}: Start_answers: ethernet:"):
@@ -673,19 +694,19 @@ async def antip_web_exit_1(message: Message, state: FSMContext):
 
 @router.message(PplPropagandaFilter(),
                 (F.text.contains('Это и так понятно 👌')) | (F.text.contains('Интересно 🤔')), flags=flags)
-async def antip_bad_people_lies(message: Message, state: FSMContext):
+async def antip_bad_people_lies(message: Message, ppl_lies_list: List[str], state: FSMContext):
     await state.set_state(propaganda_victim.ppl_propaganda)
+    persons = ppl_lies_list
     text = await sql_safe_select('text', 'texts', {'name': 'antip_bad_people_lies'})
-    text = text.replace('[[первая красная личность]]',
-                        ((await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:'))[0]))
-
+    text = text.replace('[[первая красная личность]]', persons[0] if len(persons) > 0 else 'N/A')
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Начнём 🙂"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text.contains('Интересно 🤔')) | (F.text.contains('и так')) | (F.text.contains('я всё равно')),
-                state=(propaganda_victim.choose_TV, propaganda_victim.web, propaganda_victim.ppl_propaganda),
+                state=(propaganda_victim.choose_TV, propaganda_victim.web, propaganda_victim.ppl_propaganda,
+                       propaganda_victim.fake_tv),
                 flags=flags)
 async def antip_funny_propaganda(message: Message, state: FSMContext):
     await state.set_state(propaganda_victim.quiz_1)
@@ -702,7 +723,7 @@ async def antip_quiz_1(message: Message, bot: Bot):
 
 
 @router.poll_answer(state=propaganda_victim.quiz_1, flags=flags)
-async def antip_quiz_1_answer(poll_answer: types.PollAnswer, bot: Bot):
+async def antip_quiz_1_answer(poll_answer: types.PollAnswer, bot: Bot, state: FSMContext):
     answer = poll_answer.option_ids[0]
     await mongo_update_stat_new(tg_id=poll_answer.user.id, column='antiprop_quiz_1',
                                 value=antip_q1_options[answer])
@@ -846,9 +867,14 @@ async def antip_chicken_and_egg(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(((F.text.contains('В целом согласен(а)')) | (F.text.contains('Продолжаем 👉'))),
-                state=propaganda_victim.quiz_3, flags=flags)
+@router.message(
+    ((F.text.contains('В целом согласен(а)')) | (F.text.contains('Продолжаем 👉')) | (F.text == "Хорошо, продолжим 👌")),
+    state=(propaganda_victim.quiz_3, propaganda_victim.after_quizez), flags=flags)
 async def antip_german_list(message: Message, state: FSMContext):
+    if 'Хорошо, продолжим' in message.text:
+        text = await sql_safe_select('text', 'texts', {'name': 'antip_return_to_german_list'})
+        await message.answer(text)
+        await asyncio.sleep(1)
     await state.set_state(propaganda_victim.after_quizez)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Интересно 👍"))
@@ -856,13 +882,6 @@ async def antip_german_list(message: Message, state: FSMContext):
     if not await redis_just_one_read(f'Usrs: {message.from_user.id}: Ukr_tv:'):
         nmarkup.row(types.KeyboardButton(text="Подожди. А украинскую пропаганду ты показать не хочешь? 🤔"))
     await simple_media(message, 'antip_german_list', nmarkup.as_markup(resize_keyboard=True))
-
-
-@router.message((F.text == "Хорошо, продолжим 👌"), state=propaganda_victim.after_quizez, flags=flags)
-async def antip_return_to_german_list(message: Message, state: FSMContext):
-    text = await sql_safe_select('text', 'texts', {'name': 'antip_return_to_german_list'})
-    await message.answer(text)
-    await antip_chicken_and_egg(message, state)
 
 
 @router.message(((F.text == "Интересно 👍") | (F.text == "Скучновато 👎")),
@@ -1171,7 +1190,7 @@ async def antip_good_idea(message: Message):
 @router.message((F.text.contains('удивлён')) | (F.text == 'Продолжим 👌'), state=propaganda_victim.yandex,
                 flags=flags)
 @router.message(F.text == "Не надо, не интересно 🙅‍♂️", flags=flags)
-async def antip_clear_and_cool(message: Message, state: FSMContext):
+async def antip_why_not_wiki(message: Message, state: FSMContext):
     await state.set_state(propaganda_victim.wiki)
     text = await sql_safe_select('text', 'texts', {'name': 'antip_why_not_wiki'})
     nmarkup = ReplyKeyboardBuilder()
@@ -1193,42 +1212,38 @@ async def antip_clear_and_cool(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Продолжай ⏳"), state=propaganda_victim.wiki, flags=flags)
+# ПРОВЕРИТЬ ВАЛИДНОСТЬ ДВУХ ПРЕДЫДУЩИХ ХЭНДЛЕРОВ
+
+@router.message((F.text.contains('Продолжай ⏳')), flags=flags, state=propaganda_victim.next_3)
 async def antip_look_at_it_yourself(message: Message, state: FSMContext):
-    await state.set_state(propaganda_victim.wiki)
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Спасибо, не знaл(а) 🙂"))
-    nmarkup.add(types.KeyboardButton(text="Ничего нового 🤷‍♀️"))
-    nmarkup.row(types.KeyboardButton(text="Я не верю 😕"))
-    await simple_media(message, 'antip_look_at_it_yourself', nmarkup.as_markup(resize_keyboard=True))
+    nmarkap = ReplyKeyboardBuilder()
+    nmarkap.add(types.KeyboardButton(text='Спасибо, не знaл(а) 🙂'))
+    nmarkap.add(types.KeyboardButton(text='Ничего нового 🤷‍♀️'))
+    nmarkap.add(types.KeyboardButton(text='Я не верю 😕'))
+    nmarkap.adjust(2)
+    await simple_media(message, 'antip_look_at_it_yourself', reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
-@router.message(((F.text.contains('Спасибо, не знaл(а) 🙂')) | (F.text.contains('нового')) |  # не знaл - a - английская
-                 (F.text.contains('не верю'))),
-                state=propaganda_victim.wiki, flags=flags)
-@router.message(((F.text.contains('удивлён')) | (F.text.contains('не верю'))),
-                state=propaganda_victim.yandex, flags=flags)
-@router.message(
-    (F.text == "Пропустим игру 🙅‍♀️") | (F.text == '🤝 Продолжим') | (F.text == 'Достаточно, двигаемся дальше  🙅‍♀️'),
-    flags=flags)
+@router.message((F.text.contains('Я не верю')), flags=flags, state=propaganda_victim.next_3)
+async def antip_learn_yourself(message: Message, state: FSMContext):
+    nmarkap = ReplyKeyboardBuilder()
+    nmarkap.row(types.KeyboardButton(text='Продолжим 👌'))
+    text = await sql_safe_select('text', 'texts', {'name': 'antip_learn_yourself'})
+    await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message(((F.text.contains('не знaл(а)')) | (F.text.contains('Ничего нового')) | (F.text == 'Продолжим 👌')),
+                state=(propaganda_victim.wiki, propaganda_victim.next_3), flags=flags)
+@router.message((F.text.contains('двигаемся дальше')), flags=flags)
 async def antip_ok(message: Message, state: FSMContext):
     if 'Спасибо' in message.text or 'нового' in message.text or 'не верю' in message.text:
         await mongo_update_stat_new(tg_id=message.from_user.id, column='antip_look_at_it_yourself', value=message.text)
     await message.answer("Хорошо", reply_markup=ReplyKeyboardRemove())
-    if await redis_just_one_read(f'Usrs: {message.from_user.id}: INFOState:') == 'Жертва пропаганды':
-        await asyncio.sleep(1)
-        nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(types.KeyboardButton(text="Давай"))
-        await message.answer("У меня есть анекдот", reply_markup=nmarkup.as_markup(resize_keyboard=True))
-    else:
-        polistate = await redis_just_one_read(f'Usrs: {message.from_user.id}: Politics:')
-        await asyncio.sleep(1)
-        if polistate == 'Аполитичный':
-            await reasons_lets_figure(message, state)
-        elif polistate == 'Сторонник войны':
-            await war_point_now(message, state)
-        elif polistate == 'Оппозиционер':
-            await reasons_king_of_info(message, state)
+    await asyncio.sleep(1)
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text='Давай 🤔'))
+    await state.set_state(propaganda_victim.final)
+    await message.answer("У меня есть анекдот", reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text == 'Давай 🤔'), state=propaganda_victim.final, flags=flags)
@@ -1256,6 +1271,7 @@ async def antip_hole_in_deck(message: Message):
     txt.replace('YY', a_haha)
     txt.replace('ZZ', a_meh)
     await message.answer(txt())
+    await asyncio.sleep(1)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
     nmarkup.add(types.KeyboardButton(text="Забавная картинка 🙂"))
@@ -1297,11 +1313,11 @@ async def antip_forbidden_truth(message: Message):
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.add(types.KeyboardButton(text="Какой ресурс? 🤔"))
     nmarkap.add(types.KeyboardButton(text="Википедия что ли? 🙂"))
-    await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text.contains('Какой ресурс? 🤔') | (F.text.contains('Википедия что ли? 🙂'))), flags=flags)
-async def antip_forbidden_truth(message: Message):
+async def antip_bite_me(message: Message):
     if 'Википедия что ли' in message.text:
         fake_text = await sql_safe_select('text', 'texts', {'name': 'antip_bite_me'})
         await message.answer(fake_text)
@@ -1314,62 +1330,34 @@ async def antip_forbidden_truth(message: Message):
         nmarkap.add(types.KeyboardButton(text="Случайно, вообще я доверяю Википедии 👌"))
         nmarkap.adjust(1, 2, 1)
         text = await sql_safe_select('text', 'texts', {'name': 'antip_why_not_wiki'})
-        await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+        await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     else:
         nmarkap = ReplyKeyboardBuilder()
         nmarkap.add(types.KeyboardButton(text="Расскажи 🙂️"))
         nmarkap.add(types.KeyboardButton(text="Не надо, двигаемся дальше 👉"))
         text = await sql_safe_select('text', 'texts', {'name': 'antip_two_words'})
-        await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+        await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message(
     (F.text.contains('Там статьи может редактировать любой человек') | (F.text.contains('Википедия — проект Запада')) |
      (F.text.contains('Не пользуюсь / Не слышал(а)')) | (F.text.contains('Случайно, вообще я доверяю Википедии')) |
      (F.text.contains('Расскажи 🙂'))), flags=flags)
-async def antip_forbidden_truth(message: Message, state: FSMContext):
+async def antip_clear_and_cool(message: Message, state: FSMContext):
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.add(types.KeyboardButton(text='Продолжай ⏳'))
     text = await sql_safe_select('text', 'texts', {'name': 'antip_clear_and_cool'})
     await state.set_state(propaganda_victim.next_3)
-    await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
-
-
-@router.message((F.text.contains('Продолжай ⏳')), flags=flags, state=propaganda_victim.next_3)
-async def antip_look_at_it_yourself(message: Message, state: FSMContext):
-    nmarkap = ReplyKeyboardBuilder()
-    nmarkap.add(types.KeyboardButton(text='Спасибо, не знал(а) 🙂'))
-    nmarkap.add(types.KeyboardButton(text='Ничего нового 🤷‍♀️'))
-    nmarkap.add(types.KeyboardButton(text='Я не верю 😕'))
-    nmarkap.adjust(2)
-    await simple_media(message, 'antip_look_at_it_yourself', reply_markup=nmarkap.as_markup(resize_keyboard=True))
-
-
-@router.message((F.text.contains('Я не верю')), flags=flags, state=propaganda_victim.next_3)
-async def antip_look_at_it_yourself(message: Message, state: FSMContext):
-    nmarkap = ReplyKeyboardBuilder()
-    nmarkap.row(types.KeyboardButton(text='Продолжим 👌'))
-    text = await sql_safe_select('text', 'texts', {'name': 'antip_learn_yourself'})
-    await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True))
-
-
-@router.message((F.text.contains('Спасибо, не знал(а)') | (F.text.contains('Ничего нового')) |
-                 (F.text.contains('Не надо, двигаемся дальше')) | (F.text.contains('Продолжим 👌'))), flags=flags)
-async def antip_forbidden_truth(message: Message, state: FSMContext):
-    await state.set_state(propaganda_victim.final)
-    nmarkap = ReplyKeyboardBuilder()
-    nmarkap.add(types.KeyboardButton(text='Давай 🤔'))
-    await message.answer('У меня есть анекдот', reply_markup=nmarkap.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text.in_({'Продолжай ⏳', "Забавная картинка 🙂"})), state=propaganda_victim.final_end, flags=flags)
 async def antip_how_they_made_it(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'antip_how_they_made_it'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Какой ужас 😯"))
     nmarkup.add(types.KeyboardButton(text="Смешно 🙂"))
     nmarkup.add(types.KeyboardButton(text="Продолжим 👉"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await simple_media(message, 'antip_how_they_made_it', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text.in_({"Какой ужас 😯", "Смешно 🙂", "Продолжим 👉"})),
@@ -1379,6 +1367,6 @@ async def antip_only_tip_of_the_berg(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Очень интересно 👍"))
     nmarkup.add(types.KeyboardButton(text="Интересно, но слегка затянуто 🤏"))
-    nmarkup.add(types.KeyboardButton(text="Довольно скучно 🥱"))
     nmarkup.row(types.KeyboardButton(text="Где-то интересно, где-то скучно 🙂"))
+    nmarkup.row(types.KeyboardButton(text="Довольно скучно 🥱"))
     await simple_media(message, 'antip_only_tip_of_the_berg', reply_markup=nmarkup.as_markup(resize_keyboard=True))
