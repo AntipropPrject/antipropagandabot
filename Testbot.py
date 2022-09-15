@@ -88,8 +88,8 @@ async def main():
 
     dp.message.middleware(ThrottlingMiddleware())
     # Роутер для неподошедшего
-    # dp.include_router(other_file.router)
     dp.include_router(shop.router)
+    dp.include_router(other_file.router)
 
     session = aiohttp.ClientSession()
     # use the session here
