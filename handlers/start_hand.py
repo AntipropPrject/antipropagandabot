@@ -148,6 +148,6 @@ async def commands_restore(message: Message, bot: Bot, state: FSMContext):
     await antip_only_tip_of_the_berg(message, state)
 
 
-@router.message(IsAdmin(level=['Тестирование']), commands=['start2'], flags=flags)
+@router.message(IsAdmin(level=['Тестирование']), commands=['polls_start'], flags=flags)
 async def command_start2(message: Message):
     await start_how_to_manipulate(message)
