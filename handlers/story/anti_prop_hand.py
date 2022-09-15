@@ -642,7 +642,7 @@ async def revealing_the_news(message: Message, state: FSMContext):
         for key in redis.scan_iter(f"Usrs: {message.from_user.id}: Start_answers: ethernet:*"):
             if key != "Яндекс" or key != "Википедия":
                 redis.delete(key)
-        if set(await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:')).isdisjoint(
+        if set(await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')).isdisjoint(
                 ("Дмитрий Песков", "Сергей Лавров",
                  "Маргарита Симоньян", "Владимир Соловьев", "Никита Михалков")) is False:
             await antip_bad_people_lies(message, state)
