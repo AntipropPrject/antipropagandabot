@@ -101,20 +101,14 @@ async def simple_video_album(message: Message, bot: Bot, tags: list[str], text_t
         caption = await sql_safe_select("text", "texts", {"name": text_tag})
     media_ids = await data_getter(f'SELECT t_id FROM assets WHERE name IN {*tags,}')
     for media in media_ids:
-        try:
-            await bot.get_file(media[0])
-        except Exception as ex:
-            print(ex)
-            media_list.append(InputMediaPhoto(media=await sql_safe_select("t_id", "assets", {"name": 'ERROR_SORRY'})))
-        else:
-            media_list.append(InputMediaVideo(media=media[0]))
+        media_list.append(InputMediaVideo(media=media[0]))
     if media_list:
         if caption:
             media_list[-1].caption = caption
         try:
             await message.answer_media_group(media_list)
         except TelegramBadRequest as err:
-            print(err)
+            await simple_media(message, 'ERROR_SORRY')
 
 
 async def game_answer(message: Message, telegram_media_id: Union[int, InputFile] = None, text: str = None,
