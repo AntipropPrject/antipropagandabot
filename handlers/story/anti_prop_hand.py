@@ -393,10 +393,15 @@ async def tv_star_reb(message: Message, state: FSMContext):
 
 
 @router.message((F.text.contains('Достаточно') & (F.text.contains('по ТВ ✋'))), flags=flags)
-async def antip_TV_how_about_more(message: Message):
+async def antip_TV_how_about_more(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_TV_how_about_more'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text='Нет, посмотрим ещё ложь по ТВ 📺'))
+    data = await state.get_data()
+    if (await sql_select_row_like('assets', data['Star_tv_count'] + 1, {'name': 'tv_star_lie_'})) is not False or \
+            (await sql_select_row_like('assets', data['HTB_tv_count'] + 1, {'name': 'tv_HTB_lie_'})) is not False or \
+            (await sql_select_row_like('assets', data['rus24_tv_count'] + 1, {'name': 'tv_24_lie_'})) is not False or \
+            (await sql_select_row_like('assets', data['first_tv_count'] + 1, {'name': 'tv_first_lie_'})) is not False:
+        nmarkup.row(types.KeyboardButton(text='Нет, посмотрим ещё ложь по ТВ 📺'))
     nmarkup.row(types.KeyboardButton(text='Да, закончим с ТВ 👌'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
@@ -683,12 +688,12 @@ async def antip_web_exit_1(message: Message, state: FSMContext):
             redis.delete(key)
     if await state.get_state() == "propaganda_victim:options":
         await antip_funny_propaganda(message, state)
-        redis.delete(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:')
+        redis.delete(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
         return
-    if set(await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:')).isdisjoint(
-            ("Дмитрий Песков", "Сергей Лавров",
-             "Маргарита Симоньян", "Владимир Соловьев", "Никита Михалков")) is False:
-        await antip_bad_people_lies(message, state)
+    propagandist_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
+    if set(propagandist_list).isdisjoint(("Дмитрий Песков", "Сергей Лавров",
+                                          "Маргарита Симоньян", "Владимир Соловьев", "Никита Михалков")) is False:
+        await antip_bad_people_lies(message, propagandist_list, state)
     else:
         await antip_funny_propaganda(message, state)
 
