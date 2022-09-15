@@ -157,7 +157,7 @@ async def shop_bucket(message: types.Message, state: FSMContext):
                                        'card7',
                                        'card8',
                                        'card9',
-                                       'card10',])
+                                       'card10',] )
     text = await sql_safe_select("text", "texts", {"name": "shop_bucket"})
 
     data_dict = await state.get_data()
