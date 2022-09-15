@@ -848,11 +848,11 @@ async def antip_torture_really_not_recommended(message: Message):
 
 
 @router.message((F.text == "Да, покажи эти видео 🤯"), state=propaganda_victim.quiz_3, flags=flags)
-async def antip_torture(message: Message):
+async def antip_torture(message: Message, bot: Bot):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_torture_really_not_recommended'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Я готов(а) продолжить 👉"))
-    await simple_video_album(message, ['antip_torture_v_1', 'antip_torture_v_2', 'antip_torture_v_3'])
+    await simple_video_album(message, bot, ['antip_torture_v_1', 'antip_torture_v_2', 'antip_torture_v_3'])
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 

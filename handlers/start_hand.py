@@ -150,4 +150,4 @@ async def commands_restore(message: Message, bot: Bot, state: FSMContext):
 
 @router.message(IsAdmin(level=['Тестирование']), commands=['start2'], flags=flags)
 async def command_start2(message: Message):
-    await start_is_war_bad(message)
+    await start_how_to_manipulate(message)
