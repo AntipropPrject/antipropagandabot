@@ -397,7 +397,7 @@ async def antip_TV_how_about_more(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_TV_how_about_more'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Нет, посмотрим ещё ложь по ТВ 📺'))
-    nmarkup.row(types.KeyboardButton(text='Да, закончим с ТВ 👌'))
+    nmarkup.row(types.KeyboardButton(text='Да, закончим с ТВТВ 👌'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
@@ -642,10 +642,11 @@ async def revealing_the_news(message: Message, state: FSMContext):
         for key in redis.scan_iter(f"Usrs: {message.from_user.id}: Start_answers: ethernet:*"):
             if key != "Яндекс" or key != "Википедия":
                 redis.delete(key)
-        if set(await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')).isdisjoint(
+        propagandist_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
+        if set(propagandist_list).isdisjoint(
                 ("Дмитрий Песков", "Сергей Лавров",
                  "Маргарита Симоньян", "Владимир Соловьев", "Никита Михалков")) is False:
-            await antip_bad_people_lies(message, state)
+            await antip_bad_people_lies(message, propagandist_list, state)
         else:
             await antip_funny_propaganda(message, state)
 
