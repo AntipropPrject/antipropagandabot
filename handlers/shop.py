@@ -5,7 +5,7 @@ from aiogram.dispatcher.fsm.state import StatesGroup, State
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message, CallbackQuery, InputMediaPhoto
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
-
+import datetime
 from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
 from data_base.DBuse import data_getter, sql_safe_select, mongo_game_answer, mongo_count_docs
 from utilts import simple_media, simple_media_bot, CoolPercReplacer, simple_video_album
@@ -114,7 +114,10 @@ async def shop_transfer(message: types.Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='shop_transfer', value="+")
     await state.set_state(Shop.shop_transfer)
     text = await sql_safe_select("text", "texts", {"name": "shop_transfer"})
-    day = 203
+    now = datetime.datetime.now().date()
+    old = datetime.datetime(year=2022, month=2, day=24).date()
+    day = now-old
+    print(day)
     sum = day * 55000000000
     await state.update_data(balance=sum)
     await state.update_data(balance_all=sum)
