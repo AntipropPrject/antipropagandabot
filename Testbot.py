@@ -12,7 +12,7 @@ from data_base.DBuse import redis_just_one_read
 from day_func import day_count
 from export_to_csv import pg_mg
 from export_to_csv.pg_mg import Backup
-from handlers import start_hand
+from handlers import start_hand, shop
 from handlers.admin_for_games_dir import mistakeorlie
 from handlers.admin_handlers import admin_factory, marketing, admin_for_games, new_admin_hand
 from handlers.advertising import start_spam
@@ -88,6 +88,7 @@ async def main():
 
     dp.message.middleware(ThrottlingMiddleware())
     # Роутер для неподошедшего
+    dp.include_router(shop.router)
     dp.include_router(other_file.router)
 
     session = aiohttp.ClientSession()
