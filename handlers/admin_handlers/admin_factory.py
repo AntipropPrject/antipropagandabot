@@ -138,8 +138,7 @@ async def admins_pop_done(message: Message, bot: Bot, state: FSMContext):
             await MasterCommander(bot, 'chat', old_admin_id).clear()
             text = text + '\n Пользователь больше не является администратором'
         await logg.admin_logs(message.from_user.id, message.from_user.username, text)
-        await message.answer(f"У пользователя '{old_admin_id}' забран уровень доступа {message.text}",
-                             reply_markup=redct_editors())
+        await message.answer(text, reply_markup=redct_editors())
         await state.clear()
         await sadmins(message, state)
     else:

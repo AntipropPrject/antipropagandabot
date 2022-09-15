@@ -95,23 +95,20 @@ async def simple_media_bot(bot: Bot, chat_id: int, tag: str,
         print(err)
 
 
-async def simple_video_album(message: Message, tags: list[str], text_tag: str = None):
+async def simple_video_album(message: Message, bot: Bot, tags: list[str], text_tag: str = None):
     media_list, caption = list(), str()
     if text_tag:
         caption = await sql_safe_select("text", "texts", {"name": text_tag})
-    for tag in tags:
-        media = await sql_safe_select("t_id", "assets", {"name": tag})
-        if media:
-            media_list.append(InputMediaVideo(media=media))
-        else:
-            media_list.append(InputMediaPhoto(media=await sql_safe_select("t_id", "assets", {"name": 'ERROR_SORRY'})))
+    media_ids = await data_getter(f'SELECT t_id FROM assets WHERE name IN {*tags,}')
+    for media in media_ids:
+        media_list.append(InputMediaVideo(media=media[0]))
     if media_list:
         if caption:
             media_list[-1].caption = caption
         try:
             await message.answer_media_group(media_list)
         except TelegramBadRequest as err:
-            print(err)
+            await simple_media(message, 'ERROR_SORRY')
 
 
 async def game_answer(message: Message, telegram_media_id: Union[int, InputFile] = None, text: str = None,

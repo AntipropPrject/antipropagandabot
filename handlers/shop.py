@@ -195,7 +195,7 @@ async def shop_bucket(message: types.Message, state: FSMContext):
 @router.callback_query(Shop.shop_callback)
 async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext):
     global count, text, balance
-    await query.answer(" ")
+    await query.answer()
     await state.set_state(Shop.shop_callback)
 
     text = ((await state.get_data())["text_shop"])

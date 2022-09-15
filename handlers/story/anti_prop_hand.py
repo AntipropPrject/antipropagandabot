@@ -642,10 +642,11 @@ async def revealing_the_news(message: Message, state: FSMContext):
         for key in redis.scan_iter(f"Usrs: {message.from_user.id}: Start_answers: ethernet:*"):
             if key != "Яндекс" or key != "Википедия":
                 redis.delete(key)
-        if set(await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust:')).isdisjoint(
+        propagandist_list = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: who_to_trust_persons:')
+        if set(propagandist_list).isdisjoint(
                 ("Дмитрий Песков", "Сергей Лавров",
                  "Маргарита Симоньян", "Владимир Соловьев", "Никита Михалков")) is False:
-            await antip_bad_people_lies(message, state)
+            await antip_bad_people_lies(message, propagandist_list, state)
         else:
             await antip_funny_propaganda(message, state)
 
@@ -848,11 +849,11 @@ async def antip_torture_really_not_recommended(message: Message):
 
 
 @router.message((F.text == "Да, покажи эти видео 🤯"), state=propaganda_victim.quiz_3, flags=flags)
-async def antip_torture(message: Message):
+async def antip_torture(message: Message, bot: Bot):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_torture_really_not_recommended'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Я готов(а) продолжить 👉"))
-    await simple_video_album(message, ['antip_torture_v_1', 'antip_torture_v_2', 'antip_torture_v_3'])
+    await simple_video_album(message, bot, ['antip_torture_v_1', 'antip_torture_v_2', 'antip_torture_v_3'])
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
