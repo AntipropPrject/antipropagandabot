@@ -5,6 +5,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 from bot_statistics.stat import mongo_update_stat_new
 from data_base.DBuse import sql_safe_select, mongo_count_docs
+from resources.all_polls import shop_poll
 from states.true_goals_states import Shop, TrueGoalsState
 from utilts import CoolPercReplacer
 import re
@@ -68,11 +69,7 @@ async def shop_welcome(message: types.Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     await message.answer_poll("Сколько?", explanation_parse_mode="HTML",
-                              allows_multiple_answers=True,
-                              options=["Около 1 000 000 000 (1 миллиарда) рублей",
-                                       "Около 100 000 000 000 (100 миллиардов) рублей",
-                                       "Около 10 000 000 000 000 (10 триллионов) рублей",
-                                       "Около 1 000 000 000 000 000 (1 квадриллиона) рублей"], is_anonymous=False,
+                              options=shop_poll, correct_option_id=3, is_anonymous=False,
                               reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
