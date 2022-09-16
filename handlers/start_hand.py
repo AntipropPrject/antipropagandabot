@@ -12,6 +12,7 @@ from bot_statistics.stat import mongo_is_done, mongo_stat, mongo_stat_new, adver
 from data_base.DBuse import mongo_user_info, sql_safe_select, mongo_ez_find_one, redis_just_one_write
 from day_func import day_count
 from filters.isAdmin import IsAdmin
+from handlers.shop import shop_welcome
 from handlers.story import true_resons_hand
 from handlers.story import main_menu_hand
 from handlers.story.anti_prop_hand import antip_what_is_prop
@@ -157,3 +158,8 @@ async def command_polls_start(message: Message):
 async def command_test_goals(message: Message, state: FSMContext):
     await state.set_state(TrueGoalsState.main)
     await goals_war_point_now(message, state)
+
+
+@router.message(IsAdmin(level=['Тестирование']), commands=['shop'], flags=flags)
+async def command_shop(message: Message, state: FSMContext):
+    await shop_welcome(message, state)

@@ -56,7 +56,7 @@ inline.button(text='Оформить заказ',
 inline.adjust(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2)
 
 
-@router.message(commands=["shop"], flags=flags)
+
 @router.message((F.text.in_({'Продолжай ⏳', 'Хорошо 🤝', '*презрительно хмыкнуть* 🤨'})),
                 state=TrueGoalsState.before_shop, flags=flags)
 async def shop_welcome(message: types.Message, state: FSMContext):

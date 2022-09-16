@@ -79,6 +79,7 @@ async def main():
 
     # Роутеры причин войны
     dp.include_router(true_goals_hand.router)
+    dp.include_router(shop.router)
     dp.include_router(true_resons_hand.router)
     dp.include_router(donbass_hand.router)
     dp.include_router(nazi_hand.router)
@@ -89,7 +90,7 @@ async def main():
 
     dp.message.middleware(ThrottlingMiddleware())
     # Роутер для неподошедшего
-    dp.include_router(shop.router)
+
     dp.include_router(other_file.router)
 
     session = aiohttp.ClientSession()
