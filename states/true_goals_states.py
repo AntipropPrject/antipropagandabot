@@ -8,3 +8,12 @@ class TrueGoalsState(StatesGroup):
     opp_root = State()
     game = State()
     final = State()
+
+
+class Shop(StatesGroup):
+    main = State()
+    after_first_poll = State()
+    shop_transfer = State()
+    shop_bucket = State()
+    shop_why_so_many = State()
+    shop_callback = State()

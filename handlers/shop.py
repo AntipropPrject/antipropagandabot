@@ -1,32 +1,19 @@
 from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
-from aiogram.dispatcher.fsm.state import StatesGroup, State
-from aiogram.exceptions import TelegramBadRequest
-from aiogram.types import Message, CallbackQuery
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
-from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
-from data_base.DBuse import data_getter, sql_safe_select, mongo_game_answer, mongo_count_docs
-from utilts import simple_media, simple_media_bot, CoolPercReplacer
-from filters.MapFilters import PutinFilter
-from handlers.story.stopwar_hand import StopWarState
-from utilts import simple_media
+from bot_statistics.stat import mongo_update_stat_new
+from data_base.DBuse import sql_safe_select, mongo_count_docs
+from states.true_goals_states import Shop, TrueGoalsState
+from utilts import CoolPercReplacer
 import re
 
 flags = {"throttling_key": "True"}
 router = Router()
-
-
-class Shop(StatesGroup):
-    main = State()
-    after_first_poll = State()
-    shop_transfer = State()
-    shop_bucket = State()
-    shop_why_so_many = State()
-    shop_callback = State()
-    shop_why_so_many = State()
-
+router.message.filter(state=(Shop, TrueGoalsState.before_shop))
+router.poll_answer.filter(state=Shop)
+router.callback_query.filter(state=Shop)
 
 price_dict = {'1000 x 🚀 Детская площадка': 1150000,
               '100 x 🏫 Современная школа': 560000000,
@@ -70,7 +57,8 @@ inline.adjust(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2)
 
 
 @router.message(commands=["shop"], flags=flags)
-@router.message((F.text.contains("shop")), flags=flags)
+@router.message((F.text.in_({'Продолжай ⏳', 'Хорошо 🤝', '*презрительно хмыкнуть* 🤨'})),
+                state=TrueGoalsState.before_shop, flags=flags)
 async def shop_welcome(message: types.Message, state: FSMContext):
     print("in shop")
     await mongo_update_stat_new(tg_id=message.from_user.id, column='shop_welcome', value="+")
@@ -295,7 +283,7 @@ async def shop_bucket(message: types.Message, bot: Bot, state: FSMContext):
     await bot.delete_message(chat_id, message_id)
 
 @router.message(Shop.shop_callback, F.text.contains("Вернуться в магазин 🛒"), flags=flags)
-@router.message(Shop.shop_bucket, (F.text.contains("Вернуться в магазин 🛒")|F.text.contains("Да, выйти ⬇")), flags=flags)
+@router.message(Shop.shop_bucket, (F.text.contains("Вернуться в магазин 🛒") | F.text.contains("Да, выйти ⬇")), flags=flags)
 async def shop_bucket(message: types.Message, bot: Bot, state: FSMContext):
     chat_id = (await state.get_data())['chat_id_shop']
     await bot.delete_message(chat_id,message.message_id-1)
