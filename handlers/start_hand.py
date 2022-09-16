@@ -18,11 +18,13 @@ from handlers.story.anti_prop_hand import antip_what_is_prop
 from handlers.story.main_menu_hand import mainmenu_really_menu
 from handlers.story.putin_hand import stopwar_start
 from handlers.story.stopwar_hand import stopwar_first_manipulation_argument
+from handlers.story.true_goals_hand import goals_war_point_now
 from handlers.story.true_resons_hand import reasons_who_to_blame, donbass_big_tragedy
 from handlers.story.welcome_messages import message_2
 from handlers.story.welcome_stories import start_how_to_manipulate
 from states.antiprop_states import propaganda_victim
 from states.main_menu_states import MainMenuStates
+from states.true_goals_states import TrueGoalsState
 from states.welcome_states import start_dialog
 from utilts import MasterCommander
 
@@ -142,10 +144,16 @@ async def commands_restore(message: Message, bot: Bot, state: FSMContext):
 
 
 @router.message(IsAdmin(level=['Тестирование']), commands=["test_reasons"], flags=flags)
-async def commands_restore(message: Message, bot: Bot, state: FSMContext):
+async def commands_test_reasons(message: Message, bot: Bot, state: FSMContext):
     await message_2(message, state)
 
 
 @router.message(IsAdmin(level=['Тестирование']), commands=['polls_start'], flags=flags)
-async def command_start2(message: Message):
+async def command_polls_start(message: Message):
     await start_how_to_manipulate(message)
+
+
+@router.message(IsAdmin(level=['Тестирование']), commands=['test_goals'], flags=flags)
+async def command_test_goals(message: Message, state: FSMContext):
+    await state.set_state(TrueGoalsState.main)
+    await goals_war_point_now(message, state)
