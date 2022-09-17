@@ -148,7 +148,7 @@ async def goals_no_truth_for_us(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="Объясни-ка 🤔"))
     nmarkup.row(types.KeyboardButton(text="Просто продолжим 👉"))
     nmarkup.adjust(2, 2)
-    await state.set_state(TrueGoalsState.main)
+    await state.set_state(TrueGoalsState.more_goals)
     await message.answer(result_text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
