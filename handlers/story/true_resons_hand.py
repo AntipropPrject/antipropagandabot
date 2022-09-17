@@ -23,6 +23,7 @@ from utilts import simple_media
 
 class TruereasonsState(StatesGroup):
     main = State()
+    opp_root = State()
     game = State()
     final = State()
 
@@ -60,7 +61,8 @@ async def reasons_lets_figure(message: Message):
 
 
 @router.message((F.text.contains('нтересно')) | (F.text.contains('скучно')), flags=flags)
-async def reasons_king_of_info(message: Message):
+async def reasons_king_of_info(message: Message, state: FSMContext):
+    await state.set_state(TruereasonsState.opp_root)
     await mongo_update_stat_new(tg_id=message.from_user.id, column='map_antiprop', value=message.text)
     await mongo_update_stat(message.from_user.id, 'antiprop')
     text = await sql_safe_select('text', 'texts', {'name': 'reasons_king_of_info'})
@@ -87,9 +89,7 @@ async def reasons_true_reason_for_all(message: Message):
 
 @router.message(((F.text.contains('цели')) & (F.text.contains('бессмысленны')) & (F.text.contains('Не'))), flags=flags)
 async def to_reasons_king_of_info(message: Message, state: FSMContext):
-    await redis_just_one_write(f'Usrs: {message.from_user.id}: Politics:', 'Сторонник войны')
-    await state.set_state(anti_prop_hand.propaganda_victim.final)
-    await reasons_king_of_info(message)
+    await reasons_king_of_info(message, state)
 
 
 @router.message((F.text == "Подожди. Я так не говорил(а). С чего ты взял, что это ненастоящие цели? 🤷‍♂️"),
@@ -121,8 +121,9 @@ async def reasons_now_you_fucked(message: Message, state: FSMContext):
     await war_point_now(message)
 
 
-@router.message((F.text == "Хорошо!"), flags=flags)
+@router.message((F.text == "Хорошо 👌"), state=TruereasonsState.opp_root, flags=flags)
 async def reasons_now_you_blessed(message: Message, state: FSMContext):
+    await state.set_state(TruereasonsState.main)
     await redis_just_one_write(f'Usrs: {message.from_user.id}: Politics:', 'Оппозиционер')
     await reasons_normal_game_start(message, state)
 

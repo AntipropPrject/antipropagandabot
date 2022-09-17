@@ -5,8 +5,9 @@ release_date = {
     }
 
 all_test_commands = {
-    'start2': 'Начало: опросы (start_how_to_manipulate)',
+    'polls_start': 'Начало: опросы (start_how_to_manipulate)',
     'proptest': 'Антипропаганда (antip_what_is_prop)',
+    'test_goals': '🍤 НОВЫЕ 🍤 Причины войны (goals_war_point_now)',
     'test_reasons': 'Причины войны (antip_only_tip_of_the_berg)',
     'donbass': 'Донбас (donbass_big_tragedy)',
     'testnazi': 'Нацизм (start_nazi)',

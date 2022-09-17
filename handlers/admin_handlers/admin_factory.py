@@ -20,7 +20,7 @@ router.message.filter(state=admin)
 access_levels = bata.all_data().access_levels
 
 
-@router.message((F.text == 'Отменить'), state=(admin.add, admin.pop, admin.editors_menu, admin.add_not))
+@router.message((F.text == 'Отменить'), state=(admin.add, admin.pop, admin.pop_not, admin.editors_menu, admin.add_not))
 async def canccel(message: Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Отменить'")
     await state.clear()
@@ -138,8 +138,7 @@ async def admins_pop_done(message: Message, bot: Bot, state: FSMContext):
             await MasterCommander(bot, 'chat', old_admin_id).clear()
             text = text + '\n Пользователь больше не является администратором'
         await logg.admin_logs(message.from_user.id, message.from_user.username, text)
-        await message.answer(f"У пользователя '{old_admin_id}' забран уровень доступа {message.text}",
-                             reply_markup=redct_editors())
+        await message.answer(text, reply_markup=redct_editors())
         await state.clear()
         await sadmins(message, state)
     else:
