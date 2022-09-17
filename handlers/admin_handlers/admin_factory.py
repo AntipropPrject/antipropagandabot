@@ -20,7 +20,7 @@ router.message.filter(state=admin)
 access_levels = bata.all_data().access_levels
 
 
-@router.message((F.text == 'Отменить'), state=(admin.add, admin.pop, admin.editors_menu, admin.add_not))
+@router.message((F.text == 'Отменить'), state=(admin.add, admin.pop, admin.pop_not, admin.editors_menu, admin.add_not))
 async def canccel(message: Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Отменить'")
     await state.clear()

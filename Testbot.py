@@ -12,7 +12,7 @@ from handlers.admin_for_games_dir import mistakeorlie
 from handlers.admin_handlers import admin_factory, marketing, admin_for_games, new_admin_hand
 from handlers.other import status, other_file
 from handlers.story import preventive_strike, true_resons_hand, welcome_messages, nazi_hand, \
-    donbass_hand, main_menu_hand, anti_prop_hand, putin_hand, smi_hand, stopwar_hand, welcome_stories
+    donbass_hand, main_menu_hand, anti_prop_hand, putin_hand, smi_hand, stopwar_hand, welcome_stories, true_goals_hand
 from middleware.trottling import ThrottlingMiddleware
 from periodic_func import periodic
 from utilts import happy_tester
@@ -88,6 +88,8 @@ def main():
     dp.include_router(smi_hand.router)
 
     # Роутеры причин войны
+    dp.include_router(true_goals_hand.router)
+    dp.include_router(shop.router)
     dp.include_router(true_resons_hand.router)
     dp.include_router(donbass_hand.router)
     dp.include_router(nazi_hand.router)
@@ -98,7 +100,7 @@ def main():
 
     dp.message.middleware(ThrottlingMiddleware())
     # Роутер для неподошедшего
-    dp.include_router(shop.router)
+
     dp.include_router(other_file.router)
 
     # session = aiohttp.ClientSession()
