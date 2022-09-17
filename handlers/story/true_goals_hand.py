@@ -46,7 +46,7 @@ async def goals_not_operation(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.contains('Понятно 👌')) | (F.text.contains('Да, выйти ⬇️')), flags=flags)
+@router.message((F.text.contains('Понятно 👌')) | (F.text.contains('Да, выйти ⬇')), flags=flags)
 async def goals_big_war(message: Message, state: FSMContext):
     await state.set_state(TrueGoalsState.more_goals)
     text = await sql_safe_select('text', 'texts', {'name': 'goals_big_war'})
