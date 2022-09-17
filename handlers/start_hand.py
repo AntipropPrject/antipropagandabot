@@ -150,7 +150,8 @@ async def commands_test_reasons(message: Message, bot: Bot, state: FSMContext):
 
 
 @router.message(IsAdmin(level=['Тестирование']), commands=['polls_start'], flags=flags)
-async def command_polls_start(message: Message):
+async def command_polls_start(message: Message, state: FSMContext):
+    await state.set_state(start_dialog.big_story)
     await start_how_to_manipulate(message)
 
 
