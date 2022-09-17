@@ -60,10 +60,11 @@ async def goals_big_war(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'goals_no_clear'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Покажи результаты 📊"))
+    await state.set_state(TrueGoalsState.more_goals_sort)
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.contains("Покажи результаты 📊")), state=TrueGoalsState.more_goals, flags=flags)
+@router.message((F.text.contains("Покажи результаты 📊")), state=TrueGoalsState.more_goals_sort, flags=flags)
 async def goals_sort_reveal(message: Message, state: FSMContext):
     var_aims = dict()
     pwr_ukr = await mongo_count_docs('database', 'statistics_new',
@@ -107,11 +108,11 @@ async def goals_sort_reveal(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="Интересно 🤔"))
     nmarkup.row(types.KeyboardButton(text="Продолжай 👉"))
     nmarkup.adjust(2)
-    await state.set_state(TrueGoalsState.more_goals_2)
+    await state.set_state(TrueGoalsState.more_goals_no_truth)
     await message.answer(result_text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.contains('Интересно 🤔')) | (F.text.contains('Продолжай 👉')), state=TrueGoalsState.more_goals_2,
+@router.message((F.text.contains('Интересно 🤔')) | (F.text.contains('Продолжай 👉')), state=TrueGoalsState.more_goals_no_truth,
                 flags=flags)
 async def goals_no_truth_for_us(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'goals_no_truth_for_us'})
@@ -125,7 +126,7 @@ async def goals_no_truth_for_us(message: Message, state: FSMContext):
 
 @router.message((F.text.contains("Да, слышал(а) 👌") | F.text.contains("Нет, не слышал(а) 🤷‍♀️") |
                  F.text.contains("Да, и сам(а) так считаю 👍")),
-                state=TrueGoalsState.more_goals_2, flags=flags)
+                state=TrueGoalsState.more_goals_no_truth, flags=flags)
 async def goals_no_truth_for_us(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'goals_cards_opened'})
     nmarkup = ReplyKeyboardBuilder()
@@ -133,7 +134,7 @@ async def goals_no_truth_for_us(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(F.text.contains("Давай! 👌"), state=TrueGoalsState.more_goals_2, flags=flags)
+@router.message(F.text.contains("Давай! 👌"), state=TrueGoalsState.more_goals_no_truth, flags=flags)
 async def goals_no_truth_for_us(message: Message, state: FSMContext):
     data = await state.get_data()
     sorted_dict = data['sorted_dict']
