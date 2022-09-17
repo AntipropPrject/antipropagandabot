@@ -70,7 +70,7 @@ async def goals_sort_reveal(message: Message, state: FSMContext):
     unite_russian = await mongo_count_docs('database', 'statistics_new', {'war_aims_ex': {'$regex': "Объединить русский народ"}})
     secret_dev = await mongo_count_docs('database', 'statistics_new', {'war_aims_ex': {'$regex': "Предотвратить секретные разработки"}})
     all_count = pwr_ukr + nato + putins_reting + russians_donbass + prevent_the_invasion + denazification + \
-                demilitarization + unite_russian + secret_dev
+                demilitarization + unite_russian + secret_dev + 1
     var_aims['✅ ♻️ Сменить власть на Украине / Сделать её лояльной России'] = round(pwr_ukr/all_count * 100)
     var_aims['❌ 💂 Предотвратить размещение военных баз НАТО на Украине'] = round(nato/all_count * 100)
     var_aims['❓ 📈 Повысить рейтинг доверия Владимира Путина'] = round(putins_reting/all_count * 100)
