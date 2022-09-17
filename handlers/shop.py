@@ -1,7 +1,14 @@
+import re
+
 from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
+
+from bot_statistics.stat import mongo_update_stat_new
+from data_base.DBuse import sql_safe_select, mongo_count_docs
+from utils.elk_logger import Logger
+from utilts import CoolPercReplacer
 
 from bot_statistics.stat import mongo_update_stat_new
 from data_base.DBuse import sql_safe_select, mongo_count_docs
@@ -29,32 +36,32 @@ price_dict = {'1000 x 🚀 Детская площадка': 1150000,
               }
 
 inline = InlineKeyboardBuilder()
-inline.button(text='1000 x 🚀 Детская площадка',
-              callback_data='1000 x 🚀 Детская площадка')
-inline.button(text='100 x 🏫 Современная школа',
+inline.button(text='1000 x 🚀',
+              callback_data='1000 x 🚀 Детская площадка',)
+inline.button(text='100 x 🏫',
               callback_data='100 x 🏫 Современная школа')
-inline.button(text='1000 x ⚡️ Электробус',
+inline.button(text='1000 x ⚡',
               callback_data='1000 x ⚡️ Электробус')
-inline.button(text='10 x 🛩 Пассажирский самолёт (SuperJet)',
+inline.button(text='10 x 🛩',
               callback_data='10 x 🛩 Пассажирский самолёт (SuperJet)')
-inline.button(text='100 км x 🛣 Автомагистраль (от 4 полос)',
+inline.button(text='100 км x 🛣',
               callback_data='100 км x 🛣 Автомагистраль (от 4 полос)')
-inline.button(text='100 x 🌳 Большой парк',
+inline.button(text='100 x 🌳',
               callback_data='100 x 🌳 Большой парк')
-inline.button(text='10 x 💊 Детский онкологический центр',
+inline.button(text='10 x 💊',
               callback_data='10 x 💊 Детский онкологический центр')
-inline.button(text='10 x 🏥 Корпус ядерной медицины',
+inline.button(text='10 x 🏥',
               callback_data='10 x 🏥 Корпус ядерной медицины')
-inline.button(text='1 x 🔥 Северный поток — 2',
+inline.button(text='1 x 🔥',
               callback_data='1 x 🔥 Северный поток — 2')
-inline.button(text='100 x 🧸 Спасти жизнь ребёнку',
+inline.button(text='100 x 🧸',
               callback_data='100 x 🧸 Спасти жизнь ребёнку')
 inline.button(text='Очистить корзину',
               callback_data='Очистить корзину')
 inline.button(text='Оформить заказ',
               callback_data='Оформить заказ')
 
-inline.adjust(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2)
+inline.adjust(3,3,4,2)
 
 
 
@@ -62,7 +69,6 @@ inline.adjust(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2)
                 state=TrueGoalsState.before_shop, flags=flags)
 async def shop_welcome(message: types.Message, state: FSMContext):
     print("in shop")
-    await mongo_update_stat_new(tg_id=message.from_user.id, column='shop_welcome', value="+")
     await state.set_state(Shop.main)
     text = await sql_safe_select("text", "texts", {"name": "shop_welcome"})
 
@@ -71,15 +77,16 @@ async def shop_welcome(message: types.Message, state: FSMContext):
     await message.answer_poll("Сколько?", explanation_parse_mode="HTML",
                               options=shop_poll, correct_option_id=3, is_anonymous=False,
                               reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    Logger.log("TEST TEST TEST")
 
 
 @router.poll_answer(state=Shop.main, flags=flags)
 async def shop_after_first_poll(poll_answer: types.PollAnswer, bot: Bot, state: FSMContext):
-    await mongo_update_stat_new(tg_id=poll_answer.user.id, column='shop_after_first_poll',
-                                value=poll_answer.option_ids[0])
+    # await mongo_update_stat_new(tg_id=poll_answer.user.id, column='shop_after_first_poll',
+    #                             value=poll_answer.option_ids[0])
     print(poll_answer.option_ids[0])
-    right_answers = await mongo_count_docs('database', 'statistics_new', {'shop_after_first_poll': 2})
-    all_answers = await mongo_count_docs('database', 'statistics_new', {'shop_after_first_poll': {'$exists': True}})
+    # right_answers = await mongo_count_docs('database', 'statistics_new', {'shop_after_first_poll': 2})
+    # all_answers = await mongo_count_docs('database', 'statistics_new', {'shop_after_first_poll': {'$exists': True}})
     await state.set_state(Shop.after_first_poll)
     await state.update_data(shop_after_first_poll=poll_answer.option_ids[0])
     # await mongo_update_stat_new(tg_id=poll_answer.user.id, column='shop_after_first_poll', value=poll_answer.option_ids[0])
@@ -88,15 +95,15 @@ async def shop_after_first_poll(poll_answer: types.PollAnswer, bot: Bot, state: 
     nmarkup.row(types.KeyboardButton(text="Откуда такие цифры?🤔"))
     text = await sql_safe_select("text", "texts", {"name": "shop_after_first_poll"})
     # result= (right_answers*100)/all_answers
-    txt = CoolPercReplacer(text, all_answers)
-    txt.replace('AA', right_answers)
-    await bot.send_message(poll_answer.user.id, txt(),
+    # txt = CoolPercReplacer(text, all_answers)
+    # txt.replace('AA', right_answers)
+    await bot.send_message(poll_answer.user.id, text,
                            reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message(Shop.after_first_poll, F.text.contains("Посетить магазин"), flags=flags)
 async def shop_transfer(message: types.Message, state: FSMContext):
-    await mongo_update_stat_new(tg_id=message.from_user.id, column='shop_transfer', value="+")
+    # await mongo_update_stat_new(tg_id=message.from_user.id, column='shop_transfer', value="+")
     await state.set_state(Shop.shop_transfer)
     text = await sql_safe_select("text", "texts", {"name": "shop_transfer"})
     day = 203
@@ -126,7 +133,7 @@ async def shop_why_so_many(message: types.Message, state: FSMContext):
 @router.message(Shop.shop_transfer, F.text.contains("Перейти к покупкам"), flags=flags)
 @router.message(Shop.shop_why_so_many, F.text.contains("Перейти к покупкам"), flags=flags)
 async def shop_bucket(message: types.Message, state: FSMContext):
-    await mongo_update_stat_new(tg_id=message.from_user.id, column='shop_bucket', value="+")
+    # await mongo_update_stat_new(tg_id=message.from_user.id, column='shop_bucket', value="+")
     await state.set_state(Shop.shop_bucket)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Выйти из магазина ⬇"))
@@ -274,21 +281,23 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
 
 
 @router.message(Shop.shop_callback, F.text.contains("Отлично"), flags=flags)
-async def shop_bucket(message: types.Message, bot: Bot, state: FSMContext):
+async def shop_children_ok(message: types.Message, bot: Bot, state: FSMContext):
     message_id = (await state.get_data())['child_message']
     chat_id = (await state.get_data())['chat_id_shop']
     await bot.delete_message(chat_id, message_id)
 
 @router.message(Shop.shop_callback, F.text.contains("Вернуться в магазин 🛒"), flags=flags)
 @router.message(Shop.shop_bucket, (F.text.contains("Вернуться в магазин 🛒") | F.text.contains("Да, выйти ⬇")), flags=flags)
-async def shop_bucket(message: types.Message, bot: Bot, state: FSMContext):
+async def shop_go_back(message: types.Message, bot: Bot, state: FSMContext):
     chat_id = (await state.get_data())['chat_id_shop']
+    await state.set_state(Shop.shop_bucket)
     await bot.delete_message(chat_id,message.message_id-1)
 
 
 @router.message(Shop.shop_callback, F.text.contains("Выйти из магазина ⬇"), flags=flags)
 @router.message(Shop.shop_bucket, F.text.contains("Выйти из магазина ⬇"), flags=flags)
-async def shop_bucket(message: types.Message, bot: Bot, state: FSMContext):
+async def shop_out(message: types.Message, bot: Bot, state: FSMContext):
+    await state.set_state(TrueGoalsState.main)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Вернуться в магазин 🛒"))
     nmarkup.row(types.KeyboardButton(text="Да, выйти ⬇"))
@@ -296,6 +305,7 @@ async def shop_bucket(message: types.Message, bot: Bot, state: FSMContext):
 
 @router.message((F.text.contains('Да, оформить заказ')), state=Shop.shop_callback)
 async def shop_bucket(message: types.Message, bot: Bot, state: FSMContext):
+    await state.set_state(TrueGoalsState.main)
     chat_id = (await state.get_data())['chat_id_shop']
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Понятно 👌"))
