@@ -190,15 +190,15 @@ async def goals_are_you_sure_conflict(message: Message):
 async def goals_little_bet(message: Message, fake_goals_data: dict):
     text = await sql_safe_select('text', 'texts', {'name': 'goals_little_bet'})
     if fake_goals_data['fake_goals_number'] > 1:
-        text.replace('[agreed]', 'такими причинами')
-        text.replace('[claim]', 'эти причины')
-        text.replace('[is]', 'являются')
+        text = text.replace('[agreed]', 'такими причинами')
+        text = text.replace('[claim]', 'эти причины')
+        text = text.replace('[is]', 'являются')
     else:
-        text.replace('[agreed]', 'такой причиной')
-        text.replace('[claim]', 'эта причина')
-        text.replace('[is]', 'является')
+        text = text.replace('[agreed]', 'такой причиной')
+        text = text.replace('[claim]', 'эта причина')
+        text = text.replace('[is]', 'является')
     listtext = "\n".join(fake_goals_data['fake_goals'])
-    text.replace('[REASONS_LIST]', listtext)
+    text = text.replace('[REASONS_LIST]', listtext)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Да, начнём 🤝"))
     if fake_goals_data['fake_goals_number'] != 6:
