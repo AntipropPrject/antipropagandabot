@@ -177,7 +177,7 @@ async def shop_bucket(message: types.Message, state: FSMContext):
     await message.answer("Отлично!", reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
     text = await sql_safe_select("text", "texts", {"name": "shop_bucket"})
-    check_text=" "
+    check_text=""
     data_dict = await state.get_data()
     for key in data_dict:
         text = text.replace(f"[{key}]", f"{data_dict[key]}")
@@ -189,13 +189,13 @@ async def shop_bucket(message: types.Message, state: FSMContext):
                     num_list.append(int(word))
             good = key.replace(str(num_list[0]), "")
             if data_dict[key]!="0":
-                check_text=check_text+f"{data_dict[key]} {good} "+"\n"
+                check_text=check_text+f"<b>{data_dict[key]}</b> {good} "+"\n"
     text = re.sub(r'\[[^\]]+\]', '0', text)
     text = text.replace("MM", f"{change_number_format(data_dict['balance'])}")
 
     bot_message = await message.answer(text, reply_markup=inline.as_markup(resize_keyboard=True),
                                        disable_web_page_preview=True)  # TODO СДЕЛАТЬ АЛЬБОМ
-    await message.answer(text=f"<b>БАЛАНС</b>:\n<i>{change_number_format(data_dict['balance'])}</i>\nЧЕК: \n{check_text}")
+    await message.answer(text=f"<b>БАЛАНС</b>:\n<i>{change_number_format(data_dict['balance'])}</i>\n<b>ЧЕК</b>:\n{check_text}")
 
 
     print(bot_message.message_id)
@@ -261,14 +261,14 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
                     good=key.replace(str(num_list[0]),"")
                     print(data_dict[key])
                     if int(data_dict[key]) > 0:
-                        check_text=check_text+f"{data_dict[key]} {good} "+"\n"
+                        check_text=check_text+f"<b>{data_dict[key]}</b> {good} "+"\n"
                         print(check_text)
             text = re.sub(r'\[[^\]]+\]', '0', text)
             text = text.replace("MM", f"{change_number_format(balance)}")
             await bot.edit_message_text(text=text, chat_id=chat_id, message_id=message_id_shop,  # TODO СДЕЛАТЬ АЛЬБОМ
                                         reply_markup=inline.as_markup())
 
-            await bot.edit_message_text(text=f"<b>БАЛАНС</b>:\n<i>{change_number_format(data_dict['balance'])}</i>\nЧЕК: \n{check_text}", chat_id=chat_id, message_id=(message_id_shop+1))
+            await bot.edit_message_text(text=f"<b>БАЛАНС</b>:\n<i>{change_number_format(data_dict['balance'])}</i>\n<b>ЧЕК</b>:\n{check_text}", chat_id=chat_id, message_id=(message_id_shop+1))
 
 
         else:
