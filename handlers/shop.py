@@ -20,7 +20,7 @@ import re
 
 flags = {"throttling_key": "True"}
 router = Router()
-router.message.filter(state=(Shop, TrueGoalsState.before_shop))
+router.message.filter(state=(Shop, TrueGoalsState.before_shop,TrueGoalsState.main))
 router.poll_answer.filter(state=Shop)
 router.callback_query.filter(state=Shop)
 
@@ -210,6 +210,7 @@ async def shop_bucket(message: types.Message, state: FSMContext):
 
 @router.callback_query(Shop.shop_bucket)
 @router.callback_query(Shop.shop_callback)
+@router.callback_query(TrueGoalsState.main)
 async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext):
     global count, text, balance, check_text
     await query.answer()
