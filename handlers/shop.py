@@ -51,6 +51,7 @@ inline.button(text='100 x 🌳 Большой парк: 500 000 000 руб',
               callback_data='100 x 🌳 Большой парк')
 inline.button(text='10 x 💊 Детский онкологический центр: 1 500 000 000 руб',
               callback_data='10 x 💊 Детский онкологический центр')
+
 inline.button(text='10 x 🏥 Корпус ядерной медицины: 2 600 000 000 руб',
               callback_data='10 x 🏥 Корпус ядерной медицины')
 inline.button(text='1 x 🔥 Северный поток — 2: 1 037 000 000 000 руб',
@@ -280,6 +281,7 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
             text = text.replace("MM", f"{change_number_format(balance)}")
             await bot.edit_message_text(text=text, chat_id=chat_id, message_id=message_id_shop,  # TODO СДЕЛАТЬ АЛЬБОМ
                                         reply_markup=inline.as_markup())
+            await bot.edit_message_text(text=f"<b>БАЛАНС</b>:                                                                                                             💵\n<i>{change_number_format(data_dict['balance'])} руб</i>\n<b>ЧЕК</b>:\n\n{check_text}", chat_id=chat_id, message_id=(message_id_shop+1))
 
         print(int(data_dict["100 x 🧸 Спасти жизнь ребёнку"]))
         seen_cild_message = (await state.get_data())["seen_child_message"]
