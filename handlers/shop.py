@@ -154,9 +154,11 @@ async def shop_why_so_many(message: types.Message, state: FSMContext):
 async def shop_bucket(message: types.Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='shop_bucket', value="+")
     await state.set_state(Shop.shop_bucket)
+
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Выйти из магазина ⬇"))
     await message.answer("Добро пожаловать!", reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
     tag_list=['card1',
               'card2',
               'card3',
@@ -175,8 +177,6 @@ async def shop_bucket(message: types.Message, state: FSMContext):
         await message.answer_media_group(asset_list)
     except Exception as e:
         print(e)
-
-
 
     text = await sql_safe_select("text", "texts", {"name": "shop_bucket"})
     check_text=""
@@ -208,8 +208,8 @@ async def shop_bucket(message: types.Message, state: FSMContext):
     await state.update_data(text_shop=shop_text)
 
 
-
-@router.callback_query(Shop)
+@router.callback_query(Shop.shop_bucket)
+@router.callback_query(Shop.shop_callback)
 async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext):
     global count, text, balance, check_text
     await query.answer()
@@ -366,9 +366,9 @@ async def shop_children_ok(message: types.Message, bot: Bot, state: FSMContext):
     chat_id = (await state.get_data())['chat_id_shop']
     await bot.delete_message(chat_id, message_id)
 
-@router.message(Shop.shop_callback, F.text.contains("Вернуться в магазин 🛒"), flags=flags)
-@router.message(Shop.shop_bucket, (F.text.contains("Вернуться в магазин 🛒") | F.text.contains("Да, выйти ⬇")), flags=flags)
-@router.message(TrueGoalsState.main, F.text.contains("Вернуться в магазин 🛒"), flags=flags)
+@router.message(Shop.shop_callback, F.text.contains("Вернуться в магазин"), flags=flags)
+@router.message(Shop.shop_bucket, (F.text.contains("Вернуться в магазин") | F.text.contains("Да, выйти ⬇")), flags=flags)
+@router.message(TrueGoalsState.main, F.text.contains("Вернуться в магазин"), flags=flags)
 async def shop_go_back(message: types.Message, bot: Bot, state: FSMContext):
     chat_id = (await state.get_data())['chat_id_shop']
     await state.set_state(Shop.shop_bucket)
