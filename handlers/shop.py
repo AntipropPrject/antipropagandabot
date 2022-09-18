@@ -367,6 +367,7 @@ async def shop_children_ok(message: types.Message, bot: Bot, state: FSMContext):
 
 @router.message(Shop.shop_callback, F.text.contains("Вернуться в магазин 🛒"), flags=flags)
 @router.message(Shop.shop_bucket, (F.text.contains("Вернуться в магазин 🛒") | F.text.contains("Да, выйти ⬇")), flags=flags)
+@router.message(TrueGoalsState.main, F.text.contains("Вернуться в магазин 🛒"), flags=flags)
 async def shop_go_back(message: types.Message, bot: Bot, state: FSMContext):
     chat_id = (await state.get_data())['chat_id_shop']
     await state.set_state(Shop.shop_bucket)
