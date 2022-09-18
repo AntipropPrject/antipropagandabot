@@ -174,7 +174,7 @@ async def shop_bucket(message: types.Message, state: FSMContext):
 
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Выйти из магазина ⬇"))
-    await message.answer("Отлично!", reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer("Добро пожаловать!", reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
     text = await sql_safe_select("text", "texts", {"name": "shop_bucket"})
     check_text=""
@@ -195,7 +195,7 @@ async def shop_bucket(message: types.Message, state: FSMContext):
 
     bot_message = await message.answer(text, reply_markup=inline.as_markup(resize_keyboard=True),
                                        disable_web_page_preview=True)  # TODO СДЕЛАТЬ АЛЬБОМ
-    await message.answer(text=f"<b>БАЛАНС</b>:\n<i>{change_number_format(data_dict['balance'])}</i>\n<b>ЧЕК</b>:\n{check_text}")
+    await message.answer(text=f"<b>БАЛАНС</b>:                                                                                                             💵\n<i>{change_number_format(data_dict['balance'])} руб</i>\n<b>ЧЕК</b>:\n\n{check_text}")
 
 
     print(bot_message.message_id)
@@ -268,7 +268,7 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
             await bot.edit_message_text(text=text, chat_id=chat_id, message_id=message_id_shop,  # TODO СДЕЛАТЬ АЛЬБОМ
                                         reply_markup=inline.as_markup())
 
-            await bot.edit_message_text(text=f"<b>БАЛАНС</b>:\n<i>{change_number_format(data_dict['balance'])}</i>\n<b>ЧЕК</b>:\n{check_text}", chat_id=chat_id, message_id=(message_id_shop+1))
+            await bot.edit_message_text(text=f"<b>БАЛАНС</b>:                                                                                                             💵\n<i>{change_number_format(data_dict['balance'])} руб</i>\n<b>ЧЕК</b>:\n\n{check_text}", chat_id=chat_id, message_id=(message_id_shop+1))
 
 
         else:
@@ -315,7 +315,7 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
         await bot.edit_message_text(text=text, chat_id=chat_id, message_id=message_id_shop,  # TODO СДЕЛАТЬ АЛЬБОМ
                                     reply_markup=inline.as_markup())
         print("123")
-        await bot.edit_message_text(text=f"БАЛАНС: {data_dict['balance_all']}\nЧЕК: ", chat_id=chat_id,
+        await bot.edit_message_text(text=f"<b>БАЛАНС</b>:                                                                                                             💵\n<i>{change_number_format(data_dict['balance'])} руб</i>\n<b>ЧЕК</b>:", chat_id=chat_id,
                                     message_id=(message_id_shop+1))
 
     if query.data == "Оформить заказ":
