@@ -154,6 +154,9 @@ async def shop_why_so_many(message: types.Message, state: FSMContext):
 async def shop_bucket(message: types.Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='shop_bucket', value="+")
     await state.set_state(Shop.shop_bucket)
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Выйти из магазина ⬇"))
+    await message.answer("Добро пожаловать!", reply_markup=nmarkup.as_markup(resize_keyboard=True))
     tag_list=['card1',
               'card2',
               'card3',
@@ -173,9 +176,7 @@ async def shop_bucket(message: types.Message, state: FSMContext):
     except Exception as e:
         print(e)
 
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Выйти из магазина ⬇"))
-    await message.answer("Добро пожаловать!", reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
 
     text = await sql_safe_select("text", "texts", {"name": "shop_bucket"})
     check_text=""
