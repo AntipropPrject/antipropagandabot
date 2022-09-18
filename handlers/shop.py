@@ -277,11 +277,22 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
             await state.update_data(balance=balance)
             for key in data_dict:
                 text = text.replace(f"[{key}]", f"{data_dict[key]}")
+                if key[0] == "1":
+                    word_list = key.split()
+                    num_list = []
+                    for word in word_list:
+                        if word.isnumeric():
+                            num_list.append(int(word))
+                    good=key.replace(str(num_list[0]),"")
+                    print(data_dict[key])
+                    if int(data_dict[key]) > 0:
+                        check_text=check_text+f"<b>{data_dict[key]}</b> {good} "+"\n"
+                        print(check_text)
             text = re.sub(r'\[[^\]]+\]', '0', text)
             text = text.replace("MM", f"{change_number_format(balance)}")
             await bot.edit_message_text(text=text, chat_id=chat_id, message_id=message_id_shop,  # TODO СДЕЛАТЬ АЛЬБОМ
                                         reply_markup=inline.as_markup())
-            await bot.edit_message_text(text=f"<b>БАЛАНС</b>:                                                                                                             💵\n<i>{change_number_format(data_dict['balance'])} руб</i>\n<b>ЧЕК</b>:\n\n{check_text}", chat_id=chat_id, message_id=(message_id_shop+1))
+            await bot.edit_message_text(text=f"<b>БАЛАНС</b>:                                                                                                             💵\n<i>{balance} руб</i>\n<b>ЧЕК</b>:\n\n{check_text}", chat_id=chat_id, message_id=(message_id_shop+1))
 
         print(int(data_dict["100 x 🧸 Спасти жизнь ребёнку"]))
         seen_cild_message = (await state.get_data())["seen_child_message"]
