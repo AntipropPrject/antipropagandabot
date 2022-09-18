@@ -207,8 +207,8 @@ async def shop_bucket(message: types.Message, state: FSMContext):
     await state.update_data(text_shop=shop_text)
 
 
-@router.callback_query(Shop.shop_bucket)
-@router.callback_query(Shop.shop_callback)
+
+@router.callback_query(Shop)
 async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext):
     global count, text, balance, check_text
     await query.answer()
