@@ -99,8 +99,8 @@ async def goals_sort_reveal(message: Message, state: FSMContext):
         secret_dev / all_count * 100)
 
     sorted_dict = dict(sorted(var_aims.items(), key=lambda x: x[1]))
-    result_text = await sql_safe_select('text', 'texts', {'name': 'goals_sort_reveal'})
-    result_text = result_text + '\n '
+    result_text = await sql_safe_select('text', 'texts', {'name': 'goals_sort_hided'})
+    result_text = result_text + '\n\n'
     for text, value in sorted_dict.items():
         result_text = result_text + (str(value) + '% ' + str(text[1:])) + '\n'  # str(text[:1]) + '  — ' +
     await state.update_data(sorted_dict=sorted_dict)
