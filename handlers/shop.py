@@ -37,25 +37,25 @@ price_dict = {'1000 x 🚀 Детская площадка': 1150000,
               }
 
 inline = InlineKeyboardBuilder()
-inline.button(text='1000 x 🚀 Детская площадка' ,
+inline.button(text='1000 x 🚀 Детская площадка: 1 150 000 руб' ,
               callback_data='1000 x 🚀 Детская площадка',)
-inline.button(text='100 x 🏫 Современная школа',
+inline.button(text='100 x 🏫 Современная школа: 560 000 000 руб',
               callback_data='100 x 🏫 Современная школа')
-inline.button(text='1000 x ⚡ Электробус',
+inline.button(text='1000 x ⚡ Электробус: 31 400 000 руб',
               callback_data='1000 x ⚡️ Электробус')
-inline.button(text='10 x 🛩 Пассажирский самолёт (SuperJet)',
+inline.button(text='10 x 🛩 Пассажирский самолёт (SuperJet):  2 400 000 000 руб',
               callback_data='10 x 🛩 Пассажирский самолёт (SuperJet)')
-inline.button(text='100 км x 🛣 Автомагистраль (от 4 полос)',
+inline.button(text='100 км x 🛣 Автомагистраль (от 4 полос): 52 300 000 руб(за 1 км)',
               callback_data='100 км x 🛣 Автомагистраль (от 4 полос)')
-inline.button(text='100 x 🌳 Большой парк',
+inline.button(text='100 x 🌳 Большой парк: 500 000 000 руб',
               callback_data='100 x 🌳 Большой парк')
-inline.button(text='10 x 💊 Детский онкологический центр',
+inline.button(text='10 x 💊 Детский онкологический центр: 1 500 000 000 руб',
               callback_data='10 x 💊 Детский онкологический центр')
-inline.button(text='10 x 🏥 Корпус ядерной медицины',
+inline.button(text='10 x 🏥 Корпус ядерной медицины: 2 600 000 000 руб',
               callback_data='10 x 🏥 Корпус ядерной медицины')
-inline.button(text='1 x 🔥 Северный поток — 2',
+inline.button(text='1 x 🔥 Северный поток — 2: 1 037 000 000 000 руб',
               callback_data='1 x 🔥 Северный поток — 2')
-inline.button(text='100 x 🧸 Спасти жизнь ребёнку',
+inline.button(text='100 x 🧸 Спасти жизнь ребёнку: 🧸 Спасти жизнь ребёнку',
               callback_data='100 x 🧸 Спасти жизнь ребёнку')
 inline.button(text='Очистить корзину',
               callback_data='Очистить корзину')
@@ -77,7 +77,7 @@ async def shop_welcome(message: types.Message, state: FSMContext):
 
     nmarkup = ReplyKeyboardBuilder()
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
-    await message.answer_poll("<b>Как думаете, сколько денег Россия уже потратила на войну?</b>", explanation_parse_mode="HTML",
+    await message.answer_poll("Как думаете, сколько денег Россия уже потратила на войну?", explanation_parse_mode="HTML",
                               options=shop_poll, correct_option_id=3, is_anonymous=False,
                               reply_markup=nmarkup.as_markup(resize_keyboard=True))
     Logger.log("TEST TEST TEST")
