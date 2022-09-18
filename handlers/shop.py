@@ -4,11 +4,12 @@ from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
+from aiogram.types import InputMediaPhoto
 
 from bot_statistics.stat import mongo_update_stat_new
 from data_base.DBuse import sql_safe_select, mongo_count_docs
 from utils.elk_logger import Logger
-from utilts import CoolPercReplacer
+from utilts import CoolPercReplacer, change_number_format
 
 from bot_statistics.stat import mongo_update_stat_new
 from data_base.DBuse import sql_safe_select, mongo_count_docs
@@ -36,32 +37,34 @@ price_dict = {'1000 x 🚀 Детская площадка': 1150000,
               }
 
 inline = InlineKeyboardBuilder()
-inline.button(text='1000 x 🚀',
+inline.button(text='1000 x 🚀 Детская площадка' ,
               callback_data='1000 x 🚀 Детская площадка',)
-inline.button(text='100 x 🏫',
+inline.button(text='100 x 🏫 Современная школа',
               callback_data='100 x 🏫 Современная школа')
-inline.button(text='1000 x ⚡',
+inline.button(text='1000 x ⚡ Электробус',
               callback_data='1000 x ⚡️ Электробус')
-inline.button(text='10 x 🛩',
+inline.button(text='10 x 🛩 Пассажирский самолёт (SuperJet)',
               callback_data='10 x 🛩 Пассажирский самолёт (SuperJet)')
-inline.button(text='100 км x 🛣',
+inline.button(text='100 км x 🛣 Автомагистраль (от 4 полос)',
               callback_data='100 км x 🛣 Автомагистраль (от 4 полос)')
-inline.button(text='100 x 🌳',
+inline.button(text='100 x 🌳 Большой парк',
               callback_data='100 x 🌳 Большой парк')
-inline.button(text='10 x 💊',
+inline.button(text='10 x 💊 Детский онкологический центр',
               callback_data='10 x 💊 Детский онкологический центр')
-inline.button(text='10 x 🏥',
+inline.button(text='10 x 🏥 Корпус ядерной медицины',
               callback_data='10 x 🏥 Корпус ядерной медицины')
-inline.button(text='1 x 🔥',
+inline.button(text='1 x 🔥 Северный поток — 2',
               callback_data='1 x 🔥 Северный поток — 2')
-inline.button(text='100 x 🧸',
+inline.button(text='100 x 🧸 Спасти жизнь ребёнку',
               callback_data='100 x 🧸 Спасти жизнь ребёнку')
 inline.button(text='Очистить корзину',
               callback_data='Очистить корзину')
 inline.button(text='Оформить заказ',
               callback_data='Оформить заказ')
 
-inline.adjust(3,3,4,2)
+inline.adjust(1,1,1,1,1,1,1,1,1,1,2)
+
+
 
 
 
@@ -82,36 +85,41 @@ async def shop_welcome(message: types.Message, state: FSMContext):
 
 @router.poll_answer(state=Shop.main, flags=flags)
 async def shop_after_first_poll(poll_answer: types.PollAnswer, bot: Bot, state: FSMContext):
-    # await mongo_update_stat_new(tg_id=poll_answer.user.id, column='shop_after_first_poll',
-    #                             value=poll_answer.option_ids[0])
+    await mongo_update_stat_new(tg_id=poll_answer.user.id, column='shop_after_first_poll',
+                                value=poll_answer.option_ids[0])
     print(poll_answer.option_ids[0])
-    # right_answers = await mongo_count_docs('database', 'statistics_new', {'shop_after_first_poll': 2})
-    # all_answers = await mongo_count_docs('database', 'statistics_new', {'shop_after_first_poll': {'$exists': True}})
+    right_answers = await mongo_count_docs('database', 'statistics_new', {'shop_after_first_poll': 2})
+    all_answers = await mongo_count_docs('database', 'statistics_new', {'shop_after_first_poll': {'$exists': True}})
     await state.set_state(Shop.after_first_poll)
     await state.update_data(shop_after_first_poll=poll_answer.option_ids[0])
-    # await mongo_update_stat_new(tg_id=poll_answer.user.id, column='shop_after_first_poll', value=poll_answer.option_ids[0])
+    await mongo_update_stat_new(tg_id=poll_answer.user.id, column='shop_after_first_poll', value=poll_answer.option_ids[0])
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Посетить магазин 💵"))
     nmarkup.row(types.KeyboardButton(text="Откуда такие цифры?🤔"))
     text = await sql_safe_select("text", "texts", {"name": "shop_after_first_poll"})
-    # result= (right_answers*100)/all_answers
-    # txt = CoolPercReplacer(text, all_answers)
-    # txt.replace('AA', right_answers)
+    result=(right_answers*100)/all_answers
+    print(f'all {all_answers}')
+    print(f'right {right_answers}')
+    print(result)
+    text = text.replace("AA", f"{str(result)[:-2]}")
+    print(text)
     await bot.send_message(poll_answer.user.id, text,
                            reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message(Shop.after_first_poll, F.text.contains("Посетить магазин"), flags=flags)
+@router.message(Shop.shop_why_so_many, F.text.contains("Посетить магазин"), flags=flags)
 async def shop_transfer(message: types.Message, state: FSMContext):
-    # await mongo_update_stat_new(tg_id=message.from_user.id, column='shop_transfer', value="+")
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='shop_transfer', value="+")
     await state.set_state(Shop.shop_transfer)
     text = await sql_safe_select("text", "texts", {"name": "shop_transfer"})
-    day = 203
+    day = 205
     sum = day * 55000000000
     await state.update_data(balance=sum)
     await state.update_data(balance_all=sum)
+    balance=change_number_format(sum)
     text = text.replace("NN", f"{day}")
-    text = text.replace("MM", f"{sum}")
+    text = text.replace("MM", f"{balance}")
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Перейти к покупкам 🛒"))
     nmarkup.row(types.KeyboardButton(text="Откуда такие цифры?🤔"))
@@ -120,44 +128,80 @@ async def shop_transfer(message: types.Message, state: FSMContext):
 
 
 @router.message(Shop.shop_transfer, F.text.contains("Откуда такие цифры?"), flags=flags)
+async def shop_why_so_many(message: types.Message, state: FSMContext):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='shop_why_so_many', value="+")
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Перейти к покупкам 🛒"))
+    await state.set_state(Shop.shop_why_so_many)
+    text = await sql_safe_select("text", "texts", {"name": "shop_why_so_many"})
+
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
 @router.message(Shop.after_first_poll, F.text.contains("Откуда такие цифры?"), flags=flags)
 async def shop_why_so_many(message: types.Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='shop_why_so_many', value="+")
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Посетить магазин 💵"))
     await state.set_state(Shop.shop_why_so_many)
     text = await sql_safe_select("text", "texts", {"name": "shop_why_so_many"})
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Перейти к покупкам 🛒"))
+
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message(Shop.shop_transfer, F.text.contains("Перейти к покупкам"), flags=flags)
 @router.message(Shop.shop_why_so_many, F.text.contains("Перейти к покупкам"), flags=flags)
 async def shop_bucket(message: types.Message, state: FSMContext):
-    # await mongo_update_stat_new(tg_id=message.from_user.id, column='shop_bucket', value="+")
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='shop_bucket', value="+")
     await state.set_state(Shop.shop_bucket)
+    tag_list=['card1',
+              'card2',
+              'card3',
+              'card4',
+              'card5',
+              'card6',
+              'card7',
+              'card8',
+              'card9',
+              'card10',]
+    asset_list=[]
+    for tag in tag_list:
+        asset = await sql_safe_select("t_id","assets",{"name":tag})
+        asset_list.append(InputMediaPhoto(media=asset))
+    try:
+        await message.answer_media_group(asset_list)
+    except Exception as e:
+        print(e)
+
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Выйти из магазина ⬇"))
-
     await message.answer("Отлично!", reply_markup=nmarkup.as_markup(resize_keyboard=True))
-    text = await sql_safe_select("text", "texts", {"name": "shop_bucket"})
 
+    text = await sql_safe_select("text", "texts", {"name": "shop_bucket"})
+    check_text=" "
     data_dict = await state.get_data()
     for key in data_dict:
         text = text.replace(f"[{key}]", f"{data_dict[key]}")
+        if key[0] == "1":
+            word_list = key.split()
+            num_list = []
+            for word in word_list:
+                if word.isnumeric():
+                    num_list.append(int(word))
+            good = key.replace(str(num_list[0]), "")
+            if data_dict[key]!="0":
+                check_text=check_text+f"{data_dict[key]} {good} "+"\n"
     text = re.sub(r'\[[^\]]+\]', '0', text)
-    text = text.replace("MM", f"{data_dict['balance']}")
+    text = text.replace("MM", f"{change_number_format(data_dict['balance'])}")
 
     bot_message = await message.answer(text, reply_markup=inline.as_markup(resize_keyboard=True),
                                        disable_web_page_preview=True)  # TODO СДЕЛАТЬ АЛЬБОМ
+    await message.answer(text=f"<b>БАЛАНС</b>:\n<i>{change_number_format(data_dict['balance'])}</i>\nЧЕК: \n{check_text}")
 
-    # nmarkup_quit = ReplyKeyboardBuilder()
-    # nmarkup_quit.row(types.KeyboardButton(text="Выйти из магазина ⬇"))
-    # balance_message = await message.answer(text=f"           БАЛАНС: {data_dict['balance']}", reply_markup=nmarkup_quit.as_markup(resize_keyboard=True))
+
     print(bot_message.message_id)
     print(bot_message.from_user.id)
     await state.update_data(message_id_shop=bot_message.message_id)
     await state.update_data(chat_id_shop=message.from_user.id)
-    # await state.update_data(balance_message=balance_message.message_id)
     shop_text = await sql_safe_select("text", "texts", {"name": "shop_bucket"})
     await state.update_data(text_shop=shop_text)
 
@@ -165,7 +209,7 @@ async def shop_bucket(message: types.Message, state: FSMContext):
 @router.callback_query(Shop.shop_bucket)
 @router.callback_query(Shop.shop_callback)
 async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext):
-    global count, text, balance
+    global count, text, balance, check_text
     await query.answer()
     await state.set_state(Shop.shop_callback)
 
@@ -195,6 +239,7 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
         balance = (await state.get_data())['balance']
         print(balance)
         data_dict = await state.get_data()
+        check_text=""
         if int(balance) > 0:
 
             try:
@@ -205,10 +250,25 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
             data_dict = await state.get_data()
             for key in data_dict:
                 text = text.replace(f"[{key}]", f"{data_dict[key]}")
+                print(data_dict[key])
+
+                if key[0] == "1":
+                    word_list = key.split()
+                    num_list = []
+                    for word in word_list:
+                        if word.isnumeric():
+                            num_list.append(int(word))
+                    good=key.replace(str(num_list[0]),"")
+                    print(data_dict[key])
+                    if int(data_dict[key]) > 0:
+                        check_text=check_text+f"{data_dict[key]} {good} "+"\n"
+                        print(check_text)
             text = re.sub(r'\[[^\]]+\]', '0', text)
-            text = text.replace("MM", f"{balance}")
+            text = text.replace("MM", f"{change_number_format(balance)}")
             await bot.edit_message_text(text=text, chat_id=chat_id, message_id=message_id_shop,  # TODO СДЕЛАТЬ АЛЬБОМ
                                         reply_markup=inline.as_markup())
+
+            await bot.edit_message_text(text=f"<b>БАЛАНС</b>:\n<i>{change_number_format(data_dict['balance'])}</i>\nЧЕК: \n{check_text}", chat_id=chat_id, message_id=(message_id_shop+1))
 
 
         else:
@@ -217,7 +277,7 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
             for key in data_dict:
                 text = text.replace(f"[{key}]", f"{data_dict[key]}")
             text = re.sub(r'\[[^\]]+\]', '0', text)
-            text = text.replace("MM", f"{balance}")
+            text = text.replace("MM", f"{change_number_format(balance)}")
             await bot.edit_message_text(text=text, chat_id=chat_id, message_id=message_id_shop,  # TODO СДЕЛАТЬ АЛЬБОМ
                                         reply_markup=inline.as_markup())
 
@@ -248,10 +308,16 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
         balance = (await state.get_data())['balance']
         for key in data_dict:
             text = text.replace(f"[{key}]", f"{data_dict[key]}")
+            if key[0] == "1":
+                check_text = check_text + f"{key} : {data_dict[key]}" + "\n"
         text = re.sub(r'\[[^\]]+\]', '0', text)
         text = text.replace("MM", f"{balance}")
         await bot.edit_message_text(text=text, chat_id=chat_id, message_id=message_id_shop,  # TODO СДЕЛАТЬ АЛЬБОМ
                                     reply_markup=inline.as_markup())
+        print("123")
+        await bot.edit_message_text(text=f"БАЛАНС: {data_dict['balance_all']}\nЧЕК: ", chat_id=chat_id,
+                                    message_id=(message_id_shop+1))
+
     if query.data == "Оформить заказ":
         print(query.data)
         balance = (await state.get_data())['balance']

@@ -133,6 +133,9 @@ def percentage_replace(text: str, symbol: str, part: int, base: int):
         perc = 0
     return text.replace(symbol, str(round(perc)))
 
+def change_number_format(number:int):
+    return '{0:,}'.format(number).replace(',', ' ')
+
 
 class CoolPercReplacer:
     """
