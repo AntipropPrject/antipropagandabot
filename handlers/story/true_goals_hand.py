@@ -99,8 +99,8 @@ async def goals_sort_reveal(message: Message, state: FSMContext):
         secret_dev / all_count * 100)
 
     sorted_dict = dict(sorted(var_aims.items(), key=lambda x: x[1]))
-    result_text = await sql_safe_select('text', 'texts', {'name': 'goals_sort_reveal'})
-    result_text = result_text + '\n '
+    result_text = await sql_safe_select('text', 'texts', {'name': 'goals_sort_hided'})
+    result_text = result_text + '\n\n'
     for text, value in sorted_dict.items():
         result_text = result_text + (str(value) + '% ' + str(text[1:])) + '\n'  # str(text[:1]) + '  — ' +
     await state.update_data(sorted_dict=sorted_dict)
@@ -112,7 +112,8 @@ async def goals_sort_reveal(message: Message, state: FSMContext):
     await message.answer(result_text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.contains('Интересно 🤔')) | (F.text.contains('Продолжай 👉')), state=TrueGoalsState.more_goals_no_truth,
+@router.message((F.text.contains('Интересно 🤔')) | (F.text.contains('Продолжай 👉')),
+                state=TrueGoalsState.more_goals_no_truth,
                 flags=flags)
 async def goals_no_truth_for_us(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'goals_no_truth_for_us'})
@@ -190,15 +191,15 @@ async def goals_are_you_sure_conflict(message: Message):
 async def goals_little_bet(message: Message, fake_goals_data: dict):
     text = await sql_safe_select('text', 'texts', {'name': 'goals_little_bet'})
     if fake_goals_data['fake_goals_number'] > 1:
-        text.replace('[agreed]', 'такими причинами')
-        text.replace('[claim]', 'эти причины')
-        text.replace('[is]', 'являются')
+        text = text.replace('[agreed]', 'такими причинами')
+        text = text.replace('[claim]', 'эти причины')
+        text = text.replace('[is]', 'являются')
     else:
-        text.replace('[agreed]', 'такой причиной')
-        text.replace('[claim]', 'эта причина')
-        text.replace('[is]', 'является')
+        text = text.replace('[agreed]', 'такой причиной')
+        text = text.replace('[claim]', 'эта причина')
+        text = text.replace('[is]', 'является')
     listtext = "\n".join(fake_goals_data['fake_goals'])
-    text.replace('[REASONS_LIST]', listtext)
+    text = text.replace('[REASONS_LIST]', listtext)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Да, начнём 🤝"))
     if fake_goals_data['fake_goals_number'] != 6:
@@ -210,6 +211,9 @@ async def goals_little_bet(message: Message, fake_goals_data: dict):
 @router.message(FakeGoals(not_all_fakes=True), F.text == 'Да, начнём 🤝', state=TrueGoalsState.more_goals, flags=flags)
 async def goals_lets_add_goals(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'goals_lets_add_goals'})
+    not_checked_fakes = await poll_get(f'Usrs: {message.from_user.id}: TrueGoals: NotChosenFakeGoals:')
+    listtext = "\n".join(not_checked_fakes)
+    text = text.replace('[REASONS_LIST]', listtext)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Да, давай обсудим некоторые из этих тем 🎯"))
     nmarkup.row(types.KeyboardButton(text="Просто продолжим 👉"))
@@ -219,6 +223,8 @@ async def goals_lets_add_goals(message: Message):
 @router.message(F.text == 'Нет, пропустим обсуждение этих тем 👉', state=TrueGoalsState.more_goals, flags=flags)
 async def goals_wait_a_minute(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'goals_wait_a_minute'})
+    listtext = "\n".join(await poll_get(f'Usrs: {message.from_user.id}: TrueGoals: UserFakeGoals:'))
+    text = text.replace('[REASONS_LIST]', listtext)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Хорошо, давай обсудим 👌"))
     nmarkup.row(types.KeyboardButton(text="Точно пропустим 👉"))
@@ -236,11 +242,8 @@ async def goals_good_decision(message: Message):
 async def goals_add_goals_poll(message: Message, state: FSMContext):
     await state.set_state(TrueGoalsState.more_goals_poll)
     text = await sql_safe_select('text', 'texts', {'name': 'goals_add_goals_poll'})
-    answers = list((set(welc_message_one) ^ set(true_and_idk_goals)) ^
-                   set(await poll_get(f"Usrs: {message.from_user.id}: Start_answers: Invasion:")))
-    for answer in answers:
-        print(answer)
-        await poll_write(f'Usrs: {message.from_user.id}: TrueGoals: FakeInvasion:', answer)
+    answers = await poll_get(f'Usrs: {message.from_user.id}: TrueGoals: NotChosenFakeGoals:')
+    answers.append('Я передумал(а). Не хочу обсуждать ничего из вышеперечисленного.')
     await message.answer_poll(text, answers, allows_multiple_answers=True, is_anonymous=False)
 
 
@@ -248,10 +251,11 @@ async def goals_add_goals_poll(message: Message, state: FSMContext):
 async def goals_answer(poll_answer: types.PollAnswer, bot: Bot, state: FSMContext):
     await state.set_state(TrueGoalsState.main)
     lst_answers = poll_answer.option_ids
-    user_new_fake_list = await poll_get(f"Usrs: {poll_answer.user.id}: TrueGoals: FakeInvasion:")
-    await del_key(f"Usrs: {poll_answer.user.id}: TrueGoals: FakeInvasion:")
+    user_new_fake_list = await poll_get(f"Usrs: {poll_answer.user.id}: TrueGoals: NotChosenFakeGoals:")
+    user_new_fake_list.append('Я передумал(а). Не хочу обсуждать ничего из вышеперечисленного.')
+    await del_key(f"Usrs: {poll_answer.user.id}: TrueGoals: NotChosenFakeGoals:")
     for index in lst_answers:
-        print(index, user_new_fake_list[index])
-        await poll_write(f'Usrs: {poll_answer.user.id}: Start_answers: Invasion:', user_new_fake_list[index])
-    a = "\n".join((await poll_get(f"Usrs: {poll_answer.user.id}: Start_answers: Invasion:")))
-    await bot.send_message(poll_answer.user.id, f'Ответ на опрос, пока конец. Нынешний список причин войны:{a}')
+        if user_new_fake_list[index] != 'Я передумал(а). Не хочу обсуждать ничего из вышеперечисленного.':
+            await poll_write(f'Usrs: {poll_answer.user.id}: TrueGoals: UserFakeGoals:', user_new_fake_list[index])
+    a = "\n".join((await poll_get(f"Usrs: {poll_answer.user.id}: TrueGoals: UserFakeGoals:")))
+    await bot.send_message(poll_answer.user.id, f'КОНЕЦ ГОТОВОГО БЛОКА. Нынешний список ненастоящих причин войны:\n{a}')
