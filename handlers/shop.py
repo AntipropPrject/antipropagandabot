@@ -338,7 +338,7 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
                                     reply_markup=inline.as_markup())
         print("123")
         await bot.edit_message_text(
-            text=f"<b>БАЛАНС</b>:   <i>{change_number_format(data_dict['balance'])} руб                                                          💵</i>\n\n{check_text}",
+            text=f"<b>БАЛАНС</b>:   <i>{change_number_format(data_dict['balance'])} руб                                                          💵</i>\n\n",
             chat_id=chat_id,
             message_id=(message_id_shop + 1))
 
