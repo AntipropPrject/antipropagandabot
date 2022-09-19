@@ -114,7 +114,7 @@ async def shop_transfer(message: types.Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='shop_transfer', value="+")
     await state.set_state(Shop.shop_transfer)
     text = await sql_safe_select("text", "texts", {"name": "shop_transfer"})
-    day = 205
+    day = 208
     sum = day * 55000000000
     await state.update_data(balance=sum)
     await state.update_data(balance_all=sum)
