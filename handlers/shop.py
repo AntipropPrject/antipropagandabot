@@ -275,7 +275,8 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
 
             await bot.edit_message_text(text=f"<b>БАЛАНС</b>:   <i>{change_number_format(data_dict['balance'])} руб                                                          💵</i>\n\n{check_text}",
                                         chat_id=chat_id,
-                                        message_id=(message_id_shop+1))
+                                        message_id=(message_id_shop+1),
+                                        reply_markup=inline2.as_markup(resize_keyboard=True))
 
 
         else:
@@ -301,7 +302,8 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
             await bot.edit_message_text(
                 text=f"<b>БАЛАНС</b>:   <i>{change_number_format(data_dict['balance'])} руб                                                          💵</i>\n\n{check_text}",
                 chat_id=chat_id,
-                message_id=(message_id_shop + 1))
+                message_id=(message_id_shop + 1),
+            reply_markup=inline2.as_markup(resize_keyboard=True))
 
         print(int(data_dict["100 x 🧸 Спасти жизнь ребёнку"]))
         seen_cild_message = (await state.get_data())["seen_child_message"]
@@ -340,7 +342,8 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
         await bot.edit_message_text(
             text=f"<b>БАЛАНС</b>:   <i>{change_number_format(data_dict['balance'])} руб                                                          💵</i>\n\n",
             chat_id=chat_id,
-            message_id=(message_id_shop + 1))
+            message_id=(message_id_shop + 1),
+        reply_markup=inline2.as_markup(resize_keyboard=True))
 
     if query.data == "Оформить заказ":
         print(query.data)
