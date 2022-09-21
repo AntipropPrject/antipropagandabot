@@ -286,7 +286,7 @@ async def mass_spam(message: Message, state: FSMContext):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text='Отмена'))
     await message.answer("Пришлите мне сообщение, которое вы хотите разослать <b>ВСЕМ</b> пользователям бота",
-                         reply_markup=markup.as_markup())
+                         reply_markup=markup.as_markup(resize_keyboard=True))
 
 
 @router.message(IsSudo(), (F.text == 'Отмена'), state=(admin.big_spam, admin.big_spam_confirm))
@@ -307,7 +307,7 @@ async def mass_spam(message: Message, state: FSMContext):
     if message.video:
         await state.update_data(spam_media=message.video.file_id)
     await message.answer("Подтвердите сообщение.\n\n<b>ВНИМАНИЕ: ПОСЛЕ ПОДТВЕРЖДЕНИЯ ОНО ОТПРАВИТСЯ ВСЕМ "
-                         "ПОЛЬЗОВАТЕЛЯМ БОТА</b>", reply_markup=markup.as_markup())
+                         "ПОЛЬЗОВАТЕЛЯМ БОТА</b>", reply_markup=markup.as_markup(resize_keyboard=True))
     if message.photo or message.video:
         media = (await state.get_data())['spam_media']
         text = message.text if message.text else None
