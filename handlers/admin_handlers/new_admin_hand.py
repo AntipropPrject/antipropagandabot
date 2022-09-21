@@ -306,8 +306,10 @@ async def mass_spam(message: Message, state: FSMContext):
         await state.update_data(spam_media=message.photo[0].file_id)
     if message.video:
         await state.update_data(spam_media=message.video.file_id)
-    await message.answer("Подтвердите сообщение.\n\n<b>ВНИМАНИЕ: ПОСЛЕ ПОДТВЕРЖДЕНИЯ ОНО ОТПРАВИТСЯ ВСЕМ "
-                         "ПОЛЬЗОВАТЕЛЯМ БОТА</b>", reply_markup=markup.as_markup(resize_keyboard=True))
+    await message.answer("Подтвердите сообщение.\n\n🅰️<b>ВНИМАНИЕ: ПОСЛЕ ПОДТВЕРЖДЕНИЯ ОНО ОТПРАВИТСЯ ВСЕМ "
+                         "ПОЛЬЗОВАТЕЛЯМ БОТА\n\n🅱️Также обратите внимание, что для сообщения ниже выключено"
+                         " превью для ссылок, но для сообщения в рассылке превью включено! </b>",
+                         reply_markup=markup.as_markup(resize_keyboard=True))
     media = (await state.get_data())['spam_media'] if message.photo or message.video else None
     text = message.html_text if message.html_text else None
     await game_answer(message, media, text)
