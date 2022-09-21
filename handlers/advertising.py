@@ -84,23 +84,21 @@ async def news_for_user(user, main_news_base, today_actual, main_news_ids):
 
 
 async def send_spam(user_id, caption, media_id=None):
-    if caption and media_id is None:
-        await bot.send_message(chat_id=int(user_id), text=caption)
     try:
-        if str(caption) != 'None':
-            try:
-                await bot.send_video(chat_id=int(user_id), video=str(media_id), caption=str(caption))
-            except TelegramBadRequest:
-                await bot.send_photo(chat_id=int(user_id), photo=str(media_id), caption=str(caption))
+        if caption and media_id is None:
+            await bot.send_message(chat_id=int(user_id), text=caption)
         else:
-            try:
-                await bot.send_video(chat_id=int((user_id)), video=(media_id))
-            except TelegramBadRequest:
-                await bot.send_photo(chat_id=int(user_id), photo=(media_id))
+            if str(caption) != 'None':
+                try:
+                    await bot.send_video(chat_id=int(user_id), video=str(media_id), caption=str(caption))
+                except TelegramBadRequest:
+                    await bot.send_photo(chat_id=int(user_id), photo=str(media_id), caption=str(caption))
+            else:
+                try:
+                    await bot.send_video(chat_id=int((user_id)), video=(media_id))
+                except TelegramBadRequest:
+                    await bot.send_photo(chat_id=int(user_id), photo=(media_id))
     except TelegramForbiddenError:
         await mongo_update(int(user_id), 'userinfo', 'is_ban')
         print(f"ПОЛЬЗОВАТЕЛЬ {user_id} -- Заблокировал бота")
-
-    except Exception:
-        await bot.send_message(chat_id=int((user_id)), text=caption)
 
