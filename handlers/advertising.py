@@ -84,6 +84,8 @@ async def news_for_user(user, main_news_base, today_actual, main_news_ids):
 
 
 async def send_spam(user_id, caption, media_id=None):
+    if caption and media_id is None:
+        await bot.send_message(chat_id=int(user_id), text=caption)
     try:
         if str(caption) != 'None':
             try:
