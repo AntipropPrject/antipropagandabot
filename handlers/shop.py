@@ -114,7 +114,7 @@ async def shop_transfer(message: types.Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='shop_transfer', value="+")
     await state.set_state(Shop.shop_transfer)
     text = await sql_safe_select("text", "texts", {"name": "shop_transfer"})
-    day = 208
+    day = 209
     sum = day * 55000000000
     await state.update_data(balance=sum)
     await state.update_data(balance_all=sum)
@@ -340,7 +340,7 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
                                     reply_markup=inline.as_markup())
         print("123")
         await bot.edit_message_text(
-            text=f"<b>БАЛАНС</b>:   <i>0 руб                                                          💵</i>\n\n",
+            text=f"<b>БАЛАНС</b>:   <i>{data_dict['balance_all']} руб                                                          💵</i>\n\n",
             chat_id=chat_id,
             message_id=(message_id_shop + 1),
         reply_markup=inline2.as_markup(resize_keyboard=True))
