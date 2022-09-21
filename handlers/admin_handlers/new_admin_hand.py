@@ -321,9 +321,9 @@ async def mass_spam(message: Message, state: FSMContext):
     media = sttdata.get('spam_media', None)
     text = sttdata.get('spam_text', None)
     client = data.get_mongo()
-    database = client['database']
+    database = client.database
     userinfo = database['userinfo']
-    async for user in userinfo.find({}):
+    async for user in userinfo.find():
         asyncio.create_task(send_spam(user['_id'], media, text))
         await asyncio.sleep(0.033)
     await message.answer("Массовая рассылка закончена.")

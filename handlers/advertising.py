@@ -83,7 +83,7 @@ async def news_for_user(user, main_news_base, today_actual, main_news_ids):
             print('Главные новости для пользователя кончились, а актуальной не было')
 
 
-async def send_spam(user_id, media_id, caption):
+async def send_spam(user_id, caption, media_id=None):
     try:
         if str(caption) != 'None':
             try:
@@ -96,6 +96,9 @@ async def send_spam(user_id, media_id, caption):
             except TelegramBadRequest:
                 await bot.send_photo(chat_id=int(user_id), photo=(media_id))
     except TelegramForbiddenError:
-        await mongo_update(int(user_id), 'user_info', 'is_ban')
+        await mongo_update(int(user_id), 'userinfo', 'is_ban')
         print(f"ПОЛЬЗОВАТЕЛЬ {user_id} -- Заблокировал бота")
+
+    except Exception:
+        await bot.send_message(chat_id=int((user_id)), text=caption)
 
