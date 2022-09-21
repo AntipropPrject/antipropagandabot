@@ -77,7 +77,6 @@ class WikiFilter(BaseFilter):
 
     async def __call__(self, message: Message) -> Union[bool, Dict[str, Any]]:
         if await redis_check(f'Usrs: {message.from_user.id}: Start_answers: NotWiki'):
-            print('Не верит википедии')
             return True
         else:
             return False
