@@ -303,9 +303,9 @@ async def mass_spam(message: Message, state: FSMContext):
     if message.text:
         await state.update_data(spam_text=message.text)
     if message.photo:
-        await state.update_data(spam_media=message.photo)
+        await state.update_data(spam_media=message.photo[0].file_id)
     if message.video:
-        await state.update_data(spam_media=message.video)
+        await state.update_data(spam_media=message.video.file_id)
     await message.answer("Подтвердите сообщение.\n\n<b>ВНИМАНИЕ: ПОСЛЕ ПОДТВЕРЖДЕНИЯ ОНО ОТПРАВИТСЯ ВСЕМ "
                          "ПОЛЬЗОВАТЕЛЯМ БОТА</b>", reply_markup=markup.as_markup())
     if message.photo or message.video:
@@ -326,6 +326,8 @@ async def mass_spam(message: Message, state: FSMContext):
     async for user in userinfo.find({}):
         asyncio.create_task(send_spam(user['_id'], media, text))
         await asyncio.sleep(0.033)
+    await message.answer("Массовая рассылка закончена.")
+    await messenger(message, state)
 
 
 
