@@ -40,11 +40,10 @@ async def mongo_update_stat_new(tg_id, column, options='$set', value=True):
             except Exception as error:
                 await logg.get_error(f"mongo_update_stat | {error}", __file__)
     except KeyError:
-        await logg.get_info('ERROE: KeyError 43 line stat.py')
-        #try:
-        #    await collection_stat_new.update_one({'_id': int(tg_id)}, {options: {column: value}})
-        #except Exception as error:
-        #    await logg.get_error(f"mongo_update_stat | {error}", __file__)
+        try:
+            await collection_stat_new.update_one({'_id': int(tg_id)}, {options: {column: value}})
+        except Exception as error:
+            await logg.get_error(f"mongo_update_stat | {error}", __file__)
 
 
 async def mongo_update_stat(tg_id, column, options='$set', value=1):
