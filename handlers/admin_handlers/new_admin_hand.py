@@ -300,8 +300,8 @@ async def mass_spam(message: Message, state: FSMContext):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text='Подтвердить'))
     markup.row(types.KeyboardButton(text='Отмена'))
-    if message.text:
-        await state.update_data(spam_text=message.text)
+    if message.html_text:
+        await state.update_data(spam_text=message.html_text)
     if message.photo:
         await state.update_data(spam_media=message.photo[0].file_id)
     if message.video:
@@ -310,7 +310,7 @@ async def mass_spam(message: Message, state: FSMContext):
                          "ПОЛЬЗОВАТЕЛЯМ БОТА</b>", reply_markup=markup.as_markup(resize_keyboard=True))
     if message.photo or message.video:
         media = (await state.get_data())['spam_media']
-        text = message.text if message.text else None
+        text = message.html_text if message.html_text else None
         await game_answer(message, media, text)
 
 

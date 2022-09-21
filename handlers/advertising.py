@@ -88,7 +88,7 @@ async def send_spam(user_id, caption, media_id=None):
         if caption and media_id is None:
             await bot.send_message(chat_id=int(user_id), text=caption)
         else:
-            if str(caption) != 'None':
+            if caption:
                 try:
                     await bot.send_video(chat_id=int(user_id), video=str(media_id), caption=str(caption))
                 except TelegramBadRequest:
