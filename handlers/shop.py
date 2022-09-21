@@ -116,6 +116,12 @@ async def shop_transfer(message: types.Message, state: FSMContext):
     text = await sql_safe_select("text", "texts", {"name": "shop_transfer"})
     day = 209
     sum = day * 55000000000
+    # now = datetime.datetime.now().date()
+    # old = datetime.datetime(year=2022, month=2, day=24).date()
+    # day = now-old
+    # print(day)
+    day=203
+    sum = 203 * 55000000000
     await state.update_data(balance=sum)
     await state.update_data(balance_all=sum)
     balance=change_number_format(sum)
@@ -177,6 +183,25 @@ async def shop_bucket(message: types.Message, state: FSMContext):
         await message.answer_media_group(asset_list)
     except Exception as e:
         print(e)
+
+
+    await message.answer("Отлично!", reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    tag_list = ['card1',
+                'card2',
+                'card3',
+                'card4',
+                'card5',
+                'card6',
+                'card7',
+                'card8',
+                'card9',
+                'card10', ]
+    asset_list=[]
+    for tag in tag_list:
+        asset = await sql_safe_select("t_id", "assets", {"name": tag})
+        asset_list.append(InputMediaPhoto(media=asset))
+
+    await message.answer_media_group(asset_list)
 
     text = await sql_safe_select("text", "texts", {"name": "shop_bucket"})
     check_text=""
@@ -348,7 +373,7 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
     if query.data == "Оформить заказ":
         print(query.data)
         balance = (await state.get_data())['balance']
-        balance_all=(await state.get_data())['balance_all']
+        balance_all = (await state.get_data())['balance_all']
         low_amount = int(balance_all) * 0.2
         print(low_amount)
         if balance < low_amount:
@@ -367,8 +392,6 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
                 chat_id=chat_id,
                 reply_markup=nmarkup.as_markup(resize_keyboard=True), parse_mode="HTML")
 
-
-
     data_dict = await state.get_data()
     await mongo_update_stat_new(tg_id=chat_id, column='shop_callback', value=data_dict['balance'])
 
@@ -379,6 +402,7 @@ async def shop_children_ok(message: types.Message, bot: Bot, state: FSMContext):
     chat_id = (await state.get_data())['chat_id_shop']
     await bot.delete_message(chat_id, message_id)
 
+
 @router.message(Shop.shop_callback, F.text.contains("Вернуться в магазин"), flags=flags)
 @router.message(Shop.shop_bucket, (F.text.contains("Вернуться в магазин") | F.text.contains("Да, выйти ⬇")), flags=flags)
 @router.message(TrueGoalsState.main, F.text.contains("Вернуться в магазин"), flags=flags)
@@ -386,6 +410,13 @@ async def shop_go_back(message: types.Message, bot: Bot, state: FSMContext):
     chat_id = (await state.get_data())['chat_id_shop']
     await state.set_state(Shop.shop_bucket)
     await bot.delete_message(chat_id,message.message_id-1)
+
+@router.message(Shop.shop_callback, F.text.contains("Вернуться в магазин 🛒"), flags=flags)
+@router.message(Shop.shop_bucket, (F.text.contains("Вернуться в магазин 🛒") | F.text.contains("Да, выйти ⬇")),
+                flags=flags)
+async def shop_go_back(message: types.Message, bot: Bot, state: FSMContext):
+    chat_id = (await state.get_data())['chat_id_shop']
+    await bot.delete_message(chat_id, message.message_id - 1)
 
 
 @router.message(Shop.shop_callback, F.text.contains("Выйти из магазина ⬇"), flags=flags)
@@ -396,6 +427,7 @@ async def shop_out(message: types.Message, bot: Bot, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="Вернуться в магазин 🛒"))
     nmarkup.row(types.KeyboardButton(text="Да, выйти ⬇"))
     await message.answer("Уверены? Вы ещё не оформили заказ!", reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
 
 @router.message((F.text.contains('Да, оформить заказ')), state=Shop.shop_callback)
 async def shop_bucket(message: types.Message, bot: Bot, state: FSMContext):

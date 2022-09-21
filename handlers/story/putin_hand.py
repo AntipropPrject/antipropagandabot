@@ -32,7 +32,7 @@ async def putin_love_putin(message: Message, state: FSMContext):
 
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Согласен(а), кто, если не Путин? 🤷‍♂️"))
-    nmarkup.row(types.KeyboardButton(text="Нет, не согласен 🙅‍♂️"))
+    nmarkup.row(types.KeyboardButton(text="Нет, не согласен(a) 🙅‍♂️"))
     await simple_media(message, tag='putin_love_putin', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 

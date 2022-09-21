@@ -19,12 +19,13 @@ from export_to_csv.pg_mg import Backup
 from filters.isAdmin import IsAdmin, IsSudo, IsKamaga
 from handlers.admin_handlers.admin_for_games import admin_home_games, admin_truthgame, admin_gam_tv, admin_mistake_lie, \
     admin_normal_game_start
+from handlers.advertising import send_spam
 from keyboards.admin_keys import main_admin_keyboard, middle_admin_keyboard, app_admin_keyboard, redct_text, \
     redct_media, redct_games, settings_bot, spam_admin_keyboard
 from keyboards.admin_keys import secretrebornkb
 from log import logg
 from states.admin_states import admin
-from utilts import Phoenix, MasterCommander
+from utilts import Phoenix, MasterCommander, simple_media_bot, simple_media, game_answer
 
 router = Router()
 data = all_data()
@@ -186,7 +187,7 @@ async def suadmin_bot_edit(message: types.Message, state: FSMContext):
 
 
 @router.message(IsSudo(), (F.text == 'Рассылка'), state=admin.edit_context)
-async def sadmins(message: Message, state: FSMContext):
+async def messenger(message: Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Рассылка'")
     await state.clear()
     await message.answer("Тут можно редактировать список новостей для рассылки, создать свою и отключить рассылку",
@@ -276,6 +277,58 @@ async def sadmins(message: Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Выключить рассылку'")
     await redis_just_one_write(f'Usrs: admins: spam: status:', '0')
     await message.answer("Запланированная рассылка была отключена", reply_markup=await spam_admin_keyboard())
+
+
+
+@router.message(IsSudo(), (F.text == '🛑 Массовая рассылка 🛑'), state=admin.spam_menu)
+async def mass_spam(message: Message, state: FSMContext):
+    await state.set_state(admin.big_spam)
+    markup = ReplyKeyboardBuilder()
+    markup.row(types.KeyboardButton(text='Отмена'))
+    await message.answer("Пришлите мне сообщение, которое вы хотите разослать <b>ВСЕМ</b> пользователям бота",
+                         reply_markup=markup.as_markup(resize_keyboard=True))
+
+
+@router.message(IsSudo(), (F.text == 'Отмена'), state=(admin.big_spam, admin.big_spam_confirm))
+async def mass_spam(message: Message, state: FSMContext):
+    await messenger(message, state)
+
+
+@router.message(IsSudo(), state=admin.big_spam)
+async def mass_spam(message: Message, state: FSMContext):
+    await state.set_state(admin.big_spam_confirm)
+    markup = ReplyKeyboardBuilder()
+    markup.row(types.KeyboardButton(text='Подтвердить'))
+    markup.row(types.KeyboardButton(text='Отмена'))
+    if message.html_text:
+        await state.update_data(spam_text=message.html_text)
+    if message.photo:
+        await state.update_data(spam_media=message.photo[0].file_id)
+    if message.video:
+        await state.update_data(spam_media=message.video.file_id)
+    await message.answer("Подтвердите сообщение.\n\n<b>ВНИМАНИЕ: ПОСЛЕ ПОДТВЕРЖДЕНИЯ ОНО ОТПРАВИТСЯ ВСЕМ "
+                         "ПОЛЬЗОВАТЕЛЯМ БОТА</b>", reply_markup=markup.as_markup(resize_keyboard=True))
+    if message.photo or message.video:
+        media = (await state.get_data())['spam_media']
+        text = message.html_text if message.html_text else None
+        await game_answer(message, media, text)
+
+
+@router.message(IsSudo(), (F.text == 'Подтвердить'), state=admin.big_spam_confirm)
+async def mass_spam(message: Message, state: FSMContext):
+    await message.answer("Массовая рассылка началась. Надеюсь, вы знаете, что сделали.")
+    sttdata = await state.get_data()
+    media = sttdata.get('spam_media', None)
+    text = sttdata.get('spam_text', None)
+    client = data.get_mongo()
+    database = client.database
+    userinfo = database['userinfo']
+    async for user in userinfo.find():
+        asyncio.create_task(send_spam(user['_id'], text, media))
+        await asyncio.sleep(0.033)
+    await message.answer("Массовая рассылка закончена.")
+    await messenger(message, state)
+
 
 
 @router.callback_query(lambda call: call.data == "add_main_news" or call.data == "add_actual_news")
