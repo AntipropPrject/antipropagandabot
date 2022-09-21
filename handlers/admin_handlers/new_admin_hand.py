@@ -308,10 +308,9 @@ async def mass_spam(message: Message, state: FSMContext):
         await state.update_data(spam_media=message.video.file_id)
     await message.answer("Подтвердите сообщение.\n\n<b>ВНИМАНИЕ: ПОСЛЕ ПОДТВЕРЖДЕНИЯ ОНО ОТПРАВИТСЯ ВСЕМ "
                          "ПОЛЬЗОВАТЕЛЯМ БОТА</b>", reply_markup=markup.as_markup(resize_keyboard=True))
-    if message.photo or message.video:
-        media = (await state.get_data())['spam_media']
-        text = message.html_text if message.html_text else None
-        await game_answer(message, media, text)
+    media = (await state.get_data())['spam_media'] if message.photo or message.video else None
+    text = message.html_text if message.html_text else None
+    await game_answer(message, media, text)
 
 
 @router.message(IsSudo(), (F.text == 'Подтвердить'), state=admin.big_spam_confirm)
