@@ -396,7 +396,17 @@ async def mongo_update_viewed_news(tg_id, value):
         collection = database['userinfo']
         await collection.update_one({'_id': int(tg_id)}, {"$push": {"viewed_news": value}}, True)
     except Exception as error:
-        await logg.get_error(f"mongo update | {error}", __file__)
+        await logg.get_error(f"mongo update news | {error}", __file__)
+
+
+async def mongo_update(tg_id, collections: str, column, options='$set', value=True):
+    try:
+        client = all_data().get_mongo()
+        database = client.database
+        collection = database[collections]
+        await collection.update_one({'_id': int(tg_id)}, {options: {column: value}})
+    except Exception as error:
+        await logg.get_error(f"mongo_update | {error}", __file__)
 
 
 async def mongo_update_end(tg_id):

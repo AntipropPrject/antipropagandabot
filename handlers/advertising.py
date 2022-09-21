@@ -5,7 +5,7 @@ from aiogram import Router
 from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError
 
 from bata import all_data
-from data_base.DBuse import mongo_update_viewed_news, mongo_pop_news
+from data_base.DBuse import mongo_update_viewed_news, mongo_pop_news, mongo_update
 from log.logg import send_to_chat, get_logger
 
 router = Router()
@@ -96,5 +96,6 @@ async def send_spam(user_id, media_id, caption):
             except TelegramBadRequest:
                 await bot.send_photo(chat_id=int(user_id), photo=(media_id))
     except TelegramForbiddenError:
+        await mongo_update(int(user_id), 'user_info', 'is_ban')
         print(f"ПОЛЬЗОВАТЕЛЬ {user_id} -- Заблокировал бота")
 

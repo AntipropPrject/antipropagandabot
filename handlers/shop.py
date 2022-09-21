@@ -37,36 +37,36 @@ price_dict = {'1000 x 🚀 Детская площадка': 1150000,
               }
 
 inline = InlineKeyboardBuilder()
-inline.button(text='1000 x 🚀 Детская площадка: 1 150 000 руб' ,
+inline.button(text='1000 x 🚀' ,
               callback_data='1000 x 🚀 Детская площадка',)
-inline.button(text='100 x 🏫 Современная школа: 560 000 000 руб',
+inline.button(text='100 x 🏫',
               callback_data='100 x 🏫 Современная школа')
-inline.button(text='1000 x ⚡ Электробус: 31 400 000 руб',
+inline.button(text='1000 x ⚡',
               callback_data='1000 x ⚡️ Электробус')
-inline.button(text='10 x 🛩 Пассажирский самолёт (SuperJet):  2 400 000 000 руб',
+inline.button(text='10 x 🛩',
               callback_data='10 x 🛩 Пассажирский самолёт (SuperJet)')
-inline.button(text='100 км x 🛣 Автомагистраль (от 4 полос): 52 300 000 руб(за 1 км)',
+inline.button(text='100 км x 🛣 ',
               callback_data='100 км x 🛣 Автомагистраль (от 4 полос)')
-inline.button(text='100 x 🌳 Большой парк: 500 000 000 руб',
+inline.button(text='100 x 🌳',
               callback_data='100 x 🌳 Большой парк')
-inline.button(text='10 x 💊 Детский онкологический центр: 1 500 000 000 руб',
+inline.button(text='10 x 💊',
               callback_data='10 x 💊 Детский онкологический центр')
 
-inline.button(text='10 x 🏥 Корпус ядерной медицины: 2 600 000 000 руб',
+inline.button(text='10 x 🏥',
               callback_data='10 x 🏥 Корпус ядерной медицины')
-inline.button(text='1 x 🔥 Северный поток — 2: 1 037 000 000 000 руб',
+inline.button(text='1 x 🔥',
               callback_data='1 x 🔥 Северный поток — 2')
-inline.button(text='100 x 🧸 Спасти жизнь ребёнку: 121 000 000 руб',
+inline.button(text='100 x 🧸',
               callback_data='100 x 🧸 Спасти жизнь ребёнку')
-inline.button(text='Очистить корзину',
+
+inline.adjust(3,3,4)
+
+inline2 = InlineKeyboardBuilder()
+inline2.button(text='Очистить корзину',
               callback_data='Очистить корзину')
-inline.button(text='Оформить заказ',
+inline2.button(text='Оформить заказ',
               callback_data='Оформить заказ')
-
-inline.adjust(1,1,1,1,1,1,1,1,1,1,2)
-
-
-
+inline2.adjust(2)
 
 
 @router.message((F.text.in_({'Продолжай ⏳', 'Хорошо 🤝', '*презрительно хмыкнуть* 🤨'})),
@@ -114,7 +114,7 @@ async def shop_transfer(message: types.Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='shop_transfer', value="+")
     await state.set_state(Shop.shop_transfer)
     text = await sql_safe_select("text", "texts", {"name": "shop_transfer"})
-    day = 205
+    day = 208
     sum = day * 55000000000
     await state.update_data(balance=sum)
     await state.update_data(balance_all=sum)
@@ -197,7 +197,9 @@ async def shop_bucket(message: types.Message, state: FSMContext):
 
     bot_message = await message.answer(text, reply_markup=inline.as_markup(resize_keyboard=True),
                                        disable_web_page_preview=True)  # TODO СДЕЛАТЬ АЛЬБОМ
-    await message.answer(text=f"<b>БАЛАНС</b>:                                                                                                             💵\n<i>{change_number_format(data_dict['balance'])} руб</i>\n<b>ЧЕК</b>:\n\n{check_text}")
+
+
+    await message.answer(text=f"<b>БАЛАНС</b>:   <i>{change_number_format(data_dict['balance'])} руб                                                          💵</i>\n\n{check_text}",reply_markup=inline2.as_markup(resize_keyboard=True))
 
 
     print(bot_message.message_id)
@@ -271,7 +273,10 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
             await bot.edit_message_text(text=text, chat_id=chat_id, message_id=message_id_shop,  # TODO СДЕЛАТЬ АЛЬБОМ
                                         reply_markup=inline.as_markup())
 
-            await bot.edit_message_text(text=f"<b>БАЛАНС</b>:                                                                                                             💵\n<i>{change_number_format(data_dict['balance'])} руб</i>\n<b>ЧЕК</b>:\n\n{check_text}", chat_id=chat_id, message_id=(message_id_shop+1))
+            await bot.edit_message_text(text=f"<b>БАЛАНС</b>:   <i>{change_number_format(data_dict['balance'])} руб                                                          💵</i>\n\n{check_text}",
+                                        chat_id=chat_id,
+                                        message_id=(message_id_shop+1),
+                                        reply_markup=inline2.as_markup(resize_keyboard=True))
 
 
         else:
@@ -294,7 +299,11 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
             text = text.replace("MM", f"{change_number_format(balance)}")
             await bot.edit_message_text(text=text, chat_id=chat_id, message_id=message_id_shop,  # TODO СДЕЛАТЬ АЛЬБОМ
                                         reply_markup=inline.as_markup())
-            await bot.edit_message_text(text=f"<b>БАЛАНС</b>:                                                                                                             💵\n<i>{balance} руб</i>\n<b>ЧЕК</b>:\n\n{check_text}", chat_id=chat_id, message_id=(message_id_shop+1))
+            await bot.edit_message_text(
+                text=f"<b>БАЛАНС</b>:   <i>0 руб                                                          💵</i>\n\n{check_text}",
+                chat_id=chat_id,
+                message_id=(message_id_shop + 1),
+            reply_markup=inline2.as_markup(resize_keyboard=True))
 
         print(int(data_dict["100 x 🧸 Спасти жизнь ребёнку"]))
         seen_cild_message = (await state.get_data())["seen_child_message"]
@@ -330,8 +339,11 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
         await bot.edit_message_text(text=text, chat_id=chat_id, message_id=message_id_shop,  # TODO СДЕЛАТЬ АЛЬБОМ
                                     reply_markup=inline.as_markup())
         print("123")
-        await bot.edit_message_text(text=f"<b>БАЛАНС</b>:                                                                                                             💵\n<i>{change_number_format(data_dict['balance'])} руб</i>\n<b>ЧЕК</b>:", chat_id=chat_id,
-                                    message_id=(message_id_shop+1))
+        await bot.edit_message_text(
+            text=f"<b>БАЛАНС</b>:   <i>0 руб                                                          💵</i>\n\n",
+            chat_id=chat_id,
+            message_id=(message_id_shop + 1),
+        reply_markup=inline2.as_markup(resize_keyboard=True))
 
     if query.data == "Оформить заказ":
         print(query.data)
