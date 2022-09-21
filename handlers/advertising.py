@@ -5,7 +5,7 @@ from aiogram import Router
 from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError
 
 from bata import all_data
-from data_base.DBuse import mongo_update_viewed_news, mongo_pop_news
+from data_base.DBuse import mongo_update_viewed_news, mongo_pop_news, mongo_update
 from log.logg import send_to_chat, get_logger
 
 router = Router()
@@ -83,18 +83,22 @@ async def news_for_user(user, main_news_base, today_actual, main_news_ids):
             print('Главные новости для пользователя кончились, а актуальной не было')
 
 
-async def send_spam(user_id, media_id, caption):
+async def send_spam(user_id, caption, media_id=None):
     try:
-        if str(caption) != 'None':
-            try:
-                await bot.send_video(chat_id=int(user_id), video=str(media_id), caption=str(caption))
-            except TelegramBadRequest:
-                await bot.send_photo(chat_id=int(user_id), photo=str(media_id), caption=str(caption))
+        if caption and media_id is None:
+            await bot.send_message(chat_id=int(user_id), text=caption)
         else:
-            try:
-                await bot.send_video(chat_id=int((user_id)), video=(media_id))
-            except TelegramBadRequest:
-                await bot.send_photo(chat_id=int(user_id), photo=(media_id))
+            if caption:
+                try:
+                    await bot.send_video(chat_id=int(user_id), video=str(media_id), caption=str(caption))
+                except TelegramBadRequest:
+                    await bot.send_photo(chat_id=int(user_id), photo=str(media_id), caption=str(caption))
+            else:
+                try:
+                    await bot.send_video(chat_id=int((user_id)), video=(media_id))
+                except TelegramBadRequest:
+                    await bot.send_photo(chat_id=int(user_id), photo=(media_id))
     except TelegramForbiddenError:
+        await mongo_update(int(user_id), 'userinfo', 'is_ban')
         print(f"ПОЛЬЗОВАТЕЛЬ {user_id} -- Заблокировал бота")
 

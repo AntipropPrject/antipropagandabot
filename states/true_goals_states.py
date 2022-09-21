@@ -2,9 +2,14 @@ from aiogram.dispatcher.fsm.state import State, StatesGroup
 
 
 class TrueGoalsState(StatesGroup):
+    more_goals_poll = State()
     before_shop = State()
+    more_goals_sort = State()
+    more_goals_no_truth = State()
+    more_goals = State()
     before_shop_operation = State()
     main = State()
+    more_goals = State()
     opp_root = State()
     game = State()
     final = State()

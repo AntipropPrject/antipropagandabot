@@ -5,9 +5,9 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message
 
 import bata
-from data_base.DBuse import poll_get, redis_just_one_read, redis_check
+from data_base.DBuse import poll_get, redis_just_one_read, redis_check, poll_write
 from handlers.story import true_resons_hand
-from resources.all_polls import welc_message_one
+from resources.all_polls import welc_message_one, true_and_idk_goals
 
 
 class DonbassOptionsFilter(BaseFilter):
@@ -177,6 +177,38 @@ class SubscriberFilter(BaseFilter):
             return False
         else:
             return True
+
+
+class FakeGoals(BaseFilter):
+    no_fakes_do_not_know: bool = False
+    more_than_one: bool = False
+    not_all_fakes: bool = False
+
+    async def __call__(self, message: Message):
+        goals_list = await poll_get(f"Usrs: {message.from_user.id}: Start_answers: Invasion:")
+        fake_goals = await poll_get(f'Usrs: {message.from_user.id}: TrueGoals: UserFakeGoals:')
+        not_chosen_fake_goals = await poll_get(f'Usrs: {message.from_user.id}: TrueGoals: NotChosenFakeGoals:')
+        if not fake_goals and not not_chosen_fake_goals:
+            for i in range(len(goals_list)):
+                if goals_list[i] not in true_and_idk_goals:
+                    fake_goals.append(goals_list[i])
+                    await poll_write(f'Usrs: {message.from_user.id}: TrueGoals: UserFakeGoals:', goals_list[i])
+            for new_goal in ((set(welc_message_one) ^ set(true_and_idk_goals)) ^ set(fake_goals)):
+                await poll_write(f'Usrs: {message.from_user.id}: TrueGoals: NotChosenFakeGoals:', new_goal)
+        fake_goal_number = len(fake_goals)
+        if fake_goal_number < 1:
+            if welc_message_one[9] in goals_list:
+                if self.no_fakes_do_not_know:
+                    return True
+            else:
+                if not self.no_fakes_do_not_know:
+                    return True
+        elif self.not_all_fakes and fake_goal_number != 6:
+            return True
+        else:
+            if self.more_than_one:
+                return {'fake_goals_data': {'fake_goals': fake_goals, 'fake_goals_number': fake_goal_number}}
+        return False
 
 
 async def manual_filter_truereasons(message, state):

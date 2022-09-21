@@ -2,6 +2,8 @@ from aiogram.dispatcher.fsm.state import StatesGroup, State
 
 
 class admin(StatesGroup):
+    big_spam_confirm = State()
+    big_spam = State()
     nazi_game_upd_apply = State()
     nazi_game_upd = State()
     nazi_game_del_apply = State()

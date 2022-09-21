@@ -137,7 +137,7 @@ async def spam_admin_keyboard():
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Главные новости"))
     nmarkup.row(types.KeyboardButton(text="Актуальные новости"))
-    nmarkup.row(types.KeyboardButton(text="Создать рассылку"))
+    nmarkup.row(types.KeyboardButton(text="🛑 Массовая рассылка 🛑"))
     try:
         if '1' in status:
             nmarkup.row(types.KeyboardButton(text="Выключить рассылку 🟢"))
