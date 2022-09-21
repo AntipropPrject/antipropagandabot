@@ -79,7 +79,7 @@ async def shop_welcome(message: types.Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     await message.answer_poll("Как думаете, сколько денег Россия уже потратила на войну?", explanation_parse_mode="HTML",
-                              options=shop_poll, correct_option_id=3, is_anonymous=False,
+                              options=shop_poll, correct_option_id=2, is_anonymous=False, type='quiz',
                               reply_markup=nmarkup.as_markup(resize_keyboard=True))
     Logger.log("TEST TEST TEST")
 
