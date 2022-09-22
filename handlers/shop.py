@@ -185,23 +185,7 @@ async def shop_bucket(message: types.Message, state: FSMContext):
         print(e)
 
 
-    await message.answer("Отлично!", reply_markup=nmarkup.as_markup(resize_keyboard=True))
-    tag_list = ['card1',
-                'card2',
-                'card3',
-                'card4',
-                'card5',
-                'card6',
-                'card7',
-                'card8',
-                'card9',
-                'card10', ]
-    asset_list=[]
-    for tag in tag_list:
-        asset = await sql_safe_select("t_id", "assets", {"name": tag})
-        asset_list.append(InputMediaPhoto(media=asset))
 
-    await message.answer_media_group(asset_list)
 
     text = await sql_safe_select("text", "texts", {"name": "shop_bucket"})
     check_text=""
