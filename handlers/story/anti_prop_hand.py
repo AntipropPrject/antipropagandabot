@@ -1192,34 +1192,6 @@ async def antip_good_idea(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-# NOT VALID FROM HERE
-@router.message((F.text.contains('удивлён')) | (F.text == 'Продолжим 👌'), state=propaganda_victim.yandex,
-                flags=flags)
-@router.message(F.text == "Не надо, не интересно 🙅‍♂️", flags=flags)
-async def antip_why_not_wiki(message: Message, state: FSMContext):
-    await state.set_state(propaganda_victim.wiki)
-    text = await sql_safe_select('text', 'texts', {'name': 'antip_why_not_wiki'})
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Там статьи может редактировать любой человек ✍️"))
-    nmarkup.row(types.KeyboardButton(text="Википедия — проект Запада 🇺🇸"))
-    nmarkup.add(types.KeyboardButton(text="Не пользуюсь / Не слышал(а) 🤷‍♀️"))
-    nmarkup.row(types.KeyboardButton(text="Случайно, вообще я доверяю Википедии 👌"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
-
-
-@router.message(((F.text.contains('редактировать')) | (F.text.contains('проект'))
-                 | (F.text.contains('Не слышал')) | (F.text.contains('я доверяю'))),
-                state=propaganda_victim.wiki, flags=flags)
-async def antip_clear_and_cool(message: Message):
-    await mongo_update_stat_new(tg_id=message.from_user.id, column='why_not_wiki', value=message.text)
-    text = await sql_safe_select('text', 'texts', {'name': 'antip_clear_and_cool'})
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
-
-
-# ПРОВЕРИТЬ ВАЛИДНОСТЬ ДВУХ ПРЕДЫДУЩИХ ХЭНДЛЕРОВ
-
 @router.message((F.text.contains('Продолжай ⏳')), flags=flags, state=propaganda_victim.next_3)
 async def antip_look_at_it_yourself(message: Message, state: FSMContext):
     nmarkap = ReplyKeyboardBuilder()
