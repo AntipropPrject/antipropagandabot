@@ -5,12 +5,14 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
-from bot_statistics.stat import mongo_update_stat_new
+from bot_statistics.stat import mongo_update_stat_new, mongo_update_stat
 from data_base.DBuse import poll_get, poll_write, del_key, data_getter, mongo_game_answer
 from data_base.DBuse import sql_safe_select, mongo_count_docs
 from filters.MapFilters import FakeGoals
 from filters.MapFilters import OperationWar
 from resources.all_polls import welc_message_one, true_and_idk_goals
+from resources.variables import mobilisation_date
+from states.stopwar_states import StopWarState
 from states.true_goals_states import TrueGoalsState
 from utilts import simple_media, CoolPercReplacer
 
@@ -118,7 +120,7 @@ async def goals_sort_reveal(message: Message, state: FSMContext):
 @router.message((F.text.contains('Интересно 🤔')) | (F.text.contains('Продолжай 👉')),
                 state=TrueGoalsState.more_goals_no_truth,
                 flags=flags)
-async def goals_no_truth_for_us(message: Message, state: FSMContext):
+async def goals_no_truth_for_us(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'goals_no_truth_for_us'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Да, слышал(а) 👌"))
@@ -131,7 +133,7 @@ async def goals_no_truth_for_us(message: Message, state: FSMContext):
 @router.message((F.text.contains("Да, слышал(а) 👌") | F.text.contains("Нет, не слышал(а) 🤷‍♀️") |
                  F.text.contains("Да, и сам(а) так считаю 👍")),
                 state=TrueGoalsState.more_goals_no_truth, flags=flags)
-async def goals_no_truth_for_us(message: Message, state: FSMContext):
+async def goals_no_truth_for_us(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'goals_cards_opened'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Давай! 👌"))
@@ -262,7 +264,8 @@ async def goals_answer(poll_answer: types.PollAnswer, bot: Bot, state: FSMContex
             await poll_write(f'Usrs: {poll_answer.user.id}: TrueGoals: UserFakeGoals:', user_new_fake_list[index])
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Кнопка"))
-    await bot.send_message(poll_answer.user.id, f'НЕ настоящие цели войны ЗАГЛУШКА')
+    await bot.send_message(poll_answer.user.id, f'НЕ настоящие цели войны ЗАГЛУШКА',
+                           reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message(F.text == "Кнопка", state=TrueGoalsState.really_goals, flags=flags)
@@ -417,7 +420,7 @@ async def goals_change_of_power(message: Message, state: FSMContext):
 
 
 @router.message((F.text.contains('на факты 👀')), state=TrueGoalsState.power_change, flags=flags)
-async def goals_will_add_sorry(message: Message, state: FSMContext):
+async def goals_will_add_sorry(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'goals_change_of_power'})
     await message.answer(text)
     await goals_why_power_change(message)
@@ -441,7 +444,7 @@ async def goals_why_power_change(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(F.text == "Да, двигаемся дальше 👉", state=TrueGoalsState.power_change, flags=flags)
+@router.message(F.text == "Давай посмотрим 👀", state=TrueGoalsState.power_change, flags=flags)
 async def goals_paper_theses(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'goals_paper_theses'})
     nmarkup = ReplyKeyboardBuilder()
@@ -460,7 +463,7 @@ async def goals_russian_world_nazi(message: Message):
 
 
 @router.message((F.text.in_({"Посмотрел(а) 📺", "Продолжим 👉"})) | (F.text == "Это мне не интересно, пропустим 👉") |
-                (F.text == "Стало скучно, ближе к делу 👉"), state=TrueGoalsState.absurd, flags=flags)
+                (F.text == "Стало скучно, ближе к делу 👉"), state=TrueGoalsState.power_change, flags=flags)
 async def goals_why_he_is_continued(message: Message, state: FSMContext):
     await state.set_state(TrueGoalsState.putin)
     text = await sql_safe_select('text', 'texts', {'name': 'goals_why_he_is_continued'})
@@ -468,3 +471,289 @@ async def goals_why_he_is_continued(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="Давай 👌"))
     nmarkup.row(types.KeyboardButton(text="Подожди! А почему Путин решил напасть именно сейчас? 🤔"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message(F.text == "Подожди! А почему Путин решил напасть именно сейчас? 🤔",
+                state=TrueGoalsState.putin, flags=flags)
+async def goals_best_moment(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'goals_best_moment'})
+    await message.answer(text, disable_web_page_preview=True)
+    await goals_would_you_putin(message)
+
+
+@router.message(F.text == "Давай 👌", state=TrueGoalsState.putin, flags=flags)
+async def goals_would_you_putin(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'goals_would_you_putin'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Интересно, продолжай ⏳"))
+    nmarkup.add(types.KeyboardButton(text="Стало скучно, пропустим 👉"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message(F.text == "Интересно, продолжай ⏳", state=TrueGoalsState.putin, flags=flags)
+async def goals_dirt_waves(message: Message, state: FSMContext):
+    await state.set_state(TrueGoalsState.putin_next)
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Интересно, продолжай ⏳"))
+    nmarkup.add(types.KeyboardButton(text="Стало скучно, пропустим 👉"))
+    await simple_media(message, 'goals_dirt_waves', nmarkup.as_markup(resize_keyboard=True))
+
+
+@router.message(F.text == "Интересно, продолжай ⏳", state=TrueGoalsState.putin_next, flags=flags)
+async def goals_putin_plan_continued(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'goals_putin_plan_continued'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message(F.text == "Продолжай ⏳", state=TrueGoalsState.putin_next, flags=flags)
+async def goals_putin_face(message: Message):
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Чего ждать от мобилизации? 🪖"))
+    await simple_media(message, 'goals_putin_face', nmarkup.as_markup(resize_keyboard=True))
+
+
+@router.message(F.text == "Чего ждать от мобилизации? 🪖", state=TrueGoalsState.putin_next, flags=flags)
+async def goals_mobilisation(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'goals_mobilisation'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="На частичную мобилизацию 🧍‍♂️"))
+    nmarkup.add(types.KeyboardButton(text="На общую мобилизацию 🧍‍♂️🧍‍♂️🧍‍♂️"))
+    nmarkup.row(types.KeyboardButton(text="Затрудняюсь ответить 🤷‍♀️"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message((F.text.in_({"На частичную мобилизацию 🧍‍♂️", "На общую мобилизацию 🧍‍♂️🧍‍♂️🧍‍♂️",
+                             "Затрудняюсь ответить 🤷‍♀️"})), state=TrueGoalsState.putin_next, flags=flags)
+async def goals_mobilisation_result(message: Message, state: FSMContext):
+    await state.set_state(TrueGoalsState.putin_next_next)
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='goals_mobilisation', value=message.text)
+    text = await sql_safe_select('text', 'texts', {'name': 'goals_mobilisation_result'})
+
+    m_all = await mongo_count_docs('database', 'statistics_new', {'goals_mobilisation': {'$exists': True}})
+    m_part = await mongo_count_docs('database', 'statistics_new',
+                                    {'goals_mobilisation': "На частичную мобилизацию 🧍‍♂️"})
+    m_full = await mongo_count_docs('database', 'statistics_new',
+                                    {'goals_mobilisation': "На общую мобилизацию 🧍‍♂️🧍‍♂️🧍‍♂️"})
+    a_idk = await mongo_count_docs('database', 'statistics_new', {'goals_mobilisation': "Затрудняюсь ответить 🤷‍♀️"})
+
+    txt = CoolPercReplacer(text, m_all)
+    txt.replace("AA", m_part)
+    txt.replace("BB", m_full)
+    txt.replace("CC", a_idk)
+
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
+    await message.answer(txt(), reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message(F.text == "Продолжай ⏳", state=TrueGoalsState.putin_next_next, flags=flags)
+async def goals_they_need_blood(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'goals_they_need_blood'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Давай 👌"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message(F.text == "Давай 👌", state=TrueGoalsState.putin_next_next, flags=flags)
+async def goals_agreed_to_die(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'goals_agreed_to_die'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Да, ощущаю угрозу ⚔️"))
+    nmarkup.add(types.KeyboardButton(text="Нет, не ощущаю угрозы 🤷‍♂️"))
+    nmarkup.row(types.KeyboardButton(text="Затрудняюсь ответить 🤔"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message((F.text.in_({"Да, ощущаю угрозу ⚔️", "Нет, не ощущаю угрозы 🤷‍♂️",
+                             "Затрудняюсь ответить 🤔"})), state=TrueGoalsState.putin_next_next, flags=flags)
+async def goals_agreed_to_die_result(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='goals_mobilisation_terror', value=message.text)
+    text = await sql_safe_select('text', 'texts', {'name': 'goals_agreed_to_die_result'})
+
+    terr_all = await mongo_count_docs('database', 'statistics_new', {'goals_mobilisation_terror': {'$exists': True}})
+    terr_yes = await mongo_count_docs('database', 'statistics_new',
+                                    {'goals_mobilisation_terror': "Да, ощущаю угрозу ⚔️"})
+    terr_no = await mongo_count_docs('database', 'statistics_new',
+                                    {'goals_mobilisation_terror': "Нет, не ощущаю угрозы 🤷‍♂️"})
+    terr_idk = await mongo_count_docs('database', 'statistics_new',
+                                      {'goals_mobilisation_terror': "Затрудняюсь ответить 🤔"})
+
+    txt = CoolPercReplacer(text, terr_all)
+    txt.replace("AA", terr_yes)
+    txt.replace("BB", terr_no)
+    txt.replace("CC", terr_idk)
+
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Это точно 👌"))
+    nmarkup.add(types.KeyboardButton(text="Продолжим 👉"))
+    await message.answer(txt(), reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message((F.text.in_({"Это точно 👌", "Продолжим 👉"})), state=TrueGoalsState.putin_next_next, flags=flags)
+async def goals_politics_is_here(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'goals_politics_is_here'})
+
+    who_love_all = await mongo_count_docs('database', 'statistics_new', {'prop_ex': {"$exists": True},
+                                                                               "datetime": {'$gte': mobilisation_date}})
+    who_love_putin_now = await mongo_count_docs('database', 'statistics_new', {'prop_ex': "Владимир Путин",
+                                                                               "datetime": {'$gte': mobilisation_date}})
+    if not who_love_all:
+        who_love_all = 1
+    text = text.replace("XX", str(round(who_love_putin_now/who_love_all)))
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Какой факт? 🤔"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message(F.text == "Какой факт? 🤔", state=TrueGoalsState.putin_next_next, flags=flags)
+async def goals_putin_in_the_past(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'goals_putin_in_the_past'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="И правда, не могу вспомнить 🤷‍♂️"))
+    nmarkup.row(types.KeyboardButton(text="Это неправда, Путин выполняет обещания ☝️"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message(F.text == "Это неправда, Путин выполняет обещания ☝️",
+                state=TrueGoalsState.putin_next_next, flags=flags)
+async def goals_gifted_cat(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'goals_gifted_cat'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Продолжим 👌"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message((F.text == "Продолжим 👌"), state=TrueGoalsState.putin_next_next, flags=flags)
+async def putin_gaming(message: Message, state: FSMContext):
+    await state.set_state(TrueGoalsState.putin_gaming)
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='started_putin_old_lies', value='Да')
+    text = await sql_safe_select('text', 'texts', {'name': 'goals_putin_old_lies_start'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Я готов(а) 👌"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message(((F.text == "Я готов(а) 👌") | (F.text == "Нет, давай продолжим 👉") | (F.text == "Продолжаем! 👉")),
+                state=TrueGoalsState.putin_gaming, flags=flags)
+async def putin_game2_question(message: Message, state: FSMContext):
+    try:
+        count = (await state.get_data())['pgamecount']
+    except Exception:
+        count = 0
+    how_many_rounds = (await data_getter("SELECT COUNT (*) FROM public.putin_old_lies"))[0][0]
+    if count < how_many_rounds:
+        count += 1
+        truth_data = (await data_getter("SELECT * FROM (SELECT t_id, text, belivers, nonbelivers, rebuttal, "
+                                        "row_number() over (order by id) FROM public.putin_old_lies "
+                                        "left outer join assets on asset_name = assets.name "
+                                        f"left outer join texts ON text_name = texts.name) as subb "
+                                        f"where row_number = {count}"))[0]
+        print(truth_data)
+        await state.update_data(pgamecount=count, belive=truth_data[2], not_belive=truth_data[3])
+        nmarkup = ReplyKeyboardBuilder()
+        nmarkup.add(types.KeyboardButton(text="Виноват 👎"))
+        nmarkup.add(types.KeyboardButton(text="Не виноват 👍"))
+        if truth_data[0] is not None:
+            capt = ""
+            if truth_data[1] is not None:
+                capt = truth_data[1]
+            try:
+                await message.answer_video(truth_data[0], caption=capt,
+                                           reply_markup=nmarkup.as_markup(resize_keyboard=True))
+            except TelegramBadRequest:
+                await message.answer_photo(truth_data[0], caption=capt,
+                                           reply_markup=nmarkup.as_markup(resize_keyboard=True))
+        else:
+            await message.answer(f'Вот что обещал Путин:\n\n{truth_data[1]}',
+                                 reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    else:
+        nmarkup = ReplyKeyboardBuilder()
+        nmarkup.row(types.KeyboardButton(text="Хорошо, давай дальше"))
+        await message.answer(
+            "Боюсь, что пока что у меня кончились примеры. Я поищу еще, а пока что продолжим",
+            reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
+
+@router.message(((F.text == "Не виноват 👍") | (F.text == "Виноват 👎")), state=TrueGoalsState.putin_gaming,
+                flags=flags)
+async def putin_game2_answer(message: Message, state: FSMContext):
+    data = await state.get_data()
+    answer_group = str()
+    END = bool(data['pgamecount'] == (await data_getter('SELECT COUNT(id) FROM public.putin_old_lies'))[0][0])
+    nmarkup = ReplyKeyboardBuilder()
+    if END is False:
+        nmarkup.row(types.KeyboardButton(text="Продолжаем! 👉"))
+        nmarkup.row(types.KeyboardButton(text="Достаточно ✋"))
+    else:
+        nmarkup.row(types.KeyboardButton(text="Давай 🤝"))
+    if message.text == "Не виноват 👍":
+        answer_group = 'belivers'
+    elif message.text == "Виноват 👎":
+        answer_group = 'nonbelivers'
+    await mongo_game_answer(message.from_user.id, 'putin_old_lies', data['pgamecount'],
+                            answer_group, {'id': data['pgamecount']})
+    t_percentage = data['belive'] / (data['belive'] + data['not_belive'])
+    await message.answer(
+        f'А вот что думают другие участники:\n\n'
+        f'👎 <b>Виноват</b>: {round((100 - t_percentage * 100))}% \n👍 <b>Не виноват</b>: {round(t_percentage * 100)}%',
+        reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    if END is True:
+        await message.answer('Спасибо за игру 🤝 Давайте подведем итоги.')
+
+
+@router.message((F.text == "Достаточно ✋"), state=TrueGoalsState.putin_gaming, flags=flags)
+async def putin_game2_are_you_sure(message: Message):
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Нет, давай продолжим 👉"))
+    nmarkup.row(types.KeyboardButton(text="Да, достаточно 🤷‍♀️"))
+    await message.answer('Вы уверены? У меня еще есть примеры', reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
+
+@router.message(((F.text == "Да, достаточно 🤷‍♀️") | (F.text == "Хорошо, давай дальше") |
+                 (F.text == "Давай 🤝")), state=TrueGoalsState.putin_gaming, flags=flags)
+async def goals_putin_why_still_belive(message: Message, state: FSMContext):
+    await state.clear()
+    await mongo_update_stat(message.from_user.id, 'putin')
+    await state.set_state(TrueGoalsState.final)
+    text = await sql_safe_select('text', 'texts', {'name': 'goals_putin_why_still_belive'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Расскажи 👌"))
+    nmarkup.row(types.KeyboardButton(text="Мне это не интересно, пропустим 👉"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message((F.text == "Расскажи 👌"), state=TrueGoalsState.final, flags=flags)
+async def goals_bad_tzar_bad(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'goals_bad_tzar_bad'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Давай 🪖"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message((F.text == "Давай 🪖"), state=TrueGoalsState.final, flags=flags)
+async def goals_putin_not_a_sport(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'goals_putin_not_a_sport'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Какой факт? 🤔"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message((F.text == "Какой факт? 🤔"), state=TrueGoalsState.final, flags=flags)
+async def goals_no_winners_in_war(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'goals_no_winners_in_war'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
+    nmarkup.row(types.KeyboardButton(text="А что, Путин этого не знал? 🤔"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message((F.text.in_({"Продолжай ⏳", "А что, Путин этого не знал? 🤔"})),
+                state=TrueGoalsState.final, flags=flags)
+async def goals_russia_already_lost(message: Message, state: FSMContext):
+    await state.set_state(StopWarState.main)
+    text = await sql_safe_select('text', 'texts', {'name': 'goals_russia_already_lost'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="ВРЕМЕННАЯ КНОПКА ДЛЯ ПЕРЕХОДА В ОСТАНОВКУ ВОЙНЫ"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(), disable_web_page_preview=True)

@@ -9,7 +9,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
 from data_base.DBuse import data_getter, sql_safe_select, mongo_game_answer
 from filters.MapFilters import PutinFilter
-from handlers.story.stopwar_hand import StopWarState
+from states.stopwar_states import StopWarState
 from utilts import simple_media
 
 

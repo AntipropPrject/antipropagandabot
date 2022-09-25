@@ -5,8 +5,7 @@ from datetime import datetime
 from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
-from aiogram.dispatcher.fsm.state import StatesGroup, State
-from aiogram.types import Message, BotCommand, BotCommandScope, BotCommandScopeChat
+from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
@@ -15,23 +14,27 @@ from data_base.DBuse import sql_safe_select, redis_just_one_write, redis_just_on
 from handlers.story.main_menu_hand import mainmenu_really_menu
 from log import logg
 from states.main_menu_states import MainMenuStates
+from states.stopwar_states import StopWarState
 from utilts import simple_media, percentage_replace, ref_master, ref_spy_sender, MasterCommander
-
-
-class StopWarState(StatesGroup):
-    main = State()
-    questions = State()
-    must_watch = State()
-    next_1 = State()
-    war_1 = State()
-    arg_1 = State()
-    arg_2 = State()
-    arg_3 = State()
-
 
 flags = {"throttling_key": "True"}
 router = Router()
 router.message.filter(state=StopWarState)
+
+
+# Будет работать только с версии  2.2 (мобилизация)
+@router.message(((F.text == "ВРЕМЕННАЯ КНОПКА ДЛЯ ПЕРЕХОДА В ОСТАНОВКУ ВОЙНЫ")), flags=flags)
+async def new_stopwar_start(message: Message, state: FSMContext):
+    if 'согласен(а)' in message.text:
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='future_with_putin', value=message.text)
+    if 'Военный преступник' in message.text or 'Был хорошим' in message.text:
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='not_love_putin_descr', value=message.text)
+    await mongo_update_stat(message.from_user.id, 'putin')
+    await state.set_state(StopWarState.main)
+    text = await sql_safe_select('text', 'texts', {'name': 'stopwar_why_they_sad'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Повторим вопросы 👌"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message(F.text == "Повторим вопросы 👌", flags=flags)

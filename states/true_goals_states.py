@@ -2,6 +2,9 @@ from aiogram.dispatcher.fsm.state import State, StatesGroup
 
 
 class TrueGoalsState(StatesGroup):
+    putin_gaming = State()
+    putin_next_next = State()
+    putin_next = State()
     putin = State()
     power_change = State()
     absurd = State()
