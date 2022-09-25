@@ -214,7 +214,8 @@ async def goals_little_bet(message: Message, fake_goals_data: dict):
 
 
 @router.message(FakeGoals(not_all_fakes=True), F.text == 'Да, начнём 🤝', state=TrueGoalsState.more_goals, flags=flags)
-async def goals_lets_add_goals(message: Message):
+async def goals_lets_add_goals(message: Message, state: FSMContext):
+    await state.set_state(TrueGoalsState.more_goals_next)
     text = await sql_safe_select('text', 'texts', {'name': 'goals_lets_add_goals'})
     not_checked_fakes = await poll_get(f'Usrs: {message.from_user.id}: TrueGoals: NotChosenFakeGoals:')
     listtext = "\n".join(not_checked_fakes)
@@ -243,7 +244,7 @@ async def goals_good_decision(message: Message):
     await goals_lets_add_goals(message)
 
 
-@router.message(F.text.contains('🎯'), state=TrueGoalsState.more_goals, flags=flags)
+@router.message(F.text.contains('🎯'), state=(TrueGoalsState.more_goals, TrueGoalsState.more_goals_next), flags=flags)
 async def goals_add_goals_poll(message: Message, state: FSMContext):
     await state.set_state(TrueGoalsState.more_goals_poll)
     text = await sql_safe_select('text', 'texts', {'name': 'goals_add_goals_poll'})
@@ -253,22 +254,30 @@ async def goals_add_goals_poll(message: Message, state: FSMContext):
 
 
 @router.poll_answer(state=TrueGoalsState.more_goals_poll, flags=flags)
-async def goals_answer(poll_answer: types.PollAnswer, bot: Bot, state: FSMContext):
+@router.message(F.text == 'Просто продолжим 👉', state=TrueGoalsState.more_goals_next, flags=flags)
+@router.message(F.text == 'Да, начнём 🤝', state=TrueGoalsState.more_goals, flags=flags)
+async def goals_answer(update: types.PollAnswer | Message, bot: Bot, state: FSMContext):
     await state.set_state(TrueGoalsState.really_goals)
-    lst_answers = poll_answer.option_ids
-    user_new_fake_list = await poll_get(f"Usrs: {poll_answer.user.id}: TrueGoals: NotChosenFakeGoals:")
-    user_new_fake_list.append('Я передумал(а). Не хочу обсуждать ничего из вышеперечисленного.')
-    await del_key(f"Usrs: {poll_answer.user.id}: TrueGoals: NotChosenFakeGoals:")
-    for index in lst_answers:
-        if user_new_fake_list[index] != 'Я передумал(а). Не хочу обсуждать ничего из вышеперечисленного.':
-            await poll_write(f'Usrs: {poll_answer.user.id}: TrueGoals: UserFakeGoals:', user_new_fake_list[index])
+    if isinstance(update, types.PollAnswer):
+        user_id = update.user.id
+        lst_answers = update.option_ids
+        user_new_fake_list = await poll_get(f"Usrs: {user_id}: TrueGoals: NotChosenFakeGoals:")
+        user_new_fake_list.append('Я передумал(а). Не хочу обсуждать ничего из вышеперечисленного.')
+        for index in lst_answers:
+            if user_new_fake_list[index] != 'Я передумал(а). Не хочу обсуждать ничего из вышеперечисленного.':
+                await poll_write(f'Usrs: {user_id}: TrueGoals: UserFakeGoals:', user_new_fake_list[index])
+    else:
+        user_id = update.from_user.id
+    await del_key(f"Usrs: {user_id}: TrueGoals: NotChosenFakeGoals:")
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Кнопка"))
-    await bot.send_message(poll_answer.user.id, f'НЕ настоящие цели войны ЗАГЛУШКА',
+    await bot.send_message(user_id, f'ЗАГЛУШКА Ненастоящие цели войны ЗАГЛУШКА',
                            reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(F.text == "Кнопка", state=TrueGoalsState.really_goals, flags=flags)
+@router.message((F.text == "Кнопка"), state=TrueGoalsState.really_goals, flags=flags)
+@router.message((F.text.contains("продолжим")) | (F.text.contains("пропустим")),
+                state=TrueGoalsState.more_goals, flags=flags)
 async def goals_normal_game_start(message: Message, state: FSMContext):
     await state.set_state(TrueGoalsState.normal_game)
     text = await sql_safe_select('text', 'texts', {'name': 'goals_normal_game_start'})
@@ -290,7 +299,6 @@ async def goals_normal_game_question(message: Message, state: FSMContext):
     except Exception:
         count = 0
     how_many_rounds = (await data_getter("SELECT COUNT (*) FROM public.normal_game"))[0][0]
-    print(f"В таблице {how_many_rounds} записей, а вот счетчик сейчас {count}")
     if count < how_many_rounds:
         count += 1
         truth_data = (await data_getter("SELECT * FROM (SELECT t_id, text, belivers, nonbelivers, rebuttal, "
@@ -499,8 +507,11 @@ async def goals_dirt_waves(message: Message, state: FSMContext):
     await simple_media(message, 'goals_dirt_waves', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(F.text == "Интересно, продолжай ⏳", state=TrueGoalsState.putin_next, flags=flags)
-async def goals_putin_plan_continued(message: Message):
+@router.message((F.text == 'Стало скучно, пропустим 👉'),
+                state=(TrueGoalsState.putin_next, TrueGoalsState.putin), flags=flags)
+@router.message((F.text == "Интересно, продолжай ⏳"), state=TrueGoalsState.putin_next, flags=flags)
+async def goals_putin_plan_continued(message: Message, state: FSMContext):
+    await state.set_state(TrueGoalsState.putin_next)
     text = await sql_safe_select('text', 'texts', {'name': 'goals_putin_plan_continued'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
@@ -574,9 +585,9 @@ async def goals_agreed_to_die_result(message: Message):
 
     terr_all = await mongo_count_docs('database', 'statistics_new', {'goals_mobilisation_terror': {'$exists': True}})
     terr_yes = await mongo_count_docs('database', 'statistics_new',
-                                    {'goals_mobilisation_terror': "Да, ощущаю угрозу ⚔️"})
+                                      {'goals_mobilisation_terror': "Да, ощущаю угрозу ⚔️"})
     terr_no = await mongo_count_docs('database', 'statistics_new',
-                                    {'goals_mobilisation_terror': "Нет, не ощущаю угрозы 🤷‍♂️"})
+                                     {'goals_mobilisation_terror': "Нет, не ощущаю угрозы 🤷‍♂️"})
     terr_idk = await mongo_count_docs('database', 'statistics_new',
                                       {'goals_mobilisation_terror': "Затрудняюсь ответить 🤔"})
 
@@ -596,12 +607,12 @@ async def goals_politics_is_here(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'goals_politics_is_here'})
 
     who_love_all = await mongo_count_docs('database', 'statistics_new', {'prop_ex': {"$exists": True},
-                                                                               "datetime": {'$gte': mobilisation_date}})
+                                                                         "datetime": {'$gte': mobilisation_date}})
     who_love_putin_now = await mongo_count_docs('database', 'statistics_new', {'prop_ex': "Владимир Путин",
                                                                                "datetime": {'$gte': mobilisation_date}})
     if not who_love_all:
         who_love_all = 1
-    text = text.replace("XX", str(round(who_love_putin_now/who_love_all)))
+    text = text.replace("XX", str(round(who_love_putin_now / who_love_all)))
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Какой факт? 🤔"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
@@ -651,7 +662,6 @@ async def putin_game2_question(message: Message, state: FSMContext):
                                         "left outer join assets on asset_name = assets.name "
                                         f"left outer join texts ON text_name = texts.name) as subb "
                                         f"where row_number = {count}"))[0]
-        print(truth_data)
         await state.update_data(pgamecount=count, belive=truth_data[2], not_belive=truth_data[3])
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.add(types.KeyboardButton(text="Виноват 👎"))
