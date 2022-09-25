@@ -397,7 +397,7 @@ async def goals_no_conspirasy(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Давай начнём 👌"))
     nmarkup.add(types.KeyboardButton(text="Так войну или спецоперацию? 🤔"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await message.answer(txt(), reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message(F.text.in_({"Давай начнём 👌", "Так войну или спецоперацию? 🤔"}),
@@ -625,7 +625,8 @@ async def goals_gifted_cat(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Продолжим 👌"), state=TrueGoalsState.putin_next_next, flags=flags)
+@router.message(((F.text == "Продолжим 👌") | (F.text == "И правда, не могу вспомнить 🤷‍♂️")),
+                state=TrueGoalsState.putin_next_next, flags=flags)
 async def putin_gaming(message: Message, state: FSMContext):
     await state.set_state(TrueGoalsState.putin_gaming)
     await mongo_update_stat_new(tg_id=message.from_user.id, column='started_putin_old_lies', value='Да')
@@ -724,7 +725,8 @@ async def goals_putin_why_still_belive(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Расскажи 👌"), state=TrueGoalsState.final, flags=flags)
+@router.message((F.text == "Расскажи 👌") | (F.text == "Мне это не интересно, пропустим 👉"),
+                state=TrueGoalsState.final, flags=flags)
 async def goals_bad_tzar_bad(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'goals_bad_tzar_bad'})
     nmarkup = ReplyKeyboardBuilder()
