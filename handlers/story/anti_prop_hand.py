@@ -15,11 +15,13 @@ from data_base.DBuse import poll_get, redis_just_one_read, sql_select_row_like, 
 from data_base.DBuse import sql_safe_select, data_getter
 from filters.MapFilters import WebPropagandaFilter, PplPropagandaFilter, \
     NotYandexPropagandaFilter
+from filters.isAdmin import IsAdmin
 from handlers.story import true_resons_hand
 from keyboards.map_keys import antip_killme_kb
 from resources.all_polls import antip_q1_options, antip_q2_options, antip_q3_options
 from resources.variables import release_date
 from states.antiprop_states import propaganda_victim
+from states.true_goals_states import TrueGoalsState
 from utilts import simple_media, dynamic_media_answer, simple_media_bot, simple_video_album, CoolPercReplacer
 
 flags = {"throttling_key": "True"}
@@ -1338,6 +1340,19 @@ async def antip_how_they_made_it(message: Message):
     await simple_media(message, 'antip_how_they_made_it', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
+@router.message(IsAdmin(level=['Тестирование']), (F.text.in_({"Какой ужас 😯", "Смешно 🙂", "Продолжим 👉"})),
+                state=propaganda_victim.final_end, flags=flags)
+async def antip_only_tip_of_the_berg(message: Message, state: FSMContext):
+    await state.set_state(TrueGoalsState.main)
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Очень интересно 👍"))
+    nmarkup.add(types.KeyboardButton(text="Интересно, но слегка затянуто 🤏"))
+    nmarkup.row(types.KeyboardButton(text="Где-то интересно, где-то скучно 🙂"))
+    nmarkup.row(types.KeyboardButton(text="Довольно скучно 🥱"))
+    await simple_media(message, 'antip_only_tip_of_the_berg', reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
+
+# Нижеследующий роутер устареет с версии 2.2
 @router.message((F.text.in_({"Какой ужас 😯", "Смешно 🙂", "Продолжим 👉"})),
                 state=propaganda_victim.final_end, flags=flags)
 async def antip_only_tip_of_the_berg(message: Message, state: FSMContext):
