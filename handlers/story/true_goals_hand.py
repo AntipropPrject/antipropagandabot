@@ -238,10 +238,10 @@ async def goals_wait_a_minute(message: Message):
 
 
 @router.message(F.text == 'Хорошо, давай обсудим 👌', state=TrueGoalsState.more_goals, flags=flags)
-async def goals_good_decision(message: Message):
+async def goals_good_decision(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'goals_good_decision'})
     await message.answer(text, disable_web_page_preview=True)
-    await goals_lets_add_goals(message)
+    await goals_lets_add_goals(message, state)
 
 
 @router.message(F.text.contains('🎯'), state=(TrueGoalsState.more_goals, TrueGoalsState.more_goals_next), flags=flags)
