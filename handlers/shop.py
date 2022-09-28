@@ -75,7 +75,7 @@ async def shop_welcome(message: types.Message, state: FSMContext):
     print("in shop")
     await state.set_state(Shop.main)
     text = await sql_safe_select("text", "texts", {"name": "shop_welcome"})
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await message.answer(text, disable_web_page_preview=True)
     await message.answer_poll("Как думаете, сколько денег Россия уже потратила на войну?", explanation_parse_mode="HTML",
                               options=shop_poll, correct_option_id=2, is_anonymous=False, type='quiz',
                               reply_markup=ReplyKeyboardRemove())
