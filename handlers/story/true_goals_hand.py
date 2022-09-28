@@ -507,19 +507,19 @@ async def goals_dirt_waves(message: Message, state: FSMContext):
     await simple_media(message, 'goals_dirt_waves', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == 'Стало скучно, пропустим 👉'),
-                state=(TrueGoalsState.putin_next, TrueGoalsState.putin), flags=flags)
+
 @router.message((F.text == "Интересно, продолжай ⏳"), state=TrueGoalsState.putin_next, flags=flags)
-async def goals_putin_plan_continued(message: Message, state: FSMContext):
-    await state.set_state(TrueGoalsState.putin_next)
-    text = await sql_safe_select('text', 'texts', {'name': 'goals_putin_plan_continued'})
+async def goals_putin_plan_continued(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await simple_media(message, 'goals_putin_plan_continued', nmarkup.as_markup(resize_keyboard=True))
 
 
+@router.message((F.text == 'Стало скучно, пропустим 👉'),
+                state=(TrueGoalsState.putin_next, TrueGoalsState.putin), flags=flags)
 @router.message(F.text == "Продолжай ⏳", state=TrueGoalsState.putin_next, flags=flags)
-async def goals_putin_face(message: Message):
+async def goals_putin_face(message: Message, state: FSMContext):
+    await state.set_state(TrueGoalsState.putin_next)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Чего ждать от мобилизации? 🪖"))
     await simple_media(message, 'goals_putin_face', nmarkup.as_markup(resize_keyboard=True))
