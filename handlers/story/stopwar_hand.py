@@ -11,6 +11,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
 from data_base.DBuse import sql_safe_select, redis_just_one_write, redis_just_one_read, \
     mongo_select_info, mongo_update_end, del_key, poll_write, redis_delete_from_list, poll_get, mongo_count_docs
+from filters.MapFilters import FinalPolFiler
 from handlers.story.main_menu_hand import mainmenu_really_menu
 from log import logg
 from states.main_menu_states import MainMenuStates
@@ -25,11 +26,6 @@ router.message.filter(state=StopWarState)
 # Будет работать только с версии  2.2 (мобилизация)
 @router.message((F.text == "Подведём итоги 📊"), flags=flags)
 async def new_stopwar_start(message: Message, state: FSMContext):
-    if 'согласен(а)' in message.text:
-        await mongo_update_stat_new(tg_id=message.from_user.id, column='future_with_putin', value=message.text)
-    if 'Военный преступник' in message.text or 'Был хорошим' in message.text:
-        await mongo_update_stat_new(tg_id=message.from_user.id, column='not_love_putin_descr', value=message.text)
-    await mongo_update_stat(message.from_user.id, 'putin')
     await state.set_state(StopWarState.main)
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_why_they_sad'})
     nmarkup = ReplyKeyboardBuilder()
@@ -229,46 +225,52 @@ async def stopwar_must_watch_all(message: Message):
         await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     else:
         text = await sql_safe_select('text', 'texts', {'name': 'stopwar_plastic_views'})
-        nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
+        nmarkup.row(types.KeyboardButton(text="✅ Скорее да, был непредвзят"))
+        nmarkup.add(types.KeyboardButton(text="❌ Скорее нет, был предвзят"))
+        nmarkup.row(types.KeyboardButton(text="🤷‍♂️ Не знаю"))
         await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(F.text == "Продолжай ⏳", state=StopWarState.must_watch, flags=flags)
+@router.message((F.text.in_({"✅ Скорее да, был непредвзят", "❌ Скорее нет, был предвзят", "🤷‍♂️ Не знаю"})),
+                state=StopWarState.must_watch, flags=flags)
 async def stopwar_old_start(message: Message, state: FSMContext):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='CredibleBot', value=message.text)
     await state.set_state(StopWarState.main)
-    text = await sql_safe_select('text', 'texts', {'name': 'stopwar_old_start'})
+    text = await sql_safe_select('text', 'texts', {'name': 'goals_thanks_for_time'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Скорее да ✅"))
-    nmarkup.add(types.KeyboardButton(text="Скорее нет ❌"))
-    nmarkup.row(types.KeyboardButton(text="Не знаю 🤷‍♂️"))
+    nmarkup.row(types.KeyboardButton(text="Что же? 🤔"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(F.text == "Скорее да ✅", flags=flags)
-async def stopwar_rather_yes(message: Message):
-    await mongo_update_stat_new(tg_id=message.from_user.id, column='is_putin_ready_to_stop', value=message.text)
+# В данный момент непонятно что будет дальше, поэтому на всякий случай делю на три роутера
+@router.message(FinalPolFiler(status='Сторонник спецоперации ⚔️'), F.text == "Что же? 🤔", flags=flags)
+async def stopwar_stat_lecture_war(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'stopwar_stat_lecture_war'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.add(types.KeyboardButton(text="Согласен(а) 👌"))
     nmarkup.add(types.KeyboardButton(text="Не согласен(а) 🙅"))
-    await simple_media(message, 'stopwar_rather_yes', nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(F.text == "Не знаю 🤷‍♂️", flags=flags)
+@router.message(FinalPolFiler(status='Сомневающийся 🤷'), F.text == "Что же? 🤔", flags=flags)
 async def stopwar_idk(message: Message):
-    await mongo_update_stat_new(tg_id=message.from_user.id, column='is_putin_ready_to_stop', value=message.text)
+    text = await sql_safe_select('text', 'texts', {'name': 'stopwar_stat_lecture_doub'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.add(types.KeyboardButton(text="Согласен(а) 👌"))
     nmarkup.add(types.KeyboardButton(text="Не согласен(а) 🙅"))
-    await simple_media(message, 'stopwar_idk', nmarkup.as_markup(resize_keyboard=True))
-
-
-@router.message(F.text == "Скорее нет ❌", flags=flags)
-async def stopwar_rather_no(message: Message):
-    await mongo_update_stat_new(tg_id=message.from_user.id, column='is_putin_ready_to_stop', value=message.text)
-    text = await sql_safe_select('text', 'texts', {'name': 'stopwar_rather_no'})
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Продолжим 👌"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message(FinalPolFiler(status='Противник войны 🕊'), F.text == "Что же? 🤔", flags=flags)
+async def stopwar_rather_no(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'stopwar_stat_lecture_peace'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.add(types.KeyboardButton(text="Согласен(а) 👌"))
+    nmarkup.add(types.KeyboardButton(text="Не согласен(а) 🙅"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+# ---------------------------------Старый сценарий------------------------------------------------------------------ #
 
 
 @router.message((F.text == "Не согласен(а) 🙅") | (F.text == "Согласен(а) 👌") | (F.text == "Продолжим 👌"),

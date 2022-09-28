@@ -50,6 +50,16 @@ class PoliticsFilter(BaseFilter):
         return False
 
 
+class FinalPolFiler(BaseFilter):
+    status: Union[str]
+
+    async def __call__(self, message: Message) -> bool:
+        user_status = await redis_just_one_read(f'Usrs: {message.from_user.id}: StopWar: NewPolitStat:')
+        if self.status == user_status:
+            return True
+        return False
+
+
 class second_donbass_filter(BaseFilter):
     option: Union[str, list]
 
