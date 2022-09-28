@@ -485,11 +485,12 @@ async def goals_why_he_is_continued(message: Message, state: FSMContext):
                 state=TrueGoalsState.putin, flags=flags)
 async def goals_best_moment(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'goals_best_moment'})
-    await message.answer(text, disable_web_page_preview=True)
-    await goals_would_you_putin(message)
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Хорошо, продолжим 👌"))
+    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(F.text == "Давай 👌", state=TrueGoalsState.putin, flags=flags)
+@router.message(((F.text == "Давай 👌") | (F.text == 'Хорошо, продолжим 👌')), state=TrueGoalsState.putin, flags=flags)
 async def goals_would_you_putin(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'goals_would_you_putin'})
     nmarkup = ReplyKeyboardBuilder()
