@@ -23,7 +23,7 @@ router.message.filter(state=StopWarState)
 
 
 # Будет работать только с версии  2.2 (мобилизация)
-@router.message(((F.text == "ВРЕМЕННАЯ КНОПКА ДЛЯ ПЕРЕХОДА В ОСТАНОВКУ ВОЙНЫ")), flags=flags)
+@router.message((F.text == "Подведём итоги 📊"), flags=flags)
 async def new_stopwar_start(message: Message, state: FSMContext):
     if 'согласен(а)' in message.text:
         await mongo_update_stat_new(tg_id=message.from_user.id, column='future_with_putin', value=message.text)

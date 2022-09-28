@@ -759,14 +759,23 @@ async def goals_no_winners_in_war(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
     nmarkup.row(types.KeyboardButton(text="А что, Путин этого не знал? 🤔"))
+    nmarkup.row(types.KeyboardButton(text="Не верю / Докажи 🤔"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.in_({"Продолжай ⏳", "А что, Путин этого не знал? 🤔"})),
+@router.message((F.text == "Не верю / Докажи 🤔"), state=TrueGoalsState.final, flags=flags)
+async def goals_russia_already_lost(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'goals_wars_of_past'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Продолжим 👌"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(), disable_web_page_preview=True)
+
+
+@router.message((F.text.in_({"Продолжай ⏳", "А что, Путин этого не знал? 🤔", "Продолжим 👌"})),
                 state=TrueGoalsState.final, flags=flags)
 async def goals_russia_already_lost(message: Message, state: FSMContext):
     await state.set_state(StopWarState.main)
     text = await sql_safe_select('text', 'texts', {'name': 'goals_russia_already_lost'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="ВРЕМЕННАЯ КНОПКА ДЛЯ ПЕРЕХОДА В ОСТАНОВКУ ВОЙНЫ"))
+    nmarkup.row(types.KeyboardButton(text="Подведём итоги 📊"))
     await message.answer(text, reply_markup=nmarkup.as_markup(), disable_web_page_preview=True)
