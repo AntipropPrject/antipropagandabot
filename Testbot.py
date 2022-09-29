@@ -92,8 +92,8 @@ async def main():
 
     dp.include_router(other_file.router)
 
-    session = aiohttp.ClientSession()
     # use the session here
+    session = aiohttp.ClientSession()
 
     #periodic function
     asyncio.create_task(periodic())
@@ -101,6 +101,7 @@ async def main():
     await session.close()
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
+
 
 if __name__ == "__main__":
     asyncio.run(main())

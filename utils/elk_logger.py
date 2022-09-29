@@ -18,8 +18,8 @@ class Logger():
         return logger.info(log)
 
 
-@router.message()
-@router.callback_query()
-@router.poll_answer()
-async def logsmth(update: types.Update, state='*'):
-    Logger.log("Any info")
+# @router.message()
+# @router.callback_query()
+# @router.poll_answer()
+# async def logsmth(update: types.Update, state='*'):
+#    print("asdasd")
