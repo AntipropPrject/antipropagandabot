@@ -61,7 +61,6 @@ async def main():
         print('Tickets checking is disabled, so noone will know...')
     # Технические роутеры
     # TablesCreator.tables_god()
-    dp.include_router(elk_logger.router)
     dp.include_router(pg_mg.router)
     dp.include_router(new_admin_hand.router)
     dp.include_router(admin_factory.router)
