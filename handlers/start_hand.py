@@ -13,8 +13,8 @@ from data_base.DBuse import mongo_user_info, sql_safe_select, mongo_ez_find_one,
 from day_func import day_count
 from filters.isAdmin import IsAdmin
 from handlers.shop import shop_welcome
-from handlers.story import main_menu_hand
 from handlers.story import true_resons_hand
+from handlers.story import main_menu_hand
 from handlers.story.anti_prop_hand import antip_what_is_prop
 from handlers.story.main_menu_hand import mainmenu_really_menu
 from handlers.story.putin_hand import stopwar_start
