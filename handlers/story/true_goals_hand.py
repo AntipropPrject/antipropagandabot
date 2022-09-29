@@ -779,4 +779,4 @@ async def goals_russia_already_lost(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'goals_russia_already_lost'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Подведём итоги 📊"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(), disable_web_page_preview=True)
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
