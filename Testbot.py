@@ -20,7 +20,6 @@ from handlers.other import status, other_file
 from handlers.story import preventive_strike, true_resons_hand, welcome_messages, nazi_hand, \
     donbass_hand, main_menu_hand, anti_prop_hand, putin_hand, smi_hand, stopwar_hand, welcome_stories, true_goals_hand
 from middleware.trottling import ThrottlingMiddleware
-from utils import elk_logger
 from utilts import happy_tester
 
 data = all_data()
@@ -61,7 +60,6 @@ async def main():
         print('Tickets checking is disabled, so noone will know...')
     # Технические роутеры
     # TablesCreator.tables_god()
-    dp.include_router(elk_logger.router)
     dp.include_router(pg_mg.router)
     dp.include_router(new_admin_hand.router)
     dp.include_router(admin_factory.router)
