@@ -11,7 +11,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
 from data_base.DBuse import data_getter, sql_safe_select, redis_just_one_write, poll_write, mongo_game_answer
 from data_base.DBuse import redis_delete_from_list
-from filters.MapFilters import OperationWar, WarReason, PoliticsFilter
+from filters.MapFilters import PoliticsFilter, OperationWar, WarReason
 from handlers.story.nazi_hand import NaziState
 from handlers.story.preventive_strike import PreventStrikeState
 from handlers.story.putin_hand import StateofPutin

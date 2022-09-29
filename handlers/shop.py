@@ -118,8 +118,8 @@ async def shop_transfer(message: types.Message, state: FSMContext):
     # old = datetime.datetime(year=2022, month=2, day=24).date()
     # day = now-old
     # print(day)
-    day=203
-    sum = 203 * 55000000000
+    day=218
+    sum = 218 * 55000000000
     await state.update_data(balance=sum)
     await state.update_data(balance_all=sum)
     balance=change_number_format(sum)
@@ -382,7 +382,12 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
 async def shop_children_ok(message: types.Message, bot: Bot, state: FSMContext):
     message_id = (await state.get_data())['child_message']
     chat_id = (await state.get_data())['chat_id_shop']
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Выйти из магазина ⬇"))
+    await bot.send_message(text="!",chat_id=chat_id,reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await bot.delete_message(chat_id, message_id+1)
     await bot.delete_message(chat_id, message_id)
+    await bot.delete_message(chat_id, message_id-1)
 
 
 @router.message(Shop.shop_callback, F.text.contains("Вернуться в магазин"), flags=flags)

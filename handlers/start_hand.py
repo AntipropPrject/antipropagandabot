@@ -2,9 +2,9 @@ import asyncio
 
 from aiogram import Router, F, Bot
 from aiogram import types
-from aiogram.dispatcher.filters.command import CommandStart, CommandObject
+from aiogram.dispatcher.filters.command import CommandStart, CommandObject, Command
 from aiogram.dispatcher.fsm.context import FSMContext
-from aiogram.types import Message, User, CallbackQuery
+from aiogram.types import Message, User, CallbackQuery, Update
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 from bata import all_data
@@ -13,8 +13,8 @@ from data_base.DBuse import mongo_user_info, sql_safe_select, mongo_ez_find_one,
 from day_func import day_count
 from filters.isAdmin import IsAdmin
 from handlers.shop import shop_welcome
-from handlers.story import true_resons_hand
 from handlers.story import main_menu_hand
+from handlers.story import true_resons_hand
 from handlers.story.anti_prop_hand import antip_what_is_prop
 from handlers.story.main_menu_hand import mainmenu_really_menu
 from handlers.story.putin_hand import stopwar_start
@@ -33,16 +33,17 @@ flags = {"throttling_key": "True"}
 router = Router()
 
 
-@router.message(CommandStart(command_magic=F.args), flags=flags)
+@router.name(CommandStart(command_magic=F.args), flags=flags)
 async def adv_company(message: Message, bot: Bot, state: FSMContext, command: CommandObject):
     asyncio.create_task(advertising_value(command.args, message.from_user))
-    await commands_start(message, bot, state)
+    print("With ARGS")
 
 
 @router.callback_query(text="restarting")
 @router.message(commands=['start', 'restart'], state='*', flags=flags)
 async def commands_start(update: Message | CallbackQuery, bot: Bot, state: FSMContext):  # Первое сообщение
     user_obj = update.from_user
+    print("No ARGS")
     if isinstance(update, CallbackQuery):
         await update.answer()
     else:
