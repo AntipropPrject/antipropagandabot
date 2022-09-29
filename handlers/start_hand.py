@@ -33,10 +33,10 @@ flags = {"throttling_key": "True"}
 router = Router()
 
 
-@router.name(CommandStart(command_magic=F.args), flags=flags)
+@router.message(CommandStart(command_magic=F.args), flags=flags)
 async def adv_company(message: Message, bot: Bot, state: FSMContext, command: CommandObject):
     asyncio.create_task(advertising_value(command.args, message.from_user))
-    print("With ARGS")
+    await commands_start(message, bot, state)
 
 
 @router.callback_query(text="restarting")
