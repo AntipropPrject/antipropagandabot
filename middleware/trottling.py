@@ -27,7 +27,7 @@ class ThrottlingMiddleware(BaseMiddleware):
         redis = all_data().get_data_red()
         redis.set(f"user_last_answer: {event.from_user.id}:", "1", 280)
         if await mongo_ez_find_one('database', 'userinfo', {'_id': event.from_user.id, 'datetime_end': None}):
-            redis.set(f"Current_users: {event.from_user.id}:", datetime.now().strftime("%m/%d/%Y %H:%M:%S"), 597600)
+            redis.set(f"Current_users: {event.from_user.id}", datetime.now().strftime("%m/%d/%Y %H:%M:%S"), 597600)
         if throttling_key is not None and throttling_key in self.caches:
             if event.chat.id in self.caches[throttling_key]:
                 loggers.event.info('Throttled')
