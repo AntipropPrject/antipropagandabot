@@ -377,7 +377,7 @@ async def goals_demilitari_start(message: Message, state: FSMContext):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: TrueGoals: UserFakeGoals:', welc_message_one[3])
     g_all = await mongo_count_docs('database', 'statistics_new', {'war_aims_ex': {'$exists': True}})
     demil = await mongo_count_docs('database', 'statistics_new', {'war_aims_ex': welc_message_one[3]})
-    txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'goals_nazi_start'}), g_all)
+    txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'goals_demilitari_start'}), g_all)
     txt.replace('XX', demil)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Предотвратить размещение военных баз НАТО 🛡'))
