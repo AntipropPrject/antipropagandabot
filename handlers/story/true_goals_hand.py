@@ -286,7 +286,7 @@ async def goals_donbas_start(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text='Начнём 👪'))
     nmarkup.row(types.KeyboardButton(text='Пропустим 👉'))
     nmarkup.adjust(2)
-    await message.answer(txt(), reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await simple_media(message, 'goals_donbas_start', nmarkup.as_markup(resize_keyboard=True), txt())
 
 
 @router.message((F.text == "Пропустим 👉"), state=WarGoalsState.donbas_enter, flags=flags)
@@ -318,7 +318,8 @@ async def goals_preventive_start(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text='Начнём 🛡'))
     nmarkup.row(types.KeyboardButton(text='Пропустим 👉'))
     nmarkup.adjust(2)
-    await message.answer(txt(), reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await simple_media(message, 'goals_preventive_start', nmarkup.as_markup(resize_keyboard=True), txt())
+
 
 
 @router.message((F.text == "Пропустим 👉"), state=WarGoalsState.preventive_enter, flags=flags)
@@ -349,8 +350,8 @@ async def goals_nazi_start(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Начнём 🙋‍♂️'))
     nmarkup.row(types.KeyboardButton(text='Пропустим 👉'))
-    nmarkup.adjust(2)
-    await message.answer(txt(), reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await simple_media(message, 'goals_nazi_start', nmarkup.as_markup(resize_keyboard=True), txt())
+
 
 
 @router.message((F.text == "Пропустим 👉"), state=WarGoalsState.nazi_enter, flags=flags)
@@ -385,7 +386,7 @@ async def goals_demilitari_start(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text='Им наверху виднее 🤔'))
     nmarkup.add(types.KeyboardButton(text='Я не знаю 🤷‍♀️'))
     nmarkup.row(types.KeyboardButton(text='Думаю он хотел, как лучше, а получилось наоборот 🤷‍♂️'))
-    await message.answer(txt(), reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await simple_media(message, 'goals_demilitari_start', nmarkup.as_markup(resize_keyboard=True), txt())
 
 
 @router.message(((F.text.contains("🤷‍")) | F.text.contains("виднее 🤔")),
@@ -430,7 +431,7 @@ async def goals_NATO_start(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Начнём 💂'))
     nmarkup.row(types.KeyboardButton(text='Пропустим 👉'))
-    await message.answer(txt(), reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await simple_media(message, 'goals_NATO_start', nmarkup.as_markup(resize_keyboard=True), txt())
 
 
 @router.message((F.text == "Пропустим 👉"), state=WarGoalsState.nato, flags=flags)
@@ -462,7 +463,7 @@ async def goals_bio_start(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Начнём 🤯'))
     nmarkup.row(types.KeyboardButton(text='Пропустим 👉'))
-    await message.answer(txt(), reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await simple_media(message, 'goals_bio_start', nmarkup.as_markup(resize_keyboard=True), txt())
 
 
 @router.message((F.text == "Пропустим 👉"), state=WarGoalsState.bio, flags=flags)
