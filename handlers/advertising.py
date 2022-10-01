@@ -126,9 +126,9 @@ async def return_spam_send_task(time_now: datetime):
         if timedelta(hours=22) < past_time < timedelta(hours=22, seconds=1):
             text = await sql_safe_select('text', 'texts', {'name': 'come_back_22'})
             await bot.send_message(user, text)
-        elif timedelta(hours=22) < past_time < timedelta(hours=46, seconds=1):
+        elif timedelta(hours=46) < past_time < timedelta(hours=46, seconds=1):
             text = await sql_safe_select('text', 'texts', {'name': 'come_back_46'})
             await bot.send_message(user, text)
-        elif timedelta(hours=22) < past_time < timedelta(hours=166, seconds=1):
+        elif timedelta(hours=166) < past_time < timedelta(hours=166, seconds=1):
             text = await sql_safe_select('text', 'texts', {'name': 'come_back_166'})
             await bot.send_message(user, text)
