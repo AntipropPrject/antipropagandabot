@@ -5,13 +5,12 @@ from aiogram import Router
 from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError
 
 from bata import all_data
-from data_base.DBuse import mongo_update_viewed_news, mongo_pop_news, mongo_update
+from data_base.DBuse import mongo_update_viewed_news, mongo_pop_news, mongo_update, sql_safe_select
 from log.logg import send_to_chat, get_logger
 
 router = Router()
 data = all_data()
 bot = data.get_bot()
-
 
 logger = get_logger('SPAM')
 
@@ -102,3 +101,34 @@ async def send_spam(user_id, caption, media_id=None):
         await mongo_update(int(user_id), 'userinfo', 'is_ban')
         print(f"ПОЛЬЗОВАТЕЛЬ {user_id} -- Заблокировал бота")
 
+
+async def user_returner():
+    client = all_data().get_mongo()
+    redis = all_data().get_data_red()
+    database = client['database']
+    collection = database['userinfo']
+    cursor = collection.find({'datetime_end': None})
+    list_of_users = await cursor.to_list(length=None)
+    for user in list_of_users:
+        redis.set(f'Must_return_list: {user["_id"]}:', user['datetime'])
+
+
+async def return_spam_send():
+    asyncio.create_task(return_spam_send_task(datetime.now()))
+
+
+async def return_spam_send_task(time_now: datetime):
+    redis = all_data().get_data_red()
+    for key in redis.scan_iter(f"Current_users:*"):
+        user_time = datetime.strptime(redis.get(key), '%m/%d/%Y %H:%M:%S')
+        past_time = time_now - user_time
+        user = int(key.strip('Current_users: '))
+        if timedelta(hours=1) < past_time < timedelta(hours=22, seconds=1):
+            text = await sql_safe_select('text', 'texts', {'name': 'come_back_22'})
+            await bot.send_message(user, text)
+        elif timedelta(hours=2) < past_time < timedelta(hours=46, seconds=1):
+            text = await sql_safe_select('text', 'texts', {'name': 'come_back_46'})
+            await bot.send_message(user, text)
+        elif timedelta(hours=3) < past_time < timedelta(hours=166, seconds=1):
+            text = await sql_safe_select('text', 'texts', {'name': 'come_back_166'})
+            await bot.send_message(user, text)

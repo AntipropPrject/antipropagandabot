@@ -140,6 +140,16 @@ class WarReason(BaseFilter):
         return False
 
 
+class WarGoals(BaseFilter):
+    goal: str
+
+    async def __call__(self, message: Message):
+        reason_list = await poll_get(f'Usrs: {message.from_user.id}: TrueGoals: UserFakeGoals:')
+        if self.goal in reason_list:
+            return True
+        return False
+
+
 class PutinFilter(BaseFilter):
     async def __call__(self, message: Message):
         if await redis_check(f'Usrs: {message.from_user.id}: Start_answers: LovePutin'):

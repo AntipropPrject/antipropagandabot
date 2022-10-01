@@ -5,6 +5,7 @@ from datetime import datetime
 from aiogram import Dispatcher
 from aiogram.client.session import aiohttp
 from aiogram.dispatcher.fsm.storage.redis import RedisStorage
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 import bata
 from bata import all_data
@@ -15,7 +16,7 @@ from export_to_csv.pg_mg import Backup
 from handlers import start_hand, shop
 from handlers.admin_for_games_dir import mistakeorlie
 from handlers.admin_handlers import admin_factory, marketing, admin_for_games, new_admin_hand
-from handlers.advertising import start_spam
+from handlers.advertising import start_spam, user_returner, return_spam_send
 from handlers.other import status, other_file
 from handlers.story import preventive_strike, true_resons_hand, welcome_messages, nazi_hand, \
     donbass_hand, main_menu_hand, anti_prop_hand, putin_hand, smi_hand, stopwar_hand, welcome_stories, true_goals_hand
@@ -54,10 +55,12 @@ async def periodic():
 async def main():
     bot_info = await bot.get_me()
     print(f"Hello, i'm {bot_info.first_name} | {bot_info.username}")
-    if bata.Check_tickets is True and os.getenv('PIPELINE') is None:
-        await happy_tester(bot)
-    else:
-        print('Tickets checking is disabled, so noone will know...')
+
+    scheduler = AsyncIOScheduler()
+    scheduler.add_job(user_returner, 'interval', hours=1)
+    scheduler.add_job(return_spam_send, 'interval', seconds=1)
+    scheduler.start()
+
     # Технические роутеры
     # TablesCreator.tables_god()
     dp.include_router(pg_mg.router)

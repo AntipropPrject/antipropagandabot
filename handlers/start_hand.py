@@ -1,10 +1,11 @@
 import asyncio
+from datetime import datetime
 
 from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.filters.command import CommandStart, CommandObject, Command
 from aiogram.dispatcher.fsm.context import FSMContext
-from aiogram.types import Message, User, CallbackQuery, Update
+from aiogram.types import Message, User, CallbackQuery, Update, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 from bata import all_data
@@ -43,7 +44,6 @@ async def adv_company(message: Message, bot: Bot, state: FSMContext, command: Co
 @router.message(commands=['start', 'restart'], state='*', flags=flags)
 async def commands_start(update: Message | CallbackQuery, bot: Bot, state: FSMContext):  # Первое сообщение
     user_obj = update.from_user
-    print("No ARGS")
     if isinstance(update, CallbackQuery):
         await update.answer()
     else:
