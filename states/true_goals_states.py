@@ -24,6 +24,16 @@ class TrueGoalsState(StatesGroup):
     final = State()
 
 
+class WarGoalsState(StatesGroup):
+    bio = State()
+    nato = State()
+    demilitari = State()
+    main = State()
+    donbas_enter = State()
+    preventive_enter = State()
+    nazi_enter = State()
+
+
 class Shop(StatesGroup):
     main = State()
     after_first_poll = State()

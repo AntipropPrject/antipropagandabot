@@ -648,7 +648,6 @@ async def redis_delete_first_item(key):
 async def redis_write(key, value):
     try:
         all_data().get_data_red().lpush(key, value)
-
     except Exception as error:
         await logg.get_error(f"redis write | {error}", __file__)
 
