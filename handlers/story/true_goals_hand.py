@@ -278,12 +278,15 @@ async def goals_answer(update: types.PollAnswer | Message, bot: Bot, state: FSMC
 async def goals_donbas_start(message: Message, state: FSMContext):
     await state.set_state(WarGoalsState.donbas_enter)
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: TrueGoals: UserFakeGoals:', welc_message_one[0])
-    text = await sql_safe_select('text', 'texts', {'name': 'goals_donbas_start'})
+    g_all = await mongo_count_docs('database', 'statistics_new', {'war_aims_ex': {'$exists': True}})
+    donbass = await mongo_count_docs('database', 'statistics_new', {'war_aims_ex': welc_message_one[0]})
+    txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'goals_donbas_start'}), g_all)
+    txt.replace('XX', donbass)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Начнём 👪'))
     nmarkup.row(types.KeyboardButton(text='Пропустим 👉'))
     nmarkup.adjust(2)
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await message.answer(txt(), reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text == "Пропустим 👉"), state=WarGoalsState.donbas_enter, flags=flags)
@@ -307,12 +310,15 @@ async def goals_donbas_enterence(message: Message):
 async def goals_preventive_start(message: Message, state: FSMContext):
     await state.set_state(WarGoalsState.preventive_enter)
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: TrueGoals: UserFakeGoals:', welc_message_one[1])
-    text = await sql_safe_select('text', 'texts', {'name': 'goals_preventive_start'})
+    g_all = await mongo_count_docs('database', 'statistics_new', {'war_aims_ex': {'$exists': True}})
+    prevent = await mongo_count_docs('database', 'statistics_new', {'war_aims_ex': welc_message_one[1]})
+    txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'goals_preventive_start'}), g_all)
+    txt.replace('XX', prevent)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Начнём 🛡'))
     nmarkup.row(types.KeyboardButton(text='Пропустим 👉'))
     nmarkup.adjust(2)
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await message.answer(txt(), reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text == "Пропустим 👉"), state=WarGoalsState.preventive_enter, flags=flags)
@@ -336,12 +342,15 @@ async def goals_preventive_enterence(message: Message):
 async def goals_nazi_start(message: Message, state: FSMContext):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: TrueGoals: UserFakeGoals:', welc_message_one[2])
     await state.set_state(WarGoalsState.nazi_enter)
-    text = await sql_safe_select('text', 'texts', {'name': 'goals_nazi_start'})
+    g_all = await mongo_count_docs('database', 'statistics_new', {'war_aims_ex': {'$exists': True}})
+    nazi = await mongo_count_docs('database', 'statistics_new', {'war_aims_ex': welc_message_one[2]})
+    txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'goals_nazi_start'}), g_all)
+    txt.replace('XX', nazi)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Начнём 🙋‍♂️'))
     nmarkup.row(types.KeyboardButton(text='Пропустим 👉'))
     nmarkup.adjust(2)
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await message.answer(txt(), reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text == "Пропустим 👉"), state=WarGoalsState.nazi_enter, flags=flags)
@@ -366,17 +375,20 @@ async def goals_nazi_enterence(message: Message):
 async def goals_demilitari_start(message: Message, state: FSMContext):
     await state.set_state(WarGoalsState.demilitari)
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: TrueGoals: UserFakeGoals:', welc_message_one[3])
-    text = await sql_safe_select('text', 'texts', {'name': 'goals_demilitari_start'})
+    g_all = await mongo_count_docs('database', 'statistics_new', {'war_aims_ex': {'$exists': True}})
+    demil = await mongo_count_docs('database', 'statistics_new', {'war_aims_ex': welc_message_one[3]})
+    txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'goals_nazi_start'}), g_all)
+    txt.replace('XX', demil)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Предотвратить размещение военных баз НАТО 🛡'))
     nmarkup.row(types.KeyboardButton(text='Предотвратить создание ядерного оружия на Украине 💥'))
     nmarkup.row(types.KeyboardButton(text='Им наверху виднее 🤔'))
     nmarkup.add(types.KeyboardButton(text='Я не знаю 🤷‍♀️'))
     nmarkup.row(types.KeyboardButton(text='Думаю он хотел, как лучше, а получилось наоборот 🤷‍♂️'))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await message.answer(txt(), reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(((F.text.contains("🤷‍♂️")) | F.text.contains("виднее 🤔")),
+@router.message(((F.text.contains("🤷‍")) | F.text.contains("виднее 🤔")),
                 state=WarGoalsState.demilitari, flags=flags)
 async def goals_noone_remember(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'goals_noone_remember'})
@@ -411,11 +423,14 @@ async def goals_demilitari_nukes(message: Message):
 async def goals_NATO_start(message: Message, state: FSMContext):
     await state.set_state(WarGoalsState.nato)
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: TrueGoals: UserFakeGoals:', welc_message_one[5])
-    text = await sql_safe_select('text', 'texts', {'name': 'goals_NATO_start'})
+    g_all = await mongo_count_docs('database', 'statistics_new', {'war_aims_ex': {'$exists': True}})
+    nato = await mongo_count_docs('database', 'statistics_new', {'war_aims_ex': welc_message_one[5]})
+    txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'goals_NATO_start'}), g_all)
+    txt.replace('XX', nato)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Начнём 💂'))
     nmarkup.row(types.KeyboardButton(text='Пропустим 👉'))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await message.answer(txt(), reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text == "Пропустим 👉"), state=WarGoalsState.nato, flags=flags)
@@ -440,11 +455,14 @@ async def goals_nazi_enterence(message: Message):
 async def goals_bio_start(message: Message, state: FSMContext):
     await state.set_state(WarGoalsState.bio)
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: TrueGoals: UserFakeGoals:', welc_message_one[8])
-    text = await sql_safe_select('text', 'texts', {'name': 'goals_bio_start'})
+    g_all = await mongo_count_docs('database', 'statistics_new', {'war_aims_ex': {'$exists': True}})
+    bio = await mongo_count_docs('database', 'statistics_new', {'war_aims_ex': welc_message_one[8]})
+    txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'goals_bio_start'}), g_all)
+    txt.replace('XX', bio)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Начнём 🤯'))
     nmarkup.row(types.KeyboardButton(text='Пропустим 👉'))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await message.answer(txt(), reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text == "Пропустим 👉"), state=WarGoalsState.bio, flags=flags)
