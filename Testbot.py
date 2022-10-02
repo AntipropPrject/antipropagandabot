@@ -56,6 +56,11 @@ async def main():
     bot_info = await bot.get_me()
     print(f"Hello, i'm {bot_info.first_name} | {bot_info.username}")
 
+    if bata.Check_tickets is True and os.getenv('PIPELINE') is None:
+        await happy_tester(bot)
+    else:
+        print('Tickets checking is disabled, so noone will know...')
+
     scheduler = AsyncIOScheduler()
     scheduler.add_job(user_returner, 'interval', hours=1)
     scheduler.add_job(return_spam_send, 'interval', seconds=1)
