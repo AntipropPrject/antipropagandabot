@@ -134,5 +134,5 @@ async def return_spam_send_task(time_now: datetime):
                 text = await sql_safe_select('text', 'texts', {'name': 'come_back_166'})
                 await bot.send_message(user, text)
         except TelegramForbiddenError:
-            await redis.delete(key)
+            redis.delete(key)
             await mongo_easy_upsert('database', 'userinfo', {'_id': user}, {'is_ban': True})
