@@ -123,7 +123,6 @@ async def return_spam_send_task(time_now: datetime):
         user_time = datetime.strptime(redis.get(key), '%m/%d/%Y %H:%M:%S')
         past_time = time_now - user_time
         user = int(key.strip('Current_users: '))
-        print(past_time)
         try:
             if timedelta(hours=22) < past_time < timedelta(hours=22, seconds=1):
                 text = await sql_safe_select('text', 'texts', {'name': 'come_back_22'})
