@@ -5,7 +5,7 @@ from aiogram import Router
 from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError
 
 from bata import all_data
-from data_base.DBuse import mongo_update_viewed_news, mongo_pop_news, mongo_update, sql_safe_select
+from data_base.DBuse import mongo_update_viewed_news, mongo_pop_news, mongo_update, sql_safe_select, mongo_easy_upsert
 from log.logg import send_to_chat, get_logger
 
 router = Router()
@@ -123,12 +123,17 @@ async def return_spam_send_task(time_now: datetime):
         user_time = datetime.strptime(redis.get(key), '%m/%d/%Y %H:%M:%S')
         past_time = time_now - user_time
         user = int(key.strip('Current_users: '))
-        if timedelta(hours=22) < past_time < timedelta(hours=22, seconds=1):
-            text = await sql_safe_select('text', 'texts', {'name': 'come_back_22'})
-            await bot.send_message(user, text)
-        elif timedelta(hours=46) < past_time < timedelta(hours=46, seconds=1):
-            text = await sql_safe_select('text', 'texts', {'name': 'come_back_46'})
-            await bot.send_message(user, text)
-        elif timedelta(hours=166) < past_time < timedelta(hours=166, seconds=1):
-            text = await sql_safe_select('text', 'texts', {'name': 'come_back_166'})
-            await bot.send_message(user, text)
+        print(past_time)
+        try:
+            if timedelta(hours=22) < past_time < timedelta(hours=22, seconds=1):
+                text = await sql_safe_select('text', 'texts', {'name': 'come_back_22'})
+                await bot.send_message(user, text)
+            elif timedelta(hours=46) < past_time < timedelta(hours=46, seconds=1):
+                text = await sql_safe_select('text', 'texts', {'name': 'come_back_46'})
+                await bot.send_message(user, text)
+            elif timedelta(hours=166) < past_time < timedelta(hours=166, seconds=1):
+                text = await sql_safe_select('text', 'texts', {'name': 'come_back_166'})
+                await bot.send_message(user, text)
+        except TelegramForbiddenError:
+            await redis.delete(key)
+            await mongo_easy_upsert('database', 'userinfo', {'_id': user}, {'is_ban': True})
