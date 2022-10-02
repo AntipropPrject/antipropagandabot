@@ -972,7 +972,6 @@ async def goals_no_winners_in_war(message: Message):
 
 @router.message((F.text == "Не верю / Докажи 🤔"), state=TrueGoalsState.final, flags=flags)
 async def goals_russia_already_lost(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'goals_wars_of_past'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжим 👌"))
     await simple_media(message, 'goals_wars_of_past', nmarkup.as_markup(resize_keyboard=True))

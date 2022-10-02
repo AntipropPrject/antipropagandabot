@@ -678,3 +678,8 @@ async def redis_check(key):
         return all_data().get_data_red().exists(key)
     except Exception as error:
         await logg.get_error(f"{error}", __file__)
+
+
+def add_current_user(user_id: int):
+    redis = all_data().get_data_red()
+    redis.set(f"Current_users: {user_id}", datetime.now().strftime("%m/%d/%Y %H:%M:%S"), 597602)

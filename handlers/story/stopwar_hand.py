@@ -496,6 +496,7 @@ async def stopwar_timer(message: Message, bot: Bot):
         await mongo_update_stat(message.from_user.id, 'end')
         await mongo_update_end(message.from_user.id)
         await asyncio.sleep(1)
+        await del_key(f"Current_users: {message.from_user.id}")
         await del_key(f'Usrs: {message.from_user.id}: count:')
         textend = await sql_safe_select('text', 'texts', {'name': 'stopwar_end_timer'})
         await message.answer(textend, reply_markup=nmarkup.as_markup(resize_keyboard=True), parse_mode="HTML",
