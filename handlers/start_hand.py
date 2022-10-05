@@ -18,6 +18,7 @@ from handlers.story import true_resons_hand
 from handlers.story import main_menu_hand
 from handlers.story.anti_prop_hand import antip_what_is_prop
 from handlers.story.main_menu_hand import mainmenu_really_menu
+from handlers.story.preventive_strike import prevent_strike_any_brutality
 from handlers.story.putin_hand import stopwar_start
 from handlers.story.stopwar_hand import stopwar_first_manipulation_argument
 from handlers.story.true_goals_hand import goals_war_point_now
@@ -116,7 +117,7 @@ async def cmd_mainskip(message: Message, state: FSMContext):
 
 @router.message(IsAdmin(level=['Тестирование']), commands=["teststrike"], flags=flags)
 async def cmd_teststrike(message: Message, state: FSMContext):
-    await true_resons_hand.prevent_strike_start(message, state)
+    await prevent_strike_any_brutality(message, state)
 
 
 @router.message(IsAdmin(level=['Тестирование']), commands=["putest"], flags=flags)

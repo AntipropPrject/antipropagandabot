@@ -10,6 +10,7 @@ from data_base.DBuse import poll_get, poll_write, del_key, data_getter, mongo_ga
 from data_base.DBuse import sql_safe_select, mongo_count_docs
 from filters.MapFilters import FakeGoals, WarGoals
 from filters.MapFilters import OperationWar
+from handlers.story.preventive_strike import prevent_strike_any_brutality
 from resources.all_polls import welc_message_one, true_and_idk_goals
 from resources.variables import mobilisation_date
 from states.stopwar_states import StopWarState
@@ -97,7 +98,7 @@ async def goals_sort_reveal(message: Message, state: FSMContext):
     var_aims['❌ 👪 Защитить русских в Донбассе'] = round(russians_donbass / all_count * 100)
     var_aims['❌ 🛡 Предотвратить вторжение на территорию России или ДНР/ЛНР'] = round(
         prevent_the_invasion / all_count * 100)
-    var_aims['❌ 🤬 Денацификация / Уничтожить нацистов'] = round(denazification / all_count * 100)
+    var_aims['❌ ' + welc_message_one[2]] = round(denazification / all_count * 100)
     var_aims['❌ 💣 Демилитаризация / Снижение военной мощи'] = round(demilitarization / all_count * 100)
     var_aims['❓ 🗺 Вернуть России исторические земли / Объединить русский народ'] = round(
         unite_russian / all_count * 100)
@@ -321,7 +322,6 @@ async def goals_preventive_start(message: Message, state: FSMContext):
     await simple_media(message, 'goals_preventive_start', nmarkup.as_markup(resize_keyboard=True), txt())
 
 
-
 @router.message((F.text == "Пропустим 👉"), state=WarGoalsState.preventive_enter, flags=flags)
 async def goals_pls_use_goal_prev(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'goals_pls_use_goal'})
@@ -332,10 +332,9 @@ async def goals_pls_use_goal_prev(message: Message):
 
 
 @router.message((F.text.contains("🛡")), state=WarGoalsState.preventive_enter, flags=flags)
-async def goals_preventive_enterence(message: Message):
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text='Кнопка'))
-    await message.answer('Начало превентивного удара, но пока что ничего', reply_markup=nmarkup.as_markup())
+async def goals_preventive_enterence(message: Message, state: FSMContext):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='prevent_strike_start', value='Да')
+    await prevent_strike_any_brutality(message, state)
 
 
 @router.message(WarGoals(goal=welc_message_one[2]), ((F.text.contains("Уверен(а), проп")) | (F.text == "Кнопка")),
@@ -351,7 +350,6 @@ async def goals_nazi_start(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text='Начнём 🙋‍♂️'))
     nmarkup.row(types.KeyboardButton(text='Пропустим 👉'))
     await simple_media(message, 'goals_nazi_start', nmarkup.as_markup(resize_keyboard=True), txt())
-
 
 
 @router.message((F.text == "Пропустим 👉"), state=WarGoalsState.nazi_enter, flags=flags)

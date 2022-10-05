@@ -174,6 +174,14 @@ async def sql_games_row_selecter(tablename: str, row: int):
                                              left outer join texts on {tablename}.text_name = texts.name)
                                              AS sub WHERE row_number = {row}"""))[0]
             keys = ('id', 'plot_media', 'plot_text', 'belivers', 'nonbelivers', 'ROW_NUMBER')
+        elif tablename == 'strikememes':
+            data = (await data_getter(f"""
+                                    SELECT id, t_id, funny_reaction, positive_reaction, negative_reaction FROM (
+                                    SELECT row_number() over (order by id), * from strikememes
+                                    left join assets a on a.name = strikememes.asset_name
+                                    ) as sub WHERE sub.row_number = {row}
+                                    """))[0]
+            keys = ('id', 't_id', 'funny_reaction', 'positive_reaction', 'negative_reaction')
         datadict = dict(zip(keys, data))
         return datadict
     except IndexError:
