@@ -4,7 +4,7 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
-from bot_statistics.stat import mongo_update_stat_new
+from bot_statistics.stat import mongo_update_stat_new, mongo_update_stat
 from data_base.DBuse import sql_safe_select, mongo_count_docs, sql_games_row_selecter, mongo_game_answer
 from handlers.story import true_resons_hand
 from states.preventstrike_states import PreventStrikeState
@@ -130,10 +130,7 @@ async def prevent_strike_hitler_did_it(message: Message, state: FSMContext):
 @router.message(F.text == 'Нет, продолжим разговор ⏱', flags=flags)
 async def prevent_strike_end_point(message: Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='game_i_show_u', value='Пропустили')
-    # TODO: await mongo_update_stat_new(tg_id=message.from_user.id, column='prevent_strike_fin', value='Да')
     await state.set_state(true_resons_hand.TruereasonsState.after_game)
-    # TODO: await mongo_update_stat(message.from_user.id, 'prevent_strike')
-    # TODO: await manual_filter_truereasons(message, state)
 
 
 @router.message(F.text == 'Да, хочу 🙂', flags=flags)
@@ -207,6 +204,7 @@ async def prevent_strike_sure_memes(message: Message):
                          disable_web_page_preview=True)
 
 
+@router.message(F.text == 'Нет, продолжим разговор ⏱', state=PreventStrikeState.before_game, flags=flags)
 @router.message(F.text == 'Продолжим 🙂', state=PreventStrikeState.after_game, flags=flags)
 @router.message(F.text == 'Да, закончим ✋', state=PreventStrikeState.memes, flags=flags)
 async def prevent_strike_do_you_agree(message: Message, state: FSMContext):
@@ -235,6 +233,8 @@ async def prevent_strike_honesty_time(message: Message, state: FSMContext):
     txt.replace('AA', luca_yes)
     txt.replace('BB', luca_no)
     txt.replace('CC', luca_idk)
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='prevent_strike_fin', value='Да')
+    await mongo_update_stat(message.from_user.id, 'prevent_strike')
     await state.set_state(WarGoalsState.main)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Продолжим 👌'))
