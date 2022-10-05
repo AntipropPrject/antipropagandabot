@@ -1,4 +1,4 @@
-from aiogram import Router, F, Bot, Dispatcher
+from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.exceptions import TelegramBadRequest
@@ -11,7 +11,7 @@ from data_base.DBuse import sql_safe_select, mongo_count_docs
 from filters.MapFilters import FakeGoals, WarGoals
 from filters.MapFilters import OperationWar
 from handlers.story.preventive_strike import prevent_strike_any_brutality
-from resources.all_polls import welc_message_one, true_and_idk_goals
+from resources.all_polls import welc_message_one
 from resources.variables import mobilisation_date
 from states.stopwar_states import StopWarState
 from states.true_goals_states import TrueGoalsState, WarGoalsState
