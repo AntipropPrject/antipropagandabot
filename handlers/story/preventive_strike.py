@@ -7,6 +7,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from bot_statistics.stat import mongo_update_stat_new, mongo_update_stat
 from data_base.DBuse import sql_safe_select, mongo_count_docs, sql_games_row_selecter, mongo_game_answer
 from handlers.story import true_resons_hand
+from resources.all_polls import welc_message_one
 from states.preventstrike_states import PreventStrikeState
 from states.true_goals_states import WarGoalsState
 from utilts import simple_media, CoolPercReplacer, game_answer
@@ -127,10 +128,10 @@ async def prevent_strike_hitler_did_it(message: Message, state: FSMContext):
     await simple_media(message, 'prevent_strike_hitler_did_it', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(F.text == 'Нет, продолжим разговор ⏱', flags=flags)
+@router.message(F.text == 'Нет, продолжим разговор ⏱', state=PreventStrikeState.before_game, flags=flags)
 async def prevent_strike_end_point(message: Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='game_i_show_u', value='Пропустили')
-    await state.set_state(true_resons_hand.TruereasonsState.after_game)
+    await prevent_strike_do_you_agree(message, state)
 
 
 @router.message(F.text == 'Да, хочу 🙂', flags=flags)
@@ -204,7 +205,6 @@ async def prevent_strike_sure_memes(message: Message):
                          disable_web_page_preview=True)
 
 
-@router.message(F.text == 'Нет, продолжим разговор ⏱', state=PreventStrikeState.before_game, flags=flags)
 @router.message(F.text == 'Продолжим 🙂', state=PreventStrikeState.after_game, flags=flags)
 @router.message(F.text == 'Да, закончим ✋', state=PreventStrikeState.memes, flags=flags)
 async def prevent_strike_do_you_agree(message: Message, state: FSMContext):
@@ -222,13 +222,16 @@ async def prevent_strike_do_you_agree(message: Message, state: FSMContext):
 async def prevent_strike_honesty_time(message: Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='preventive_final_result', value=message.text)
 
-    luca_all = await mongo_count_docs('database', 'statistics_new', {'preventive_final_result': {'$exists': True}})
+    luca_all = await mongo_count_docs('database', 'statistics_new', {'preventive_final_result': {'$exists': True},
+                                      'war_aims_ex': welc_message_one[1]})
     luca_yes = await mongo_count_docs('database', 'statistics_new',
                                       {'preventive_final_result': 'Скорее да, это лишь предлог 👌'})
     luca_idk = await mongo_count_docs('database', 'statistics_new',
-                                      {'preventive_final_result': 'Скорее нет, это настоящая причина 🙅‍♂️'})
+                                      {'preventive_final_result': 'Скорее нет, это настоящая причина 🙅‍♂️',
+                                      'war_aims_ex': welc_message_one[1]})
     luca_no = await mongo_count_docs('database', 'statistics_new',
-                                     {'preventive_final_result': 'Затрудняюсь ответить 🤷‍♀️'})
+                                     {'preventive_final_result': 'Затрудняюсь ответить 🤷‍♀️',
+                                      'war_aims_ex': welc_message_one[1]})
     txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'prevent_strike_honesty_time'}), luca_all)
     txt.replace('AA', luca_yes)
     txt.replace('BB', luca_no)
