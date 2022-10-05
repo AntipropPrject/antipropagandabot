@@ -62,7 +62,7 @@ async def main():
         print('Tickets checking is disabled, so noone will know...')
 
     scheduler = AsyncIOScheduler()
-    scheduler.add_job(user_returner, 'interval', hours=1)
+    # scheduler.add_job(user_returner, 'interval', hours=1)
     scheduler.add_job(return_spam_send, 'interval', seconds=1)
     scheduler.start()
 
