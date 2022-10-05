@@ -91,7 +91,7 @@ async def goals_sort_reveal(message: Message, state: FSMContext):
     var_aims['❌ 👪 Защитить русских в Донбассе'] = round(russians_donbass / all_count * 100)
     var_aims['❌ 🛡 Предотвратить вторжение на территорию России или ДНР/ЛНР'] = round(
         prevent_the_invasion / all_count * 100)
-    var_aims['❌ 🤬 Денацификация / Уничтожить нацистов'] = round(denazification / all_count * 100)
+    var_aims['❌ ' + welc_message_one[2]] = round(denazification / all_count * 100)
     var_aims['❌ 💣 Демилитаризация / Снижение военной мощи'] = round(demilitarization / all_count * 100)
     var_aims['❓ 🗺 Вернуть России исторические земли / Объединить русский народ'] = round(
         unite_russian / all_count * 100)
