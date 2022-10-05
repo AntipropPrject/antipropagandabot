@@ -5,7 +5,8 @@ from aiogram import Router
 from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError
 
 from bata import all_data
-from data_base.DBuse import mongo_update_viewed_news, mongo_pop_news, mongo_update, sql_safe_select, mongo_easy_upsert
+from data_base.DBuse import mongo_update_viewed_news, mongo_pop_news, mongo_update, sql_safe_select, mongo_easy_upsert, \
+    redis_just_one_write, redis_just_one_read
 from log.logg import send_to_chat, get_logger
 
 router = Router()
@@ -16,9 +17,9 @@ logger = get_logger('SPAM')
 
 
 async def start_spam(datet):
+    await redis_just_one_write('adversting: spam_count:', '0')
     asyncio.create_task(send_to_chat("Рассылка началась"))
     logger.info("Функция рассылки запущена")
-    print('start spam')
     date = datetime.strptime(datet, '%Y.%m.%d %H:%M')
     client = data.get_mongo()
     database = client['database']
@@ -36,20 +37,20 @@ async def start_spam(datet):
     async for n in main_news_base:
         main_news_list.append(n)
         main_news_ids.append(n['_id'])
-    count = 0
     logger.info('Начало рассылки')
     async for user in userinfo.find({'datetime_end': {'$lt': datetime.utcnow() - timedelta(days=1)}}):
-        if all_data().get_data_red().get(f"user_last_answer: {user['_id']}:") != '1':
-            asyncio.create_task(news_for_user(user, main_news_list, today_actual, main_news_ids))
-            count += 1
-        else:
-            asyncio.create_task(latecomers(user, main_news_list, today_actual, main_news_ids))
-            count += 1
+        if user.get('is_ban') is not True:
+            if all_data().get_data_red().get(f"user_last_answer: {user['_id']}:") != '1':
+                asyncio.create_task(news_for_user(user, main_news_list, today_actual, main_news_ids))
+            else:
+                asyncio.create_task(latecomers(user, main_news_list, today_actual, main_news_ids))
         await asyncio.sleep(0.033)
+
     try:
         asyncio.create_task(mongo_pop_news(m_id=today_actual['media'], coll='actu'))
     except:
         pass
+    count = int(await redis_just_one_read('adversting: spam_count:'))
     logger.info(f'Рассылка завершена, сообщение получили {count}')
     asyncio.create_task(send_to_chat(f"Рассылка завершена\n\nБыло отправлено: +-{count} сообщений"))
 
@@ -79,11 +80,14 @@ async def news_for_user(user, main_news_base, today_actual, main_news_ids):
                     await mongo_update_viewed_news(user_id, main_news['_id'])
 
         else:
-            print('Главные новости для пользователя кончились, а актуальной не было')
+            #print('Главные новости для пользователя кончились, а актуальной не было')
+            pass
 
 
 async def send_spam(user_id, caption, media_id=None):
     try:
+        count = int(await redis_just_one_read('adversting: spam_count:'))
+        await redis_just_one_write('adversting: spam_count:', f'{count+1}')
         if caption and media_id is None:
             await bot.send_message(chat_id=int(user_id), text=caption)
         else:
@@ -97,9 +101,9 @@ async def send_spam(user_id, caption, media_id=None):
                     await bot.send_video(chat_id=int((user_id)), video=(media_id))
                 except TelegramBadRequest:
                     await bot.send_photo(chat_id=int(user_id), photo=(media_id))
+
     except TelegramForbiddenError:
         await mongo_update(int(user_id), 'userinfo', 'is_ban')
-        print(f"ПОЛЬЗОВАТЕЛЬ {user_id} -- Заблокировал бота")
 
 
 async def user_returner():
