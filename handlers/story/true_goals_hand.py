@@ -92,20 +92,17 @@ async def goals_sort_reveal(message: Message, state: FSMContext):
                                         {'war_aims_ex': {'$regex': "Предотвратить секретные разработки"}})
     all_count = pwr_ukr + nato + putins_reting + russians_donbass + prevent_the_invasion + denazification + \
                 demilitarization + unite_russian + secret_dev
-    var_aims['✅ ♻️ Сменить власть на Украине / Сделать её лояльной России'] = round(pwr_ukr / all_count * 100)
-    var_aims['❌ 💂 Предотвратить размещение военных баз НАТО на Украине'] = round(nato / all_count * 100)
-    var_aims['❓ 📈 Повысить рейтинг доверия Владимира Путина'] = round(putins_reting / all_count * 100)
-    var_aims['❌ 👪 Защитить русских в Донбассе'] = round(russians_donbass / all_count * 100)
-    var_aims['❌ 🛡 Предотвратить вторжение на территорию России или ДНР/ЛНР'] = round(
-        prevent_the_invasion / all_count * 100)
+    var_aims['✅ ' + welc_message_one[4]] = round(pwr_ukr / all_count * 100)
+    var_aims['❌ ' + welc_message_one[5]] = round(nato / all_count * 100)
+    var_aims['❓ ' + welc_message_one[6]] = round(putins_reting / all_count * 100)
+    var_aims['❌ ' + welc_message_one[0]] = round(russians_donbass / all_count * 100)
+    var_aims['❌ ' + welc_message_one[1]] = round(prevent_the_invasion / all_count * 100)
     var_aims['❌ ' + welc_message_one[2]] = round(denazification / all_count * 100)
-    var_aims['❌ 💣 Демилитаризация / Снижение военной мощи'] = round(demilitarization / all_count * 100)
-    var_aims['❓ 🗺 Вернуть России исторические земли / Объединить русский народ'] = round(
-        unite_russian / all_count * 100)
-    var_aims['❌ 🤯 Предотвратить секретные разработки: биологическое оружие / ядерное оружие'] = round(
-        secret_dev / all_count * 100)
+    var_aims['❌ ' + welc_message_one[3]] = round(demilitarization / all_count * 100)
+    var_aims['❓ ' + welc_message_one[7]] = round(unite_russian / all_count * 100)
+    var_aims['❌ ' + welc_message_one[8]] = round(secret_dev / all_count * 100)
 
-    sorted_dict = dict(sorted(var_aims.items(), key=lambda x: x[1]))
+    sorted_dict = dict(sorted(var_aims.items(), key=lambda x: x[1], reverse=True))
     result_text = await sql_safe_select('text', 'texts', {'name': 'goals_sort_hided'})
     result_text = result_text + '\n\n'
     for text, value in sorted_dict.items():
@@ -147,7 +144,7 @@ async def goals_no_truth_for_us(message: Message, state: FSMContext):
     data = await state.get_data()
     sorted_dict = data['sorted_dict']
     result_text = await sql_safe_select('text', 'texts', {'name': 'goals_sort_reveal'})
-    result_text = result_text + '\n '
+    result_text = result_text + '\n'
     for text, value in sorted_dict.items():
         result_text = result_text + (str(text[:1]) + '  — ' + str(value) + '% ' + str(text[1:])) + '\n'
     await state.update_data(sorted_dict=sorted_dict)

@@ -6,7 +6,6 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from bot_statistics.stat import mongo_update_stat_new, mongo_update_stat
 from data_base.DBuse import sql_safe_select, mongo_count_docs, sql_games_row_selecter, mongo_game_answer
-from handlers.story import true_resons_hand
 from resources.all_polls import welc_message_one
 from states.preventstrike_states import PreventStrikeState
 from states.true_goals_states import WarGoalsState
@@ -223,12 +222,12 @@ async def prevent_strike_honesty_time(message: Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='preventive_final_result', value=message.text)
 
     luca_all = await mongo_count_docs('database', 'statistics_new', {'preventive_final_result': {'$exists': True},
-                                      'war_aims_ex': welc_message_one[1]})
+                                                                     'war_aims_ex': welc_message_one[1]})
     luca_yes = await mongo_count_docs('database', 'statistics_new',
                                       {'preventive_final_result': 'Скорее да, это лишь предлог 👌'})
     luca_idk = await mongo_count_docs('database', 'statistics_new',
                                       {'preventive_final_result': 'Скорее нет, это настоящая причина 🙅‍♂️',
-                                      'war_aims_ex': welc_message_one[1]})
+                                       'war_aims_ex': welc_message_one[1]})
     luca_no = await mongo_count_docs('database', 'statistics_new',
                                      {'preventive_final_result': 'Затрудняюсь ответить 🤷‍♀️',
                                       'war_aims_ex': welc_message_one[1]})
