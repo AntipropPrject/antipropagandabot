@@ -6,76 +6,116 @@ from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
-from data_base.DBuse import poll_write, sql_safe_select, poll_get, redis_delete_from_list
+from data_base.DBuse import poll_write, sql_safe_select, poll_get, redis_delete_from_list, mongo_count_docs
 from filters.MapFilters import DonbassOptionsFilter
 from handlers.story.true_resons_hand import TruereasonsState
 from keyboards.main_keys import filler_kb
 from resources.all_polls import donbass_first_poll, welc_message_one
 from states.donbass_states import donbass_state
-from utilts import simple_media
-
-
-async def DonbassManualFilter(message: Message, state: FSMContext):
-    don_answ = await poll_get(f"Usrs: {message.from_user.id}: Donbass_polls: First:")
-    if donbass_first_poll[2] in don_answ:
-        await donbas_OOH(message, state)
-    elif donbass_first_poll[4] in don_answ:
-        await donbas_only_war_objects(message)
-    elif donbass_first_poll[5] in don_answ:
-        await donbas_live_shield_start(message)
-    elif donbass_first_poll[6] in don_answ:
-        await donbas_why_not_surrender(message)
-    elif donbass_first_poll[7] in don_answ:
-        await donbas_more_reasons(message, state)
-    else:
-        await donbas_who_do_that(message, state)
-
+from utilts import simple_media, CoolPercReplacer
 
 flags = {"throttling_key": "True"}
 router = Router()
 router.message.filter(state=donbass_state)
+router.poll_answer.filter(state=donbass_state)
 
 
-@router.message(F.text == 'Что главное? 🤔', flags=flags)
+async def donbass_big_tragedy(message: Message, state: FSMContext):
+    await state.set_state(donbass_state.start)
+    text = await sql_safe_select('text', 'texts', {'name': 'donbass_big_tragedy'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.add(types.KeyboardButton(text='Помню ✔️'))
+    nmarkup.add(types.KeyboardButton(text='Не помню 🤔️'))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message(F.text.in_({'Помню ✔️', 'Не помню 🤔️'}), state=donbass_state.start, flags=flags)
 async def donbass_chart_1(message: Message):
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.add(types.KeyboardButton(text='Да, знал(а) 👌'))
-    nmarkup.add(types.KeyboardButton(text='Нет, не знал(а) 🤔'))
+    nmarkup.add(types.KeyboardButton(text='Продолжай ⏳'))
     nmarkup.row(types.KeyboardButton(text='Что значит «гражданские»? 👨‍👩‍👧‍👦'))
     nmarkup.adjust(2, 1)
     await simple_media(message, 'donbass_chart_1', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(text_contains='значит', content_types=types.ContentType.TEXT, text_ignore_case=True, flags=flags)
+@router.message((F.text.contains('Что значит')), state=donbass_state.start, flags=flags)
 async def eight_years_add(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'donbas_years_add'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.add(types.KeyboardButton(text='Да, знал(а) 👌'))
-    nmarkup.add(types.KeyboardButton(text='Нет, не знал(а) 🤔'))
+    nmarkup.add(types.KeyboardButton(text='Продолжай ⏳'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.contains('знал')), flags=flags)
+@router.message((F.text == 'Продолжай ⏳'), state=donbass_state.start, flags=flags)
 async def donbass_chart_2(message: Message, state: FSMContext):
-    await state.set_state(donbass_state.eight_years_selection)
+    await state.set_state(donbass_state.poll)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.add(types.KeyboardButton(text='Покажи варианты ✍️'))
     await simple_media(message, 'donbass_chart_2', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(donbass_state.eight_years_selection, (F.text.contains('Покажи варианты ✍️')), flags=flags)
-async def donbass_poll(message: Message):
+@router.message((F.text.contains('Покажи варианты ✍️')), state=donbass_state.poll, flags=flags)
+async def donbas_args_poll(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'donbas_args_poll'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.add(types.KeyboardButton(text='Продолжить'))
-    await message.answer_poll("Отметьте один или более вариантов, с которыми вы согласны или частично согласны",
-                              donbass_first_poll, is_anonymous=False, allows_multiple_answers=True,
+    await message.answer_poll(text, donbass_first_poll, is_anonymous=False, allows_multiple_answers=True,
                               reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(donbass_state.eight_years_selection, (F.text == 'Продолжить'), flags=flags)
+@router.message(donbass_state.poll, (F.text == 'Продолжить'), flags=flags)
 async def poll_filler(message: types.Message):
     await message.answer('Чтобы продолжить — отметьте варианты выше и нажмите «ГОЛОСОВАТЬ» или «VOTE»',
                          reply_markup=ReplyKeyboardRemove())
+
+
+@router.poll_answer(state=donbass_state.poll)
+async def donbass_arguments_result(poll_answer: types.PollAnswer, bot: Bot, state: FSMContext):
+    await state.set_state(donbass_state.after_poll)
+    text = await sql_safe_select('text', 'texts', {'name': 'donbass_arguments_result'})
+
+    answers_indexes = poll_answer.option_ids
+    user_answers = list()
+    for index in answers_indexes:
+        answer = donbass_first_poll[index]
+        user_answers.append(answer)
+        await poll_write(f'Usrs: {poll_answer.user.id}: Donbas_poll:', answer)
+    await mongo_update_stat_new(tg_id=poll_answer.user.id, column='donbass_ex', value=user_answers)
+
+    if answers_indexes == [0]:
+        await mongo_update_stat_new(tg_id=poll_answer.user.id, column='donbas_poll_summary',
+                                    value='🤝 Согласились без возражений')
+    else:
+        if 0 in answers_indexes:
+            await mongo_update_stat_new(tg_id=poll_answer.user.id, column='donbas_poll_summary',
+                                        value='☝️ Согласились, но возразили')
+        else:
+            await mongo_update_stat_new(tg_id=poll_answer.user.id, column='donbas_poll_summary',
+                                        value='🙅‍♂️ Не согласились и возразили')
+
+    sorted_dict = await CoolPercReplacer.make_sorted_statistics_dict('donbass_ex', donbass_first_poll[1:])
+    sorted_text = str()
+    for item in sorted_dict:
+        line = str(sorted_dict[item]) + '%: ' + item + '\n\n'
+        sorted_text += line
+    text = text.replace('[[LIST]]', sorted_text)
+
+    all_sumary = await mongo_count_docs('database', 'statistics_new', {'donbas_poll_summary': {'$exists': True}})
+    agree_sumary = await mongo_count_docs('database', 'statistics_new',
+                                          {'donbas_poll_summary': '🤝 Согласились без возражений'})
+    agree_but_sumary = await mongo_count_docs('database', 'statistics_new',
+                                              {'donbas_poll_summary': '☝️ Согласились, но возразили'})
+    not_agree_sumary = await mongo_count_docs('database', 'statistics_new',
+                                              {'donbas_poll_summary': '🙅‍♂️ Не согласились и возразили'})
+    txt = CoolPercReplacer(text, all_sumary)
+    txt.replace('XX', agree_sumary)
+    txt.replace('YY', agree_but_sumary)
+    txt.replace('ZZ', not_agree_sumary)
+
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text='Продолжим 👉'))
+    await bot.send_message(poll_answer.user.id, txt(),
+                           reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 # Тут удвоение первого поста каждой ветки, потому что нам надо отвечать СРАЗУ после опроса

@@ -17,12 +17,13 @@ from handlers.shop import shop_welcome
 from handlers.story import true_resons_hand
 from handlers.story import main_menu_hand
 from handlers.story.anti_prop_hand import antip_what_is_prop
+from handlers.story.donbass_hand import donbass_big_tragedy
 from handlers.story.main_menu_hand import mainmenu_really_menu
 from handlers.story.preventive_strike import prevent_strike_any_brutality
 from handlers.story.putin_hand import stopwar_start
 from handlers.story.stopwar_hand import stopwar_first_manipulation_argument
 from handlers.story.true_goals_hand import goals_war_point_now
-from handlers.story.true_resons_hand import reasons_who_to_blame, donbass_big_tragedy
+from handlers.story.true_resons_hand import reasons_who_to_blame
 from handlers.story.welcome_messages import message_2
 from handlers.story.welcome_stories import start_how_to_manipulate
 from states.antiprop_states import propaganda_victim
