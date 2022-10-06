@@ -233,10 +233,10 @@ async def stopwar_must_watch_all(message: Message):
 
 @router.message((F.text.in_({"✅ Скорее да, был непредвзят", "❌ Скорее нет, был предвзят", "🤷‍♂️ Не знаю"})),
                 state=StopWarState.must_watch, flags=flags)
-async def stopwar_old_start(message: Message, state: FSMContext):
+async def stopwar_thanks_for_time(message: Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='CredibleBot', value=message.text)
     await state.set_state(StopWarState.main)
-    text = await sql_safe_select('text', 'texts', {'name': 'goals_thanks_for_time'})
+    text = await sql_safe_select('text', 'texts', {'name': 'stopwar_thanks_for_time'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Что же? 🤔"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
