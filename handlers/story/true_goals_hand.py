@@ -2,7 +2,7 @@ from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.exceptions import TelegramBadRequest
-from aiogram.types import Message
+from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from bot_statistics.stat import mongo_update_stat_new, mongo_update_stat
@@ -249,7 +249,8 @@ async def goals_add_goals_poll(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'goals_add_goals_poll'})
     answers = await poll_get(f'Usrs: {message.from_user.id}: TrueGoals: NotChosenFakeGoals:')
     answers.append('Я передумал(а). Не хочу обсуждать ничего из вышеперечисленного.')
-    await message.answer_poll(text, answers, allows_multiple_answers=True, is_anonymous=False)
+    await message.answer_poll(text, answers, allows_multiple_answers=True, is_anonymous=False,
+                              reply_markup=ReplyKeyboardRemove())
 
 
 @router.poll_answer(state=TrueGoalsState.more_goals_poll, flags=flags)
