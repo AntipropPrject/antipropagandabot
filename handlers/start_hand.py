@@ -165,7 +165,7 @@ async def command_shop(message: Message, state: FSMContext):
     await shop_welcome(message, state)
 
 
-@router.message(IsAdmin(level=['Тестирование']), commands=["commands_сlear"], flags=flags)
+@router.message(IsAdmin(level=['Тестирование']), commands=["commands_clear"], flags=flags)
 async def commands_restore(message: Message, bot: Bot, state: FSMContext):
     await MasterCommander(bot, 'chat', message.from_user.id).clear()
 
