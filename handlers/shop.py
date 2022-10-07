@@ -109,7 +109,6 @@ async def shop_welcome(message: types.Message, state: FSMContext):
 async def shop_after_first_poll(poll_answer: types.PollAnswer, bot: Bot, state: FSMContext):
     await mongo_update_stat_new(tg_id=poll_answer.user.id, column='shop_after_first_poll',
                                 value=poll_answer.option_ids[0])
-    print(poll_answer.option_ids[0])
     right_answers = await mongo_count_docs('database', 'statistics_new', {'shop_after_first_poll': 2})
     all_answers = await mongo_count_docs('database', 'statistics_new', {'shop_after_first_poll': {'$exists': True}})
     await state.set_state(Shop.after_first_poll)

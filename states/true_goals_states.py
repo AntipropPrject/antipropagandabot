@@ -35,6 +35,7 @@ class WarGoalsState(StatesGroup):
 
 
 class Shop(StatesGroup):
+    shop_callback_child_saved = State()
     main = State()
     after_first_poll = State()
     shop_transfer = State()
