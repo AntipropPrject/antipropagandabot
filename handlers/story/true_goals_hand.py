@@ -1,8 +1,8 @@
-from aiogram import Router, F, Bot, Dispatcher
+from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.exceptions import TelegramBadRequest
-from aiogram.types import Message
+from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from bot_statistics.stat import mongo_update_stat_new, mongo_update_stat
@@ -10,7 +10,8 @@ from data_base.DBuse import poll_get, poll_write, del_key, data_getter, mongo_ga
 from data_base.DBuse import sql_safe_select, mongo_count_docs
 from filters.MapFilters import FakeGoals, WarGoals
 from filters.MapFilters import OperationWar
-from resources.all_polls import welc_message_one, true_and_idk_goals
+from handlers.story.preventive_strike import prevent_strike_any_brutality
+from resources.all_polls import welc_message_one
 from resources.variables import mobilisation_date
 from states.stopwar_states import StopWarState
 from states.true_goals_states import TrueGoalsState, WarGoalsState
@@ -91,20 +92,17 @@ async def goals_sort_reveal(message: Message, state: FSMContext):
                                         {'war_aims_ex': {'$regex': "Предотвратить секретные разработки"}})
     all_count = pwr_ukr + nato + putins_reting + russians_donbass + prevent_the_invasion + denazification + \
                 demilitarization + unite_russian + secret_dev
-    var_aims['✅ ♻️ Сменить власть на Украине / Сделать её лояльной России'] = round(pwr_ukr / all_count * 100)
-    var_aims['❌ 💂 Предотвратить размещение военных баз НАТО на Украине'] = round(nato / all_count * 100)
-    var_aims['❓ 📈 Повысить рейтинг доверия Владимира Путина'] = round(putins_reting / all_count * 100)
-    var_aims['❌ 👪 Защитить русских в Донбассе'] = round(russians_donbass / all_count * 100)
-    var_aims['❌ 🛡 Предотвратить вторжение на территорию России или ДНР/ЛНР'] = round(
-        prevent_the_invasion / all_count * 100)
-    var_aims['❌ 🤬 Денацификация / Уничтожить нацистов'] = round(denazification / all_count * 100)
-    var_aims['❌ 💣 Демилитаризация / Снижение военной мощи'] = round(demilitarization / all_count * 100)
-    var_aims['❓ 🗺 Вернуть России исторические земли / Объединить русский народ'] = round(
-        unite_russian / all_count * 100)
-    var_aims['❌ 🤯 Предотвратить секретные разработки: биологическое оружие / ядерное оружие'] = round(
-        secret_dev / all_count * 100)
+    var_aims['✅ ' + welc_message_one[4]] = round(pwr_ukr / all_count * 100)
+    var_aims['❌ ' + welc_message_one[5]] = round(nato / all_count * 100)
+    var_aims['❓ ' + welc_message_one[6]] = round(putins_reting / all_count * 100)
+    var_aims['❌ ' + welc_message_one[0]] = round(russians_donbass / all_count * 100)
+    var_aims['❌ ' + welc_message_one[1]] = round(prevent_the_invasion / all_count * 100)
+    var_aims['❌ ' + welc_message_one[2]] = round(denazification / all_count * 100)
+    var_aims['❌ ' + welc_message_one[3]] = round(demilitarization / all_count * 100)
+    var_aims['❓ ' + welc_message_one[7]] = round(unite_russian / all_count * 100)
+    var_aims['❌ ' + welc_message_one[8]] = round(secret_dev / all_count * 100)
 
-    sorted_dict = dict(sorted(var_aims.items(), key=lambda x: x[1]))
+    sorted_dict = dict(sorted(var_aims.items(), key=lambda x: x[1], reverse=True))
     result_text = await sql_safe_select('text', 'texts', {'name': 'goals_sort_hided'})
     result_text = result_text + '\n\n'
     for text, value in sorted_dict.items():
@@ -146,7 +144,7 @@ async def goals_no_truth_for_us(message: Message, state: FSMContext):
     data = await state.get_data()
     sorted_dict = data['sorted_dict']
     result_text = await sql_safe_select('text', 'texts', {'name': 'goals_sort_reveal'})
-    result_text = result_text + '\n '
+    result_text = result_text + '\n'
     for text, value in sorted_dict.items():
         result_text = result_text + (str(text[:1]) + '  — ' + str(value) + '% ' + str(text[1:])) + '\n'
     await state.update_data(sorted_dict=sorted_dict)
@@ -251,7 +249,8 @@ async def goals_add_goals_poll(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'goals_add_goals_poll'})
     answers = await poll_get(f'Usrs: {message.from_user.id}: TrueGoals: NotChosenFakeGoals:')
     answers.append('Я передумал(а). Не хочу обсуждать ничего из вышеперечисленного.')
-    await message.answer_poll(text, answers, allows_multiple_answers=True, is_anonymous=False)
+    await message.answer_poll(text, answers, allows_multiple_answers=True, is_anonymous=False,
+                              reply_markup=ReplyKeyboardRemove())
 
 
 @router.poll_answer(state=TrueGoalsState.more_goals_poll, flags=flags)
@@ -321,7 +320,6 @@ async def goals_preventive_start(message: Message, state: FSMContext):
     await simple_media(message, 'goals_preventive_start', nmarkup.as_markup(resize_keyboard=True), txt())
 
 
-
 @router.message((F.text == "Пропустим 👉"), state=WarGoalsState.preventive_enter, flags=flags)
 async def goals_pls_use_goal_prev(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'goals_pls_use_goal'})
@@ -332,10 +330,9 @@ async def goals_pls_use_goal_prev(message: Message):
 
 
 @router.message((F.text.contains("🛡")), state=WarGoalsState.preventive_enter, flags=flags)
-async def goals_preventive_enterence(message: Message):
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text='Кнопка'))
-    await message.answer('Начало превентивного удара, но пока что ничего', reply_markup=nmarkup.as_markup())
+async def goals_preventive_enterence(message: Message, state: FSMContext):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='prevent_strike_start', value='Да')
+    await prevent_strike_any_brutality(message, state)
 
 
 @router.message(WarGoals(goal=welc_message_one[2]), ((F.text.contains("Уверен(а), проп")) | (F.text == "Кнопка")) |
@@ -351,7 +348,6 @@ async def goals_nazi_start(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text='Начнём 🙋‍♂️'))
     nmarkup.row(types.KeyboardButton(text='Пропустим 👉'))
     await simple_media(message, 'goals_nazi_start', nmarkup.as_markup(resize_keyboard=True), txt())
-
 
 
 @router.message((F.text == "Пропустим 👉"), state=WarGoalsState.nazi_enter, flags=flags)

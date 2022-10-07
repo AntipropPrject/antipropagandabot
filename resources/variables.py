@@ -19,5 +19,6 @@ all_test_commands = {
     'putest': 'Путин (reasons_who_to_blame)',
     'testend': 'Концовка перед таймером (stopwar_first_manipulation_argument)',
     'mainskip69': 'Главное меню (mainmenu_really_menu)',
-    'commands_restore': '❗️Убрать все тестовые команды❗️'
+    'commands_clear': 'Сбросить команды на стандартный для всех юзеров набор',
+    'commands_restore': 'Получить все тестовые команды в меню'
 }

@@ -17,13 +17,16 @@ from handlers.shop import shop_welcome
 from handlers.story import true_resons_hand
 from handlers.story import main_menu_hand
 from handlers.story.anti_prop_hand import antip_what_is_prop
+from handlers.story.donbass_hand import donbass_big_tragedy
 from handlers.story.main_menu_hand import mainmenu_really_menu
+from handlers.story.preventive_strike import prevent_strike_any_brutality
 from handlers.story.putin_hand import stopwar_start
 from handlers.story.stopwar_hand import stopwar_first_manipulation_argument
 from handlers.story.true_goals_hand import goals_war_point_now
-from handlers.story.true_resons_hand import reasons_who_to_blame, donbass_big_tragedy
+from handlers.story.true_resons_hand import reasons_who_to_blame
 from handlers.story.welcome_messages import message_2
 from handlers.story.welcome_stories import start_how_to_manipulate
+from resources.variables import all_test_commands
 from states.antiprop_states import propaganda_victim
 from states.main_menu_states import MainMenuStates
 from states.true_goals_states import TrueGoalsState
@@ -116,7 +119,7 @@ async def cmd_mainskip(message: Message, state: FSMContext):
 
 @router.message(IsAdmin(level=['Тестирование']), commands=["teststrike"], flags=flags)
 async def cmd_teststrike(message: Message, state: FSMContext):
-    await true_resons_hand.prevent_strike_start(message, state)
+    await prevent_strike_any_brutality(message, state)
 
 
 @router.message(IsAdmin(level=['Тестирование']), commands=["putest"], flags=flags)
@@ -140,11 +143,6 @@ async def cmd_donbass(message: Message, state: FSMContext):
     await stopwar_start(message, state)
 
 
-@router.message(IsAdmin(level=['Тестирование']), commands=["commands_restore"], flags=flags)
-async def commands_restore(message: Message, bot: Bot, state: FSMContext):
-    await MasterCommander(bot, 'chat', message.from_user.id).clear()
-
-
 @router.message(IsAdmin(level=['Тестирование']), commands=["test_reasons"], flags=flags)
 async def commands_test_reasons(message: Message, bot: Bot, state: FSMContext):
     await message_2(message, state)
@@ -165,3 +163,13 @@ async def command_test_goals(message: Message, state: FSMContext):
 @router.message(IsAdmin(level=['Тестирование']), commands=['shop'], flags=flags)
 async def command_shop(message: Message, state: FSMContext):
     await shop_welcome(message, state)
+
+
+@router.message(IsAdmin(level=['Тестирование']), commands=["commands_clear"], flags=flags)
+async def commands_restore(message: Message, bot: Bot, state: FSMContext):
+    await MasterCommander(bot, 'chat', message.from_user.id).clear()
+
+
+@router.message(IsAdmin(level=['Тестирование']), commands=["commands_restore"], flags=flags)
+async def commands_restore(message: Message, bot: Bot, state: FSMContext):
+    await MasterCommander(bot, 'chat', message.from_user.id).add(all_test_commands)

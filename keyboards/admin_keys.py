@@ -43,6 +43,7 @@ def games_keyboard(t_id=None):
     nmarkup.row(types.KeyboardButton(text="Путин (Обещания) 🍜"))
     nmarkup.row(types.KeyboardButton(text="Игра Абсурда 🗯"))
     nmarkup.row(types.KeyboardButton(text="Игра Нацизма 💤"))
+    nmarkup.row(types.KeyboardButton(text="Превентивный удар 🐓"))
     nmarkup.row(types.KeyboardButton(text="Вернуться в меню администрирования"))
     nmarkup.adjust(2)
     return nmarkup.as_markup(resize_keyboard=True, input_field_placeholder=random.choice(usless_list))
