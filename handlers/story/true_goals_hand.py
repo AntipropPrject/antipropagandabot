@@ -1,3 +1,5 @@
+import asyncio
+
 from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
@@ -5,11 +7,13 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
+from bata import all_data
 from bot_statistics.stat import mongo_update_stat_new, mongo_update_stat
 from data_base.DBuse import poll_get, poll_write, del_key, data_getter, mongo_game_answer, redis_delete_from_list
 from data_base.DBuse import sql_safe_select, mongo_count_docs
 from filters.MapFilters import FakeGoals, WarGoals
 from filters.MapFilters import OperationWar
+from handlers.story.donbass_hand import donbass_big_tragedy
 from handlers.story.preventive_strike import prevent_strike_any_brutality
 from resources.all_polls import welc_message_one
 from resources.variables import mobilisation_date
@@ -269,6 +273,8 @@ async def goals_answer(update: types.PollAnswer | Message, bot: Bot, state: FSMC
     else:
         user = update.from_user
     await del_key(f"Usrs: {user.id}: TrueGoals: NotChosenFakeGoals:")
+    await bot.send_message(user.id, await sql_safe_select('text', 'texts', {'name': 'goals_answer'}))
+    await asyncio.sleep(all_data().THROTTLE_TIME)
     await router.parent_router.feed_update(bot, fake_message(user, "Уверен(а), проп"))
 
 
@@ -298,10 +304,10 @@ async def goals_pls_use_goal(message: Message):
 
 
 @router.message((F.text.contains("👪")), state=WarGoalsState.donbas_enter, flags=flags)
-async def goals_donbas_enterence(message: Message):
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text='Кнопка'))
-    await message.answer('Начало Донбасса, но пока что ничего', reply_markup=nmarkup.as_markup())
+async def goals_donbas_enterence(message: Message, state: FSMContext):
+    # await mongo_update_stat_new(tg_id=message.from_user.id, column='prevent_strike_start', value='Да')
+    await donbass_big_tragedy(message, state)
+
 
 
 @router.message(WarGoals(goal=welc_message_one[1]), ((F.text.contains("Уверен(а), проп")) | (F.text == "Кнопка") |
