@@ -14,10 +14,9 @@ class DonbassOptionsFilter(BaseFilter):
     option: Union[str, list]
 
     async def __call__(self, message: Message) -> bool:
-        user_lies = await poll_get(f'Usrs: {message.from_user.id}: Donbass_polls: First:')
-        for lie in user_lies:
-            if int(lie.find(self.option)) != -1:
-                return True
+        user_lies = await poll_get(f'Usrs: {message.from_user.id}: Donbas_poll:')
+        if self.option in user_lies:
+            return True
         return False
 
 
@@ -142,12 +141,13 @@ class WarReason(BaseFilter):
 
 class WarGoals(BaseFilter):
     goal: str
+    inversed = False
 
     async def __call__(self, message: Message):
         reason_list = await poll_get(f'Usrs: {message.from_user.id}: TrueGoals: UserFakeGoals:')
         if self.goal in reason_list:
-            return True
-        return False
+            return not self.inversed
+        return self.inversed
 
 
 class PutinFilter(BaseFilter):
