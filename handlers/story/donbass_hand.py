@@ -12,7 +12,7 @@ from handlers.story.true_resons_hand import TruereasonsState
 from keyboards.main_keys import filler_kb
 from resources.all_polls import donbass_first_poll, welc_message_one
 from states.donbass_states import donbass_state
-from states.true_goals_states import TrueGoalsState
+from states.true_goals_states import TrueGoalsState, WarGoalsState
 from utilts import simple_media
 
 
@@ -525,6 +525,7 @@ async def donbas_no_army_here(message: Message):
     nmarkup.row(types.KeyboardButton(text="Нет, не замечаю🤷‍♀"))
     await simple_media(message, 'donbass_no_male', nmarkup.as_markup(resize_keyboard=True))
 
+
 async def lnr_mobilization(message: Message):
     await mongo_update_stat(message.from_user.id, 'donbass')
     nmarkup = ReplyKeyboardBuilder()
@@ -532,10 +533,11 @@ async def lnr_mobilization(message: Message):
     nmarkup.row(types.KeyboardButton(text="Давай продолжим 👉"))
     await simple_media(message, 'lnr_mobilization', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
+
 @router.message((F.text == "Скорее да, это лишь предлог 👌") | (F.text == "Скорее нет, это настоящая причина 🙅‍♂️") |
                 (F.text == "Затрудняюсь ответить 🤷‍♀️"), flags=flags)
 async def donbass_honest_result(message: Message, state: FSMContext):
-    await state.set_state(TrueGoalsState.main)
+    await state.set_state(WarGoalsState.main)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжим 👌"))
     text = await sql_safe_select('text', 'texts', {'name': 'donbass_honest_result'})
