@@ -12,6 +12,7 @@ from handlers.story.true_resons_hand import TruereasonsState
 from keyboards.main_keys import filler_kb
 from resources.all_polls import donbass_first_poll, welc_message_one
 from states.donbass_states import donbass_state
+from states.true_goals_states import TrueGoalsState
 from utilts import simple_media
 
 
@@ -33,7 +34,7 @@ async def DonbassManualFilter(message: Message, state: FSMContext):
 
 flags = {"throttling_key": "True"}
 router = Router()
-router.message.filter(state=donbass_state)
+router.message.filter()
 
 
 @router.message(F.text == 'Что главное? 🤔', flags=flags)
@@ -79,7 +80,7 @@ async def poll_filler(message: types.Message):
 
 
 # Тут удвоение первого поста каждой ветки, потому что нам надо отвечать СРАЗУ после опроса
-@router.poll_answer(state=donbass_state.eight_years_selection)
+@router.poll_answer(state=donbass_state.eight_years_selection, flags=flags)
 async def poll_answer_handler(poll_answer: types.PollAnswer, bot: Bot, state: FSMContext):
     await state.set_state(donbass_state.after_poll)
     indexes = poll_answer.option_ids
@@ -508,10 +509,9 @@ async def donbas_hypocrisy(message: Message):
 @router.message((F.text == "Вообще-то, наших войск не было в ДНР/ ЛНР все эти 8 лет 🙅"), flags=flags)
 async def donbas_untrue(message: Message):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='donbass_end', value='Наших не было в ЛДНР')
-    text = await sql_safe_select('text', 'texts', {'name': 'donbas_untrue'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Хорошо 👌"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await simple_media(message, 'donbas_untrue', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text == "Продолжай ⏳") | (F.text == 'Хорошо 👌'), flags=flags)
@@ -527,10 +527,19 @@ async def donbas_no_army_here(message: Message):
 
 
 @router.message((F.text == "Да, замечаю  😯") | (F.text == "Нет, не замечаю🤷‍♀"), flags=flags)
-async def lnr_mobilization(message: Message, state: FSMContext):
-    await state.set_state(TruereasonsState.main)
+async def lnr_mobilization(message: Message):
     await mongo_update_stat(message.from_user.id, 'donbass')
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Какой ужас 😨"))
     nmarkup.row(types.KeyboardButton(text="Давай продолжим 👉"))
-    await simple_media(message, 'lnr_mobilization', nmarkup.as_markup(resize_keyboard=True))
+    await simple_media(message, 'lnr_mobilization', reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
+
+@router.message((F.text == "Скорее да, это лишь предлог 👌") | (F.text == "Скорее нет, это настоящая причина 🙅‍♂️") |
+                (F.text == "Затрудняюсь ответить 🤷‍♀️"), flags=flags)
+async def donbass_honest_result(message: Message, state: FSMContext):
+    await state.set_state(TrueGoalsState.main)
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Продолжим 👌"))
+    text = await sql_safe_select('text', 'texts', {'name': 'donbass_honest_result'})
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))

@@ -305,8 +305,8 @@ async def goals_donbas_enterence(message: Message):
     await message.answer('Начало Донбасса, но пока что ничего', reply_markup=nmarkup.as_markup())
 
 
-@router.message(WarGoals(goal=welc_message_one[1]), ((F.text.contains("Уверен(а), проп")) | (F.text == "Кнопка")),
-                state=WarGoalsState, flags=flags)
+@router.message(WarGoals(goal=welc_message_one[1]), ((F.text.contains("Уверен(а), проп")) | (F.text == "Кнопка") |
+                                                     (F.text == "Продолжим 👌")), state=WarGoalsState, flags=flags)
 async def goals_preventive_start(message: Message, state: FSMContext):
     await state.set_state(WarGoalsState.preventive_enter)
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: TrueGoals: UserFakeGoals:', welc_message_one[1])
@@ -338,8 +338,8 @@ async def goals_preventive_enterence(message: Message):
     await message.answer('Начало превентивного удара, но пока что ничего', reply_markup=nmarkup.as_markup())
 
 
-@router.message(WarGoals(goal=welc_message_one[2]), ((F.text.contains("Уверен(а), проп")) | (F.text == "Кнопка")),
-                state=WarGoalsState, flags=flags)
+@router.message(WarGoals(goal=welc_message_one[2]), ((F.text.contains("Уверен(а), проп")) | (F.text == "Кнопка")) |
+                (F.text == "Продолжим 👌"), state=WarGoalsState, flags=flags)
 async def goals_nazi_start(message: Message, state: FSMContext):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: TrueGoals: UserFakeGoals:', welc_message_one[2])
     await state.set_state(WarGoalsState.nazi_enter)
@@ -371,7 +371,7 @@ async def goals_nazi_enterence(message: Message):
 
 
 @router.message(WarGoals(goal=welc_message_one[3]),
-                ((F.text.contains("Уверен(а), проп")) | (F.text.in_({"Кнопка"}))),
+                ((F.text.contains("Уверен(а), проп")) | (F.text.in_({"Кнопка"})) | (F.text == "Продолжим 👌")),
                 state=WarGoalsState, flags=flags)
 async def goals_demilitari_start(message: Message, state: FSMContext):
     await state.set_state(WarGoalsState.demilitari)
