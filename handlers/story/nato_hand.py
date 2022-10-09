@@ -21,7 +21,7 @@ from keyboards.map_keys import antip_killme_kb
 from resources.all_polls import antip_q1_options, antip_q2_options, antip_q3_options
 from resources.variables import release_date
 from states.antiprop_states import propaganda_victim
-from states.true_goals_states import TrueGoalsState
+from states.true_goals_states import TrueGoalsState, WarGoalsState
 from utilts import simple_media, dynamic_media_answer, simple_media_bot, simple_video_album, CoolPercReplacer
 
 from states.nato_states import Nato_states
@@ -34,6 +34,8 @@ router = Router()
 
 
 @router.message(commands='nato')
+@router.message((F.text.contains('Хорошо, обсудим 💂')) , flags=flags,
+                state=WarGoalsState.donbas_enter)
 async def nato_start(message: Message, bot: Bot, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'nato_start'})
     await state.set_state(Nato_states.nato_start)
@@ -283,7 +285,7 @@ async def nato_pre_end(message: Message, bot: Bot, state: FSMContext):
 
 @router.message(state=Nato_states.nato_pre_end, flags=flags)
 async def nato_end(message: Message, bot: Bot, state: FSMContext):
-    await state.set_state(Nato_states.nato_pre_end)
+    await state.set_state(WarGoalsState.main)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжим 👌"))
     try:
