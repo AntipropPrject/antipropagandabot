@@ -257,12 +257,12 @@ async def start_now_you_putin(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'start_now_you_putin'})
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Начну военную операцию ⚔️"))
-    nmarkap.row(types.KeyboardButton(text="Не стану этого делать 🙅‍♂️"))
+    nmarkap.row(types.KeyboardButton(text="Не стану этого делать 🕊"))
     nmarkap.row(types.KeyboardButton(text="Затрудняюсь  ответить  🤷‍♀️"))
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.in_({"Начну военную операцию ⚔️", "Не стану этого делать 🙅‍♂️",
+@router.message((F.text.in_({"Начну военную операцию ⚔️", "Не стану этого делать 🕊",
                              "Затрудняюсь  ответить  🤷‍♀️"})), flags=flags)
 async def start_now_you_putin_results(message: Message, bot: Bot):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='start_now_you_putin_results',
@@ -275,7 +275,7 @@ async def start_now_you_putin_results(message: Message, bot: Bot):
                                    'Сторонник спецоперации ⚔️')
         await mongo_update_stat_new(tg_id=message.from_user.id, column='NewPolitStat_start',
                                     value='Сторонник спецоперации')
-    elif "Переходить к мирным переговорам 🕊" in user_answers and "Не стану этого делать 🙅‍♂️" in user_answers:
+    elif "Переходить к мирным переговорам 🕊" in user_answers and "Не стану этого делать 🕊" in user_answers:
         status = 'Противник войны 🕊'
         await redis_just_one_write(f'Usrs: {message.from_user.id}: Start_answers: NewPolitStat:', 'Противник войны 🕊')
         await mongo_update_stat_new(tg_id=message.from_user.id, column='NewPolitStat_start', value='Противник войны')
@@ -295,7 +295,7 @@ async def start_now_you_putin_results(message: Message, bot: Bot):
         database = client.database
         collection = database['statistics_new']
         war = await collection.count_documents({'start_now_you_putin_results': 'Начну военную операцию ⚔️'})
-        stop_war = await collection.count_documents({'start_now_you_putin_results': 'Не стану этого делать 🙅‍♂️'})
+        stop_war = await collection.count_documents({'start_now_you_putin_results': 'Не стану этого делать 🕊'})
         hz = await collection.count_documents({'start_now_you_putin_results': 'Затрудняюсь  ответить  🤷‍♀️'})
         all_people = war + stop_war + hz
         text = text.replace('XX', f"{(round(war / all_people * 100, 1) if all_people > 0 else 'N/A')}")

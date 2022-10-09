@@ -53,12 +53,12 @@ async def stopwar_question_2(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_question_2'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Начну военную операцию ⚔️"))
-    nmarkup.row(types.KeyboardButton(text="Не стану этого делать 🙅‍♂️"))
+    nmarkup.row(types.KeyboardButton(text="Не стану этого делать 🕊"))
     nmarkup.row(types.KeyboardButton(text="Затрудняюсь ответить 🤷‍♀️"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.in_({"Начну военную операцию ⚔️", "Не стану этого делать 🙅‍♂️",
+@router.message((F.text.in_({"Начну военную операцию ⚔️", "Не стану этого делать 🕊",
                              "Затрудняюсь ответить 🤷‍♀️"})), state=StopWarState.must_watch, flags=flags)
 async def stopwar_here_they_all(message: Message, bot: Bot):
     await mongo_update_stat_new(message.from_user.id, 'stopwar_will_you_start_war', value=message.text)
@@ -68,7 +68,7 @@ async def stopwar_here_they_all(message: Message, bot: Bot):
                                    'Сторонник спецоперации ⚔️')
         await mongo_update_stat_new(tg_id=message.from_user.id, column='NewPolitStat_end',
                                     value='Сторонник спецоперации')
-    elif first_question[0] == "Переходить к мирным переговорам 🕊" and message.text == "Не стану этого делать 🙅‍♂️":
+    elif first_question[0] == "Переходить к мирным переговорам 🕊" and message.text == "Не стану этого делать 🕊":
         await redis_just_one_write(f'Usrs: {message.from_user.id}: StopWar: NewPolitStat:',
                                    'Противник войны 🕊')
         await mongo_update_stat_new(tg_id=message.from_user.id, column='NewPolitStat_end',
