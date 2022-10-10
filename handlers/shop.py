@@ -131,6 +131,7 @@ async def shop_after_first_poll(poll_answer: types.PollAnswer, bot: Bot, state: 
 
 @router.message(Shop.after_first_poll, F.text.contains("Посетить магазин"), flags=flags)
 @router.message(Shop.shop_why_so_many, F.text.contains("Посетить магазин"), flags=flags)
+@router.message(Shop.shop_transfer, F.text.contains("Посетить магазин"), flags=flags)
 async def shop_transfer(message: types.Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='shop_transfer', value="+")
     await state.set_state(Shop.shop_transfer)
