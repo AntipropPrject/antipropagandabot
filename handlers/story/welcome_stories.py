@@ -249,11 +249,11 @@ async def start_are_you_ready(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'start_are_you_ready'})
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Продолжим 👌"))
-    nmarkap.row(types.KeyboardButton(text="Дай ссылку на лекцию про моральную сторону убийства 🔫"))
+    nmarkap.row(types.KeyboardButton(text="Дай ссылку на лекцию про моральную сторону убийства 🛤"))
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Дай ссылку на лекцию про моральную сторону убийства 🔫"), flags=flags)
+@router.message((F.text == "Дай ссылку на лекцию про моральную сторону убийства 🛤"), flags=flags)
 async def start_good_lecture(message: Message):
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Продолжим 👌"))
