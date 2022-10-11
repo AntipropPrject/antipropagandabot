@@ -442,24 +442,16 @@ async def stopwar_I_told_you_everything(message: Message):
     nmarkup.row(types.KeyboardButton(text="Я передумал(а). Важно, чтобы россияне поняли — война им не нужна 🕊"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
-
 @router.message(((F.text.contains('Я передумал(а). Важно, чтобы россияне поняли — война им не нужна 🕊')) |
                  (F.text.contains('Да, согласен(а), это остановит войну 🕊')) |
                  (F.text.contains('Да нет, я согласен(а), важно, чтобы россияне поняли — война им не нужна 🕊')) |
                  (F.text.contains('Ну не знаю... 🤷‍♀️')) |
                  (F.text.contains('Это разумные аргументы. Важно, чтобы россияне поняли — война им не нужна 🕊')) |
                  (F.text.contains('Согласен(а), важно, чтобы россияне поняли — война им не нужна 🕊'))), flags=flags)
-async def stopwar_timer(message: Message, bot: Bot):
-    await mongo_update_stat_new(tg_id=message.from_user.id, column='will_they_stop', value=message.text)
-    text_1 = await sql_safe_select('text', 'texts', {'name': 'stopwar_hello_world'})
-    link = await ref_master(bot, message.from_user.id)
-    text_2 = re.sub('(?<=href\=\")(.*?)(?=\")', link,
-                    (await sql_safe_select('text', 'texts', {'name': 'stopwar_send_me'})))
-    text_3 = await sql_safe_select('text', 'texts', {'name': 'stopwar_send_the_message'})
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Какие советы? 🤔"))
-    nmarkup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
+
+async def stopwar_pre_timer(message: Message):
     user_info = await mongo_select_info(message.from_user.id)
+    text_1 = await sql_safe_select('text', 'texts', {'name': 'stopwar_pre_timer'})
     date_start = user_info['datetime'].replace('_', ' ')
     usertime = datetime.strptime(date_start, "%d-%m-%Y %H:%M")
     time_bot = datetime.strptime(datetime.strftime(datetime.now(), "%d-%m-%Y %H:%M"), "%d-%m-%Y %H:%M") - usertime
@@ -471,13 +463,29 @@ async def stopwar_timer(message: Message, bot: Bot):
         time = f"{days} д. {hours} ч. {minutes} мин"
     else:
         time = f"{hours} ч. {minutes} мин"
+
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Получить ссылку 🎉"))
+    await message.answer(text_1.replace('[YY:YY]', str(time)), disable_web_page_preview=True)
+
+
+@router.message((F.text == "Получить ссылку 🎉"), flags=flags)
+async def stopwar_timer(message: Message, bot: Bot):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='will_they_stop', value=message.text)
+    link = await ref_master(bot, message.from_user.id)
+    text_2 = re.sub('(?<=href\=\")(.*?)(?=\")', link,
+                    (await sql_safe_select('text', 'texts', {'name': 'stopwar_send_me'})))
+    text_3 = await sql_safe_select('text', 'texts', {'name': 'stopwar_send_the_message'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Какие советы? 🤔"))
+    nmarkup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
+    user_info = await mongo_select_info(message.from_user.id)
     if user_info['datetime_end'] is None:
         sec = 299
         markup = ReplyKeyboardBuilder()
         markup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
         bot_message = await message.answer('5:00')
         try:
-            await message.answer(text_1.replace('[YY:YY]', str(time)), disable_web_page_preview=True)
             await message.answer(text_2, disable_web_page_preview=True)
             await message.answer(text_3, reply_markup=nmarkup.as_markup(resize_keyboard=True),
                                  disable_web_page_preview=True)
@@ -506,7 +514,6 @@ async def stopwar_timer(message: Message, bot: Bot):
     else:
         await del_key(f'Usrs: {message.from_user.id}: count:')
         try:
-            await message.answer(text_1.replace('[YY:YY]', str(time)), disable_web_page_preview=True)
             await message.answer(text_2, disable_web_page_preview=True)
             await message.answer(text_3, reply_markup=nmarkup.as_markup(resize_keyboard=True),
                                  disable_web_page_preview=True)
