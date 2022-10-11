@@ -285,38 +285,11 @@ async def start_red_pill(message: Message):
 
 
 @router.message((F.text == 'Я понимаю, готов(а) продолжить 👌'), flags=flags)
-async def start_dumb_dam(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'start_dumb_dam'})
-    nmarkap = ReplyKeyboardBuilder()
-    nmarkap.row(types.KeyboardButton(text="Ничего не  буду делать  🙅‍♂️"))
-    nmarkap.add(types.KeyboardButton(text="Взорву дамбу 💥"))
-    await simple_media(message, "start_dumb_dam", nmarkap.as_markup(resize_keyboard=True))
-
-
-@router.message(F.text.in_({"Ничего не  буду делать  🙅‍♂️", "Взорву дамбу 💥"}), flags=flags)
-async def start_dam_results(message: Message):
-    await mongo_update_stat_new(tg_id=message.from_user.id, column='start_dam_results',
-                                value=message.text)
-    text = await sql_safe_select('text', 'texts', {'name': 'start_dam_results'})
-
-    try:
-        client = all_data().get_mongo()
-        database = client.database
-        collection = database['statistics_new']
-        passive = await collection.count_documents({'start_dam_results': 'Ничего не  буду делать  🙅‍♂️'})
-        active = await collection.count_documents({'start_dam_results': 'Взорву дамбу 💥'})
-        all_people = passive + active
-        text = text.replace('XX', f"{(round(passive / all_people * 100, 1) if all_people > 0 else 'N/A')}")
-        text = text.replace('YY', f"{(round(active / all_people * 100, 1) if all_people > 0 else 'N/A')}")
-    except Exception as e:
-        print(e)
-        text = text.replace('XX', 'N/A')
-        text = text.replace('YY', 'N/A')
-
+async def start_key_questions(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'start_key_questions'})
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Задавай вопросы 👌"))
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
-
 
 @router.message((F.text == "Задавай вопросы 👌"), flags=flags)
 async def start_continue_or_peace(message: Message):
