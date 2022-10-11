@@ -30,15 +30,6 @@ router = Router()
 router.message.filter(state=propaganda_victim)
 
 
-@router.message((F.text.contains('такое пропаганда')), flags=flags, state=propaganda_victim.next_0)
-async def antip_what_is_prop(message: Message, state: FSMContext):
-    text = await sql_safe_select('text', 'texts', {'name': 'antip_what_is_prop'})
-    nmarkap = ReplyKeyboardBuilder()
-    await state.set_state(propaganda_victim.next_0)
-    nmarkap.row(types.KeyboardButton(text="Продолжай ⏳"))
-    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
-
-
 @router.message((F.text == "Продолжай ⏳"), flags=flags, state=propaganda_victim.next_0)
 async def antip_black_and_white(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_black_and_white'})

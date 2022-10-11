@@ -125,7 +125,7 @@ async def start_result_loss(message: Message):
 
 
 @router.message((F.text.contains('такое пропаганда')), flags=flags)
-async def antip_what_is_prop(message: Message):
+async def start_what_is_prop(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_what_is_prop'})
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Давай 👌"))
