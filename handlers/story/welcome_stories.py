@@ -26,8 +26,113 @@ async def start_why_belive(message: types.Message):
     text = await sql_safe_select("text", "texts", {"name": "start_why_belive"})
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
+@router.message((F.text.contains("Начнём 🇷🇺🇺🇦")), flags=flags)
+async def start_why_communicate(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'start_why_communicate'})
+    nmarkap = ReplyKeyboardBuilder()
+    nmarkap.row(types.KeyboardButton(text="Хочу узнать правду о кофликте России и Украины 🇷🇺🇺🇦"))
+    nmarkap.row(types.KeyboardButton(text="Хочу получить советы по поводу мобилизации 🪖"))
+    nmarkap.row(types.KeyboardButton(text="Да просто знакомые уговорили пообщаться 🤷‍♂️"))
+    nmarkap.row(types.KeyboardButton(text="Другое 🤔"))
+    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
-@router.message((F.text.contains('Начнём 🇷🇺🇺🇦')), flags=flags)
+@router.message((F.text.contains("Хочу узнать правду")), flags=flags)
+async def start_info_first(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'start_info_first'})
+    nmarkap = ReplyKeyboardBuilder()
+    nmarkap.row(types.KeyboardButton(text="Хорошо 👌"))
+    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+
+@router.message((F.text.contains("Хочу получить советы")), flags=flags)
+async def start_info_second(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'start_info_second'})
+    nmarkap = ReplyKeyboardBuilder()
+    nmarkap.row(types.KeyboardButton(text="Хорошо 👌"))
+    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+
+@router.message((F.text.contains("уговорили пообщаться")), flags=flags)
+async def start_info_third(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'start_info_third'})
+    nmarkap = ReplyKeyboardBuilder()
+    nmarkap.row(types.KeyboardButton(text="Хорошо 👌"))
+    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+
+@router.message((F.text.contains("Другое 🤔")), flags=flags)
+async def start_info_fourth(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'start_info_fourth'})
+    nmarkap = ReplyKeyboardBuilder()
+    nmarkap.row(types.KeyboardButton(text="Хорошо 👌"))
+    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+
+@router.message((F.text.contains("Хорошо 👌")), flags=flags)
+async def start_info_fourth(message: Message):
+    nmarkap = ReplyKeyboardBuilder()
+    nmarkap.row(types.KeyboardButton(text="На частичную мобилизацию 🧍‍♂️"))
+    nmarkap.row(types.KeyboardButton(text="На общую мобилизацию 🧍‍♂️🧍‍♂️🧍‍♂️"))
+    nmarkap.row(types.KeyboardButton(text="Затрудняюсь ответить 🤷‍♀️"))
+    await simple_media(message, 'start_putin_mobilization', reply_markup=nmarkap.as_markup(resize_keyboard=True))
+
+@router.message((F.text.in_({"На частичную мобилизацию 🧍‍♂️", "На общую мобилизацию 🧍‍♂️🧍‍♂️🧍‍♂️",
+                             "Затрудняюсь ответить 🤷‍♀️"})), flags=flags)
+async def goals_mobilisation_result(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='goals_mobilisation', value=message.text)
+    text = await sql_safe_select('text', 'texts', {'name': 'goals_mobilisation_result'})
+
+    m_all = await mongo_count_docs('database', 'statistics_new', {'goals_mobilisation': {'$exists': True}})
+    m_part = await mongo_count_docs('database', 'statistics_new',
+                                    {'goals_mobilisation': "На частичную мобилизацию 🧍‍♂️"})
+    m_full = await mongo_count_docs('database', 'statistics_new',
+                                    {'goals_mobilisation': "На общую мобилизацию 🧍‍♂️🧍‍♂️🧍‍♂️"})
+    a_idk = await mongo_count_docs('database', 'statistics_new', {'goals_mobilisation': "Затрудняюсь ответить 🤷‍♀️"})
+
+    txt = CoolPercReplacer(text, m_all)
+    txt.replace("AA", m_part)
+    txt.replace("BB", m_full)
+    txt.replace("CC", a_idk)
+
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Продолжим 👌"))
+    await message.answer(txt(), reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+@router.message((F.text.contains("Хорошо 👌")), flags=flags)
+async def start_shoigu_loss(message: Message):
+    nmarkap = ReplyKeyboardBuilder()
+    nmarkap.row(types.KeyboardButton(text="Да, доверяю 👍"))
+    nmarkap.row(types.KeyboardButton(text="Думаю погибло больше ☹️"))
+    nmarkap.row(types.KeyboardButton(text="Затрудняюсь ответить 🤷‍♀️"))
+    await simple_media(message, 'start_shoigu_loss', reply_markup=nmarkap.as_markup(resize_keyboard=True))
+
+@router.message((F.text.in_({"Да, доверяю 👍", "Думаю погибло больше ☹️",
+                             "Затрудняюсь ответить 🤷‍♀️"})), flags=flags)
+async def start_result_loss(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='start_result_loss', value=message.text)
+    text = await sql_safe_select('text', 'texts', {'name': 'start_result_loss'})
+
+    m_all = await mongo_count_docs('database', 'statistics_new', {'start_result_loss': {'$exists': True}})
+    m_part = await mongo_count_docs('database', 'statistics_new', {'start_result_loss': "Да, доверяю 👍"})
+    m_full = await mongo_count_docs('database', 'statistics_new', {'start_result_loss': "Думаю погибло больше ☹️"})
+    a_idk = await mongo_count_docs('database', 'statistics_new', {'start_result_loss': "Затрудняюсь ответить 🤷‍♀️"})
+
+    txt = CoolPercReplacer(text, m_all)
+    txt.replace("AA", m_part)
+    txt.replace("BB", m_full)
+    txt.replace("CC", a_idk)
+
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Давай 👌"))
+    nmarkup.row(types.KeyboardButton(text="Что такое пропаганда? 🤔"))
+    await message.answer(txt(), reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message((F.text.contains('такое пропаганда')), flags=flags)
+async def antip_what_is_prop(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'antip_what_is_prop'})
+    nmarkap = ReplyKeyboardBuilder()
+    nmarkap.row(types.KeyboardButton(text="Давай 👌"))
+    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+
+
+@router.message((F.text.contains('Давай 👌')), flags=flags)
 async def start_is_war_bad(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'start_is_war_bad'})
     nmarkap = ReplyKeyboardBuilder()
