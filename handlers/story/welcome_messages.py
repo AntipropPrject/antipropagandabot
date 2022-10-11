@@ -117,11 +117,19 @@ async def poll_filler(message: types.Message):
 async def start_do_you_love_politics(message: types.Message, state: FSMContext):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Скорее да  🙂"), types.KeyboardButton(text="Скорее нет  🙅‍♂"))
+    markup.row(types.KeyboardButton(text="Начал(а) интересоваться из-за мобилизации (после 21 сентября) 🪖"))
     markup.row(types.KeyboardButton(text="Начал(а) интересоваться после 24 февраля 🇷🇺🇺🇦"))
     text = await sql_safe_select("text", "texts", {"name": "start_do_you_love_politics"})
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     await state.set_state(welcome_states.start_dialog.dialogue_6)
 
+@router.message(F.text.contains('после 21 сентября'), welcome_states.start_dialog.dialogue_6, flags=flags)
+async def start_mobilisation_polit(message: types.Message, state: FSMContext):
+    text = await sql_safe_select("text", "texts", {"name": "start_mobilisation_polit"})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Хорошо, продолжим 👌"))
+    await state.set_state(welcome_states.start_dialog.dialogue_6)
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 @router.message((F.text.contains('Скорее да') | F.text.contains('продолжим')),
                 welcome_states.start_dialog.dialogue_6, flags=flags)
