@@ -310,7 +310,6 @@ async def goals_donbas_enterence(message: Message, state: FSMContext):
     await donbass_big_tragedy(message, state)
 
 
-
 @router.message(WarGoals(goal=welc_message_one[1]), ((F.text.contains("Уверен(а), проп")) | (F.text == "Кнопка") |
                                                      (F.text == "Продолжим 👌")), state=WarGoalsState, flags=flags)
 async def goals_preventive_start(message: Message, state: FSMContext):
@@ -739,42 +738,53 @@ async def goals_putin_face(message: Message, state: FSMContext):
 async def goals_mobilisation(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'goals_mobilisation'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="На частичную мобилизацию 🧍‍♂️"))
-    nmarkup.add(types.KeyboardButton(text="На общую мобилизацию 🧍‍♂️🧍‍♂️🧍‍♂️"))
+    nmarkup.row(types.KeyboardButton(text="Какой вопрос 🤔"))
+    await simple_media(message, 'goals_mobilisation', nmarkup.as_markup(resize_keyboard=True))
+
+
+@router.message(F.text == "Какой вопрос 🤔", state=TrueGoalsState.putin_next, flags=flags)
+async def goals_how_many_mobs(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'goals_how_many_mobs'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Около 300 тысяч, как и обещали 👌"))
+    nmarkup.row(types.KeyboardButton(text="Меньше 300 тыс. человек 🔻"))
+    nmarkup.add(types.KeyboardButton(text="Больше 300 тыс. человек 🔺"))
     nmarkup.row(types.KeyboardButton(text="Затрудняюсь ответить 🤷‍♀️"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.in_({"На частичную мобилизацию 🧍‍♂️", "На общую мобилизацию 🧍‍♂️🧍‍♂️🧍‍♂️",
-                             "Затрудняюсь ответить 🤷‍♀️"})), state=TrueGoalsState.putin_next, flags=flags)
-async def goals_mobilisation_result(message: Message, state: FSMContext):
+@router.message((F.text.in_({"Около 300 тысяч, как и обещали 👌", "Меньше 300 тыс. человек 🔻",
+                             "Больше 300 тыс. человек 🔺", "Затрудняюсь ответить 🤷‍♀️"})),
+                state=TrueGoalsState.putin_next, flags=flags)
+async def goals_how_many_mobs_result(message: Message, state: FSMContext):
     await state.set_state(TrueGoalsState.putin_next_next)
-    await mongo_update_stat_new(tg_id=message.from_user.id, column='goals_mobilisation', value=message.text)
-    text = await sql_safe_select('text', 'texts', {'name': 'goals_mobilisation_result'})
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='goals_many_mobs', value=message.text)
+    text = await sql_safe_select('text', 'texts', {'name': 'goals_how_many_mobs_result'})
 
-    m_all = await mongo_count_docs('database', 'statistics_new', {'goals_mobilisation': {'$exists': True}})
-    m_part = await mongo_count_docs('database', 'statistics_new',
-                                    {'goals_mobilisation': "На частичную мобилизацию 🧍‍♂️"})
-    m_full = await mongo_count_docs('database', 'statistics_new',
-                                    {'goals_mobilisation': "На общую мобилизацию 🧍‍♂️🧍‍♂️🧍‍♂️"})
-    a_idk = await mongo_count_docs('database', 'statistics_new', {'goals_mobilisation': "Затрудняюсь ответить 🤷‍♀️"})
+    m_all = await mongo_count_docs('database', 'statistics_new', {'goals_many_mobs': {'$exists': True}})
+    m_300 = await mongo_count_docs('database', 'statistics_new',
+                                    {'goals_many_mobs': "Около 300 тысяч, как и обещали 👌"})
+    m_less = await mongo_count_docs('database', 'statistics_new',
+                                    {'goals_many_mobs': "Меньше 300 тыс. человек 🔻"})
+    m_more = await mongo_count_docs('database', 'statistics_new', {'goals_many_mobs': "Больше 300 тыс. человек 🔺"})
+    m_idk = await mongo_count_docs('database', 'statistics_new', {'goals_many_mobs': "Затрудняюсь ответить 🤷‍♀️"})
 
     txt = CoolPercReplacer(text, m_all)
-    txt.replace("AA", m_part)
-    txt.replace("BB", m_full)
-    txt.replace("CC", a_idk)
+    txt.replace("AA", m_300)
+    txt.replace("BB", m_less)
+    txt.replace("CC", m_more)
+    txt.replace("DD", m_idk)
 
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
+    nmarkup.row(types.KeyboardButton(text="Узнать правильный ответ 📊"))
     await message.answer(txt(), reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(F.text == "Продолжай ⏳", state=TrueGoalsState.putin_next_next, flags=flags)
-async def goals_they_need_blood(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'goals_they_need_blood'})
+@router.message(F.text == "Узнать правильный ответ 📊", state=TrueGoalsState.putin_next_next, flags=flags)
+async def goals_more_than_300(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Давай 👌"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await simple_media(message, 'goals_more_than_300', nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message(F.text == "Давай 👌", state=TrueGoalsState.putin_next_next, flags=flags)
