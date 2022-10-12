@@ -14,6 +14,7 @@ from data_base.DBuse import data_getter, poll_write, sql_safe_select, redis_dele
 from filters.MapFilters import NaziFilter, RusHate_pr, NotNaziFilter
 from handlers.story import true_resons_hand
 from resources.all_polls import nazizm, nazizm_pr
+from states.true_goals_states import WarGoalsState
 from utilts import simple_media
 
 
@@ -589,7 +590,7 @@ async def putin_in_the_past(message: Message, state: FSMContext):
     if message.text == 'Пропустим игру 🙅‍♂️':
         await mongo_update_stat_new(tg_id=message.from_user.id, column='game_ru_or_usr', value='Пропустили')
     await state.clear()
-    await state.set_state(true_resons_hand.TruereasonsState.main)
+    await state.set_state(WarGoalsState.main)
     await mongo_update_stat(message.from_user.id, 'nazi')
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжим 👌"))
