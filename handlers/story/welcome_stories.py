@@ -75,9 +75,9 @@ async def start_info_fourth(message: Message):
 
 @router.message((F.text.in_({"На частичную мобилизацию 🧍‍♂️", "На общую мобилизацию 🧍‍♂️🧍‍♂️🧍‍♂️",
                              "Затрудняюсь ответить 🤷‍♀️"})), flags=flags)
-async def goals_mobilisation_result(message: Message, state: FSMContext):
+async def start_mobilisation_result(message: Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='goals_mobilisation', value=message.text)
-    text = await sql_safe_select('text', 'texts', {'name': 'goals_mobilisation_result'})
+    text = await sql_safe_select('text', 'texts', {'name': 'start_mobilisation_result'})
 
     m_all = await mongo_count_docs('database', 'statistics_new', {'goals_mobilisation': {'$exists': True}})
     m_part = await mongo_count_docs('database', 'statistics_new',
