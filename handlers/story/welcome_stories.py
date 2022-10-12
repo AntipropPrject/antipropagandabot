@@ -107,7 +107,7 @@ async def start_shoigu_loss(message: Message, state: FSMContext):
 
 @router.message((F.text.in_({"Да, доверяю 👍", "Думаю погибло больше ☹️",
                              "Затрудняюсь ответить 🤷‍♀️"})), flags=flags)
-async def start_result_loss(message: Message):
+async def start_result_loss(message: Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='start_result_loss', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'start_result_loss'})
 
@@ -120,14 +120,14 @@ async def start_result_loss(message: Message):
     txt.replace("AA", m_part)
     txt.replace("BB", m_full)
     txt.replace("CC", a_idk)
-
+    await state.set_state(start_dialog.button_next_2)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Давай 👌"))
     nmarkup.row(types.KeyboardButton(text="Что такое пропаганда? 🤔"))
     await message.answer(txt(), reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.contains('такое пропаганда')), flags=flags)
+@router.message(start_dialog.button_next_2, (F.text.contains('такое пропаганда')), flags=flags)
 async def start_what_is_prop(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'start_what_is_prop'})
     nmarkap = ReplyKeyboardBuilder()
@@ -135,8 +135,9 @@ async def start_what_is_prop(message: Message):
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.contains('Давай 👌')), flags=flags)
-async def start_is_war_bad(message: Message):
+@router.message(start_dialog.button_next_2, (F.text.contains('Давай 👌')), flags=flags)
+async def start_is_war_bad(message: Message, state: FSMContext):
+    await state.set_state(start_dialog.big_story)
     text = await sql_safe_select('text', 'texts', {'name': 'start_is_war_bad'})
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Какой феномен? 🤔"))
