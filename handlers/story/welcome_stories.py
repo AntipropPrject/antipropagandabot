@@ -1,5 +1,6 @@
 from aiogram import Router, F, Bot
 from aiogram import types
+from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
@@ -74,7 +75,7 @@ async def start_info_fourth(message: Message):
 
 @router.message((F.text.in_({"На частичную мобилизацию 🧍‍♂️", "На общую мобилизацию 🧍‍♂️🧍‍♂️🧍‍♂️",
                              "Затрудняюсь ответить 🤷‍♀️"})), flags=flags)
-async def goals_mobilisation_result(message: Message):
+async def goals_mobilisation_result(message: Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='goals_mobilisation', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'goals_mobilisation_result'})
 
@@ -92,14 +93,16 @@ async def goals_mobilisation_result(message: Message):
 
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжим 👌"))
+    await state.set_state(start_dialog.button_next_1)
     await message.answer(txt(), reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
-@router.message((F.text.contains("Хорошо 👌")), flags=flags)
-async def start_shoigu_loss(message: Message):
+@router.message((F.text.contains("Продолжим 👌")), state=start_dialog.button_next_1,  flags=flags)
+async def start_shoigu_loss(message: Message, state: FSMContext):
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Да, доверяю 👍"))
     nmarkap.row(types.KeyboardButton(text="Думаю погибло больше ☹️"))
     nmarkap.row(types.KeyboardButton(text="Затрудняюсь ответить 🤷‍♀️"))
+    await state.set_state(start_dialog.big_story)
     await simple_media(message, 'start_shoigu_loss', reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 @router.message((F.text.in_({"Да, доверяю 👍", "Думаю погибло больше ☹️",
