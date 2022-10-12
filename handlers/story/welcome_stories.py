@@ -307,7 +307,7 @@ async def start_continue_or_peace(message: Message):
 
 @router.message((F.text.in_({"Продолжать военную операцию ⚔️", "Переходить к мирным переговорам 🕊",
                              "Затрудняюсь ответить 🤷‍♀️"})), flags=flags)
-async def start_continue_or_peace_results(message: Message):
+async def start_continue_or_peace_results(message: Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='start_continue_or_peace_results',
                                 value=message.text)
     await poll_write(f'Usrs: {message.from_user.id}: Start_answers: NewPolitList:', message.text)
@@ -328,13 +328,13 @@ async def start_continue_or_peace_results(message: Message):
         text = text.replace('XX', 'N/A')
         text = text.replace('YY', 'N/A')
         text = text.replace('ZZ', 'N/A')
-
+    await state.set_state(start_dialog.ask_1)
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Задавай 👌"))
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Задавай 👌"), flags=flags)
+@router.message(start_dialog.ask_1, (F.text == "Задавай 👌"), flags=flags)
 async def start_now_you_putin(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'start_now_you_putin'})
     nmarkap = ReplyKeyboardBuilder()
