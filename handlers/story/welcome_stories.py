@@ -76,15 +76,15 @@ async def start_info_fourth(message: Message):
 @router.message((F.text.in_({"На частичную мобилизацию 🧍‍♂️", "На общую мобилизацию 🧍‍♂️🧍‍♂️🧍‍♂️",
                              "Затрудняюсь ответить 🤷‍♀️"})), flags=flags)
 async def start_mobilisation_result(message: Message, state: FSMContext):
-    await mongo_update_stat_new(tg_id=message.from_user.id, column='goals_mobilisation', value=message.text)
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='start_mobilisation', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'start_mobilisation_result'})
 
-    m_all = await mongo_count_docs('database', 'statistics_new', {'goals_mobilisation': {'$exists': True}})
+    m_all = await mongo_count_docs('database', 'statistics_new', {'start_mobilisation': {'$exists': True}})
     m_part = await mongo_count_docs('database', 'statistics_new',
-                                    {'goals_mobilisation': "На частичную мобилизацию 🧍‍♂️"})
+                                    {'start_mobilisation': "На частичную мобилизацию 🧍‍♂️"})
     m_full = await mongo_count_docs('database', 'statistics_new',
-                                    {'goals_mobilisation': "На общую мобилизацию 🧍‍♂️🧍‍♂️🧍‍♂️"})
-    a_idk = await mongo_count_docs('database', 'statistics_new', {'goals_mobilisation': "Затрудняюсь ответить 🤷‍♀️"})
+                                    {'start_mobilisation': "На общую мобилизацию 🧍‍♂️🧍‍♂️🧍‍♂️"})
+    a_idk = await mongo_count_docs('database', 'statistics_new', {'start_mobilisation': "Затрудняюсь ответить 🤷‍♀️"})
 
     txt = CoolPercReplacer(text, m_all)
     txt.replace("AA", m_part)
