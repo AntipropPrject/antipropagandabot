@@ -15,7 +15,7 @@ from utilts import simple_media, ref_spy_sender, CoolPercReplacer
 flags = {"throttling_key": "True"}
 router = Router()
 
-router.message.filter(state=start_dialog.big_story)
+router.message.filter(state=(start_dialog))
 logger = get_logger('welcome_stories')
 
 
