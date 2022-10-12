@@ -319,11 +319,11 @@ async def start_continue_or_peace_results(message: Message, state: FSMContext):
         war = await collection.count_documents({'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'})
         stop_war = await collection.count_documents(
             {'start_continue_or_peace_results': 'Переходить к мирным переговорам 🕊'})
-        hz = await collection.count_documents({'start_continue_or_peace_results': 'Затрудняюсь ответить 🤷‍♀️'})
-        all_people = war + stop_war + hz
+        dont_know = await collection.count_documents({'start_continue_or_peace_results': 'Затрудняюсь ответить 🤷‍♀️'})
+        all_people = war + stop_war + dont_know
         text = text.replace('XX', f"{(round(war / all_people * 100, 1) if all_people > 0 else 'N/A')}")
         text = text.replace('YY', f"{(round(stop_war / all_people * 100, 1) if all_people > 0 else 'N/A')}")
-        text = text.replace('ZZ', f"{(round(hz / all_people * 100, 1) if all_people > 0 else 'N/A')}")
+        text = text.replace('ZZ', f"{(round(dont_know / all_people * 100, 1) if all_people > 0 else 'N/A')}")
     except:
         text = text.replace('XX', 'N/A')
         text = text.replace('YY', 'N/A')
