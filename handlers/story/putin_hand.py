@@ -12,6 +12,7 @@ from filters.MapFilters import PutinFilter
 from states.stopwar_states import StopWarState
 from utilts import simple_media
 
+# ----------- с версии 2.3 будет бессмысленный файл, пока оставлен для референсов ---------------------
 
 class StateofPutin(StatesGroup):
     main = State()
