@@ -16,7 +16,7 @@ from filters.isAdmin import IsAdmin
 from handlers.shop import shop_welcome
 from handlers.story import true_resons_hand
 from handlers.story import main_menu_hand
-from handlers.story.anti_prop_hand import antip_what_is_prop
+from handlers.story.anti_prop_hand import antip_wolves
 from handlers.story.donbass_hand import donbass_big_tragedy
 from handlers.story.main_menu_hand import mainmenu_really_menu
 from handlers.story.preventive_strike import prevent_strike_any_brutality
@@ -128,9 +128,9 @@ async def cmd_putest(message: Message, state: FSMContext):
 
 
 @router.message(IsAdmin(level=['Тестирование']), commands=["proptest"], flags=flags)
-async def cmd_putest(message: Message, state: FSMContext):
+async def cmd_putest(message: Message, bot: Bot, state: FSMContext):
     await state.set_state(propaganda_victim.start)
-    await antip_what_is_prop(message, state)
+    await antip_wolves(message.from_user, bot, state)
 
 
 @router.message(IsAdmin(level=['Тестирование']), commands=["donbass"], flags=flags)

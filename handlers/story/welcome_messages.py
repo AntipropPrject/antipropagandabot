@@ -9,6 +9,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
 from data_base.DBuse import poll_write, sql_safe_select, mongo_add, mongo_select, redis_just_one_write, \
     redis_just_one_read, mongo_count_docs
+from handlers.story.anti_prop_hand import antip_wolves
 from resources.all_polls import web_prop, welc_message_one, people_prop
 from resources.variables import release_date
 from states import welcome_states
@@ -345,11 +346,8 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
         await redis_just_one_write(f'Usrs: {poll_answer.user.id}: Politics:', 'Аполитичный')
         await mongo_update_stat(poll_answer.user.id, column='political_view', value='apolitical', options='$set')
         await mongo_update_stat_new(tg_id=poll_answer.user.id, column='polit_status', value='Аполитичный')
-    nmarkap = ReplyKeyboardBuilder()
-    nmarkap.row(types.KeyboardButton(text="Продолжай ⏳"))
-    await state.set_state(propaganda_victim.next_0)
     await redis_just_one_write(f'Usrs: {poll_answer.user.id}: INFOState:', 'Жертва пропаганды')
-    await simple_media_bot(bot, poll_answer.user.id, 'antip_wolves', reply_markup=nmarkap.as_markup(resize_keyboard=True))
+    await antip_wolves(poll_answer.user, bot, state)
 
 
 """    if data["answer_3"] == "Нет, не верю ни слову ⛔":

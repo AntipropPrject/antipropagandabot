@@ -5,7 +5,7 @@ from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.exceptions import TelegramBadRequest
-from aiogram.types import Message, ReplyKeyboardRemove
+from aiogram.types import Message, ReplyKeyboardRemove, User
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from bata import all_data
@@ -28,6 +28,13 @@ flags = {"throttling_key": "True"}
 router = Router()
 
 router.message.filter(state=propaganda_victim)
+
+
+async def antip_wolves(user: User, bot: Bot, state: FSMContext):
+    nmarkap = ReplyKeyboardBuilder()
+    nmarkap.row(types.KeyboardButton(text="Продолжай ⏳"))
+    await state.set_state(propaganda_victim.next_0)
+    await simple_media_bot(bot, user.id, 'antip_wolves', reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text == "Продолжай ⏳"), flags=flags, state=propaganda_victim.next_0)
