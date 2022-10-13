@@ -348,32 +348,4 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
         await mongo_update_stat_new(tg_id=poll_answer.user.id, column='polit_status', value='Аполитичный')
     await redis_just_one_write(f'Usrs: {poll_answer.user.id}: INFOState:', 'Жертва пропаганды')
     await antip_wolves(poll_answer.user, bot, state)
-
-
-"""    if data["answer_3"] == "Нет, не верю ни слову ⛔":
-        markup = ReplyKeyboardBuilder()
-        markup.row(types.KeyboardButton(text="Пропустим этот шаг 👉"))
-        markup.row(types.KeyboardButton(text="Покажи ложь на ТВ — мне интересно посмотреть! 📺"))
-        text = await sql_safe_select("text", "texts", {"name": "antip_all_no_TV"})
-        await bot.send_message(poll_answer.user.id, text, reply_markup=markup.as_markup(resize_keyboard=True),
-                               disable_web_page_preview=True)
-    elif data["answer_3"] == "Да, полностью доверяю ✅":
-        text = await sql_safe_select('text', 'texts', {'name': 'antip_all_yes_TV'})
-        nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
-        await bot.send_message(poll_answer.user.id, text, reply_markup=nmarkup.as_markup(resize_keyboard=True),
-                               disable_web_page_preview=True)
-    elif data["answer_3"] == "Скорее нет 👎":
-        text = await sql_safe_select('text', 'texts', {'name': 'antip_rather_no_TV'})
-        nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(types.KeyboardButton(text="Открой мне глаза 👀"))
-        nmarkup.row(types.KeyboardButton(text="Ну удиви меня 🤔"))
-        await bot.send_message(poll_answer.user.id, text, reply_markup=nmarkup.as_markup(resize_keyboard=True),
-                               disable_web_page_preview=True)
-    elif data["answer_3"] == "Скорее да 👍":
-        text = await sql_safe_select('text', 'texts', {'name': 'antip_rather_yes_TV'})
-        nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(types.KeyboardButton(text="Открой мне глаза 👀"))
-        nmarkup.row(types.KeyboardButton(text="Ну удиви меня 🤔"))
-        await bot.send_message(poll_answer.user.id, text, reply_markup=nmarkup.as_markup(resize_keyboard=True),
-                               disable_web_page_preview=True)"""
+    
