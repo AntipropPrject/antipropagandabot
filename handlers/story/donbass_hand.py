@@ -136,7 +136,7 @@ async def donbass_civil_casualties(message: Message):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Donbas_poll:', donbass_first_poll[2])
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Понятно 👌"))
-    await simple_media(message, 'donbass_preventive_strike', nmarkup.as_markup(resize_keyboard=True))
+    await simple_media(message, 'donbass_civil_casualties', nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message(DonbassOptionsFilter(option=donbass_first_poll[4]), WarGoals(goal=welc_message_one[2], inversed=True),
