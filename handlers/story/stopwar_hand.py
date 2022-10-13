@@ -13,6 +13,7 @@ from data_base.DBuse import sql_safe_select, redis_just_one_write, redis_just_on
     mongo_select_info, mongo_update_end, del_key, poll_write, redis_delete_from_list, poll_get, mongo_count_docs
 from filters.MapFilters import FinalPolFiler
 from handlers.story.main_menu_hand import mainmenu_really_menu
+from keyboards.map_keys import stopwar_lecture_kb
 from log import logg
 from states.main_menu_states import MainMenuStates
 from states.stopwar_states import StopWarState
@@ -245,28 +246,19 @@ async def stopwar_thanks_for_time(message: Message, state: FSMContext):
 @router.message(FinalPolFiler(status='Сторонник спецоперации ⚔️'), F.text == "Что же? 🤔", flags=flags)
 async def stopwar_stat_lecture_war(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_stat_lecture_war'})
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.add(types.KeyboardButton(text="Согласен(а) 👌"))
-    nmarkup.add(types.KeyboardButton(text="Не согласен(а) 🙅"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await message.answer(text, reply_markup=stopwar_lecture_kb(), disable_web_page_preview=True)
 
 
 @router.message(FinalPolFiler(status='Сомневающийся 🤷'), F.text == "Что же? 🤔", flags=flags)
 async def stopwar_idk(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_stat_lecture_doub'})
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.add(types.KeyboardButton(text="Согласен(а) 👌"))
-    nmarkup.add(types.KeyboardButton(text="Не согласен(а) 🙅"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await message.answer(text, reply_markup=stopwar_lecture_kb(), disable_web_page_preview=True)
 
 
 @router.message(FinalPolFiler(status='Противник войны 🕊'), F.text == "Что же? 🤔", flags=flags)
 async def stopwar_rather_no(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_stat_lecture_peace'})
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.add(types.KeyboardButton(text="Согласен(а) 👌"))
-    nmarkup.add(types.KeyboardButton(text="Не согласен(а) 🙅"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await message.answer(text, reply_markup=stopwar_lecture_kb(), disable_web_page_preview=True)
 
 
 # ---------------------------------Старый сценарий------------------------------------------------------------------ #
