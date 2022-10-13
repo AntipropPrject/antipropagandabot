@@ -293,7 +293,7 @@ async def stopwar_ofc(message: Message):
 
 
 @router.message((F.text == "Не знаю 🤷‍♀️") | (F.text == "Не обязательно, новый президент может продолжить войну 🗡"),
-                flags=flags)
+                state=StopWarState.main, flags=flags)
 async def stopwar_war_eternal(message: Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='no_putin_will_stop', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_war_eternal'})
