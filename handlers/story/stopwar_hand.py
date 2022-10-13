@@ -440,7 +440,8 @@ async def stopwar_pre_timer(message: Message):
 
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Получить ссылку 🎉"))
-    await message.answer(text_1.replace('[YY:YY]', str(time)), disable_web_page_preview=True)
+    await message.answer(text_1.replace('[YY:YY]', str(time)), reply_markup=nmarkup.as_markup(),
+                         disable_web_page_preview=True)
 
 
 @router.message((F.text == "Получить ссылку 🎉"), flags=flags)
