@@ -9,11 +9,11 @@ from aiogram.exceptions import TelegramBadRequest, TelegramNetworkError, Telegra
 from aiogram.types import Message, ReplyKeyboardRemove, InlineKeyboardMarkup, ReplyKeyboardMarkup, ForceReply, \
     FSInputFile, InputFile, InputMediaVideo, InputMediaPhoto, BotCommandScopeChat, BotCommandScopeDefault, \
     BotCommandScopeAllPrivateChats, BotCommandScopeAllGroupChats, BotCommandScopeAllChatAdministrators, \
-    BotCommandScopeChatAdministrators, BotCommandScopeChatMember, BotCommand
+    BotCommandScopeChatAdministrators, BotCommandScopeChatMember, BotCommand, User
 
 import bata
 from data_base.DBuse import sql_safe_select, sql_safe_insert, sql_safe_update, data_getter, sql_select_row_like, \
-    mongo_ez_find_one, mongo_count_docs
+    mongo_ez_find_one, mongo_count_docs, mongo_select_info
 from log import logg
 from utils.spacebot import SpaceBot
 
@@ -111,7 +111,7 @@ async def simple_video_album(message: Message, bot: Bot, tags: list[str], text_t
             await simple_media(message, 'ERROR_SORRY')
 
 
-async def game_answer(message: Message, telegram_media_id: Union[int, InputFile] = None, text: str = None,
+async def game_answer(message: Message, telegram_media_id: Union[int, str, InputFile] = None, text: str = None,
                       reply_markup: Union[InlineKeyboardMarkup, ReplyKeyboardMarkup,
                                           ReplyKeyboardRemove, ForceReply, None] = None):
     if telegram_media_id is not None:
@@ -212,6 +212,22 @@ async def dynamic_media_answer(message: Message, similarity_tag: str, row_number
 
 async def ref_master(bot: Bot, link: str | int):
     return f'https://t.me/{(await bot.get_me()).username.replace(" ", "_")}?start={str(link)}'
+
+
+async def day_counter(user: User):
+    user_info = await mongo_select_info(user.id)
+    date_start = user_info['datetime'].replace('_', ' ')
+    usertime = datetime.strptime(date_start, "%d-%m-%Y %H:%M")
+    time_bot = datetime.strptime(datetime.strftime(datetime.now(), "%d-%m-%Y %H:%M"), "%d-%m-%Y %H:%M") - usertime
+    days, seconds = time_bot.days, time_bot.seconds
+    hs = days * 24 + seconds // 3600
+    hours = hs - days * 24
+    minutes = (seconds % 3600) // 60
+    if days >= 1:
+        time = f"{days} д. {hours} ч. {minutes} мин"
+    else:
+        time = f"{hours} ч. {minutes} мин"
+    return time
 
 
 async def ref_spy_sender(bot: Bot, child_telegram_id: str | int, message_to_send: str, replace_dict: dict):
