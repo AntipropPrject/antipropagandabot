@@ -1313,8 +1313,11 @@ async def antip_bite_me(message: Message):
         nmarkap = ReplyKeyboardBuilder()
         nmarkap.add(types.KeyboardButton(text="Расскажи 🙂️"))
         nmarkap.add(types.KeyboardButton(text="Не надо, двигаемся дальше 👉"))
-        text = await sql_safe_select('text', 'texts', {'name': 'antip_two_words'})
-        await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+        p_all = await mongo_count_docs('database', 'statistics_new', {'web_prop_ex': {'$exists': True}})
+        p_wiki = await mongo_count_docs('database', 'statistics_new', {'web_prop_ex': "Википедия"})
+        txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'antip_two_words'}), p_all)
+        txt.replace('XX', p_wiki)
+        await message.answer(txt(), reply_markup=nmarkap.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message(
