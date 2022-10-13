@@ -14,13 +14,12 @@ from day_func import day_count
 from export_to_csv import pg_mg
 from export_to_csv.pg_mg import Backup
 from handlers import start_hand, shop
-from handlers.admin_for_games_dir import mistakeorlie
 from handlers.admin_handlers import admin_factory, marketing, admin_for_games, new_admin_hand
 from handlers.advertising import start_spam, user_returner, return_spam_send
 from handlers.other import status, other_file
 from handlers.story import preventive_strike, true_resons_hand, welcome_messages, nazi_hand, \
     donbass_hand, main_menu_hand, anti_prop_hand, putin_hand, smi_hand, stopwar_hand, welcome_stories, true_goals_hand, \
-    nato_hand, stopwar2_hand
+    nato_hand
 from middleware.trottling import ThrottlingMiddleware
 from utilts import happy_tester
 
@@ -74,7 +73,6 @@ async def main():
     dp.include_router(admin_factory.router)
     dp.include_router(marketing.router)
     dp.include_router(admin_for_games.router)
-    dp.include_router(mistakeorlie.router)
 
     dp.include_router(status.router)
     dp.include_router(start_hand.router)
@@ -95,7 +93,6 @@ async def main():
     dp.include_router(preventive_strike.router)
     dp.include_router(putin_hand.router)
     dp.include_router(stopwar_hand.router)
-    dp.include_router(stopwar2_hand.router)
     dp.include_router(main_menu_hand.router)
 
 
