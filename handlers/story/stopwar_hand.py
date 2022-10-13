@@ -264,21 +264,22 @@ async def stopwar_rather_no(message: Message):
 # ---------------------------------Старый сценарий------------------------------------------------------------------ #
 
 
-@router.message((F.text == "Не согласен(а) 🙅") | (F.text == "Согласен(а) 👌") | (F.text == "Продолжим 👌"),
-                flags=flags)
-async def stopwar_will_it_stop(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'stopwar_will_it_stop'})
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Да, это закончит войну 🕊"))
-    nmarkup.row(types.KeyboardButton(text="Не обязательно, новый президент может продолжить войну 🗡"))
-    nmarkup.row(types.KeyboardButton(text="Не знаю 🤷‍♀️"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+# @router.message((F.text == "Не согласен(а) 🙅") | (F.text == "Согласен(а) 👌") | (F.text == "Продолжим 👌"),
+#                 flags=flags)
+# async def stopwar_will_it_stop(message: Message):
+#     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_will_it_stop'})
+#     nmarkup = ReplyKeyboardBuilder()
+#     nmarkup.row(types.KeyboardButton(text="Да, это закончит войну 🕊"))
+#     nmarkup.row(types.KeyboardButton(text="Не обязательно, новый президент может продолжить войну 🗡"))
+#     nmarkup.row(types.KeyboardButton(text="Не знаю 🤷‍♀️"))
+#     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text == "Да, это закончит войну 🕊"), flags=flags)
-async def stopwar_ofc(message: Message):
+async def stopwar_ofc(message: Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='no_putin_will_stop', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_ofc'})
+    await state.set_state(StopWarState.war_2)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжим👌"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
@@ -296,14 +297,15 @@ async def stopwar_war_eternal(message: Message, state: FSMContext):
 
 
 @router.message((F.text == "Продолжай ⏳"), state=StopWarState.war_1, flags=flags)
-async def stopwar_isolation(message: Message):
+async def stopwar_isolation(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_isolation'})
+    await state.set_state(StopWarState.war_2)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжим👌"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Продолжим👌"), flags=flags)
+@router.message((F.text == "Продолжим👌"), state=StopWarState.war_2, flags=flags)
 async def stopwar_stop_putin(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_stop_putin'})
     nmarkup = ReplyKeyboardBuilder()
@@ -340,7 +342,7 @@ async def stopwar_end_it_now(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.in_({'👍', '👎'})), flags=flags)
+@router.message((F.text.in_({'👍', '👎'})), flags=flags,state=StopWarState.stopwar_viva_la_resistance)
 async def stopwar_lets_fight(message: Message, state: FSMContext):
     await state.set_state(StopWarState.final)
     nmarkup = ReplyKeyboardBuilder()

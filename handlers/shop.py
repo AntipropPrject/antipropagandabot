@@ -1,22 +1,18 @@
+import datetime
 import re
 
 from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
-from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 from aiogram.types import InputMediaPhoto, ReplyKeyboardRemove
-
-from bot_statistics.stat import mongo_update_stat_new
-from data_base.DBuse import sql_safe_select, mongo_count_docs
-from utils.elk_logger import Logger
-from utilts import CoolPercReplacer, change_number_format
+from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 from bot_statistics.stat import mongo_update_stat_new
 from data_base.DBuse import sql_safe_select, mongo_count_docs
 from resources.all_polls import shop_poll
 from states.true_goals_states import Shop, TrueGoalsState
-from utilts import CoolPercReplacer
-import re
+from utils.elk_logger import Logger
+from utilts import change_number_format
 
 flags = {"throttling_key": "True"}
 router = Router()
@@ -131,19 +127,16 @@ async def shop_after_first_poll(poll_answer: types.PollAnswer, bot: Bot, state: 
 
 @router.message(Shop.after_first_poll, F.text.contains("Посетить магазин"), flags=flags)
 @router.message(Shop.shop_why_so_many, F.text.contains("Посетить магазин"), flags=flags)
-@router.message(Shop.shop_transfer, F.text.contains("Посетить магазин"), flags=flags)
+@router.message(Shop.main, F.text.contains("Посетить магазин"), flags=flags)
 async def shop_transfer(message: types.Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='shop_transfer', value="+")
     await state.set_state(Shop.shop_transfer)
     text = await sql_safe_select("text", "texts", {"name": "shop_transfer"})
-    day = 209
-    sum = day * 55000000000
-    # now = datetime.datetime.now().date()
-    # old = datetime.datetime(year=2022, month=2, day=24).date()
-    # day = now-old
-    # print(day)
-    day = 218
-    sum = 218 * 55000000000
+    now = datetime.datetime.now().date()
+    old = datetime.datetime(year=2022, month=2, day=24).date()
+    day = now-old
+    print(day.days)
+    sum = day.days * 55000000000
     data = await state.get_data()
     await state.update_data(balance_all=sum)
     balance_all = change_number_format(data['balance_all'])
@@ -152,7 +145,7 @@ async def shop_transfer(message: types.Message, state: FSMContext):
     except:
         await state.update_data(balance=sum)
         balance = change_number_format(sum)
-    text = text.replace("NN", f"{day}")
+    text = text.replace("NN", f"{day.days}")
     text = text.replace("MM", f"{balance_all}")
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Перейти к покупкам 🛒"))
