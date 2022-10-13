@@ -130,7 +130,7 @@ async def donbass_preventive_strike(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(DonbassOptionsFilter(option=donbass_first_poll[2]), F.text.in_({'Продолжим 👉', "Хорошо 👌"}),
+@router.message(DonbassOptionsFilter(option=donbass_first_poll[2]), (F.text.in_({'Продолжим 👉', "Хорошо 👌"})),
                 state=donbass_state.after_poll, flags=flags)
 async def donbass_civil_casualties(message: Message):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Donbas_poll:', donbass_first_poll[2])
@@ -140,7 +140,7 @@ async def donbass_civil_casualties(message: Message):
 
 
 @router.message(DonbassOptionsFilter(option=donbass_first_poll[4]), WarGoals(goal=welc_message_one[2], inversed=True),
-                F.text.in_({'Продолжим 👉', "Хорошо 👌", "Понятно 👌"}), state=donbass_state.after_poll, flags=flags)
+                (F.text.in_({'Продолжим 👉', "Хорошо 👌", "Понятно 👌"})), state=donbass_state.after_poll, flags=flags)
 async def donbass_denazi(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'donbass_denazi'})
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Donbas_poll:', donbass_first_poll[4])
@@ -151,7 +151,7 @@ async def donbass_denazi(message: Message):
 
 
 @router.message(DonbassOptionsFilter(option=donbass_first_poll[5]),
-                F.text.in_({'Продолжим 👉', "Хорошо 👌", "Понятно 👌"}), state=donbass_state.after_poll, flags=flags)
+                (F.text.in_({'Продолжим 👉', "Хорошо 👌", "Понятно 👌"})), state=donbass_state.after_poll, flags=flags)
 async def donbas_only_war_objects(message: Message):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Donbas_poll:', donbass_first_poll[5])
     nmarkup = ReplyKeyboardBuilder()
@@ -185,7 +185,7 @@ async def donbas_return_to_donbass(message: Message):
 @router.message(donbass_state.after_poll,
                 F.text == "Просто укронацисты размещаются в домах и делают их легитимной военной целью 😡", flags=flags)
 @router.message(DonbassOptionsFilter(option=donbass_first_poll[6]),
-                F.text.in_({'Продолжим 👉', "Хорошо 👌", "Понятно 👌", "Просто ужас. 😨 Давай к следующей теме"}),
+                (F.text.in_({'Продолжим 👉', "Хорошо 👌", "Понятно 👌", "Просто ужас. 😨 Давай к следующей теме"})),
                 state=donbass_state.after_poll, flags=flags)
 async def donbass_living_shield(message: Message):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Donbas_poll:', donbass_first_poll[6])
@@ -214,10 +214,10 @@ async def donbass_fight_far_away(message: Message):
 
 
 @router.message(donbass_state.after_poll,
-                F.text == "Зачем они вообще сопротивлялись? 🤷‍♀️ Мы же им желаем мира.", flags=flags)
+                (F.text == "Зачем они вообще сопротивлялись? 🤷‍♀️ Мы же им желаем мира."), flags=flags)
 @router.message(DonbassOptionsFilter(option=donbass_first_poll[3]),
-                F.text.in_({'Продолжим 👉', "Хорошо 👌", "Продолжим 👌", "Понятно 👌",
-                            "Просто ужас. 😨 Давай к следующей теме"}),
+                (F.text.in_({'Продолжим 👉', "Хорошо 👌", "Продолжим 👌", "Понятно 👌",
+                             "Просто ужас. 😨 Давай к следующей теме"})),
                 state=donbass_state.after_poll, flags=flags)
 async def donbas_why_not_surrender(message: Message):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Donbas_poll:', donbass_first_poll[3])
@@ -348,7 +348,7 @@ async def donbass_no_male(message: Message):
     await simple_media(message, 'donbass_no_male', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(F.text.in_({"Да, замечаю  😯", "Нет, не замечаю🤷‍♀"}), flags=flags)
+@router.message((F.text.in_({"Да, замечаю  😯", "Нет, не замечаю🤷‍♀"})), flags=flags)
 async def donbass_mobilization(message: Message):
     await mongo_update_stat(message.from_user.id, 'donbass')
     nmarkup = ReplyKeyboardBuilder()
@@ -356,7 +356,8 @@ async def donbass_mobilization(message: Message):
     nmarkup.row(types.KeyboardButton(text="Давай продолжим 👉"))
     await simple_media(message, 'donbass_mobilization', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
-@router.message(F.text.in_({"Какой ужас 😨", "Давай продолжим 👉"}), flags=flags)
+
+@router.message((F.text.in_({"Какой ужас 😨", "Давай продолжим 👉"})), flags=flags)
 async def donbass_can_you_agree(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'donbass_can_you_agree'})
     nmarkup = ReplyKeyboardBuilder()
