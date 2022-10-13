@@ -185,7 +185,7 @@ async def donbas_return_to_donbass(message: Message):
 @router.message(donbass_state.after_poll,
                 F.text == "Просто укронацисты размещаются в домах и делают их легитимной военной целью 😡", flags=flags)
 @router.message(DonbassOptionsFilter(option=donbass_first_poll[6]),
-                (F.text.in_({'Продолжим 👉', "Хорошо 👌", "Понятно 👌", "Просто ужас. 😨 Давай к следующей теме"})),
+                (F.text.in_({'Продолжим 👉', "Хорошо 👌", "Понятно 👌", "Просто ужас. 😨 Давай к следующей теме."})),
                 state=donbass_state.after_poll, flags=flags)
 async def donbass_living_shield(message: Message):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Donbas_poll:', donbass_first_poll[6])
@@ -217,7 +217,7 @@ async def donbass_fight_far_away(message: Message):
                 (F.text == "Зачем они вообще сопротивлялись? 🤷‍♀️ Мы же им желаем мира."), flags=flags)
 @router.message(DonbassOptionsFilter(option=donbass_first_poll[3]),
                 (F.text.in_({'Продолжим 👉', "Хорошо 👌", "Продолжим 👌", "Понятно 👌",
-                             "Просто ужас. 😨 Давай к следующей теме"})),
+                             "Просто ужас. 😨 Давай к следующей теме."})),
                 state=donbass_state.after_poll, flags=flags)
 async def donbas_why_not_surrender(message: Message):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: Donbas_poll:', donbass_first_poll[3])

@@ -348,4 +348,3 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
         await mongo_update_stat_new(tg_id=poll_answer.user.id, column='polit_status', value='Аполитичный')
     await redis_just_one_write(f'Usrs: {poll_answer.user.id}: INFOState:', 'Жертва пропаганды')
     await antip_wolves(poll_answer.user, bot, state)
-    
