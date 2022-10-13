@@ -178,7 +178,7 @@ async def donbass_protection(message: Message):
 async def donbas_return_to_donbass(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'donbas_return_to_donbass'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Хорошо  👌"))
+    nmarkup.row(types.KeyboardButton(text="Хорошо 👌"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
