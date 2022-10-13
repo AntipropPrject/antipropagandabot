@@ -237,6 +237,7 @@ async def stopwar_must_watch_all(message: Message):
 async def stopwar_thanks_for_time(message: Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='CredibleBot', value=message.text)
     await state.set_state(StopWarState.main)
+    await del_key(f'Usrs: {message.from_user.id}: StopWar: NewPolitList:')
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_thanks_for_time'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Что же? 🤔"))
