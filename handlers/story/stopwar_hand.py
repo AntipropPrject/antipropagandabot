@@ -440,7 +440,7 @@ async def stopwar_pre_timer(message: Message):
 
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Получить ссылку 🎉"))
-    await message.answer(text_1.replace('[YY:YY]', str(time)), reply_markup=nmarkup.as_markup(),
+    await message.answer(text_1.replace('[YY:YY]', str(time)), reply_markup=nmarkup.as_markup(resize_keyboard=True),
                          disable_web_page_preview=True)
 
 
@@ -448,8 +448,7 @@ async def stopwar_pre_timer(message: Message):
 async def stopwar_timer(message: Message, bot: Bot):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='will_they_stop', value=message.text)
     link = await ref_master(bot, message.from_user.id)
-    text_1 = await sql_safe_select('text', 'texts', {'name': 'stopwar_hello_world'})
-    text_1 = text_1.replace('XXXXXXXXXX', message.from_user.id)
+    text_1 = (await sql_safe_select('text', 'texts', {'name': 'stopwar_hello_world'})).replace('[LINK]', link)
     text_2 = re.sub('(?<=href\=\")(.*?)(?=\")', link,
                     (await sql_safe_select('text', 'texts', {'name': 'stopwar_send_me'})))
     text_3 = await sql_safe_select('text', 'texts', {'name': 'stopwar_send_the_message'})
