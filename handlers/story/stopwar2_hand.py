@@ -135,6 +135,36 @@ async def stopwar_ukraine_at_the_borders(message: Message, state: FSMContext):
 async def stopwar_borders_result(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_borders_result'})
     await state.set_state(StopWarState.stopwar_borders_result)
+    try:
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='stopwar_borders_result',
+                                    value=message.text)
+    except Exception:
+        print("asdasd")
+
+    answer_1 = await mongo_count_docs('database', 'statistics_new',
+                                      {'stopwar_borders_result': 'Скорее да, будет ⚔️'})
+    answer_2 = await mongo_count_docs('database', 'statistics_new',
+                                      {'stopwar_borders_result': 'Скорее нет, не будет '})
+    answer_3 = await mongo_count_docs('database', 'statistics_new',
+                                      {'stopwar_borders_result': 'Я не знаю 🤷‍♂️'})
+    print("asdasd")
+    all_answers = await mongo_count_docs('database', 'statistics_new', {'stopwar_borders_result': {'$exists': True}})
+    if all_answers == 0:
+        all_answers = 1
+    print(all_answers)
+    print(answer_1)
+    print(answer_2)
+    print(answer_3)
+    result_1 = (answer_1 * 100) / all_answers
+    result_2 = (answer_2 * 100) / all_answers
+    result_3 = (answer_3 * 100) / all_answers
+    text = await sql_safe_select('text', 'texts', {'name': 'stopwar_borders_result'})
+    print(text)
+    text = text.replace("AA", f"{str(result_1)[:-2]}")
+    text = text.replace("BB", f"{str(result_2)[:-2]}")
+    text = text.replace("CC", f"{str(result_3)[:-2]}")
+
+
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.add(types.KeyboardButton(text="Какой вопрос?"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
