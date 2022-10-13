@@ -20,7 +20,7 @@ flags = {"throttling_key": "True"}
 router = Router()
 
 
-@router.message(welcome_states.start_dialog.big_story, text_contains='Готов(а) продолжить 👌', flags=flags)
+@router.message(text_contains='Готов(а) продолжить 👌', flags=flags)
 async def message_2(message: types.Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='first_button', value='Начнем')
     # запись значения в базу
