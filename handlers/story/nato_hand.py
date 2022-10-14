@@ -74,9 +74,6 @@ async def poll_answer(poll_answer: types.PollAnswer, bot: Bot, state: FSMContext
     result_2 = (answer_2 * 100) / all_answers
     result_3 = (answer_3 * 100) / all_answers
 
-    print(f'all {all_answers}')
-    print(f'right {right_answers}')
-
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Скорее да, согласен(а) 👍"))
     nmarkup.row(types.KeyboardButton(text="Скорее нет, не согласен(а) 👎"))
@@ -87,13 +84,11 @@ async def poll_answer(poll_answer: types.PollAnswer, bot: Bot, state: FSMContext
     text = text.replace("BB", f"{str(result_1)[:-2]}")
     text = text.replace("CC", f"{str(result_2)[:-2]}")
     text = text.replace("DD", f"{str(result_3)[:-2]}")
-    print(all_answers)
-    print(right_answers)
     await bot.send_message(text=text, chat_id=poll_answer.user.id, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.in_({'Скорее да, согласен(а)', 'Скорее нет, не согласен(а)', "Затрудняюсь ответить 🤷‍♀"})),
-                state=Nato_states.poll_answer, flags=flags)
+@router.message((F.text.in_({'Скорее да, согласен(а) 👍', 'Скорее нет, не согласен(а) 👎',
+                             "Затрудняюсь ответить 🤷‍♀"})), state=Nato_states.poll_answer, flags=flags)
 async def nato_other_questions(message: Message, state: FSMContext):
     await state.set_state(Nato_states.nato_other_questions)
     await mongo_update_stat_new(tg_id=message.from_user.id, column='nato_other_questions',
@@ -112,7 +107,7 @@ async def nato_other_questions(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Какие? 🤔"))
     nmarkup.row(types.KeyboardButton(text="Страны НАТО что ли? 😏"))
-    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(txt(), disable_web_page_preview=True, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message(
