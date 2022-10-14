@@ -14,6 +14,7 @@ from data_base.DBuse import sql_safe_select, mongo_count_docs
 from filters.MapFilters import FakeGoals, WarGoals
 from filters.MapFilters import OperationWar
 from handlers.story.donbass_hand import donbass_big_tragedy
+from handlers.story.nato_hand import nato_start
 from handlers.story.nazi_hand import NaziState, nazi_first_poll
 from handlers.story.preventive_strike import prevent_strike_any_brutality
 from resources.all_polls import welc_message_one
@@ -445,10 +446,10 @@ async def goals_pls_use_goal_nazi(message: Message):
 
 
 @router.message((F.text.contains("💂")), state=WarGoalsState.nato, flags=flags)
-async def goals_nazi_enterence(message: Message):
+async def goals_nazi_enterence(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Кнопка'))
-    await message.answer('Начало нато, но пока что ничего', reply_markup=nmarkup.as_markup())
+    await nato_start(message, state)
 
 
 @router.message(WarGoals(goal=welc_message_one[8]),

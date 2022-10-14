@@ -33,10 +33,8 @@ router = Router()
 # router.message.filter(state=Nato_states)
 
 
-@router.message(commands='nato')
-@router.message((F.text.contains('Хорошо, обсудим 💂')) , flags=flags,
-                state=WarGoalsState.donbas_enter)
-async def nato_start(message: Message, bot: Bot, state: FSMContext):
+@router.message(commands='test_nato')
+async def nato_start(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'nato_start'})
     await state.set_state(Nato_states.nato_start)
     nmarkap = ReplyKeyboardBuilder()
@@ -94,43 +92,23 @@ async def poll_answer(poll_answer: types.PollAnswer, bot: Bot, state: FSMContext
     await bot.send_message(text=text, chat_id=poll_answer.user.id, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(
-    ((F.text.contains('Скорее да, согласен(а)')) | (F.text.contains('Скорее нет, не согласен(а)')) | (
-            F.text == "Затрудняюсь ответить 🤷‍♀")),
-    state=Nato_states.poll_answer, flags=flags)
-async def nato_other_questions(message: Message, bot: Bot, state: FSMContext):
+@router.message((F.text.in_({'Скорее да, согласен(а)', 'Скорее нет, не согласен(а)', "Затрудняюсь ответить 🤷‍♀"})),
+                state=Nato_states.poll_answer, flags=flags)
+async def nato_other_questions(message: Message, state: FSMContext):
     await state.set_state(Nato_states.nato_other_questions)
-    print("asdasd")
-    try:
-        await mongo_update_stat_new(tg_id=message.from_user.id, column='nato_other_questions',
-                                    value=message.text)
-    except Exception:
-        print("asdasd")
-
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='nato_other_questions',
+                                value=message.text)
     answer_1 = await mongo_count_docs('database', 'statistics_new',
                                       {'nato_other_questions': 'Скорее да, согласен(а) 👍'})
     answer_2 = await mongo_count_docs('database', 'statistics_new',
                                       {'nato_other_questions': 'Скорее нет, не согласен(а) 👎'})
     answer_3 = await mongo_count_docs('database', 'statistics_new',
                                       {'nato_other_questions': 'Затрудняюсь ответить 🤷‍♀'})
-    print("asdasd")
-
     all_answers = await mongo_count_docs('database', 'statistics_new', {'nato_other_questions': {'$exists': True}})
-    if all_answers == 0:
-        all_answers = 1
-    print(all_answers)
-    print(answer_1)
-    print(answer_2)
-    print(answer_3)
-    result_1 = (answer_1 * 100) / all_answers
-    result_2 = (answer_2 * 100) / all_answers
-    result_3 = (answer_3 * 100) / all_answers
-    text = await sql_safe_select('text', 'texts', {'name': 'nato_other_questions'})
-    print(text)
-    text = text.replace("AA", f"{str(result_1)[:-2]}")
-    text = text.replace("BB", f"{str(result_2)[:-2]}")
-    text = text.replace("CC", f"{str(result_3)[:-2]}")
-    print(text)
+    txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'nato_other_questions'}), all_answers)
+    txt.replace("AA", answer_1)
+    txt.replace("BB", answer_2)
+    txt.replace("CC", answer_3)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Какие? 🤔"))
     nmarkup.row(types.KeyboardButton(text="Страны НАТО что ли? 😏"))
@@ -249,7 +227,6 @@ async def nato_krim_naw(message: Message, bot: Bot, state: FSMContext):
     await message.answer(text=text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-
 @router.message(F.text.contains('А Путин объяснил, почему Украина и Финляндия— это разное? 🤔'),
                 state=Nato_states.nato_map, flags=flags)
 async def nato_diff_with_fin(message: Message, bot: Bot, state: FSMContext):
@@ -262,11 +239,14 @@ async def nato_diff_with_fin(message: Message, bot: Bot, state: FSMContext):
         nato_buttons = 0
     await state.update_data(nato_buttons_2=f'{nato_buttons + 1}')
     if nato_buttons == 0:
-        nmarkup.row(types.KeyboardButton(text="Так если бы Украина вступила в НАТО, они вместе вторглись бы в Крым!  ✈️"))
+        nmarkup.row(
+            types.KeyboardButton(text="Так если бы Украина вступила в НАТО, они вместе вторглись бы в Крым!  ✈️"))
     nmarkup.row(types.KeyboardButton(text="Закончим диалог о НАТО 👉"))
     text = await sql_safe_select('text', 'texts', {'name': 'nato_diff_with_fin'})
-    media_id = await sql_safe_select('t_id', 'assets', {'name': "Путин_объясняет_в_чём_разница_между_Украиной_в_НАТО_и_Финляндией"})
+    media_id = await sql_safe_select('t_id', 'assets',
+                                     {'name': "Путин_объясняет_в_чём_разница_между_Украиной_в_НАТО_и_Финляндией"})
     await message.answer_video(media_id, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
 
 @router.message(F.text.contains('Закончим диалог о НАТО 👉'),
                 state=Nato_states.nato_map, flags=flags)
@@ -276,44 +256,30 @@ async def nato_pre_end(message: Message, bot: Bot, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="Скорее да, это лишь предлог 👌"))
     nmarkup.row(types.KeyboardButton(text="Скорее нет, это настоящая причина 🙅‍♂"))
     nmarkup.row(types.KeyboardButton(text="Затрудняюсь ответить 🤷‍♀"))
-    nmarkup.adjust(2,1)
-
+    nmarkup.adjust(2, 1)
     text = await sql_safe_select('text', 'texts', {'name': 'nato_pre_end'})
     await message.answer(text=text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-
-@router.message(state=Nato_states.nato_pre_end, flags=flags)
-async def nato_end(message: Message, bot: Bot, state: FSMContext):
+@router.message(Nato_states.nato_pre_end,
+                (F.text.in_({'Скорее да, это лишь предлог 👌', "Скорее нет, это настоящая причина 🙅‍♂",
+                             "Затрудняюсь ответить 🤷‍♀"})), flags=flags)
+async def nato_end(message: Message, state: FSMContext):
     await state.set_state(WarGoalsState.main)
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Продолжим 👌"))
-    try:
-        await mongo_update_stat_new(tg_id=message.from_user.id, column='nato_end',
-                                    value=message.text)
-    except Exception:
-        print("asdasd")
-
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='nato_end',
+                                value=message.text)
     answer_1 = await mongo_count_docs('database', 'statistics_new',
                                       {'nato_end': 'Скорее да, это лишь предлог 👌'})
     answer_2 = await mongo_count_docs('database', 'statistics_new',
                                       {'nato_end': 'Скорее нет, это настоящая причина 🙅‍♂'})
     answer_3 = await mongo_count_docs('database', 'statistics_new',
                                       {'nato_end': 'Затрудняюсь ответить 🤷‍♀'})
-
     all_answers = await mongo_count_docs('database', 'statistics_new', {'nato_end': {'$exists': True}})
-    if all_answers == 0:
-        all_answers = 1
-    print(all_answers)
-    print(answer_1)
-    print(answer_2)
-    print(answer_3)
-    result_1 = (answer_1 * 100) / all_answers
-    result_2 = (answer_2 * 100) / all_answers
-    result_3 = (answer_3 * 100) / all_answers
-
-    text = await sql_safe_select('text', 'texts', {'name': 'nato_end'})
-    text = text.replace("AA", f"{str(result_1)[:-2]}")
-    text = text.replace("BB", f"{str(result_2)[:-2]}")
-    text = text.replace("CC", f"{str(result_3)[:-2]}")
-    await message.answer(text=text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'nato_end'}), all_answers)
+    txt.replace("AA", answer_1)
+    txt.replace("BB", answer_2)
+    txt.replace("CC", answer_3)
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Продолжим 👌"))
+    await message.answer(text=txt(), reply_markup=nmarkup.as_markup(resize_keyboard=True),
+                         disable_web_page_preview=True)
