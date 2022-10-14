@@ -574,12 +574,14 @@ async def goals_normal_game_answer(message: Message, state: FSMContext):
 @router.message(((F.text.contains("Достаточно,")) | (F.text == "Продолжим 🤝") | (F.text == 'Пропустим игру 🙅‍♀️')),
                 state=TrueGoalsState.normal_game, flags=flags)
 async def goals_I_love_absurd(message: Message, state: FSMContext):
+    text = await sql_safe_select('text', 'texts', {'name': 'goals_I_love_absurd'})
     if 'Пропустим игру' in message.text:
+        await message.answer('Хорошо')
         await mongo_update_stat_new(tg_id=message.from_user.id, column='normal_game_stats', value='Пропустили')
     await state.set_state(TrueGoalsState.absurd)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Добавить абсурдности 🪄"))
-    await simple_media(message, 'reasons_real_reasons', nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message(F.text == "Добавить абсурдности 🪄", state=TrueGoalsState.absurd, flags=flags)
