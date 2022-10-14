@@ -116,18 +116,14 @@ async def shop_after_first_poll(poll_answer: types.PollAnswer, bot: Bot, state: 
     nmarkup.row(types.KeyboardButton(text="Откуда такие цифры?🤔"))
     text = await sql_safe_select("text", "texts", {"name": "shop_after_first_poll"})
     result = (right_answers * 100) / all_answers
-    print(f'all {all_answers}')
-    print(f'right {right_answers}')
-    print(result)
     text = text.replace("AA", f"{str(result)[:-2]}")
-    print(text)
     await bot.send_message(poll_answer.user.id, text,
                            reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(Shop.after_first_poll, F.text.contains("Посетить магазин"), flags=flags)
-@router.message(Shop.shop_why_so_many, F.text.contains("Посетить магазин"), flags=flags)
-@router.message(Shop.main, F.text.contains("Посетить магазин"), flags=flags)
+@router.message(Shop.after_first_poll, (F.text.contains("Посетить магазин")), flags=flags)
+@router.message(Shop.shop_why_so_many, (F.text.contains("Посетить магазин")), flags=flags)
+@router.message(Shop.main, (F.text.contains("Посетить магазин")), flags=flags)
 async def shop_transfer(message: types.Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='shop_transfer', value="+")
     await state.set_state(Shop.shop_transfer)
@@ -135,10 +131,9 @@ async def shop_transfer(message: types.Message, state: FSMContext):
     now = datetime.datetime.now().date()
     old = datetime.datetime(year=2022, month=2, day=24).date()
     day = now-old
-    print(day.days)
     sum = day.days * 55000000000
-    data = await state.get_data()
     await state.update_data(balance_all=sum)
+    data = await state.get_data()
     balance_all = change_number_format(data['balance_all'])
     try:
         balance = change_number_format(data['balance'])
@@ -232,7 +227,6 @@ async def shop_bucket(message: types.Message, state: FSMContext):
     print(bot_message.message_id)
     print(bot_message.from_user.id)
     await state.update_data(message_id_shop=bot_message.message_id)
-    await state.update_data(chat_id_shop=message.from_user.id)
     shop_text = await sql_safe_select("text", "texts", {"name": "shop_bucket"})
     await state.update_data(text_shop=shop_text)
 
@@ -246,7 +240,7 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
     await state.set_state(Shop.shop_callback)
     text = ((await state.get_data())["text_shop"])
     message_id_shop = (await state.get_data())['message_id_shop']
-    chat_id = (await state.get_data())['chat_id_shop']
+    chat_id = query.from_user.id
     seen_child_message = (await state.get_data())['seen_child_message']
     if seen_child_message == "1":
         new_inline = inline1
@@ -338,7 +332,7 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
             if seen_cild_message == "0":
                 nmarkup = ReplyKeyboardBuilder()
                 nmarkup.row(types.KeyboardButton(text="Отлично!"))
-                text = await sql_safe_select('text', 'texts', {'name': 'goals_agreed_to_die_result'})
+                text = await sql_safe_select('text', 'texts', {'name': 'shop_child_saver'})
                 child_message = await bot.send_message(text=text, chat_id=chat_id,
                                                        reply_markup=nmarkup.as_markup(resize_keyboard=True))
                 await state.update_data(child_message=child_message.message_id)
@@ -398,7 +392,7 @@ async def shop_children_ok(message: types.Message, bot: Bot, state: FSMContext):
     message_id = (await state.get_data())['child_message']
     message_id_shop = (await state.get_data())['message_id_shop']
     text_shop = (await state.get_data())['text_shop']
-    chat_id = (await state.get_data())['chat_id_shop']
+    chat_id = message.from_user.id
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Выйти из магазина ⬇"))
     await bot.edit_message_text(text=text_shop, chat_id=chat_id, message_id=message_id_shop,
@@ -414,7 +408,7 @@ async def shop_children_ok(message: types.Message, bot: Bot, state: FSMContext):
                 flags=flags)
 @router.message(TrueGoalsState.main, (F.text.contains("Вернуться в магазин")), flags=flags)
 async def shop_go_back(message: types.Message, bot: Bot, state: FSMContext):
-    chat_id = (await state.get_data())['chat_id_shop']
+    chat_id = message.from_user.id
     await state.set_state(Shop.shop_bucket)
     await bot.delete_message(chat_id, message.message_id - 1)
     nmarkup = ReplyKeyboardBuilder()
@@ -426,7 +420,7 @@ async def shop_go_back(message: types.Message, bot: Bot, state: FSMContext):
 @router.message(Shop.shop_bucket, (F.text.contains("Вернуться в магазин 🛒") | F.text.contains("Да, выйти ⬇")),
                 flags=flags)
 async def shop_go_back(message: types.Message, bot: Bot, state: FSMContext):
-    chat_id = (await state.get_data())['chat_id_shop']
+    chat_id = message.from_user.id
     await bot.delete_message(chat_id, message.message_id - 1)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Выйти из магазина ⬇"))
@@ -446,7 +440,7 @@ async def shop_out(message: types.Message, bot: Bot, state: FSMContext):
 @router.message((F.text.contains('Да, оформить заказ')), state=Shop.shop_callback)
 async def shop_bucket(message: types.Message, bot: Bot, state: FSMContext):
     await state.set_state(TrueGoalsState.main)
-    chat_id = (await state.get_data())['chat_id_shop']
+    chat_id = message.from_user.id
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Понятно 👌"))
     await bot.send_message(
