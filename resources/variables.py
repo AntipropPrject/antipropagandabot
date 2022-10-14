@@ -15,6 +15,7 @@ all_test_commands = {
     'donbass': 'Донбас (donbass_big_tragedy)',
     'testnazi': 'Нацизм (start_nazi)',
     'teststrike': 'Превентивный удар (prevent_strike_start)',
+    'test_nato': 'НАТО',
     'teststop': 'Остановить войну (stopwar_start)',
     'putest': 'Путин (reasons_who_to_blame)',
     'testend': 'Концовка перед таймером (stopwar_first_manipulation_argument)',
