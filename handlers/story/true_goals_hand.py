@@ -731,11 +731,11 @@ async def goals_putin_plan_continued(message: Message):
 async def goals_putin_face(message: Message, state: FSMContext):
     await state.set_state(TrueGoalsState.putin_next)
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Чего ждать от мобилизации? 🪖"))
+    nmarkup.row(types.KeyboardButton(text="Продолжим..."))
     await simple_media(message, 'goals_putin_face', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(F.text == "Чего ждать от мобилизации? 🪖", state=TrueGoalsState.putin_next, flags=flags)
+@router.message(F.text == "Продолжим...", state=TrueGoalsState.putin_next, flags=flags)
 async def goals_mobilisation(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'goals_mobilisation'})
     nmarkup = ReplyKeyboardBuilder()
