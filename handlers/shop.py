@@ -273,20 +273,17 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
         except:
             print("о или о")
         balance = (await state.get_data())['balance']
-        print(balance)
         data_dict = await state.get_data()
         check_text = ""
         if int(balance) > 0:
 
             try:
-                print(f"{int(count)}" + "+" + f"{num_list[0]}")
                 await state.update_data({f"{data}": f"{int(count) + num_list[0]}"})
             except Exception as e:
                 print(e)
             data_dict = await state.get_data()
             for key in data_dict:
                 text = text.replace(f"[{key}]", f"{data_dict[key]}")
-                print(data_dict[key])
 
                 if key[0] == "1":
                     word_list = key.split()
@@ -323,7 +320,6 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
                         if word.isnumeric():
                             num_list.append(int(word))
                     good = key.replace(str(num_list[0]), "")
-                    print(data_dict[key])
                     if int(data_dict[key]) > 0:
                         check_text = check_text + f"<b>{data_dict[key]}</b> {good} " + "\n"
                         print(check_text)
@@ -337,23 +333,18 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
                 message_id=(message_id_shop + 1),
                 reply_markup=inline2.as_markup(resize_keyboard=True))
 
-        print(int(data_dict["100 x 🧸 Спасти жизнь ребёнку"]))
         seen_cild_message = (await state.get_data())["seen_child_message"]
-        print(seen_cild_message)
         if int(data_dict["100 x 🧸 Спасти жизнь ребёнку"]) > 7000:
-            print(type(seen_cild_message))
             if seen_cild_message == "0":
-                print(seen_cild_message)
                 nmarkup = ReplyKeyboardBuilder()
                 nmarkup.row(types.KeyboardButton(text="Отлично!"))
-                child_text = "Поздравляю! Вы спасли всех тяжелобольных детей в России. Больши ни одному родителю не придётся собирать деньги на лечение ребёнка через фонды, группы ВК и чаты в Whatsapp."
-                child_message = await bot.send_message(text=child_text, chat_id=chat_id,
+                text = await sql_safe_select('text', 'texts', {'name': 'goals_agreed_to_die_result'})
+                child_message = await bot.send_message(text=text, chat_id=chat_id,
                                                        reply_markup=nmarkup.as_markup(resize_keyboard=True))
                 await state.update_data(child_message=child_message.message_id)
                 await state.update_data(seen_child_message="1")
 
     if query.data == "Очистить корзину":
-        print(query.data)
         data_dict = await state.get_data()
         await state.update_data({'seen_child_message':'0'})
         for key in data_dict:
@@ -371,7 +362,6 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
         text = text.replace("MM", f"{balance}")
         await bot.edit_message_text(text=text, chat_id=chat_id, message_id=message_id_shop,  # TODO СДЕЛАТЬ АЛЬБОМ
                                     reply_markup=inline.as_markup())
-        print("123")
         await bot.edit_message_text(
             text=f"<b>БАЛАНС</b>:   <i>{data_dict['balance_all']} руб                                                          💵</i>\n\n",
             chat_id=chat_id,
@@ -379,11 +369,9 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
             reply_markup=inline2.as_markup(resize_keyboard=True))
 
     if query.data == "Оформить заказ":
-        print(query.data)
         balance = (await state.get_data())['balance']
         balance_all = (await state.get_data())['balance_all']
         low_amount = int(balance_all) * 0.2
-        print(low_amount)
         if balance < low_amount:
             nmarkup = ReplyKeyboardBuilder()
             nmarkup.row(types.KeyboardButton(text="Понятно 👌"))
@@ -421,10 +409,10 @@ async def shop_children_ok(message: types.Message, bot: Bot, state: FSMContext):
     # await bot.delete_message(chat_id, message_id+2)
 
 
-@router.message(Shop.shop_callback, F.text.contains("Вернуться в магазин"), flags=flags)
+@router.message(Shop.shop_callback, (F.text.contains("Вернуться в магазин")), flags=flags)
 @router.message(Shop.shop_bucket, (F.text.contains("Вернуться в магазин") | F.text.contains("Да, выйти ⬇")),
                 flags=flags)
-@router.message(TrueGoalsState.main, F.text.contains("Вернуться в магазин"), flags=flags)
+@router.message(TrueGoalsState.main, (F.text.contains("Вернуться в магазин")), flags=flags)
 async def shop_go_back(message: types.Message, bot: Bot, state: FSMContext):
     chat_id = (await state.get_data())['chat_id_shop']
     await state.set_state(Shop.shop_bucket)
@@ -434,7 +422,7 @@ async def shop_go_back(message: types.Message, bot: Bot, state: FSMContext):
     await bot.send_message(text="Продолжите покупки", chat_id=chat_id, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(Shop.shop_callback, F.text.contains("Вернуться в магазин 🛒"), flags=flags)
+@router.message(Shop.shop_callback, (F.text.contains("Вернуться в магазин 🛒")), flags=flags)
 @router.message(Shop.shop_bucket, (F.text.contains("Вернуться в магазин 🛒") | F.text.contains("Да, выйти ⬇")),
                 flags=flags)
 async def shop_go_back(message: types.Message, bot: Bot, state: FSMContext):
