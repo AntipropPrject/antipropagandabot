@@ -123,11 +123,9 @@ async def nato_countries(message: Message, bot: Bot, state: FSMContext):
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(F.text.contains('Надули? 🤨'),
-                state=Nato_states.nato_countries, flags=flags)
+@router.message(F.text.contains('Надули? 🤨'), state=Nato_states.nato_countries, flags=flags)
 async def nato_extention(message: Message, bot: Bot, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
-
     data = await state.get_data()
     try:
         nato_buttons = int(data['nato_buttons'])
@@ -137,9 +135,7 @@ async def nato_extention(message: Message, bot: Bot, state: FSMContext):
         nmarkup.row(types.KeyboardButton(text="Так а чего им бояться? Россия не собирается ни на кого нападать. 🤔"))
     nmarkup.row(types.KeyboardButton(text="Продолжим 👉"))
     await state.update_data(nato_buttons=f'{nato_buttons + 1}')
-    text = await sql_safe_select('text', 'texts', {'name': 'nato_extention'})
-    media_id = await sql_safe_select('t_id', 'assets', {'name': "Вопрос_о_нерасширении_НАТО_на_восток"})
-    await message.answer_video(media_id, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await simple_media(message, 'nato_extention', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message(F.text.contains('Так а чего им бояться? Россия не собирается ни на кого нападать. 🤔'),
@@ -155,9 +151,7 @@ async def nato_propagandons(message: Message, bot: Bot, state: FSMContext):
     if nato_buttons == 0:
         nmarkup.row(types.KeyboardButton(text="Но НАТО обещали, что не будут расширяться на восток. Надули? 🤨"))
     nmarkup.row(types.KeyboardButton(text="Продолжим 👉"))
-    text = await sql_safe_select('text', 'texts', {'name': 'nato_propagandons'})
-    media_id = await sql_safe_select('t_id', 'assets', {'name': "Пропаганда_о_том,_что_мы_не_остановимся_на_Украине"})
-    await message.answer_video(media_id, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await simple_media(message, 'nato_propagandons', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message(F.text.contains('Продолжим 👉'),
@@ -165,9 +159,7 @@ async def nato_propagandons(message: Message, bot: Bot, state: FSMContext):
 async def nato_not_enemy(message: Message, bot: Bot, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжай ⏳"))
-    text = await sql_safe_select('text', 'texts', {'name': 'nato_not_enemy'})
-    media_id = await sql_safe_select('t_id', 'assets', {'name': "Путин:_НАТО_не_враг,_но_зачем_двигаются_к_нам?"})
-    await message.answer_video(media_id, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await simple_media(message, 'nato_not_enemy', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message(F.text.contains('Продолжай ⏳'),
@@ -186,22 +178,19 @@ async def nato_ucraine_in(message: Message, bot: Bot, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     await state.set_state(Nato_states.nato_ucraine_in)
     nmarkup.row(types.KeyboardButton(text="Взглянуть на карту 🗺"))
-    text = await sql_safe_select('text', 'texts', {'name': 'nato_ucraine_in'})
-    media_id = await sql_safe_select('t_id', 'assets', {'name': "Путин_об_Украине_в_НАТО_и_Швеции_с_Финляндией_в_НАТО"})
-    await message.answer_video(media_id, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await simple_media(message, 'nato_ucraine_in', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(F.text.contains('Взглянуть на карту 🗺'),
-                state=Nato_states.nato_ucraine_in, flags=flags)
+
+@router.message(F.text.contains('Взглянуть на карту 🗺'), state=Nato_states.nato_ucraine_in, flags=flags)
 async def nato_map(message: Message, bot: Bot, state: FSMContext):
     await state.set_state(Nato_states.nato_map)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Так если бы Украина вступила в НАТО, они вместе вторглись бы в Крым!  ✈️"))
     nmarkup.row(types.KeyboardButton(text="А Путин объяснил, почему Украина и Финляндия— это разное? 🤔"))
     nmarkup.row(types.KeyboardButton(text="Закончим диалог о НАТО 👉"))
-    text = await sql_safe_select('text', 'texts', {'name': 'nato_map'})
-    media_id = await sql_safe_select('t_id', 'assets', {'name': "НАТО,_Россия,_Украина,_Швеция_и_Финляндия_на_карте"})
-    await message.answer_video(media_id, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await simple_media(message, 'nato_map', reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
 
 
 @router.message(F.text.contains('Так если бы Украина вступила в НАТО, они вместе вторглись бы в Крым!  ✈️'),
@@ -237,10 +226,8 @@ async def nato_diff_with_fin(message: Message, bot: Bot, state: FSMContext):
         nmarkup.row(
             types.KeyboardButton(text="Так если бы Украина вступила в НАТО, они вместе вторглись бы в Крым!  ✈️"))
     nmarkup.row(types.KeyboardButton(text="Закончим диалог о НАТО 👉"))
-    text = await sql_safe_select('text', 'texts', {'name': 'nato_diff_with_fin'})
-    media_id = await sql_safe_select('t_id', 'assets',
-                                     {'name': "Путин_объясняет_в_чём_разница_между_Украиной_в_НАТО_и_Финляндией"})
-    await message.answer_video(media_id, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await simple_media(message, 'nato_diff_with_fin', reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
 
 
 @router.message(F.text.contains('Закончим диалог о НАТО 👉'),
