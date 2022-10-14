@@ -154,7 +154,7 @@ async def shop_transfer(message: types.Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(Shop.shop_transfer, F.text.contains("Откуда такие цифры?"), flags=flags)
+@router.message(Shop.shop_transfer, (F.text.contains("Откуда такие цифры?")), flags=flags)
 async def shop_why_so_many(message: types.Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='shop_why_so_many', value="+")
     nmarkup = ReplyKeyboardBuilder()
@@ -165,7 +165,7 @@ async def shop_why_so_many(message: types.Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(Shop.after_first_poll, F.text.contains("Откуда такие цифры?"), flags=flags)
+@router.message(Shop.after_first_poll, (F.text.contains("Откуда такие цифры?")), flags=flags)
 async def shop_why_so_many(message: types.Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='shop_why_so_many', value="+")
     nmarkup = ReplyKeyboardBuilder()
@@ -176,8 +176,8 @@ async def shop_why_so_many(message: types.Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(Shop.shop_transfer, F.text.contains("Перейти к покупкам"), flags=flags)
-@router.message(Shop.shop_why_so_many, F.text.contains("Перейти к покупкам"), flags=flags)
+@router.message(Shop.shop_transfer, (F.text.contains("Перейти к покупкам")), flags=flags)
+@router.message(Shop.shop_why_so_many, (F.text.contains("Перейти к покупкам")), flags=flags)
 async def shop_bucket(message: types.Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='shop_bucket', value="+")
     await state.set_state(Shop.shop_bucket)
