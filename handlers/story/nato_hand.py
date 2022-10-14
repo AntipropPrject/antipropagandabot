@@ -18,7 +18,7 @@ from filters.MapFilters import WebPropagandaFilter, PplPropagandaFilter, \
 from filters.isAdmin import IsAdmin
 from handlers.story import true_resons_hand
 from keyboards.map_keys import antip_killme_kb
-from resources.all_polls import antip_q1_options, antip_q2_options, antip_q3_options
+from resources.all_polls import antip_q1_options, antip_q2_options, antip_q3_options, welc_message_one
 from resources.variables import release_date
 from states.antiprop_states import propaganda_victim
 from states.true_goals_states import TrueGoalsState, WarGoalsState
@@ -264,12 +264,16 @@ async def nato_end(message: Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='nato_end',
                                 value=message.text)
     answer_1 = await mongo_count_docs('database', 'statistics_new',
-                                      {'nato_end': 'Скорее да, это лишь предлог 👌'})
+                                      {'nato_end': 'Скорее да, это лишь предлог 👌',
+                                       'war_aims_ex': welc_message_one[5]})
     answer_2 = await mongo_count_docs('database', 'statistics_new',
-                                      {'nato_end': 'Скорее нет, это настоящая причина 🙅‍♂'})
+                                      {'nato_end': 'Скорее нет, это настоящая причина 🙅‍♂',
+                                       'war_aims_ex': welc_message_one[5]})
     answer_3 = await mongo_count_docs('database', 'statistics_new',
-                                      {'nato_end': 'Затрудняюсь ответить 🤷‍♀'})
-    all_answers = await mongo_count_docs('database', 'statistics_new', {'nato_end': {'$exists': True}})
+                                      {'nato_end': 'Затрудняюсь ответить 🤷‍♀',
+                                       'war_aims_ex': welc_message_one[5]})
+    all_answers = await mongo_count_docs('database', 'statistics_new', {'nato_end': {'$exists': True},
+                                                                        'war_aims_ex': welc_message_one[5]})
     txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'nato_end'}), all_answers)
     txt.replace("AA", answer_1)
     txt.replace("BB", answer_2)
