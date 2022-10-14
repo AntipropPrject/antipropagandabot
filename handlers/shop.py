@@ -90,7 +90,6 @@ inline2.adjust(2)
 @router.message((F.text.in_({'Продолжай ⏳', 'Хорошо 🤝', '*презрительно хмыкнуть* 🤨'})),
                 state=TrueGoalsState.before_shop, flags=flags)
 async def shop_welcome(message: types.Message, state: FSMContext):
-    print("in shop")
     await state.set_state(Shop.main)
     text = await sql_safe_select("text", "texts", {"name": "shop_welcome"})
     await message.answer(text, disable_web_page_preview=True)
@@ -224,8 +223,6 @@ async def shop_bucket(message: types.Message, state: FSMContext):
         text=f"<b>БАЛАНС</b>:   <i>{change_number_format(data_dict['balance'])} руб                                                          💵</i>\n\n{check_text}",
         reply_markup=inline2.as_markup(resize_keyboard=True))
 
-    print(bot_message.message_id)
-    print(bot_message.from_user.id)
     await state.update_data(message_id_shop=bot_message.message_id)
     shop_text = await sql_safe_select("text", "texts", {"name": "shop_bucket"})
     await state.update_data(text_shop=shop_text)
@@ -286,10 +283,8 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
                         if word.isnumeric():
                             num_list.append(int(word))
                     good = key.replace(str(num_list[0]), "")
-                    print(data_dict[key])
                     if int(data_dict[key]) > 0:
                         check_text = check_text + f"<b>{data_dict[key]}</b> {good} " + "\n"
-                        print(check_text)
             text = re.sub(r'\[[^\]]+\]', '0', text)
             text = text.replace("MM", f"{change_number_format(balance)}")
             await bot.edit_message_text(text=text, chat_id=chat_id, message_id=message_id_shop,  # TODO СДЕЛАТЬ АЛЬБОМ
@@ -316,7 +311,6 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
                     good = key.replace(str(num_list[0]), "")
                     if int(data_dict[key]) > 0:
                         check_text = check_text + f"<b>{data_dict[key]}</b> {good} " + "\n"
-                        print(check_text)
             text = re.sub(r'\[[^\]]+\]', '0', text)
             text = text.replace("MM", f"{change_number_format(balance)}")
             await bot.edit_message_text(text=text, chat_id=chat_id, message_id=message_id_shop,  # TODO СДЕЛАТЬ АЛЬБОМ
