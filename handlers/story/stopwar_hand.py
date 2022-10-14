@@ -278,7 +278,7 @@ async def stopwar_how_to_avoid(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="Начнём! 🪖"))
     nmarkup.row(types.KeyboardButton(text="Не стоит, мне это не интересно 👉"))
     await state.set_state(StopWarState.stopwar_how_to_avoid)
-    if message.text == ' Ни за что! 🙅‍♂️':
+    if message.text == 'Ни за что! 🙅‍♂️':
         await message.answer("Рад это слышать!", disable_web_page_preview=True)
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 

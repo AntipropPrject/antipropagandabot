@@ -574,12 +574,14 @@ async def goals_normal_game_answer(message: Message, state: FSMContext):
 @router.message(((F.text.contains("Достаточно,")) | (F.text == "Продолжим 🤝") | (F.text == 'Пропустим игру 🙅‍♀️')),
                 state=TrueGoalsState.normal_game, flags=flags)
 async def goals_I_love_absurd(message: Message, state: FSMContext):
+    text = await sql_safe_select('text', 'texts', {'name': 'goals_I_love_absurd'})
     if 'Пропустим игру' in message.text:
+        await message.answer('Хорошо')
         await mongo_update_stat_new(tg_id=message.from_user.id, column='normal_game_stats', value='Пропустили')
     await state.set_state(TrueGoalsState.absurd)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Добавить абсурдности 🪄"))
-    await simple_media(message, 'reasons_real_reasons', nmarkup.as_markup(resize_keyboard=True))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message(F.text == "Добавить абсурдности 🪄", state=TrueGoalsState.absurd, flags=flags)
@@ -631,6 +633,16 @@ async def goals_such_plan_so(message: Message):
 async def goals_change_of_power(message: Message, state: FSMContext):
     await state.set_state(TrueGoalsState.power_change)
     text = await sql_safe_select('text', 'texts', {'name': 'goals_change_of_power'})
+
+    g_all = await mongo_count_docs('database', 'statistics_new', {'war_aims_ex': {'$exists': True}})
+    change_power = await mongo_count_docs('database', 'statistics_new', {'war_aims_ex': welc_message_one[4]})
+    try:
+        XX = change_power / g_all * 100
+        text = text.replace('XX', round(XX))
+    except Exception:
+        text = text.replace('XX', 'N/A')
+
+
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Взглянем на факты 👀"))
     nmarkup.row(types.KeyboardButton(text="Пропустим 👉"))
@@ -731,11 +743,11 @@ async def goals_putin_plan_continued(message: Message):
 async def goals_putin_face(message: Message, state: FSMContext):
     await state.set_state(TrueGoalsState.putin_next)
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Чего ждать от мобилизации? 🪖"))
+    nmarkup.row(types.KeyboardButton(text="Продолжим..."))
     await simple_media(message, 'goals_putin_face', nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(F.text == "Чего ждать от мобилизации? 🪖", state=TrueGoalsState.putin_next, flags=flags)
+@router.message(F.text == "Продолжим...", state=TrueGoalsState.putin_next, flags=flags)
 async def goals_mobilisation(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'goals_mobilisation'})
     nmarkup = ReplyKeyboardBuilder()
