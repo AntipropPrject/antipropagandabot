@@ -636,8 +636,12 @@ async def goals_change_of_power(message: Message, state: FSMContext):
 
     g_all = await mongo_count_docs('database', 'statistics_new', {'war_aims_ex': {'$exists': True}})
     change_power = await mongo_count_docs('database', 'statistics_new', {'war_aims_ex': welc_message_one[4]})
-    txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'goals_NATO_start'}), g_all)
-    txt.replace('XX', change_power)
+    try:
+        XX = change_power / g_all * 100
+        text = text.replace('XX', round(XX))
+    except Exception:
+        text = text.replace('XX', 'N/A')
+
 
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Взглянем на факты 👀"))
