@@ -19,7 +19,7 @@ class StopWarState(StatesGroup):
     stopwar_ukraine_will_not_stop = State()
     stopwar_nostradamus = State()
     stopwar_how_and_when = State()
-    stopwar_save_vv_start = State()
+    after_mobilisation = State()
     stopwar_lifesaver = State()
     stopwar_how_to_avoid = State()
     front_death = State()

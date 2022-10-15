@@ -479,9 +479,10 @@ async def goals_pls_use_goal_nazi(message: Message):
 
 @router.message((F.text.contains("🤯")), state=WarGoalsState.bio, flags=flags)
 async def goals_nazi_enterence(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'goals_will_add_sorry'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Кнопка'))
-    await message.answer('Начало нато, но пока что ничего', reply_markup=nmarkup.as_markup())
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message(((F.text.contains("Уверен(а), проп")) | (F.text.in_({"Кнопка", 'Продолжим 👌'}))),
@@ -651,7 +652,7 @@ async def goals_change_of_power(message: Message, state: FSMContext):
 
 @router.message((F.text.contains('на факты 👀')), state=TrueGoalsState.power_change, flags=flags)
 async def goals_will_add_sorry(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'goals_change_of_power'})
+    text = await sql_safe_select('text', 'texts', {'name': 'goals_will_add_sorry'})
     await message.answer(text)
     await goals_why_power_change(message)
 
@@ -685,11 +686,10 @@ async def goals_paper_theses(message: Message):
 
 @router.message(F.text == "Интересно 🤔", state=TrueGoalsState.power_change, flags=flags)
 async def goals_russian_world_nazi(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'goals_russian_world_nazi'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Посмотрел(а) 📺"))
     nmarkup.add(types.KeyboardButton(text="Продолжим 👉"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await simple_media(message, 'goals_russian_world_nazi', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text.in_({"Посмотрел(а) 📺", "Продолжим 👉"})) | (F.text == "Это мне не интересно, пропустим 👉") |
