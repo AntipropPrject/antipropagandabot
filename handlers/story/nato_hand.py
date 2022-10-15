@@ -18,6 +18,7 @@ from filters.MapFilters import WebPropagandaFilter, PplPropagandaFilter, \
 from filters.isAdmin import IsAdmin
 from handlers.story import true_resons_hand
 from keyboards.map_keys import antip_killme_kb
+from middleware.report_ware import Reportware
 from resources.all_polls import antip_q1_options, antip_q2_options, antip_q3_options, welc_message_one
 from resources.variables import release_date
 from states.antiprop_states import propaganda_victim
@@ -28,6 +29,7 @@ from states.nato_states import Nato_states
 
 flags = {"throttling_key": "True"}
 router = Router()
+router.message.middleware(Reportware())
 
 
 # router.message.filter(state=Nato_states)

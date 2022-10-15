@@ -7,11 +7,13 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from data_base.DBuse import sql_safe_select, data_getter, sql_games_row_selecter, sql_select_row_like, mongo_game_answer
 from filters.MapFilters import SubscriberFilter
 from handlers import start_hand
+from middleware.report_ware import Reportware
 from states.main_menu_states import MainMenuStates
 from utilts import simple_media, game_answer, dynamic_media_answer
 
 router = Router()
 router.message.filter(state=MainMenuStates)
+router.message.middleware(Reportware())
 flags = {"throttling_key": "True"}
 
 fancy_numbers = ('1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '1️⃣0️⃣', '1️⃣1️⃣', '1️⃣2️⃣', '1️⃣3️⃣',
