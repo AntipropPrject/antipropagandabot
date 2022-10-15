@@ -284,8 +284,7 @@ async def stopwar_mob_start(message: Message, state: FSMContext):
 
 # -- дальше надо будет изменить роутеры на прием сообщений из конца мобилизации
 
-@router.message((F.text.in_({'Продолжаем', 'Всё равно продолжить 👉'})),
-                state=(StopWarState.after_mobilisation, StopWarState.stopwar_lifesaver), flags=flags)
+@router.message((F.text == 'ПЕРЕХОД'), state=StopWarState.stopwar_how_and_when, flags=flags)
 async def stopwar_how_and_when(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_how_and_when'})
     await state.set_state(StopWarState.stopwar_how_and_when)
