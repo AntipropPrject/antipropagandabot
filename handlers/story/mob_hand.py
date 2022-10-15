@@ -26,7 +26,7 @@ async def mob_lifesaver(message: Message, state: FSMContext):
 
 @router.message(F.text == "Не стоит, мне это не интересно 👉", state=MobState.main, flags=flags)
 async def mob_how_to_avoid(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'mob_lifesaver'})
+    text = await sql_safe_select('text', 'texts', {'name': 'mob_how_to_avoid'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(KeyboardButton(text="Хорошо, спасём Вовочку! 🪖"))
     nmarkup.row(KeyboardButton(text="Всё равно продолжить 👉"))
@@ -36,7 +36,7 @@ async def mob_how_to_avoid(message: Message):
 @router.message(F.text.in_({'Начнём! 🪖', 'Хорошо, спасём Вовочку! 🪖'}), state=MobState.main, flags=flags)
 async def mob_save_vv_start(message: Message, bot: Bot, state: FSMContext):
     await state.set_state(MobState.city_poll)
-    text = await sql_safe_select('text', 'texts', {'name': 'mob_lifesaver'})
+    text = await sql_safe_select('text', 'texts', {'name': 'mob_save_vv_start'})
     await message.answer(text, disable_web_page_preview=True)
     await bot.send_poll(message.from_user.id, 'Где безопаснее?', mob_city, is_anonymous=False,
                         type='quiz', correct_option_id=0)
