@@ -21,7 +21,7 @@ from handlers.story.donbass_hand import donbass_big_tragedy
 from handlers.story.main_menu_hand import mainmenu_really_menu
 from handlers.story.preventive_strike import prevent_strike_any_brutality
 from handlers.story.putin_hand import stopwar_start
-from handlers.story.stopwar_hand import stopwar_first_manipulation_argument, stopwar_lets_fight
+from handlers.story.stopwar_hand import stopwar_first_manipulation_argument, stopwar_lets_fight, stopwar_mob_start
 from handlers.story.true_goals_hand import goals_war_point_now
 from handlers.story.true_resons_hand import reasons_who_to_blame
 from handlers.story.welcome_messages import message_2
@@ -158,6 +158,11 @@ async def command_polls_start(message: Message, state: FSMContext):
 async def command_test_goals(message: Message, state: FSMContext):
     await state.set_state(TrueGoalsState.main)
     await goals_war_point_now(message, state)
+
+
+@router.message(IsAdmin(level=['Тестирование']), commands=['test_mob'], flags=flags)
+async def command_test_goals(message: Message, state: FSMContext):
+    await stopwar_mob_start(message, state)
 
 
 @router.message(IsAdmin(level=['Тестирование']), commands=['shop'], flags=flags)

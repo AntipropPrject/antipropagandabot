@@ -17,6 +17,7 @@ all_test_commands = {
     'teststrike': 'Превентивный удар (prevent_strike_start)',
     'test_nato': 'НАТО',
     'teststop': 'Остановить войну (stopwar_start)',
+    'test_mob': 'Мобилизация',
     'putest': 'Путин (reasons_who_to_blame)',
     'testend': 'Концовка перед таймером (stopwar_first_manipulation_argument)',
     'mainskip69': 'Главное меню (mainmenu_really_menu)',
