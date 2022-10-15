@@ -47,7 +47,7 @@ async def mob_save_vv_start(message: Message, bot: Bot, state: FSMContext):
 async def mob_size_matters(poll_answer: PollAnswer, bot: Bot, state: FSMContext):
     await state.set_state(MobState.nazi_poll)
     answer = mob_city[poll_answer.option_ids[0]]
-    await mongo_update_stat_new(poll_answer.user.id, 'mob_city_poll', answer)
+    await mongo_update_stat_new(poll_answer.user.id, 'mob_city_poll',value=answer)
 
     c_all = await mongo_count_docs('database', 'statistics_new', {'mob_city_poll': {'$exists': True}})
     c_city = await mongo_count_docs('database', 'statistics_new', {'mob_city_poll': mob_city[0]})
@@ -74,7 +74,7 @@ async def mob_wot_mvps(message: Message, bot: Bot, state: FSMContext):
 async def mob_nazi_is_here(poll_answer: PollAnswer, bot: Bot, state: FSMContext):
     await state.set_state(MobState.mob_nazi_is_here)
     answer = mob_wot_mvps_poll[poll_answer.option_ids[0]]
-    await mongo_update_stat_new(poll_answer.user.id, 'mob_nazi_is_here', answer)
+    await mongo_update_stat_new(poll_answer.user.id, 'mob_nazi_is_here', value=answer)
 
     c_all = await mongo_count_docs('database', 'statistics_new', {'mob_nazi_is_here': {'$exists': True}})
     c_vova = await mongo_count_docs('database', 'statistics_new', {'mob_nazi_is_here': mob_wot_mvps_poll[0]})
@@ -102,7 +102,7 @@ async def mob_is_he_insane(message: Message, bot: Bot, state: FSMContext):
 async def mob_only_to_lit(poll_answer: PollAnswer, bot: Bot, state: FSMContext):
     await state.set_state(MobState.mob_only_to_lit)
     answer = mob_is_he_insane_poll[poll_answer.option_ids[0]]
-    await mongo_update_stat_new(poll_answer.user.id, 'mob_only_to_lit', answer)
+    await mongo_update_stat_new(poll_answer.user.id, 'mob_only_to_lit', value=answer)
 
     c_all = await mongo_count_docs('database', 'statistics_new', {'mob_only_to_lit': {'$exists': True}})
     c_right = await mongo_count_docs('database', 'statistics_new', {'mob_only_to_lit': mob_is_he_insane_poll[3]})
@@ -133,7 +133,7 @@ async def mob_laws_lol(message: Message, bot: Bot, state: FSMContext):
 async def mob_ignore_it_go_away(poll_answer: PollAnswer, bot: Bot, state: FSMContext):
     await state.set_state(MobState.mob_ignore_it_go_away)
     answer = mob_laws_lol_poll[poll_answer.option_ids[0]]
-    await mongo_update_stat_new(poll_answer.user.id, 'mob_ignore_it_go_away', answer)
+    await mongo_update_stat_new(poll_answer.user.id, 'mob_ignore_it_go_away', value=answer)
 
     c_all = await mongo_count_docs('database', 'statistics_new', {'mob_ignore_it_go_away': {'$exists': True}})
     c_right = await mongo_count_docs('database', 'statistics_new', {'mob_ignore_it_go_away': mob_laws_lol_poll[3]})
@@ -156,7 +156,7 @@ async def mob_they_coming_for_you(message: Message, bot: Bot, state: FSMContext)
     nmarkup.row(KeyboardButton(text="Понятно, дверь незнакомцам не открываем 👌"))
     await message.answer(text, disable_web_page_preview=True,reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
-@router.message(F.text.in_({'Понятно 👌'}), state=MobState.mob_they_coming_for_you, flags=flags)
+@router.message(F.text.in_({'Понятно, дверь незнакомцам не открываем 👌'}), state=MobState.mob_they_coming_for_you, flags=flags)
 async def mob_street_fighter(message: Message, bot: Bot, state: FSMContext):
     await state.set_state(MobState.mob_street_fighter)
     text = await sql_safe_select('text', 'texts', {'name': 'mob_street_fighter'})
@@ -169,7 +169,7 @@ async def mob_street_fighter(message: Message, bot: Bot, state: FSMContext):
 async def mob_bad_ingrish(poll_answer: PollAnswer, bot: Bot, state: FSMContext):
     await state.set_state(MobState.mob_bad_ingrish)
     answer = mob_street_fighter_poll[poll_answer.option_ids[0]]
-    await mongo_update_stat_new(poll_answer.user.id, 'mob_bad_ingrish', answer)
+    await mongo_update_stat_new(poll_answer.user.id, 'mob_bad_ingrish', value=answer)
     text = await sql_safe_select('text', 'texts', {'name': 'mob_bad_ingrish'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(KeyboardButton(text="Понятно 👌"))
@@ -212,7 +212,7 @@ async def mob_why_he_did_it(message: Message, bot: Bot, state: FSMContext):
 async def mob_still_ignore_it(poll_answer: PollAnswer, bot: Bot, state: FSMContext):
     await state.set_state(MobState.voenkomat_poll)
     answer = mob_why_he_did_it_poll[poll_answer.option_ids[0]]
-    await mongo_update_stat_new(poll_answer.user.id, 'mob_still_ignore_it', answer)
+    await mongo_update_stat_new(poll_answer.user.id, 'mob_still_ignore_it', value=answer)
 
     c_all = await mongo_count_docs('database', 'statistics_new', {'mob_still_ignore_it': {'$exists': True}})
     c_right = await mongo_count_docs('database', 'statistics_new', {'mob_still_ignore_it': mob_why_he_did_it_poll[2]})
