@@ -22,7 +22,6 @@ router.message.filter(state=MobState)
 router.poll_answer.filter(state=MobState)
 
 
-@router.message(commands=['mob'], state='*', flags=flags)
 async def mob_lifesaver(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'mob_lifesaver'})
     await state.set_state(MobState.main)

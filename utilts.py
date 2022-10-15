@@ -13,7 +13,7 @@ from aiogram.types import Message, ReplyKeyboardRemove, InlineKeyboardMarkup, Re
 
 import bata
 from data_base.DBuse import sql_safe_select, sql_safe_insert, sql_safe_update, data_getter, sql_select_row_like, \
-    mongo_ez_find_one, mongo_count_docs, mongo_select_info
+    mongo_ez_find_one, mongo_count_docs, mongo_select_info, mongo_select_admin_levels
 from log import logg
 from utils.spacebot import SpaceBot
 
@@ -132,6 +132,7 @@ def percentage_replace(text: str, symbol: str, part: int, base: int):
     except ZeroDivisionError:
         perc = 0
     return text.replace(symbol, str(round(perc)))
+
 
 def change_number_format(number:int):
     return '{0:,}'.format(number).replace(',', ' ')
