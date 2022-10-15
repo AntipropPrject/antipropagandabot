@@ -13,7 +13,7 @@ from resources.all_polls import mob_wot_mvps_poll, mob_is_he_insane_poll, mob_la
 from states.mob_states import MobState
 from states.stopwar_states import StopWarState
 from utils.fakes import fake_message
-from utilts import CoolPercReplacer, simple_media
+from utilts import CoolPercReplacer, simple_media, simple_media_bot
 
 flags = {"throttling_key": "True"}
 router = Router()
@@ -117,17 +117,11 @@ async def mob_only_to_lit(poll_answer: PollAnswer, bot: Bot, state: FSMContext):
 
     txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'mob_only_to_lit'}), c_all)
     txt.replace('XX', c_right)
-    txt.replace('YY', c_all-c_right)
-    media_id=await sql_safe_select('t_id', 'assets', {'name': 'mob_only_to_lit'})
+    txt.replace('YY', c_all - c_right)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(KeyboardButton(text="Хорошо, запомнили и закрепили — не ходить в военкомат 👌"))
-    try:
-        await bot.send_video(poll_answer.user.id, video=media_id, caption=txt(),
-                             reply_markup=nmarkup.as_markup(resize_keyboard=True))
-    except Exception:
-        await bot.send_message(poll_answer.user.id,
-                               f'Здесь будет видео: Звонок от человека, который сам пришёл в военкомат\n\n\n{txt()}',
-                               reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await simple_media_bot(bot, poll_answer.user.id, 'mob_only_to_lit',
+                           reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message(F.text.in_({'Хорошо, запомнили и закрепили — не ходить в военкомат 👌'}), state=MobState.mob_only_to_lit,
@@ -152,7 +146,7 @@ async def mob_ignore_it_go_away(poll_answer: PollAnswer, bot: Bot, state: FSMCon
 
     txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'mob_ignore_it_go_away'}), c_all)
     txt.replace('XX', c_right)
-    txt.replace('YY', (c_all-c_right))
+    txt.replace('YY', (c_all - c_right))
 
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(KeyboardButton(text="Понятно 👌"))
@@ -168,7 +162,9 @@ async def mob_they_coming_for_you(message: Message, bot: Bot, state: FSMContext)
     nmarkup.row(KeyboardButton(text="Понятно, дверь незнакомцам не открываем 👌"))
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
-@router.message(F.text.in_({'Понятно, дверь незнакомцам не открываем 👌'}), state=MobState.mob_they_coming_for_you, flags=flags)
+
+@router.message(F.text.in_({'Понятно, дверь незнакомцам не открываем 👌'}), state=MobState.mob_they_coming_for_you,
+                flags=flags)
 async def mob_street_fighter(message: Message, bot: Bot, state: FSMContext):
     await state.set_state(MobState.mob_street_fighter)
     text = await sql_safe_select('text', 'texts', {'name': 'mob_street_fighter'})
@@ -201,11 +197,7 @@ async def mob_rules_of_nature(message: Message, state: FSMContext):
     nmarkup.row(KeyboardButton(text="Нет, пропустим это 👉"))
     if message.text == "А не лучше просто обходить стороной людей в форме? 🤔":
         await message.answer('Правильно мыслите! 😉')
-    try:
-        await message.answer_photo(photo=media_id, caption=text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
-    except Exception:
-        await message.answer(f'Здесь будет фото:Не брать повестку! Не ходить в военкомат!\n\n\n{text}',
-                             reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await simple_media(message, 'mob_bad_ingrish', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message(F.text.in_({'Да, обсудим, что делать Вовочке, если он официально трудоустроен 👌'}),
@@ -238,173 +230,183 @@ async def mob_still_ignore_it(poll_answer: PollAnswer, bot: Bot, state: FSMConte
     c_wrong_2 = await mongo_count_docs('database', 'statistics_new', {'mob_still_ignore_it': mob_why_he_did_it_poll[1]})
 
     txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'mob_still_ignore_it'}), c_all)
-    media_id = await sql_safe_select('t_id', 'assets', {'name': 'mob_still_ignore_it'})
     txt.replace('AA', c_wrong_1)
     txt.replace('BB', c_wrong_2)
     txt.replace('CC', c_right)
 
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(KeyboardButton(text="Понятно 👌"))
-    try:
-        await bot.send_video(poll_answer.user.id, video=media_id, caption=txt(),
-                             reply_markup=nmarkup.as_markup(resize_keyboard=True))
-    except Exception:
-        await bot.send_message(poll_answer.user.id,
-                               f'Зесь будет видео:[Максим Кац: не ходите в военкомат!]\n\n\n {txt()}',
-                               reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await simple_media_bot(bot, poll_answer.user.id, 'mob_still_ignore_it',
+                           reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
-    @router.message(F.text == "Понятно 👌", state=MobState.voenkomat_poll, flags=flags)
-    async def mob_he_is_gone(message: Message):
-        text = await sql_safe_select('text', 'texts', {'name': 'mob_he_is_gone'})
-        nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(KeyboardButton(text="Да, конечно, продолжаем! 👌"))
-        nmarkup.row(KeyboardButton(text="Нет, хватит, я узнал(а) достаточно 🙅‍♂️"))
-        await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
-    @router.message(F.text == "Нет, хватит, я узнал(а) достаточно 🙅‍♂️", state=MobState.voenkomat_poll, flags=flags)
-    async def mob_I_can_help(message: Message):
-        text = await sql_safe_select('text', 'texts', {'name': 'mob_I_can_help'})
-        nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(KeyboardButton(text="Это интересно, давай обсудим! 👌"))
-        nmarkup.row(KeyboardButton(text="Уверен(а), продолжим 👉"))
-        await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+@router.message(F.text == "Понятно 👌", state=MobState.voenkomat_poll, flags=flags)
+async def mob_he_is_gone(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'mob_he_is_gone'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(KeyboardButton(text="Да, конечно, продолжаем! 👌"))
+    nmarkup.row(KeyboardButton(text="Нет, хватит, я узнал(а) достаточно 🙅‍♂️"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
-    @router.message(F.text.in_({"Уверен(а), продолжим 👉", "И какие шансы? 🤔"}),
-                    state=(MobState.voenkomat_poll, MobState.front), flags=flags)
-    async def mob_no_chances(message: Message, state: FSMContext):
-        text = await sql_safe_select('text', 'texts', {'name': 'mob_no_chances'})
-        nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(KeyboardButton(text="Какой ужас! 😱"))
-        nmarkup.add(KeyboardButton(
-            text="Продолжаем 👉" if await state.get_state() == "MobState:voenkomat_poll" else "Понятно 👌"))
-        nmarkup.row(KeyboardButton(text="Подожди, а как ты это посчитал? 🤔"))
-        await simple_media(message, 'mob_no_chances', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
-    @router.message(F.text == "Подожди, а как ты это посчитал? 🤔", state=(MobState.voenkomat_poll, MobState.front),
-                    flags=flags)
-    async def mob_calculations(message: Message, state: FSMContext):
-        text = await sql_safe_select('text', 'texts', {'name': 'mob_calculations'})
-        nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(KeyboardButton(text="Какой ужас! 😱"))
-        if await state.get_state() == "MobState:skipping":
-            nmarkup.row(KeyboardButton(text="Продолжаем 👉"))
-        elif await state.get_state() == "MobState:front":
-            nmarkup.row(KeyboardButton(text="Понятно 👌"))
-        await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+@router.message(F.text == "Нет, хватит, я узнал(а) достаточно 🙅‍♂️", state=MobState.voenkomat_poll, flags=flags)
+async def mob_I_can_help(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'mob_I_can_help'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(KeyboardButton(text="Это интересно, давай обсудим! 👌"))
+    nmarkup.row(KeyboardButton(text="Уверен(а), продолжим 👉"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
-    @router.message(F.text.contains('👌'), state=MobState.voenkomat_poll, flags=flags)
-    async def mob_jail_card_is_good(message: Message, state: FSMContext):
-        await state.set_state(MobState.front)
-        text = await sql_safe_select('text', 'texts', {'name': 'mob_jail_card_is_good'})
-        nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(KeyboardButton(text="Давай оценим 📊"))
-        await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
-    @router.message(F.text == "Давай оценим 📊", state=MobState.front, flags=flags)
-    async def mob_forever_broken(message: Message):
-        text = await sql_safe_select('text', 'texts', {'name': 'mob_forever_broken'})
-        nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(KeyboardButton(text="И какие шансы? 🤔"))
-        await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+@router.message(F.text.in_({"Уверен(а), продолжим 👉", "И какие шансы? 🤔"}),
+                state=(MobState.voenkomat_poll, MobState.front), flags=flags)
+async def mob_no_chances(message: Message, state: FSMContext):
+    text = await sql_safe_select('text', 'texts', {'name': 'mob_no_chances'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(KeyboardButton(text="Какой ужас! 😱"))
+    nmarkup.add(KeyboardButton(
+        text="Продолжаем 👉" if await state.get_state() == "MobState:voenkomat_poll" else "Понятно 👌"))
+    nmarkup.row(KeyboardButton(text="Подожди, а как ты это посчитал? 🤔"))
+    await simple_media(message, 'mob_no_chances', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
-    @router.message(F.text.in_({"Понятно 👌", "Какой ужас! 😱"}), state=MobState.front, flags=flags)
-    async def mob_still_human(message: Message, state: FSMContext):
-        await state.set_state(MobState.jail)
-        text = await sql_safe_select('text', 'texts', {'name': 'mob_still_human'})
-        nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(KeyboardButton(text="Продолжай ⏳"))
-        await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
-    @router.message(F.text == "Продолжай ⏳", state=MobState.jail, flags=flags)
-    async def mob_too_late_to_run(message: Message):
-        text = await sql_safe_select('text', 'texts', {'name': 'mob_too_late_to_run'})
-        await message.answer(text, disable_web_page_preview=True)
-        await message.answer_poll("Как поступить?", mob_front, is_anonymous=False, reply_markup=ReplyKeyboardRemove())
+@router.message(F.text == "Подожди, а как ты это посчитал? 🤔", state=(MobState.voenkomat_poll, MobState.front),
+                flags=flags)
+async def mob_calculations(message: Message, state: FSMContext):
+    text = await sql_safe_select('text', 'texts', {'name': 'mob_calculations'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(KeyboardButton(text="Какой ужас! 😱"))
+    if await state.get_state() == "MobState:skipping":
+        nmarkup.row(KeyboardButton(text="Продолжаем 👉"))
+    elif await state.get_state() == "MobState:front":
+        nmarkup.row(KeyboardButton(text="Понятно 👌"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
-    @router.poll_answer(MobState.jail)
-    async def mob_no_talking_to_ghouls(poll_answer: PollAnswer, bot: Bot, state: FSMContext):
-        await state.set_state(MobState.save_yourself)
-        answer = mob_front[poll_answer.option_ids[0]]
-        await mongo_update_stat_new(poll_answer.user.id, 'mob_front_poll', value=answer)
 
-        f_all = await mongo_count_docs('database', 'statistics_new', {'mob_front_poll': {'$exists': True}})
-        f_run = await mongo_count_docs('database', 'statistics_new', {'mob_front_poll': mob_front[0]})
-        f_law = await mongo_count_docs('database', 'statistics_new', {'mob_front_poll': mob_front[1]})
-        f_why = await mongo_count_docs('database', 'statistics_new', {'mob_front_poll': mob_front[2]})
+@router.message(F.text.contains('👌'), state=MobState.voenkomat_poll, flags=flags)
+async def mob_jail_card_is_good(message: Message, state: FSMContext):
+    await state.set_state(MobState.front)
+    text = await sql_safe_select('text', 'texts', {'name': 'mob_jail_card_is_good'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(KeyboardButton(text="Давай оценим 📊"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
-        txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'mob_no_talking_to_ghouls'}), f_all)
-        txt.replace('AA', f_run)
-        txt.replace('BB', f_law)
-        txt.replace('CC', f_why)
 
-        nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(KeyboardButton(text="Понятно, продолжим 👌"))
-        await bot.send_message(poll_answer.user.id, txt(),
-                               reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+@router.message(F.text == "Давай оценим 📊", state=MobState.front, flags=flags)
+async def mob_forever_broken(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'mob_forever_broken'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(KeyboardButton(text="И какие шансы? 🤔"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
-    @router.message(F.text == "Понятно, продолжим 👌", state=MobState.save_yourself, flags=flags)
-    async def mob_hard_way(message: Message):
-        text = await sql_safe_select('text', 'texts', {'name': 'mob_hard_way'})
-        nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(KeyboardButton(text="Лучше в тюрьму 🗝"))
-        nmarkup.row(KeyboardButton(text="Лучше попытаться сдаться в плен 🏳️"))
-        nmarkup.row(KeyboardButton(text="Затрудняюсь ответить 🤷‍♀️"))
-        await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
-    @router.message(F.text.in_({"Лучше в тюрьму 🗝", "Лучше попытаться сдаться в плен 🏳️", "Затрудняюсь ответить 🤷‍♀️"}),
-                    state=MobState.save_yourself, flags=flags)
-    async def mob_hard_way_results(message: Message):
-        await mongo_update_stat_new(message.from_user.id, 'mob_save_methods', value=message.text)
+@router.message(F.text.in_({"Понятно 👌", "Какой ужас! 😱"}), state=MobState.front, flags=flags)
+async def mob_still_human(message: Message, state: FSMContext):
+    await state.set_state(MobState.jail)
+    text = await sql_safe_select('text', 'texts', {'name': 'mob_still_human'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(KeyboardButton(text="Продолжай ⏳"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
-        s_all = await mongo_count_docs('database', 'statistics_new', {'mob_save_methods': {'$exists': True}})
-        s_fork = await mongo_count_docs('database', 'statistics_new', {'mob_save_methods': "Лучше в тюрьму 🗝"})
-        s_chance = await mongo_count_docs('database', 'statistics_new',
-                                          {'mob_save_methods': "Лучше попытаться сдаться в плен 🏳️"})
-        s_idk = await mongo_count_docs('database', 'statistics_new',
-                                       {'mob_save_methods': "Затрудняюсь ответить 🤷‍♀️"})
 
-        txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'mob_hard_way_results'}), s_all)
-        txt.replace('AA', s_fork)
-        txt.replace('BB', s_chance)
-        txt.replace('CC', s_idk)
-        nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(KeyboardButton(text="Давай 👌"))
-        nmarkup.row(KeyboardButton(text="Не стоит, продолжим 👉"))
-        await message.answer(txt(), reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+@router.message(F.text == "Продолжай ⏳", state=MobState.jail, flags=flags)
+async def mob_too_late_to_run(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'mob_too_late_to_run'})
+    await message.answer(text, disable_web_page_preview=True)
+    await message.answer_poll("Как поступить?", mob_front, is_anonymous=False, reply_markup=ReplyKeyboardRemove())
 
-    @router.message(F.text == "Не стоит, продолжим 👉", state=MobState.save_yourself, flags=flags)
-    async def mob_want_to_live_buffer(message: Message):
-        await message.answer("Хорошо 👌")
-        await mob_want_to_live(message)
 
-    @router.message(F.text == "Давай 👌", state=MobState.save_yourself, flags=flags)
-    async def mob_want_to_live(message: Message):
-        text = await sql_safe_select('text', 'texts', {'name': 'mob_want_to_live'})
-        nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(KeyboardButton(text="Всё понятно 👌"))
-        await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+@router.poll_answer(MobState.jail)
+async def mob_no_talking_to_ghouls(poll_answer: PollAnswer, bot: Bot, state: FSMContext):
+    await state.set_state(MobState.save_yourself)
+    answer = mob_front[poll_answer.option_ids[0]]
+    await mongo_update_stat_new(poll_answer.user.id, 'mob_front_poll', value=answer)
 
-    @router.message(F.text == "Всё понятно 👌", state=MobState.save_yourself, flags=flags)
-    async def mob_want_to_live(message: Message):
-        text = await sql_safe_select('text', 'texts', {'name': 'mob_want_to_live'})
-        nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(KeyboardButton(text="Интересно и полезно 👍"))
-        nmarkup.add(KeyboardButton(text="Полезно, но скучновато 🤏"))
-        nmarkup.row(KeyboardButton(text="Интересно, но не на все вопросы получил(а) ответы 🤔"))
-        nmarkup.row(KeyboardButton(text="Скучновато, да ещё и вопросы остались 👎"))
-        await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    f_all = await mongo_count_docs('database', 'statistics_new', {'mob_front_poll': {'$exists': True}})
+    f_run = await mongo_count_docs('database', 'statistics_new', {'mob_front_poll': mob_front[0]})
+    f_law = await mongo_count_docs('database', 'statistics_new', {'mob_front_poll': mob_front[1]})
+    f_why = await mongo_count_docs('database', 'statistics_new', {'mob_front_poll': mob_front[2]})
 
-    @router.message(F.text.in_({"Интересно и полезно 👍", "Полезно, но скучновато 🤏",
-                                "Интересно, но не на все вопросы получил(а) ответы 🤔",
-                                "Скучновато, да ещё и вопросы остались 👎"}),
-                    state=MobState.save_yourself, flags=flags)
-    async def mob_feedback(message: Message, bot: Bot, state: FSMContext):
-        await mongo_update_stat_new(message.from_user.id, 'mob_feedback', message.text)
-        await message.answer("Спасибо за оценку! 🙂")
-        await mob_to_the_stopwar(message, bot, state)
+    txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'mob_no_talking_to_ghouls'}), f_all)
+    txt.replace('AA', f_run)
+    txt.replace('BB', f_law)
+    txt.replace('CC', f_why)
 
-    @router.message(F.text.in_({"Какой ужас! 😱", "Продолжаем 👉"}), state=MobState.voenkomat_poll, flags=flags)
-    async def mob_to_the_stopwar(message: Message, bot: Bot, state: FSMContext):
-        await state.set_state(StopWarState.stopwar_how_and_when)
-        await asyncio.sleep(1)
-        await router.parent_router.feed_update(bot, fake_message(message.from_user, "ПЕРЕХОД"))
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(KeyboardButton(text="Понятно, продолжим 👌"))
+    await bot.send_message(poll_answer.user.id, txt(),
+                           reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message(F.text == "Понятно, продолжим 👌", state=MobState.save_yourself, flags=flags)
+async def mob_hard_way(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'mob_hard_way'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(KeyboardButton(text="Лучше в тюрьму 🗝"))
+    nmarkup.row(KeyboardButton(text="Лучше попытаться сдаться в плен 🏳️"))
+    nmarkup.row(KeyboardButton(text="Затрудняюсь ответить 🤷‍♀️"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message(F.text.in_({"Лучше в тюрьму 🗝", "Лучше попытаться сдаться в плен 🏳️", "Затрудняюсь ответить 🤷‍♀️"}),
+                state=MobState.save_yourself, flags=flags)
+async def mob_hard_way_results(message: Message):
+    await mongo_update_stat_new(message.from_user.id, 'mob_save_methods', value=message.text)
+
+    s_all = await mongo_count_docs('database', 'statistics_new', {'mob_save_methods': {'$exists': True}})
+    s_fork = await mongo_count_docs('database', 'statistics_new', {'mob_save_methods': "Лучше в тюрьму 🗝"})
+    s_chance = await mongo_count_docs('database', 'statistics_new',
+                                      {'mob_save_methods': "Лучше попытаться сдаться в плен 🏳️"})
+    s_idk = await mongo_count_docs('database', 'statistics_new',
+                                   {'mob_save_methods': "Затрудняюсь ответить 🤷‍♀️"})
+
+    txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'mob_hard_way_results'}), s_all)
+    txt.replace('AA', s_fork)
+    txt.replace('BB', s_chance)
+    txt.replace('CC', s_idk)
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(KeyboardButton(text="Давай 👌"))
+    nmarkup.row(KeyboardButton(text="Не стоит, продолжим 👉"))
+    await message.answer(txt(), reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message(F.text == "Не стоит, продолжим 👉", state=MobState.save_yourself, flags=flags)
+async def mob_want_to_live_buffer(message: Message):
+    await message.answer("Хорошо 👌")
+    await mob_want_to_live(message)
+
+
+@router.message(F.text == "Давай 👌", state=MobState.save_yourself, flags=flags)
+async def mob_want_to_live(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'mob_want_to_live'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(KeyboardButton(text="Всё понятно 👌"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message(F.text == "Всё понятно 👌", state=MobState.save_yourself, flags=flags)
+async def mob_want_to_live(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'mob_want_to_live'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(KeyboardButton(text="Интересно и полезно 👍"))
+    nmarkup.add(KeyboardButton(text="Полезно, но скучновато 🤏"))
+    nmarkup.row(KeyboardButton(text="Интересно, но не на все вопросы получил(а) ответы 🤔"))
+    nmarkup.row(KeyboardButton(text="Скучновато, да ещё и вопросы остались 👎"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message(F.text.in_({"Интересно и полезно 👍", "Полезно, но скучновато 🤏",
+                            "Интересно, но не на все вопросы получил(а) ответы 🤔",
+                            "Скучновато, да ещё и вопросы остались 👎"}),
+                state=MobState.save_yourself, flags=flags)
+async def mob_feedback(message: Message, bot: Bot, state: FSMContext):
+    await mongo_update_stat_new(message.from_user.id, 'mob_feedback', message.text)
+    await message.answer("Спасибо за оценку! 🙂")
+    await mob_to_the_stopwar(message, bot, state)
+
+
+@router.message(F.text.in_({"Какой ужас! 😱", "Продолжаем 👉"}), state=MobState.voenkomat_poll, flags=flags)
+async def mob_to_the_stopwar(message: Message, bot: Bot, state: FSMContext):
+    await state.set_state(StopWarState.stopwar_how_and_when)
+    await asyncio.sleep(1)
+    await router.parent_router.feed_update(bot, fake_message(message.from_user, "ПЕРЕХОД"))
