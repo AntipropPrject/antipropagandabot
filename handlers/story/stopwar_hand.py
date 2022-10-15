@@ -13,6 +13,7 @@ from data_base.DBuse import sql_safe_select, redis_just_one_write, redis_just_on
     mongo_select_info, mongo_update_end, del_key, poll_write, redis_delete_from_list, poll_get, mongo_count_docs
 from filters.MapFilters import FinalPolFiler
 from handlers.story.main_menu_hand import mainmenu_really_menu
+from handlers.story.mob_hand import mob_lifesaver
 from keyboards.map_keys import stopwar_lecture_kb
 from log import logg
 from states.main_menu_states import MainMenuStates
@@ -271,41 +272,17 @@ async def stopwar_front_death(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.in_({'Ни за что! 🙅‍♂️', "Продолжим 👉"})), flags=flags)
-async def stopwar_how_to_avoid(message: Message, state: FSMContext):
-    text = await sql_safe_select('text', 'texts', {'name': 'stopwar_how_to_avoid'})
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Начнём! 🪖"))
-    nmarkup.row(types.KeyboardButton(text="Не стоит, мне это не интересно 👉"))
-    await state.set_state(StopWarState.stopwar_how_to_avoid)
+@router.message((F.text.in_({'Ни за что! 🙅‍♂️', "Продолжим 👉"})), state=StopWarState.front_death, flags=flags)
+async def stopwar_mob_start(message: Message, state: FSMContext):
     if message.text == 'Ни за что! 🙅‍♂️':
         await message.answer("Рад это слышать!", disable_web_page_preview=True)
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await mob_lifesaver(message, state)
 
 
-@router.message((F.text == 'Не стоит, мне это не интересно 👉'), state=StopWarState.stopwar_how_to_avoid, flags=flags)
-async def stopwar_lifesaver(message: Message, state: FSMContext):
-    text = await sql_safe_select('text', 'texts', {'name': 'stopwar_lifesaver'})
-    await state.set_state(StopWarState.stopwar_lifesaver)
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Хорошо, спасём Вовочку! 🪖"))
-    nmarkup.row(types.KeyboardButton(text="Всё равно продолжить 👉"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
-
-
-@router.message((F.text.in_({'Начнём! 🪖', 'Хорошо, спасём Вовочку! 🪖'})),
-                state=(StopWarState.stopwar_lifesaver, StopWarState.stopwar_how_to_avoid),
-                flags=flags)
-async def stopwar_save_vv_start(message: Message, state: FSMContext):
-    await state.set_state(StopWarState.stopwar_save_vv_start)
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Продолжаем"))
-    await message.answer("<b>Блок «Спасём Вовочку!» </b>",
-                         reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
-
+# -- дальше надо будет изменить роутеры на прием сообщений из конца мобилизации
 
 @router.message((F.text.in_({'Продолжаем', 'Всё равно продолжить 👉'})),
-                state=(StopWarState.stopwar_save_vv_start, StopWarState.stopwar_lifesaver), flags=flags)
+                state=(StopWarState.after_mobilisation, StopWarState.stopwar_lifesaver), flags=flags)
 async def stopwar_how_and_when(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_how_and_when'})
     await state.set_state(StopWarState.stopwar_how_and_when)
