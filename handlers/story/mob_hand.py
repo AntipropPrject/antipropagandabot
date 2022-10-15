@@ -109,7 +109,7 @@ async def mob_only_to_lit(poll_answer: PollAnswer, bot: Bot, state: FSMContext):
 
     txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'mob_only_to_lit'}), c_all)
     txt.replace('XX', c_right)
-    txt.replace('YY', (100-c_right))
+    txt.replace('YY', c_all-c_right)
     media_id=await sql_safe_select('t_id', 'assets', {'name': 'mob_only_to_lit'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(KeyboardButton(text="Хорошо, запомнили и закрепили — не ходить в военкомат 👌"))
@@ -140,7 +140,7 @@ async def mob_ignore_it_go_away(poll_answer: PollAnswer, bot: Bot, state: FSMCon
 
     txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'mob_ignore_it_go_away'}), c_all)
     txt.replace('XX', c_right)
-    txt.replace('YY', (100-c_right))
+    txt.replace('YY', (c_all-c_right))
 
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(KeyboardButton(text="Понятно 👌"))
