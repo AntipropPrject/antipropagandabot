@@ -6,7 +6,7 @@ from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError
 
 from bata import all_data
 from data_base.DBuse import mongo_update_viewed_news, mongo_pop_news, mongo_update, sql_safe_select, mongo_easy_upsert, \
-    redis_just_one_write, redis_just_one_read
+    redis_just_one_write, redis_just_one_read, mongo_update_end
 from log.logg import send_to_chat, get_logger
 
 router = Router()
@@ -136,6 +136,7 @@ async def return_spam_send_task(time_now: datetime):
                 await bot.send_message(user, text)
             elif timedelta(hours=166) <= past_time <= timedelta(hours=166, seconds=1):
                 text = await sql_safe_select('text', 'texts', {'name': 'come_back_166'})
+                await mongo_update_end(user)
                 await bot.send_message(user, text)
         except TelegramForbiddenError:
             redis.delete(key)

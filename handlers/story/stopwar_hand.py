@@ -235,7 +235,7 @@ async def stopwar_must_watch_all(message: Message):
 
 @router.message((F.text.in_({"✅ Скорее да, был непредвзят", "❌ Скорее нет, был предвзят", "🤷‍♂️ Не знаю"})),
                 state=StopWarState.must_watch, flags=flags)
-async def stopwar_thanks_for_time(message: Message, state: FSMContext):
+async def stopwar_thanks_for_time(message: Message, bot: Bot, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='CredibleBot', value=message.text)
     await state.set_state(StopWarState.main)
     await del_key(f'Usrs: {message.from_user.id}: StopWar: NewPolitList:')
@@ -243,6 +243,9 @@ async def stopwar_thanks_for_time(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Что же? 🤔"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    # ООР
+    await MasterCommander(bot, 'chat', message.from_user.id).add({'menu': 'Главное меню'}, check_default_scope=False)
+    await mongo_update_end(message.from_user.id)
 
 
 @router.message(FinalPolFiler(status='Сторонник спецоперации ⚔️'), F.text == "Что же? 🤔", flags=flags)
@@ -636,7 +639,6 @@ async def stopwar_timer(message: Message, bot: Bot):
             await asyncio.sleep(1)
             sec -= 1
         await mongo_update_stat(message.from_user.id, 'end')
-        await mongo_update_end(message.from_user.id)
         await asyncio.sleep(1)
         await del_key(f"Current_users: {message.from_user.id}")
         await del_key(f'Usrs: {message.from_user.id}: count:')
@@ -644,7 +646,6 @@ async def stopwar_timer(message: Message, bot: Bot):
         await message.answer(textend, reply_markup=nmarkup.as_markup(resize_keyboard=True), parse_mode="HTML",
                              disable_web_page_preview=True)
         await bot.delete_message(chat_id=message.from_user.id, message_id=m_id)
-        print('Countdown finished.')
     else:
         await del_key(f'Usrs: {message.from_user.id}: count:')
         try:
@@ -694,8 +695,6 @@ async def main_menu(message: Message, bot: Bot, state: FSMContext):
                              ' это время зря — поделитесь мной со своими родственниками,'
                              ' друзьями и знакомыми! 🙏')
     else:
-        await MasterCommander(bot, 'chat', message.from_user.id).add({'menu': 'Главное меню'},
-                                                                     check_default_scope=False)
         await mongo_update_stat_new(tg_id=message.from_user.id, column='main_menu', value='Да')
         await state.set_state(MainMenuStates.main)
         await mainmenu_really_menu(message, state)
