@@ -7,11 +7,13 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from bot_statistics.stat import mongo_update_stat_new
 from data_base.DBuse import *
 from handlers.story.anti_prop_hand import antip_funny_propaganda, antip_web_exit_1
+from middleware.report_ware import Reportware
 from states.antiprop_states import propaganda_victim
 
 flags = {"throttling_key": "True"}
 router = Router()
 router.message.filter(state=propaganda_victim)
+router.message.middleware(Reportware())
 
 
 

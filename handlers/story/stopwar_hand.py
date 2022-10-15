@@ -16,6 +16,7 @@ from handlers.story.main_menu_hand import mainmenu_really_menu
 from handlers.story.mob_hand import mob_lifesaver
 from keyboards.map_keys import stopwar_lecture_kb
 from log import logg
+from middleware.report_ware import Reportware
 from states.main_menu_states import MainMenuStates
 from states.stopwar_states import StopWarState
 from utils.fakes import fake_message
@@ -25,6 +26,7 @@ from utilts import simple_media, percentage_replace, ref_master, ref_spy_sender,
 flags = {"throttling_key": "True"}
 router = Router()
 router.message.filter(state=StopWarState)
+router.message.middleware(Reportware())
 
 
 @router.message((F.text == "Подведём итоги 📊"), flags=flags)
