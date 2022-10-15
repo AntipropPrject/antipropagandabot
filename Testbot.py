@@ -16,10 +16,11 @@ from export_to_csv.pg_mg import Backup
 from handlers import start_hand, shop
 from handlers.admin_handlers import admin_factory, marketing, admin_for_games, new_admin_hand
 from handlers.advertising import start_spam, user_returner, return_spam_send
-from handlers.other import status, other_file
+from handlers.other import status, other_file, reports
 from handlers.story import preventive_strike, true_resons_hand, welcome_messages, nazi_hand, \
     donbass_hand, main_menu_hand, anti_prop_hand, putin_hand, smi_hand, stopwar_hand, welcome_stories, true_goals_hand, \
     nato_hand, mob_hand
+from middleware.report_ware import Reportware
 from middleware.trottling import ThrottlingMiddleware
 from utilts import happy_tester
 
@@ -68,6 +69,7 @@ async def main():
 
     # Технические роутеры
     # TablesCreator.tables_god()
+    dp.include_router(reports.router)
     dp.include_router(pg_mg.router)
     dp.include_router(new_admin_hand.router)
     dp.include_router(admin_factory.router)
@@ -96,7 +98,7 @@ async def main():
     dp.include_router(mob_hand.router)
     dp.include_router(main_menu_hand.router)
 
-
+    dp.message.middleware(Reportware())
     dp.message.middleware(ThrottlingMiddleware())
     # Роутер для неподошедшего
 

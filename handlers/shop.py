@@ -9,6 +9,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 from bot_statistics.stat import mongo_update_stat_new
 from data_base.DBuse import sql_safe_select, mongo_count_docs
+from middleware.report_ware import Reportware
 from resources.all_polls import shop_poll
 from states.true_goals_states import Shop, TrueGoalsState
 from utils.elk_logger import Logger
@@ -17,6 +18,7 @@ from utilts import change_number_format
 flags = {"throttling_key": "True"}
 router = Router()
 router.message.filter(state=(Shop, TrueGoalsState.before_shop, TrueGoalsState.main))
+router.message.middleware(Reportware())
 router.poll_answer.filter(state=Shop)
 router.callback_query.filter(state=Shop)
 

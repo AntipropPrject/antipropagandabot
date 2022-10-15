@@ -17,6 +17,7 @@ from handlers.story.donbass_hand import donbass_big_tragedy
 from handlers.story.nato_hand import nato_start
 from handlers.story.nazi_hand import NaziState, nazi_first_poll
 from handlers.story.preventive_strike import prevent_strike_any_brutality
+from middleware.report_ware import Reportware
 from resources.all_polls import welc_message_one
 from resources.variables import mobilisation_date
 from states.stopwar_states import StopWarState
@@ -28,6 +29,7 @@ flags = {"throttling_key": "True"}
 router = Router()
 router.message.filter(state=(TrueGoalsState, WarGoalsState))
 router.poll_answer.filter(state=TrueGoalsState)
+router.message.middleware(Reportware())
 
 
 @router.message((F.text.contains('нтересно')) | (F.text.contains('скучно')), state=TrueGoalsState.main, flags=flags)

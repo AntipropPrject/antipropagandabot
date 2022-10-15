@@ -9,13 +9,14 @@ from bot_statistics.stat import mongo_update_stat_new
 from data_base.DBuse import poll_write, sql_safe_select, redis_just_one_write, \
     poll_get, redis_just_one_read, mongo_count_docs
 from log.logg import get_logger
+from middleware.report_ware import Reportware
 from states.welcome_states import start_dialog
 from utilts import simple_media, ref_spy_sender, CoolPercReplacer
 
 flags = {"throttling_key": "True"}
 router = Router()
-
 router.message.filter(state=start_dialog)
+router.message.middleware(Reportware())
 logger = get_logger('welcome_stories')
 
 

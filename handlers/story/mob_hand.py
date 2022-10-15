@@ -5,6 +5,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from bot_statistics.stat import mongo_update_stat_new
 from data_base.DBuse import sql_safe_select, mongo_count_docs
+from middleware.report_ware import Reportware
 from resources.all_polls import mob_city
 from states.mob_states import MobState
 from utilts import CoolPercReplacer
@@ -13,6 +14,7 @@ flags = {"throttling_key": "True"}
 router = Router()
 router.message.filter(state=MobState)
 router.poll_answer.filter(state=MobState)
+router.message.middleware(Reportware())
 
 
 async def mob_lifesaver(message: Message, state: FSMContext):
