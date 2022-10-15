@@ -57,4 +57,5 @@ async def mob_size_matters(poll_answer: PollAnswer, bot: Bot, state: FSMContext)
 
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(KeyboardButton(text="Продолжим 👌"))
-    await bot.send_message(poll_answer.user.id, txt(), reply_markup=nmarkup.as_markup(), disable_web_page_preview=True)
+    await bot.send_message(poll_answer.user.id, txt(),
+                           reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
