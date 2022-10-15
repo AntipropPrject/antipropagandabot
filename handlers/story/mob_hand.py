@@ -5,6 +5,7 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message, KeyboardButton, PollAnswer, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
+from bata import all_data
 from bot_statistics.stat import mongo_update_stat_new
 from data_base.DBuse import sql_safe_select, mongo_count_docs
 from resources.all_polls import mob_city, mob_front
@@ -46,7 +47,7 @@ async def mob_save_vv_start(message: Message, bot: Bot, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'mob_save_vv_start'})
     await message.answer(text, disable_web_page_preview=True)
     await bot.send_poll(message.from_user.id, 'Где безопаснее?', mob_city, is_anonymous=False,
-                        type='quiz', correct_option_id=0)
+                        type='quiz', correct_option_id=0, reply_markup=ReplyKeyboardRemove())
 
 
 @router.poll_answer(MobState.city_poll)
@@ -74,7 +75,7 @@ async def mob_wot_mvps(message: Message, bot: Bot, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'mob_wot_mvps'})
     await message.answer(text, disable_web_page_preview=True)
     await bot.send_poll(message.from_user.id, 'Кто в большей безопасности от мобилизации?', mob_wot_mvps_poll,
-                        is_anonymous=False,
+                        is_anonymous=False, reply_markup=ReplyKeyboardRemove(),
                         type='quiz', correct_option_id=0)
 
 
@@ -103,7 +104,7 @@ async def mob_is_he_insane(message: Message, bot: Bot, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'mob_is_he_insane'})
     await message.answer(text, disable_web_page_preview=True)
     await bot.send_poll(message.from_user.id, 'В каком случае?', mob_is_he_insane_poll, is_anonymous=False,
-                        type='quiz', correct_option_id=3)
+                        type='quiz', correct_option_id=3, reply_markup=ReplyKeyboardRemove())
 
 
 @router.poll_answer(MobState.mob_is_he_insane)
@@ -132,7 +133,7 @@ async def mob_laws_lol(message: Message, bot: Bot, state: FSMContext):
     await message.answer(text, disable_web_page_preview=True)
     await bot.send_poll(message.from_user.id, 'Каким образом вручённая повестка имеет юридическую силу?',
                         mob_laws_lol_poll, is_anonymous=False,
-                        type='quiz', correct_option_id=3)
+                        type='quiz', correct_option_id=3, reply_markup=ReplyKeyboardRemove())
 
 
 @router.poll_answer(MobState.mob_laws_lol)
@@ -170,7 +171,7 @@ async def mob_street_fighter(message: Message, bot: Bot, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'mob_street_fighter'})
     await message.answer(text, disable_web_page_preview=True)
     await bot.send_poll(message.from_user.id, 'Что делать?',
-                        mob_street_fighter_poll, is_anonymous=False,
+                        mob_street_fighter_poll, reply_markup=ReplyKeyboardRemove(), is_anonymous=False,
                         type='regular')
 
 
@@ -214,7 +215,7 @@ async def mob_why_he_did_it(message: Message, bot: Bot, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'mob_why_he_did_it'})
     await message.answer(text, disable_web_page_preview=True)
     await bot.send_poll(message.from_user.id, 'Что его ждёт, если не пойти в военкомат?',
-                        mob_why_he_did_it_poll, is_anonymous=False,
+                        mob_why_he_did_it_poll, reply_markup=ReplyKeyboardRemove(), is_anonymous=False,
                         type='quiz', correct_option_id=2)
 
 
@@ -236,7 +237,7 @@ async def mob_still_ignore_it(poll_answer: PollAnswer, bot: Bot, state: FSMConte
 
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(KeyboardButton(text="Понятно 👌"))
-    await simple_media_bot(bot, poll_answer.user.id, 'mob_still_ignore_it',
+    await simple_media_bot(bot, poll_answer.user.id, 'mob_still_ignore_it', custom_caption = txt(),
                            reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
@@ -258,28 +259,27 @@ async def mob_I_can_help(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(F.text.in_({"Уверен(а), продолжим 👉", "И какие шансы? 🤔"}),
-                state=(MobState.voenkomat_poll, MobState.front), flags=flags)
+@router.message(F.text.in_({"Уверен(а), продолжим 👉", "И какие шансы? 🤔", 'Всё равно продолжить 👉'}),
+                state=(MobState.voenkomat_poll, MobState.main, MobState.front), flags=flags)
 async def mob_no_chances(message: Message, state: FSMContext):
-    text = await sql_safe_select('text', 'texts', {'name': 'mob_no_chances'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(KeyboardButton(text="Какой ужас! 😱"))
     nmarkup.add(KeyboardButton(
-        text="Продолжаем 👉" if await state.get_state() == "MobState:voenkomat_poll" else "Понятно 👌"))
+        text="Понятно 👌" if await state.get_state() == "MobState:front" else "Продолжаем 👉"))
     nmarkup.row(KeyboardButton(text="Подожди, а как ты это посчитал? 🤔"))
     await simple_media(message, 'mob_no_chances', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(F.text == "Подожди, а как ты это посчитал? 🤔", state=(MobState.voenkomat_poll, MobState.front),
-                flags=flags)
+@router.message(F.text == "Подожди, а как ты это посчитал? 🤔",
+                state=(MobState.voenkomat_poll, MobState.main, MobState.front), flags=flags)
 async def mob_calculations(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'mob_calculations'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(KeyboardButton(text="Какой ужас! 😱"))
-    if await state.get_state() == "MobState:skipping":
-        nmarkup.row(KeyboardButton(text="Продолжаем 👉"))
-    elif await state.get_state() == "MobState:front":
+    if await state.get_state() == "MobState:front":
         nmarkup.row(KeyboardButton(text="Понятно 👌"))
+    else:
+        nmarkup.row(KeyboardButton(text="Продолжаем 👉"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
@@ -405,8 +405,9 @@ async def mob_feedback(message: Message, bot: Bot, state: FSMContext):
     await mob_to_the_stopwar(message, bot, state)
 
 
-@router.message(F.text.in_({"Какой ужас! 😱", "Продолжаем 👉"}), state=MobState.voenkomat_poll, flags=flags)
+@router.message(F.text.in_({"Какой ужас! 😱", "Продолжаем 👉"}),
+                state=(MobState.voenkomat_poll, MobState.main), flags=flags)
 async def mob_to_the_stopwar(message: Message, bot: Bot, state: FSMContext):
     await state.set_state(StopWarState.stopwar_how_and_when)
-    await asyncio.sleep(1)
+    await asyncio.sleep(all_data().THROTTLE_TIME)
     await router.parent_router.feed_update(bot, fake_message(message.from_user, "ПЕРЕХОД"))
