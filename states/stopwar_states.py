@@ -2,6 +2,7 @@ from aiogram.dispatcher.fsm.state import StatesGroup, State
 
 
 class StopWarState(StatesGroup):
+    after_new_stat = State()
     stopwar_viva_la_resistance = State()
     stopwar_save_them = State()
     stopwar_big_responsibility = State()
