@@ -9,7 +9,7 @@ flags = {"throttling_key": "True"}
 router = Router()
 
 
-@router.message()
+@router.message(flags=flags)
 async def empty(message: types.Message):
     if str(message.content_type) == 'pinned_message':
         await asyncio.sleep(0.8)
