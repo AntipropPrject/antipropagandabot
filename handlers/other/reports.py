@@ -88,6 +88,8 @@ async def report_chat(query: types.CallbackQuery):
                 message_report = await bot.forward_message(chat_id=channel_for_reports,
                                                            from_chat_id=from_chat_id, message_id=last_message_id)
                 report_message_id_list.append(message_report.message_id)
+        print(date_message)
+        print(report_message_id_list)
         await mongo_easy_upsert('database', 'reports', {'$and': [{'user_id': user_id},
                                                                  {'date_message': date_message}]},
                                 {'report_message_id_list': report_message_id_list})

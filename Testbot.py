@@ -20,7 +20,6 @@ from handlers.other import status, other_file, reports
 from handlers.story import preventive_strike, true_resons_hand, welcome_messages, nazi_hand, \
     donbass_hand, main_menu_hand, anti_prop_hand, putin_hand, smi_hand, stopwar_hand, welcome_stories, true_goals_hand, \
     nato_hand, mob_hand
-from middleware.report_ware import Reportware
 from middleware.trottling import ThrottlingMiddleware
 from utilts import happy_tester
 
@@ -98,7 +97,7 @@ async def main():
     dp.include_router(mob_hand.router)
     dp.include_router(main_menu_hand.router)
 
-    dp.message.middleware(Reportware())
+
     dp.message.middleware(ThrottlingMiddleware())
     # Роутер для неподошедшего
 
