@@ -2,6 +2,11 @@ from aiogram.dispatcher.fsm.state import StatesGroup, State
 
 
 class MobState(StatesGroup):
+    save_yourself = State()
+    jail = State()
+    front = State()
+    skipping = State()
+    voenkomat_poll = State()
     voenkomat_poll = State()
     mob_still_ignore_it = State()
     mob_why_he_did_it = State()
