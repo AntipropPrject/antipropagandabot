@@ -114,14 +114,20 @@ async def mob_only_to_lit(poll_answer: PollAnswer, bot: Bot, state: FSMContext):
 
     c_all = await mongo_count_docs('database', 'statistics_new', {'mob_only_to_lit': {'$exists': True}})
     c_right = await mongo_count_docs('database', 'statistics_new', {'mob_only_to_lit': mob_is_he_insane_poll[3]})
+    media_id=await sql_safe_select('t_id', 'assets', {'name': 'mob_only_to_lit'})
 
     txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'mob_only_to_lit'}), c_all)
     txt.replace('XX', c_right)
     txt.replace('YY', c_all - c_right)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(KeyboardButton(text="Хорошо, запомнили и закрепили — не ходить в военкомат 👌"))
-    await simple_media_bot(bot, poll_answer.user.id, 'mob_only_to_lit',
-                           reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    try:
+        await bot.send_video(poll_answer.user.id, video=media_id, caption=txt(),
+                             reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    except Exception:
+        await bot.send_message(poll_answer.user.id,
+                               f'Здесь будет видео: Звонок от человека, который сам пришёл в военкомат\n\n\n{txt()}',
+                               reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message(F.text.in_({'Хорошо, запомнили и закрепили — не ходить в военкомат 👌'}), state=MobState.mob_only_to_lit,
@@ -190,14 +196,12 @@ async def mob_bad_ingrish(poll_answer: PollAnswer, bot: Bot, state: FSMContext):
 @router.message(state=MobState.mob_bad_ingrish, flags=flags)
 async def mob_rules_of_nature(message: Message, state: FSMContext):
     await state.set_state(MobState.mob_rules_of_nature)
-    text = await sql_safe_select('text', 'texts', {'name': 'mob_bad_ingrish'})
-    media_id = await sql_safe_select('t_id', 'assets', {'name': 'mob_bad_ingrish'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(KeyboardButton(text="Да, обсудим, что делать Вовочке, если он официально трудоустроен 👌"))
     nmarkup.row(KeyboardButton(text="Нет, пропустим это 👉"))
     if message.text == "А не лучше просто обходить стороной людей в форме? 🤔":
         await message.answer('Правильно мыслите! 😉')
-    await simple_media(message, 'mob_bad_ingrish', reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await simple_media(message, 'mob_rules_of_nature', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message(F.text.in_({'Да, обсудим, что делать Вовочке, если он официально трудоустроен 👌'}),
@@ -384,8 +388,8 @@ async def mob_want_to_live(message: Message):
 
 
 @router.message(F.text == "Всё понятно 👌", state=MobState.save_yourself, flags=flags)
-async def mob_want_to_live(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'mob_want_to_live'})
+async def mob_links(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'mob_links'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(KeyboardButton(text="Интересно и полезно 👍"))
     nmarkup.add(KeyboardButton(text="Полезно, но скучновато 🤏"))
