@@ -34,15 +34,10 @@ async def mongo_stat_new(tg_id):
 
 async def mongo_update_stat_new(tg_id, column, options='$set', value=True):
     try:
-        await collection_stat_new.update_one({'_id': int(tg_id)}, {options: {column: value}}, upsert=True)
-        """
+        conditions_dict = {'_id': int(tg_id), column: {'$exists': False}}
         if await IsAdmin(level=['Тестирование'], custom_user_id=tg_id)():
-            upsert = False
-        else:
-            upsert = True
-        print(upsert)
-        await collection_stat_new.update_one({'_id': int(tg_id)}, {options: {column: value}}, upsert=upsert)
-        """
+            del conditions_dict[column]
+        await collection_stat_new.update_one(conditions_dict, {options: {column: value}}, upsert=True)
     except Exception as error:
         await logg.get_error(f"mongo_update_stat | {error}", __file__)
 
