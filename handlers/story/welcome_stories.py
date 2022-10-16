@@ -103,11 +103,11 @@ async def start_shoigu_loss(message: Message, state: FSMContext):
     nmarkap.row(types.KeyboardButton(text="Да, доверяю 👍"))
     nmarkap.row(types.KeyboardButton(text="Думаю погибло больше ☹️"))
     nmarkap.row(types.KeyboardButton(text="Затрудняюсь ответить 🤷‍♀️"))
-    await state.set_state(start_dialog.big_story)
+    await state.set_state(start_dialog.ask_2)
     await simple_media(message, 'start_shoigu_loss', reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 @router.message((F.text.in_({"Да, доверяю 👍", "Думаю погибло больше ☹️",
-                             "Затрудняюсь ответить 🤷‍♀️"})), flags=flags)
+                             "Затрудняюсь ответить 🤷‍♀️"})), state=start_dialog.ask_2, flags=flags)
 async def start_result_loss(message: Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='start_result_loss', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'start_result_loss'})

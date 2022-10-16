@@ -105,8 +105,7 @@ async def report_chat(query: types.CallbackQuery):
                                         reply_markup=nmarkup.as_markup())
 
     except Exception as e:
-        await bot.send_message(chat_id=channel_for_reports, text='Произошла невиданная ошибка, ознакомьтесь с логами')
-        print(e)
+        await bot.send_message(chat_id=channel_for_reports, text=f'[ERROR]: {e}')
 
 
 @router.callback_query(lambda call: "close_chat" in call.data)

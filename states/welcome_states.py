@@ -9,6 +9,7 @@ class start_dialog(StatesGroup):
     button_next_1 = State()
     button_next_2 = State()
     ask_1 = State()
+    ask_2 = State()
     dialogue_3 = State()
     dialogue_4 = State()
     dialogue_5 = State()
