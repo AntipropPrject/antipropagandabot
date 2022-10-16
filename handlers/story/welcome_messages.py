@@ -313,24 +313,26 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
         await redis_just_one_write(f'Usrs: {poll_answer.user.id}: INFOState:', 'Жертва пропаганды')
         await mongo_update_stat(poll_answer.user.id, column='faith', value='victim', options='$set')
 
-        if {0}.isdisjoint(answer_4) is False:
-            await redis_just_one_write(f'Usrs: {poll_answer.user.id}: Start_answers: Yandex', 1)
-        if {1}.isdisjoint(answer_4):
-            await redis_just_one_write(f'Usrs: {poll_answer.user.id}: Start_answers: NotWiki', 1)
+
         await mongo_update_stat_new(tg_id=poll_answer.user.id, column='faith', value='Жертва пропаганды')
-        print('Жертва пропаганды')
 
     elif {1, 6}.isdisjoint(answer_4) is False:
+
         await redis_just_one_write(f'Usrs: {poll_answer.user.id}: INFOState:', 'Король информации')
         await mongo_update_stat(poll_answer.user.id, column='faith', value='kinginfo', options='$set')
         await mongo_update_stat_new(tg_id=poll_answer.user.id, column='faith', value='Король информации')
-        print('Король информации')
 
     elif {1, 6}.isdisjoint(answer_4) is True:
         await redis_just_one_write(f'Usrs: {poll_answer.user.id}: INFOState:', "Фома неверующий")
         await mongo_update_stat(poll_answer.user.id, column='faith', value='foma', options='$set')
         await mongo_update_stat_new(tg_id=poll_answer.user.id, column='faith', value='Фома неверующий')
-        print('Фома неерующий')
+
+    if 0 in answer_4:
+        await redis_just_one_write(f'Usrs: {poll_answer.user.id}: Start_answers: Yandex', 1)
+    if 6 in answer_4:
+        await redis_just_one_write(f'Usrs: {poll_answer.user.id}: Start_answers: BBC', 1)
+    if 1 not in answer_4:
+        await redis_just_one_write(f'Usrs: {poll_answer.user.id}: Start_answers: NotWiki', 1)
 
     await state.clear()
     await state.set_state(propaganda_victim.start)

@@ -1272,8 +1272,7 @@ async def antip_best_of_the_best(message: Message):
 
 @router.message((F.text.contains('О чём? 🤔') | (F.text.contains('Готовь деньги'))), flags=flags)
 async def antip_many_links_normal(message: Message):
-    user_answer = await mongo_ez_find_one('database', 'useranswer', {'_id': message.from_user.id})
-    if 'Meduza / Дождь / Би-би-си' in user_answer['answers_4']:
+    if await redis_just_one_read(f'Usrs: {message.from_user.id}: Start_answers: BBC'):
         nmarkap = ReplyKeyboardBuilder()
         nmarkap.add(types.KeyboardButton(text="Готов(а) продолжить 👌"))
         text = await sql_safe_select('text', 'texts', {'name': 'antip_many_links_normal'})
@@ -1301,8 +1300,7 @@ async def antip_bite_me(message: Message):
     if 'Википедия что ли' in message.text:
         fake_text = await sql_safe_select('text', 'texts', {'name': 'antip_bite_me'})
         await message.answer(fake_text)
-    user_answer = await mongo_ez_find_one('database', 'statistics_new', {'_id': message.from_user.id})
-    if 'Википедия' not in user_answer['web_prop_ex']:
+    if await redis_just_one_read(f'Usrs: {message.from_user.id}: Start_answers: NotWiki'):
         nmarkap = ReplyKeyboardBuilder()
         nmarkap.add(types.KeyboardButton(text="Там статьи может редактировать любой человек ✍️"))
         nmarkap.add(types.KeyboardButton(text="Википедия — проект Запада 🇺🇸"))
