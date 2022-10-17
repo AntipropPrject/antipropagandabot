@@ -13,7 +13,7 @@ from middleware.report_ware import Reportware
 from resources.all_polls import shop_poll
 from states.true_goals_states import Shop, TrueGoalsState
 from utils.elk_logger import Logger
-from utilts import change_number_format
+from utilts import change_number_format, get_time_from_war_started
 
 flags = {"throttling_key": "True"}
 router = Router()
@@ -129,10 +129,10 @@ async def shop_transfer(message: types.Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='shop_transfer', value="+")
     await state.set_state(Shop.shop_transfer)
     text = await sql_safe_select("text", "texts", {"name": "shop_transfer"})
-    now = datetime.datetime.now().date()
-    old = datetime.datetime(year=2022, month=2, day=24).date()
-    day = now-old
-    sum = day.days * 55000000000
+    # now = datetime.datetime.now().date()
+    # old = datetime.datetime(year=2022, month=2, day=24).date()
+    # day = now-old
+    sum = await get_time_from_war_started() * 55000000000
     await state.update_data(balance_all=sum)
     data = await state.get_data()
     balance_all = change_number_format(data['balance_all'])
