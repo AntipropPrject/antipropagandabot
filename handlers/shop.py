@@ -129,10 +129,8 @@ async def shop_transfer(message: types.Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='shop_transfer', value="+")
     await state.set_state(Shop.shop_transfer)
     text = await sql_safe_select("text", "texts", {"name": "shop_transfer"})
-    # now = datetime.datetime.now().date()
-    # old = datetime.datetime(year=2022, month=2, day=24).date()
-    # day = now-old
-    sum = await get_time_from_war_started() * 55000000000
+    day = await get_time_from_war_started()
+    sum = day * 55000000000
     await state.update_data(balance_all=sum)
     data = await state.get_data()
     balance_all = change_number_format(data['balance_all'])
@@ -141,7 +139,7 @@ async def shop_transfer(message: types.Message, state: FSMContext):
     except:
         await state.update_data(balance=sum)
         balance = change_number_format(sum)
-    text = text.replace("NN", f"{day.days}")
+    text = text.replace("NN", f"{day}")
     text = text.replace("MM", f"{balance_all}")
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Перейти к покупкам 🛒"))

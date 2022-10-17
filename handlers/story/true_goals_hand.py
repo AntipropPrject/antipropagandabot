@@ -23,7 +23,7 @@ from resources.variables import mobilisation_date
 from states.stopwar_states import StopWarState
 from states.true_goals_states import TrueGoalsState, WarGoalsState
 from utils.fakes import fake_message
-from utilts import simple_media, CoolPercReplacer
+from utilts import simple_media, CoolPercReplacer, get_time_from_war_started
 
 flags = {"throttling_key": "True"}
 router = Router()
@@ -1001,7 +1001,10 @@ async def goals_no_winners_in_war(message: Message):
 async def goals_russia_already_lost(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжим 👌"))
-    await simple_media(message, 'goals_wars_of_past', nmarkup.as_markup(resize_keyboard=True))
+    text = await sql_safe_select('text', 'texts', {'name': 'goals_wars_of_past'})
+    day = await get_time_from_war_started()
+    text = text.replace("XX", f"{day}")
+    await simple_media(message, 'goals_wars_of_past', nmarkup.as_markup(resize_keyboard=True),custom_caption=text)
 
 
 @router.message((F.text.in_({"Продолжай ⏳", "А что, Путин этого не знал? 🤔", "Продолжим 👌"})),
