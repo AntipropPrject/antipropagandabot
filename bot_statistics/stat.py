@@ -38,9 +38,7 @@ async def mongo_update_stat_new(tg_id, column, options='$set', value=True):
         conditions_dict = {'_id': int(tg_id), column: {'$exists': False}}
         if await IsAdmin(level=['Тестирование'], custom_user_id=tg_id)():
             del conditions_dict[column]
-        await collection_stat_new.update_one(conditions_dict, {options: {column: value}}, upsert=True)
-    except DuplicateKeyError:
-        pass
+        await collection_stat_new.update_one(conditions_dict, {options: {column: value}})
     except Exception as error:
         await logg.get_error(f"mongo_update_stat | {error}", __file__)
 
