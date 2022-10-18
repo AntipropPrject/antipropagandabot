@@ -7,7 +7,7 @@ from aiogram.types import User
 from pymongo.errors import DuplicateKeyError
 
 from bata import all_data
-from data_base.DBuse import mongo_select_info, data_getter, sql_add_value, mongo_user_info, mongo_easy_upsert
+from data_base.DBuse import data_getter, sql_add_value, mongo_user_info, mongo_easy_upsert
 from filters.isAdmin import IsAdmin
 from log import logg
 
@@ -27,18 +27,22 @@ async def mongo_stat(tg_id):
 
 
 async def mongo_nstat_create(tg_id):
-    await mongo_update_stat_new(tg_id, "come", upsert=True)
-    await mongo_update_stat_new(tg_id, "datetime", value=datetime.datetime.now())
+    try:
+        await collection_stat_new.insert_one({'_id': int(tg_id), 'datetime': datetime.datetime.now(), 'come': True})
+    except DuplicateKeyError:
+        pass
+    except Exception as error:
+        await logg.get_error(f"Creation of the new user for statisticts failed!\n{error}\n", __file__)
 
 
-async def mongo_update_stat_new(tg_id, column, options='$set', value: Any = True, upsert: bool = False):
+async def mongo_update_stat_new(tg_id, column, options='$set', value: Any = True):
     try:
         conditions_dict = {'_id': int(tg_id), column: {'$exists': False}}
         if await IsAdmin(level=['Тестирование'], custom_user_id=tg_id)():
             del conditions_dict[column]
-        await collection_stat_new.update_one(conditions_dict, {options: {column: value}}, upsert=upsert)
+        await collection_stat_new.update_one(conditions_dict, {options: {column: value}})
     except Exception as error:
-        await logg.get_error(f"mongo_update_stat | {error}", __file__)
+        await logg.get_error(f"Updating statistics for user {tg_id} failed!:\n{error}", __file__)
 
 
 async def mongo_update_stat(tg_id, column, options='$set', value=1):
