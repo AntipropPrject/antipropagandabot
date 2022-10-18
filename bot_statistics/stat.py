@@ -1,5 +1,6 @@
 import datetime
 import re
+from typing import Any
 
 import aiohttp
 from aiogram.types import User
@@ -25,20 +26,17 @@ async def mongo_stat(tg_id):
         print(error)
 
 
-async def mongo_stat_new(tg_id):
-    try:
-        user_answer = {'_id': int(tg_id), 'datetime': datetime.datetime.now(), 'come': True}
-        await collection_stat_new.insert_one(user_answer)
-    except Exception as error:
-        print(error)
+async def mongo_nstat_create(tg_id):
+    await mongo_update_stat_new(tg_id, "come", upsert=True)
+    await mongo_update_stat_new(tg_id, "datetime", value=datetime.datetime.now())
 
 
-async def mongo_update_stat_new(tg_id, column, options='$set', value=True):
+async def mongo_update_stat_new(tg_id, column, options='$set', value: Any = True, upsert: bool = False):
     try:
         conditions_dict = {'_id': int(tg_id), column: {'$exists': False}}
         if await IsAdmin(level=['Тестирование'], custom_user_id=tg_id)():
             del conditions_dict[column]
-        await collection_stat_new.update_one(conditions_dict, {options: {column: value}})
+        await collection_stat_new.update_one(conditions_dict, {options: {column: value}}, upsert=upsert)
     except Exception as error:
         await logg.get_error(f"mongo_update_stat | {error}", __file__)
 
@@ -103,5 +101,5 @@ async def advertising_value(tag, user: User):
             async with session.get(url=url) as response:
                 status = response.status
                 print(status)
-    await mongo_stat_new(user.id)
+    await mongo_nstat_create(user.id)
     await mongo_update_stat_new(user.id, 'origin', value=origin)
