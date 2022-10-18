@@ -3,6 +3,7 @@ import re
 
 import aiohttp
 from aiogram.types import User
+from pymongo.errors import DuplicateKeyError
 
 from bata import all_data
 from data_base.DBuse import mongo_select_info, data_getter, sql_add_value, mongo_user_info, mongo_easy_upsert
@@ -38,6 +39,8 @@ async def mongo_update_stat_new(tg_id, column, options='$set', value=True):
         if await IsAdmin(level=['Тестирование'], custom_user_id=tg_id)():
             del conditions_dict[column]
         await collection_stat_new.update_one(conditions_dict, {options: {column: value}}, upsert=True)
+    except DuplicateKeyError:
+        pass
     except Exception as error:
         await logg.get_error(f"mongo_update_stat | {error}", __file__)
 
