@@ -665,6 +665,8 @@ async def goals_sure_power_change(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
+@router.message(F.text == "Достаточно фактов ✋", state=TrueGoalsState, flags=flags)
+@router.message(F.text == "Хорошо, продолжим 👌", state=TrueGoalsState.goals_fact_7, flags=flags)
 @router.message(F.text == "Да, двигаемся дальше 👉", state=TrueGoalsState.power_change, flags=flags)
 async def goals_why_power_change(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'goals_why_power_change'})
@@ -674,8 +676,6 @@ async def goals_why_power_change(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(F.text == "Достаточно фактов ✋", state=TrueGoalsState, flags=flags)
-@router.message(F.text == "Хорошо, продолжим 👌", state=TrueGoalsState.goals_fact_7, flags=flags)
 @router.message(F.text == "Давай посмотрим 👀", state=TrueGoalsState.power_change, flags=flags)
 async def goals_paper_theses(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'goals_paper_theses'})
