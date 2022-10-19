@@ -20,6 +20,8 @@ from utilts import simple_media, simple_media_bot, CoolPercReplacer
 flags = {"throttling_key": "True"}
 router = Router()
 router.message.middleware(Reportware())
+router.message.filter(state=welcome_states.start_dialog)
+
 
 @router.message(text_contains='Готов(а) продолжить 👌', flags=flags)
 async def message_2(message: types.Message, state: FSMContext):
@@ -44,13 +46,21 @@ async def message_3(message: types.Message, state: FSMContext):  # Начало 
     await poll_write(f'Usrs: {message.from_user.id}: Start_answers: Is_it_war:', message.text)
     await mongo_update_stat_new(tg_id=message.from_user.id, column='war_or_not', value=message.text)
 
-    all_count = await mongo_count_docs('database', 'statistics_new', [{'war_or_not': {'$exists': True}}, {'datetime': {'$gte': release_date['v2_1']}}], hard_link=True)
-    war = await mongo_count_docs('database', 'statistics_new', [{'war_or_not': '2️⃣ Война'}, {'datetime': {'$gte': release_date['v2_1']}}], hard_link=True)
+    all_count = await mongo_count_docs('database', 'statistics_new', [{'war_or_not': {'$exists': True}},
+                                                                      {'datetime': {'$gte': release_date['v2_1']}}],
+                                       hard_link=True)
+    war = await mongo_count_docs('database', 'statistics_new',
+                                 [{'war_or_not': '2️⃣ Война'}, {'datetime': {'$gte': release_date['v2_1']}}],
+                                 hard_link=True)
     not_war = await mongo_count_docs('database', 'statistics_new',
-                                     [{'war_or_not': '1️⃣ Специальная военная операция (СВО)'}, {'datetime': {'$gte': release_date['v2_1']}}], hard_link=True)
+                                     [{'war_or_not': '1️⃣ Специальная военная операция (СВО)'},
+                                      {'datetime': {'$gte': release_date['v2_1']}}], hard_link=True)
     FSB_not_war = await mongo_count_docs('database', 'statistics_new',
-                                         [{'FSB': "Да"}, {'war_or_not': '1️⃣ Специальная военная операция (СВО)'}, {'datetime': {'$gte': release_date['v2_1']}}], hard_link=True)
-    FSB_war = await mongo_count_docs('database', 'statistics_new', [{'FSB': "Да", 'war_or_not': '2️⃣ Война'}, {'datetime': {'$gte': release_date['v2_1']}}], hard_link=True)
+                                         [{'FSB': "Да"}, {'war_or_not': '1️⃣ Специальная военная операция (СВО)'},
+                                          {'datetime': {'$gte': release_date['v2_1']}}], hard_link=True)
+    FSB_war = await mongo_count_docs('database', 'statistics_new', [{'FSB': "Да", 'war_or_not': '2️⃣ Война'},
+                                                                    {'datetime': {'$gte': release_date['v2_1']}}],
+                                     hard_link=True)
 
     text = await sql_safe_select("text", "texts", {"name": "start_lets_start"})
     if '(СВО)' in message.text:
@@ -125,6 +135,7 @@ async def start_do_you_love_politics(message: types.Message, state: FSMContext):
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     await state.set_state(welcome_states.start_dialog.dialogue_6)
 
+
 @router.message(F.text.contains('после 21 сентября'), welcome_states.start_dialog.dialogue_6, flags=flags)
 async def start_mobilisation_polit(message: types.Message, state: FSMContext):
     text = await sql_safe_select("text", "texts", {"name": "start_mobilisation_polit"})
@@ -132,6 +143,7 @@ async def start_mobilisation_polit(message: types.Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="Хорошо, продолжим 👌"))
     await state.set_state(welcome_states.start_dialog.dialogue_6)
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
 
 @router.message((F.text.contains('Скорее да') | F.text.contains('продолжим')),
                 welcome_states.start_dialog.dialogue_6, flags=flags)
@@ -252,7 +264,8 @@ async def poll_answer_handler_tho(poll_answer: types.PollAnswer, bot: Bot, state
     elif {2, 3, 4, 5, 7}.isdisjoint(set(lst_answers)) is False:  # red
         await mongo_update_stat_new(tg_id=poll_answer.user.id, column='web_prop_gen', value='Хотя бы один красный')
     elif {6}.isdisjoint(set(lst_answers)) is False:  # green
-        await mongo_update_stat_new(tg_id=poll_answer.user.id, column='web_prop_gen', value='Есть зелёные и нет красных')
+        await mongo_update_stat_new(tg_id=poll_answer.user.id, column='web_prop_gen',
+                                    value='Есть зелёные и нет красных')
 
     await state.update_data(answer_4=poll_answer.option_ids)
     await mongo_update_stat_new(tg_id=poll_answer.user.id, column='web_prop_ex', value=lst_str)
@@ -312,7 +325,6 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
 
         await redis_just_one_write(f'Usrs: {poll_answer.user.id}: INFOState:', 'Жертва пропаганды')
         await mongo_update_stat(poll_answer.user.id, column='faith', value='victim', options='$set')
-
 
         await mongo_update_stat_new(tg_id=poll_answer.user.id, column='faith', value='Жертва пропаганды')
 

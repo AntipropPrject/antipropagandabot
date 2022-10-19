@@ -13,6 +13,7 @@ from data_base.DBuse import poll_get, poll_write, del_key, data_getter, mongo_ga
 from data_base.DBuse import sql_safe_select, mongo_count_docs
 from filters.MapFilters import FakeGoals, WarGoals
 from filters.MapFilters import OperationWar
+from handlers.story.bionuclear_hand import goals_fact_1
 from handlers.story.donbass_hand import donbass_big_tragedy
 from handlers.story.nato_hand import nato_start
 from handlers.story.nazi_hand import NaziState, nazi_first_poll
@@ -480,11 +481,8 @@ async def goals_pls_use_goal_nazi(message: Message):
 
 
 @router.message((F.text.contains("🤯")), state=WarGoalsState.bio, flags=flags)
-async def goals_nazi_enterence(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'goals_will_add_sorry'})
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text='Кнопка'))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+async def goals_bio_enterence(message: Message, state: FSMContext):
+    await goals_fact_1(message, state)
 
 
 @router.message(((F.text.contains("Уверен(а), проп")) | (F.text.in_({"Кнопка", 'Продолжим 👌'}))),
