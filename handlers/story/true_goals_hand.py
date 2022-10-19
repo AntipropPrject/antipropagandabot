@@ -652,11 +652,11 @@ async def goals_change_of_power(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.contains('на факты 👀')), state=TrueGoalsState.power_change, flags=flags)
-async def goals_will_add_sorry(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'goals_will_add_sorry'})
-    await message.answer(text)
-    await goals_why_power_change(message)
+# @router.message((F.text.contains('на факты 👀')), state=TrueGoalsState.power_change, flags=flags)
+# async def goals_will_add_sorry(message: Message):
+#     text = await sql_safe_select('text', 'texts', {'name': 'goals_will_add_sorry'})
+#     await message.answer(text)
+#     await goals_why_power_change(message)
 
 
 @router.message(F.text == "Пропустим 👉", state=TrueGoalsState.power_change, flags=flags)
