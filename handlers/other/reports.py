@@ -121,7 +121,10 @@ async def close_report(query: types.CallbackQuery):
     report_id = user_report['report_id']
     report_message_id_list = user_report['report_message_id_list']
     for i in report_message_id_list:
-        await bot.delete_message(chat_id=channel_for_reports, message_id=i)
+        try:
+            await bot.delete_message(chat_id=channel_for_reports, message_id=i)
+        except Exception:
+            pass
     nmarkup = InlineKeyboardBuilder()
     nmarkup.button(text='Показать чат', callback_data=f'report_chat {user_id} {date_message}')
     nmarkup.button(text='Закрыть репорт', callback_data=f'close_report {user_id} {date_message}')
@@ -152,7 +155,7 @@ async def close_report(query: types.CallbackQuery):
         try:
             await bot.delete_message(chat_id=channel_for_reports, message_id=i)
         except Exception:
-            break
+            pass
     await bot.edit_message_text(chat_id=channel_for_reports, message_id=int(report_id),
                                 text=f"🟢 User report is done 🟢\n\n"
                                      f"User: @{username}\n"
