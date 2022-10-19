@@ -239,7 +239,7 @@ async def stopwar_must_watch_all(message: Message):
                 state=StopWarState.must_watch, flags=flags)
 async def stopwar_thanks_for_time(message: Message, bot: Bot, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='CredibleBot', value=message.text)
-    await state.set_state(StopWarState.main)
+    await state.set_state(StopWarState.after_new_stat)
     await del_key(f'Usrs: {message.from_user.id}: StopWar: NewPolitList:')
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_thanks_for_time'})
     nmarkup = ReplyKeyboardBuilder()
@@ -271,13 +271,12 @@ async def stopwar_rather_no(message: Message):
 @router.message((F.text == "Ну, допустим, проскакивала мысль, и что? 🤔"), flags=flags)
 async def stopwar_front_death(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_front_death'})
-    await state.set_state(StopWarState.front_death)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.add(types.KeyboardButton(text="Продолжим 👉"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.in_({'Ни за что! 🙅‍♂️', "Продолжим 👉"})), state=StopWarState.front_death, flags=flags)
+@router.message((F.text.in_({'Ни за что! 🙅‍♂️', "Продолжим 👉"})), state=StopWarState.after_new_stat, flags=flags)
 async def stopwar_mob_start(message: Message, state: FSMContext):
     if message.text == 'Ни за что! 🙅‍♂️':
         await message.answer("Рад это слышать!", disable_web_page_preview=True)

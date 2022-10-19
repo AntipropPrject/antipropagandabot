@@ -9,7 +9,7 @@ from aiogram.types import Message, User, CallbackQuery, Update, ReplyKeyboardRem
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 from bata import all_data
-from bot_statistics.stat import mongo_is_done, mongo_stat, mongo_stat_new, advertising_value
+from bot_statistics.stat import mongo_is_done, mongo_stat, mongo_nstat_create, advertising_value
 from data_base.DBuse import mongo_user_info, sql_safe_select, mongo_ez_find_one, redis_just_one_write
 from day_func import day_count
 from filters.isAdmin import IsAdmin
@@ -79,7 +79,6 @@ async def start_are_you_sure(message):
     await redis_just_one_write(f'Usrs: {message.from_user.id}: want_to_restart', 'True', ttl=120)
 
 
-
 async def start_base(user: User):
     await day_count()
     user_id = user.id  # if old is None:
@@ -87,7 +86,7 @@ async def start_base(user: User):
     for key in redis.scan_iter(f"Usrs: {user.id}:*"):
         redis.delete(key)
     await mongo_stat(user_id)
-    await mongo_stat_new(user_id)
+    await mongo_nstat_create(user_id)
     await mongo_user_info(user_id, user.username)
     if await mongo_ez_find_one('database', 'userinfo', {'_id': user.id, 'ref_parent': {'$exists': True},
                                                         'datetime_end': {'$eq': None}}):

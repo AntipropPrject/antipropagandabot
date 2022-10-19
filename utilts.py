@@ -177,7 +177,11 @@ class CoolPercReplacer:
             main_dict[item] = round(item_number / base_number * 100) if base_number else 0
         return dict(sorted(main_dict.items(), key=lambda x: x[1], reverse=reverse))
 
-
+async def get_time_from_war_started():
+    now = datetime.now().date()
+    old = datetime(year=2022, month=2, day=24).date()
+    day = now-old
+    return day.days
 
 async def bot_send_spam(bot: Bot, user_id: Union[int, str], telegram_media_id: Union[int, InputFile] = None,
                         text: str = None, reply_markup: Union[InlineKeyboardMarkup, ReplyKeyboardMarkup,

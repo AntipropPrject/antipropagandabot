@@ -121,7 +121,7 @@ async def mob_only_to_lit(poll_answer: PollAnswer, bot: Bot, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(KeyboardButton(text="Хорошо, запомнили и закрепили — не ходить в военкомат 👌"))
     await simple_media_bot(bot, poll_answer.user.id, 'mob_only_to_lit',
-                           reply_markup=nmarkup.as_markup(resize_keyboard=True))
+                           reply_markup=nmarkup.as_markup(resize_keyboard=True), custom_caption=txt())
 
 
 @router.message(F.text.in_({'Хорошо, запомнили и закрепили — не ходить в военкомат 👌'}), state=MobState.mob_only_to_lit,
@@ -190,14 +190,12 @@ async def mob_bad_ingrish(poll_answer: PollAnswer, bot: Bot, state: FSMContext):
 @router.message(state=MobState.mob_bad_ingrish, flags=flags)
 async def mob_rules_of_nature(message: Message, state: FSMContext):
     await state.set_state(MobState.mob_rules_of_nature)
-    text = await sql_safe_select('text', 'texts', {'name': 'mob_bad_ingrish'})
-    media_id = await sql_safe_select('t_id', 'assets', {'name': 'mob_bad_ingrish'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(KeyboardButton(text="Да, обсудим, что делать Вовочке, если он официально трудоустроен 👌"))
     nmarkup.row(KeyboardButton(text="Нет, пропустим это 👉"))
     if message.text == "А не лучше просто обходить стороной людей в форме? 🤔":
         await message.answer('Правильно мыслите! 😉')
-    await simple_media(message, 'mob_bad_ingrish', reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await simple_media(message, 'mob_rules_of_nature', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message(F.text.in_({'Да, обсудим, что делать Вовочке, если он официально трудоустроен 👌'}),
@@ -384,8 +382,8 @@ async def mob_want_to_live(message: Message):
 
 
 @router.message(F.text == "Всё понятно 👌", state=MobState.save_yourself, flags=flags)
-async def mob_want_to_live(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'mob_want_to_live'})
+async def mob_links(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'mob_links'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(KeyboardButton(text="Интересно и полезно 👍"))
     nmarkup.add(KeyboardButton(text="Полезно, но скучновато 🤏"))

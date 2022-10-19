@@ -23,7 +23,7 @@ from resources.variables import mobilisation_date
 from states.stopwar_states import StopWarState
 from states.true_goals_states import TrueGoalsState, WarGoalsState
 from utils.fakes import fake_message
-from utilts import simple_media, CoolPercReplacer
+from utilts import simple_media, CoolPercReplacer, get_time_from_war_started
 
 flags = {"throttling_key": "True"}
 router = Router()
@@ -652,11 +652,11 @@ async def goals_change_of_power(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.contains('на факты 👀')), state=TrueGoalsState.power_change, flags=flags)
-async def goals_will_add_sorry(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'goals_will_add_sorry'})
-    await message.answer(text)
-    await goals_why_power_change(message)
+# @router.message((F.text.contains('на факты 👀')), state=TrueGoalsState.power_change, flags=flags)
+# async def goals_will_add_sorry(message: Message):
+#     text = await sql_safe_select('text', 'texts', {'name': 'goals_will_add_sorry'})
+#     await message.answer(text)
+#     await goals_why_power_change(message)
 
 
 @router.message(F.text == "Пропустим 👉", state=TrueGoalsState.power_change, flags=flags)
@@ -669,6 +669,8 @@ async def goals_sure_power_change(message: Message):
 
 
 @router.message(F.text == "Да, двигаемся дальше 👉", state=TrueGoalsState.power_change, flags=flags)
+@router.message(F.text == "Достаточно фактов ✋", state=TrueGoalsState, flags=flags)
+@router.message(F.text == "Хорошо, продолжим 👌", state=TrueGoalsState.goals_fact_7, flags=flags)
 async def goals_why_power_change(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'goals_why_power_change'})
     nmarkup = ReplyKeyboardBuilder()
@@ -1001,7 +1003,10 @@ async def goals_no_winners_in_war(message: Message):
 async def goals_russia_already_lost(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжим 👌"))
-    await simple_media(message, 'goals_wars_of_past', nmarkup.as_markup(resize_keyboard=True))
+    text = await sql_safe_select('text', 'texts', {'name': 'goals_wars_of_past'})
+    day = await get_time_from_war_started()
+    text = text.replace("XX", f"{day}")
+    await simple_media(message, 'goals_wars_of_past', nmarkup.as_markup(resize_keyboard=True),custom_caption=text)
 
 
 @router.message((F.text.in_({"Продолжай ⏳", "А что, Путин этого не знал? 🤔", "Продолжим 👌"})),
