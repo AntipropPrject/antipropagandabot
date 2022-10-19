@@ -85,9 +85,12 @@ async def report_chat(query: types.CallbackQuery):
             last_message_id = int(last_message_id) + 1
             print(number_message)
             if last_message_id > 0:
-                message_report = await bot.forward_message(chat_id=channel_for_reports,
+                try:
+                    message_report = await bot.forward_message(chat_id=channel_for_reports,
                                                            from_chat_id=from_chat_id, message_id=last_message_id)
-                report_message_id_list.append(message_report.message_id)
+                    report_message_id_list.append(message_report.message_id)
+                except Exception:
+                    pass
         print(date_message)
         print(report_message_id_list)
         await mongo_easy_upsert('database', 'reports', {'$and': [{'user_id': user_id},
