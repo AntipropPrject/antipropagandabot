@@ -669,6 +669,8 @@ async def goals_sure_power_change(message: Message):
 
 
 @router.message(F.text == "Да, двигаемся дальше 👉", state=TrueGoalsState.power_change, flags=flags)
+@router.message(F.text == "Достаточно фактов ✋", state=TrueGoalsState, flags=flags)
+@router.message(F.text == "Хорошо, продолжим 👌", state=TrueGoalsState.goals_fact_7, flags=flags)
 async def goals_why_power_change(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'goals_why_power_change'})
     nmarkup = ReplyKeyboardBuilder()
