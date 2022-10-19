@@ -2,6 +2,14 @@ from aiogram.dispatcher.fsm.state import StatesGroup, State
 
 
 class admin(StatesGroup):
+    luca_memes_custom_number = State()
+    luca_memes = State()
+    luca_memes_add = State()
+    luca_memes_add_conf = State()
+    luca_memes_upd = State()
+    luca_memes_upd_conf = State()
+    luca_memes_del = State()
+    luca_memes_del_conf = State()
     big_spam_confirm = State()
     big_spam = State()
     nazi_game_upd_apply = State()

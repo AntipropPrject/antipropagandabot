@@ -1,5 +1,9 @@
-from aiogram import Router, types, F
+import asyncio
+
+from aiogram import Router, types, F, Bot
+from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.fsm.context import FSMContext
+from aiogram.types import ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 from data_base.DBuse import sql_safe_update, data_getter, sql_safe_insert, sql_delete, sql_games_row_selecter, \
@@ -297,16 +301,16 @@ async def mesdfsdfnu(message: types.Message, state: FSMContext):
                           f"Игра в правду - Запись в базу данных \n {st_tag} , {reb_tag}")
     dick = {'id': tag_count + 1, 'truth': isTrue, 'belivers': 1, 'nonbelivers': 1}
     if st_asset:
-        await sql_safe_insert('assets', {'t_id': st_asset, 'name': st_tag})
+        await sql_safe_insert('public', 'assets', {'t_id': st_asset, 'name': st_tag})
         dick.update({'asset_name': st_tag})
     if reb_asset:
-        await sql_safe_insert('assets', {'t_id': reb_asset, 'name': reb_tag})
+        await sql_safe_insert('public', 'assets', {'t_id': reb_asset, 'name': reb_tag})
         dick.update({'reb_asset_name': reb_tag})
     if st_text:
-        await sql_safe_insert('texts', {'text': st_text, 'name': st_tag})
+        await sql_safe_insert('public', 'texts', {'text': st_text, 'name': st_tag})
         dick.update({'text_name': st_tag})
     if reb_text:
-        await sql_safe_insert('texts', {'text': reb_text, 'name': reb_tag})
+        await sql_safe_insert('public', 'texts', {'text': reb_text, 'name': reb_tag})
         dick.update({'rebuttal': reb_tag})
     await sql_safe_insert('truthgame', dick)
     await message.answer(f"Добавлено новая пара для игры в правду под тегами {st_tag}/{reb_tag}",
@@ -1650,3 +1654,26 @@ async def admin_home(message: types.Message, state: FSMContext):
         await message.answer("Сюжет был успешно обновлён в базе", reply_markup=admin_games_keyboard())
     except:
         await message.answer('Упс.. Что-то пошло не так, пожалуйста обратитесь к разработчиками')
+
+
+@router.message(F.text == "Превентивный удар 🪳", state=admin.game_menu)
+async def strike_start(message: types.Message, state: FSMContext):
+    await state.clear()
+    await state.set_state(admin.luca_memes)
+    nmrkup = ReplyKeyboardBuilder()
+    nmrkup.row(types.KeyboardButton(text="🆕 Добавить мем"))
+    nmrkup.add(types.KeyboardButton(text="🔀 Заменить мем"))
+    nmrkup.row(types.KeyboardButton(text="🅾️ Удалить мем"))
+    nmrkup.row(types.KeyboardButton(text="Назад"))
+    await message.answer("Выберите интересующее вас действие", reply_markup=nmrkup.as_markup(resize_keyboard=True))
+
+
+@router.message(F.text == "🆕 Добавить мем", state=admin.luca_memes)
+async def strike_add(message: types.Message, state: FSMContext):
+    await state.set_state(admin.luca_memes_add)
+    nmrkup = ReplyKeyboardBuilder()
+    nmrkup.row(types.KeyboardButton(text="Назад"))
+    await message.answer("Пришлите мне медиафайл (картинку или видео).\n"
+                         "Он будет добавлен в конец списка мемов.", reply_markup=nmrkup.as_markup(resize_keyboard=True))
+
+
