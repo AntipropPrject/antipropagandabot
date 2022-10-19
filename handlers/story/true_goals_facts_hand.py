@@ -81,5 +81,5 @@ async def goals_fact_7(message: Message, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="Хорошо, продолжим 👌"))
     await simple_media(message, 'goals_fact_7', reply_markup=nmarkup.as_markup(resize_keyboard=True))
     import time
-    time.sleep(3)
+    time.sleep(1)
     await message.answer('У меня есть ещё 9 фактов, но разработчики их ещё не успели добавить. Поэтому давайте продолжим. 🙂', reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
