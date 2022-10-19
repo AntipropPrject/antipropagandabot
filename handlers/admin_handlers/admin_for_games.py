@@ -312,7 +312,7 @@ async def mesdfsdfnu(message: types.Message, state: FSMContext):
     if reb_text:
         await sql_safe_insert('public', 'texts', {'text': reb_text, 'name': reb_tag})
         dick.update({'rebuttal': reb_tag})
-    await sql_safe_insert('truthgame', dick)
+    await sql_safe_insert('public', 'truthgame', dick)
     await message.answer(f"Добавлено новая пара для игры в правду под тегами {st_tag}/{reb_tag}",
                          reply_markup=nmrkup.as_markup(resize_keyboard=True))
     await state.clear()
