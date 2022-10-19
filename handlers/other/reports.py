@@ -35,6 +35,7 @@ async def report(message: types.Message):
 
     user_report_dict['report_id'] = report.message_id
     await report_mongo(user_report_dict)
+    await message.answer('Спасибо, ваш отчет об ошибке отправлен разработчикам.')
 
 
 async def report_mongo(user_report_dict):

@@ -68,15 +68,16 @@ async def start_info_fourth(message: Message):
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 @router.message((F.text.contains("Хорошо 👌")), flags=flags)
-async def start_info_fourth(message: Message):
+async def start_info_fourth(message: Message, state: FSMContext):
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="На частичную мобилизацию 🧍‍♂️"))
     nmarkap.row(types.KeyboardButton(text="На общую мобилизацию 🧍‍♂️🧍‍♂️🧍‍♂️"))
     nmarkap.row(types.KeyboardButton(text="Затрудняюсь ответить 🤷‍♀️"))
+    await state.set_state(start_dialog.dont_know_1)
     await simple_media(message, 'start_putin_mobilization', reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 @router.message((F.text.in_({"На частичную мобилизацию 🧍‍♂️", "На общую мобилизацию 🧍‍♂️🧍‍♂️🧍‍♂️",
-                             "Затрудняюсь ответить 🤷‍♀️"})), flags=flags)
+                             "Затрудняюсь ответить 🤷‍♀️"})), state=start_dialog.dont_know_1, flags=flags)
 async def start_mobilisation_result(message: Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='start_mobilisation', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'start_mobilisation_result'})
@@ -298,17 +299,18 @@ async def start_key_questions(message: Message):
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 @router.message((F.text == "Задавай вопросы 👌"), flags=flags)
-async def start_continue_or_peace(message: Message):
+async def start_continue_or_peace(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'start_continue_or_peace'})
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Продолжать военную операцию ⚔️"))
     nmarkap.row(types.KeyboardButton(text="Переходить к мирным переговорам 🕊"))
     nmarkap.row(types.KeyboardButton(text="Затрудняюсь ответить 🤷‍♀️"))
+    await state.set_state(start_dialog.dont_know_2)
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text.in_({"Продолжать военную операцию ⚔️", "Переходить к мирным переговорам 🕊",
-                             "Затрудняюсь ответить 🤷‍♀️"})), flags=flags)
+                             "Затрудняюсь ответить 🤷‍♀️"})), state=start_dialog.dont_know_2, flags=flags)
 async def start_continue_or_peace_results(message: Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='start_continue_or_peace_results',
                                 value=message.text)
