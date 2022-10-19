@@ -1,37 +1,22 @@
-import asyncio
-
-from aiogram import Router, F, Bot
+from aiogram import Router, F
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
-from aiogram.exceptions import TelegramBadRequest
-from aiogram.types import Message, ReplyKeyboardRemove
+from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
-from bata import all_data
-from bot_statistics.stat import mongo_update_stat_new, mongo_update_stat
-from data_base.DBuse import poll_get, poll_write, del_key, data_getter, mongo_game_answer, redis_delete_from_list
-from data_base.DBuse import sql_safe_select, mongo_count_docs
-from filters.MapFilters import FakeGoals, WarGoals
-from filters.MapFilters import OperationWar
-from handlers.story.donbass_hand import donbass_big_tragedy
-from handlers.story.nato_hand import nato_start
-from handlers.story.nazi_hand import NaziState, nazi_first_poll
-from handlers.story.preventive_strike import prevent_strike_any_brutality
+from data_base.DBuse import sql_safe_select
 from middleware.report_ware import Reportware
-from resources.all_polls import welc_message_one
-from resources.variables import mobilisation_date
-from states.stopwar_states import StopWarState
 from states.true_goals_states import TrueGoalsState, WarGoalsState
-from utils.fakes import fake_message
-from utilts import simple_media, CoolPercReplacer, get_time_from_war_started
+from states.welcome_states import start_dialog
+from utilts import simple_media
 
 flags = {"throttling_key": "True"}
 router = Router()
-router.message.filter(state=(TrueGoalsState, WarGoalsState))
+router.message.filter(state=(TrueGoalsState, WarGoalsState,start_dialog.big_story))
 router.poll_answer.filter(state=TrueGoalsState)
 router.message.middleware(Reportware())
 
-
+@router.message(commands=['goals_facts_test'], state='*', flags=flags)
 @router.message((F.text.contains('на факты 👀')), state=TrueGoalsState.power_change, flags=flags)
 async def goals_fact_1(message: Message, state: FSMContext):
     await state.set_state(TrueGoalsState.goals_fact_1)
