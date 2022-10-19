@@ -90,7 +90,7 @@ async def report_chat(query: types.CallbackQuery):
                                                            from_chat_id=from_chat_id, message_id=last_message_id)
                     report_message_id_list.append(message_report.message_id)
                 except Exception:
-                    pass
+                    bot.send_message(chat_id=channel_for_reports, text='This message cannot be forwarded')
         print(date_message)
         print(report_message_id_list)
         await mongo_easy_upsert('database', 'reports', {'$and': [{'user_id': user_id},
