@@ -38,6 +38,7 @@ async def start_spam(datet):
         main_news_list.append(n)
         main_news_ids.append(n['_id'])
     logger.info('Начало рассылки')
+    start_datetime_spam = datetime.now()
     async for user in userinfo.find({'datetime_end': {'$lt': datetime.utcnow() - timedelta(days=1)}}):
         if user.get('is_ban') is not True:
             if all_data().get_data_red().get(f"user_last_answer: {user['_id']}:") != '1':
@@ -50,9 +51,12 @@ async def start_spam(datet):
         asyncio.create_task(mongo_pop_news(m_id=today_actual['media'], coll='actu'))
     except:
         pass
+    end_datetime_spam = datetime.now()
+    result_spam_time = start_datetime_spam - end_datetime_spam
     count = int(await redis_just_one_read('adversting: spam_count:'))
     logger.info(f'Рассылка завершена, сообщение получили {count}')
-    asyncio.create_task(send_to_chat(f"Рассылка завершена\n\nБыло отправлено: +-{count} сообщений"))
+    asyncio.create_task(send_to_chat(f"Рассылка завершена\n\nБыло отправлено: +-{count} сообщений\n"
+                                     f"Время рассылки: {result_spam_time}"))
 
 
 async def latecomers(user, main_news_base, today_actual, main_news_ids):
