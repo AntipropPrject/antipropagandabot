@@ -20,9 +20,10 @@ from utilts import simple_media, simple_media_bot, CoolPercReplacer
 flags = {"throttling_key": "True"}
 router = Router()
 router.message.middleware(Reportware())
+router.message.filter(state=welcome_states.start_dialog)
 
 
-@router.message(text_contains='Готов(а) продолжить 👌', state=welcome_states, flags=flags)
+@router.message(text_contains='Готов(а) продолжить 👌', flags=flags)
 async def message_2(message: types.Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='first_button', value='Начнем')
     # запись значения в базу
