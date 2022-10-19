@@ -671,7 +671,8 @@ async def goals_sure_power_change(message: Message):
 @router.message(F.text == "Да, двигаемся дальше 👉", state=TrueGoalsState.power_change, flags=flags)
 @router.message(F.text == "Достаточно фактов ✋", state=TrueGoalsState, flags=flags)
 @router.message(F.text == "Хорошо, продолжим 👌", state=TrueGoalsState.goals_fact_7, flags=flags)
-async def goals_why_power_change(message: Message):
+async def goals_why_power_change(message: Message, state: FSMContext):
+    await state.set_state(TrueGoalsState.power_change)
     text = await sql_safe_select('text', 'texts', {'name': 'goals_why_power_change'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Давай посмотрим 👀"))
@@ -1005,7 +1006,7 @@ async def goals_russia_already_lost(message: Message):
     nmarkup.row(types.KeyboardButton(text="Продолжим 👌"))
     text = await sql_safe_select('text', 'texts', {'name': 'goals_wars_of_past'})
     day = await get_time_from_war_started()
-    text = text.replace("XX", f"{day}")
+    text = text.replace("AA", f"{day}")
     await simple_media(message, 'goals_wars_of_past', nmarkup.as_markup(resize_keyboard=True),custom_caption=text)
 
 

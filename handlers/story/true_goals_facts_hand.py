@@ -3,6 +3,7 @@ from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
+from werkzeug.exceptions import BadRequest
 
 from data_base.DBuse import sql_safe_select
 from middleware.report_ware import Reportware
@@ -54,11 +55,8 @@ async def goals_fact_4(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Следующий факт 👉"))
     nmarkup.row(types.KeyboardButton(text="Достаточно фактов ✋"))
-    try:
-        await simple_media(message, 'goals_fact_4', reply_markup=nmarkup.as_markup(resize_keyboard=True))
-    except Exception:
-        text = await sql_safe_select('text', 'texts', {'name': 'goals_fact_4'})
-        await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    text = await sql_safe_select('text', 'texts', {'name': 'goals_fact_4'})
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message((F.text.contains('факт 👉')), state=TrueGoalsState.goals_fact_4, flags=flags)
@@ -67,11 +65,9 @@ async def goals_fact_5(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Следующий факт 👉"))
     nmarkup.row(types.KeyboardButton(text="Достаточно фактов ✋"))
-    try:
-        await simple_media(message, 'goals_fact_5', reply_markup=nmarkup.as_markup(resize_keyboard=True))
-    except Exception:
-        text = await sql_safe_select('text', 'texts', {'name': 'goals_fact_5'})
-        await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+    text = await sql_safe_select('text', 'texts', {'name': 'goals_fact_5'})
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 @router.message((F.text.contains('факт 👉')), state=TrueGoalsState.goals_fact_5, flags=flags)
 async def goals_fact_6(message: Message, state: FSMContext):
@@ -79,11 +75,9 @@ async def goals_fact_6(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Следующий факт 👉"))
     nmarkup.row(types.KeyboardButton(text="Достаточно фактов ✋"))
-    try:
-        await simple_media(message, 'goals_fact_6', reply_markup=nmarkup.as_markup(resize_keyboard=True))
-    except Exception:
-        text = await sql_safe_select('text', 'texts', {'name': 'goals_fact_6'})
-        await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+    text = await sql_safe_select('text', 'texts', {'name': 'goals_fact_6'})
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 @router.message((F.text.contains('факт 👉')), state=TrueGoalsState.goals_fact_6, flags=flags)
 async def goals_fact_7(message: Message, state: FSMContext):
