@@ -22,7 +22,7 @@ logger = get_logger('welcome_stories')
 
 @router.message((F.text.contains('верить') | F.text.contains('50 000')), flags=flags)  # А с чего мне тебе верить?
 async def start_why_belive(message: types.Message):
-    await mongo_update_stat_new(tg_id=message.from_user.id, column='first_button', value='А с чего мне тебе верить?')
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='first_button', value=message.text)
     markup = ReplyKeyboardBuilder()
     markup.add(types.KeyboardButton(text="Начнём 🇷🇺🇺🇦"))
     text = await sql_safe_select("text", "texts", {"name": "start_why_belive"})
@@ -30,6 +30,7 @@ async def start_why_belive(message: types.Message):
 
 @router.message((F.text.contains("Начнём 🇷🇺🇺🇦")), flags=flags)
 async def start_why_communicate(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='first_button', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'start_why_communicate'})
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Хочу узнать правду о кофликте России и Украины 🇷🇺🇺🇦"))

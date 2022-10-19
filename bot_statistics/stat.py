@@ -1,11 +1,13 @@
 import datetime
 import re
+from typing import Any
 
 import aiohttp
 from aiogram.types import User
+from pymongo.errors import DuplicateKeyError
 
 from bata import all_data
-from data_base.DBuse import mongo_select_info, data_getter, sql_add_value, mongo_user_info, mongo_easy_upsert
+from data_base.DBuse import data_getter, sql_add_value, mongo_user_info, mongo_easy_upsert
 from filters.isAdmin import IsAdmin
 from log import logg
 
@@ -24,22 +26,23 @@ async def mongo_stat(tg_id):
         print(error)
 
 
-async def mongo_stat_new(tg_id):
+async def mongo_nstat_create(tg_id):
     try:
-        user_answer = {'_id': int(tg_id), 'datetime': datetime.datetime.now(), 'come': True}
-        await collection_stat_new.insert_one(user_answer)
+        await collection_stat_new.insert_one({'_id': int(tg_id), 'datetime': datetime.datetime.now(), 'come': True})
+    except DuplicateKeyError:
+        pass
     except Exception as error:
-        print(error)
+        await logg.get_error(f"Creation of the new user for statisticts failed!\n{error}\n", __file__)
 
 
-async def mongo_update_stat_new(tg_id, column, options='$set', value=True):
+async def mongo_update_stat_new(tg_id, column, options='$set', value: Any = True):
     try:
         conditions_dict = {'_id': int(tg_id), column: {'$exists': False}}
         if await IsAdmin(level=['Тестирование'], custom_user_id=tg_id)():
             del conditions_dict[column]
-        await collection_stat_new.update_one(conditions_dict, {options: {column: value}}, upsert=True)
+        await collection_stat_new.update_one(conditions_dict, {options: {column: value}})
     except Exception as error:
-        await logg.get_error(f"mongo_update_stat | {error}", __file__)
+        await logg.get_error(f"Updating statistics for user {tg_id} failed!:\n{error}", __file__)
 
 
 async def mongo_update_stat(tg_id, column, options='$set', value=1):
@@ -102,5 +105,5 @@ async def advertising_value(tag, user: User):
             async with session.get(url=url) as response:
                 status = response.status
                 print(status)
-    await mongo_stat_new(user.id)
+    await mongo_nstat_create(user.id)
     await mongo_update_stat_new(user.id, 'origin', value=origin)
