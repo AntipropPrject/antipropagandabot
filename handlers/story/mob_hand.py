@@ -256,13 +256,12 @@ async def mob_I_can_help(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(F.text.in_({"Уверен(а), продолжим 👉", "И какие шансы? 🤔", 'Всё равно продолжить 👉'}),
-                state=(MobState.voenkomat_poll, MobState.main, MobState.front), flags=flags)
+@router.message(F.text.in_({"Уверен(а), продолжим 👉", "Всё равно продолжить 👉"}),
+                state=(MobState.voenkomat_poll, MobState.main), flags=flags)
 async def mob_no_chances(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(KeyboardButton(text="Какой ужас! 😱"))
-    nmarkup.add(KeyboardButton(
-        text="Понятно 👌" if await state.get_state() == "MobState:front" else "Продолжаем 👉"))
+    nmarkup.add(KeyboardButton(text="Продолжаем 👉"))
     nmarkup.row(KeyboardButton(text="Подожди, а как ты это посчитал? 🤔"))
     await simple_media(message, 'mob_no_chances', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
@@ -295,6 +294,15 @@ async def mob_forever_broken(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(KeyboardButton(text="И какие шансы? 🤔"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message(F.text == "И какие шансы? 🤔", state=MobState.front, flags=flags)
+async def mob_no_chances_the_second(message: Message, state: FSMContext):
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(KeyboardButton(text="Какой ужас! 😱"))
+    nmarkup.add(KeyboardButton(text="Понятно 👌"))
+    nmarkup.row(KeyboardButton(text="Подожди, а как ты это посчитал? 🤔"))
+    await simple_media(message, 'mob_no_chances_the_second', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message(F.text.in_({"Понятно 👌", "Какой ужас! 😱"}), state=MobState.front, flags=flags)
