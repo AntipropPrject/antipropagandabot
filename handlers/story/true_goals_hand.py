@@ -1003,8 +1003,8 @@ async def goals_russia_already_lost(message: Message):
     nmarkup.row(types.KeyboardButton(text="Продолжим 👌"))
     text = await sql_safe_select('text', 'texts', {'name': 'goals_wars_of_past'})
     day = await get_time_from_war_started()
-    text = text.replace("XX", f"{day}")
-    await simple_media(message, 'goals_wars_of_past', nmarkup.as_markup(resize_keyboard=True),custom_caption=text)
+    text = text.replace("AA", f"{day}")
+    await simple_media(message, 'goals_wars_of_past', nmarkup.as_markup(resize_keyboard=True), custom_caption=text)
 
 
 @router.message((F.text.in_({"Продолжай ⏳", "А что, Путин этого не знал? 🤔", "Продолжим 👌"})),
