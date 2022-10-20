@@ -998,13 +998,10 @@ async def goals_no_winners_in_war(message: Message):
 
 
 @router.message((F.text == "Не верю / Докажи 🤔"), state=TrueGoalsState.final, flags=flags)
-async def goals_russia_already_lost(message: Message):
+async def goals_wars_of_past(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжим 👌"))
-    text = await sql_safe_select('text', 'texts', {'name': 'goals_wars_of_past'})
-    day = await get_time_from_war_started()
-    text = text.replace("AA", f"{day}")
-    await simple_media(message, 'goals_wars_of_past', nmarkup.as_markup(resize_keyboard=True), custom_caption=text)
+    await simple_media(message, 'goals_wars_of_past', nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text.in_({"Продолжай ⏳", "А что, Путин этого не знал? 🤔", "Продолжим 👌"})),
@@ -1012,6 +1009,8 @@ async def goals_russia_already_lost(message: Message):
 async def goals_russia_already_lost(message: Message, state: FSMContext):
     await state.set_state(StopWarState.main)
     text = await sql_safe_select('text', 'texts', {'name': 'goals_russia_already_lost'})
+    day = await get_time_from_war_started()
+    text = text.replace("AA", f"{day}")
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Подведём итоги 📊"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
