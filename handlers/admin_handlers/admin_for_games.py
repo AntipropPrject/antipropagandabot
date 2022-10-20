@@ -291,7 +291,10 @@ async def mesdfsdfnu(message: types.Message, state: FSMContext):
     st_asset = data['truthgame_statement_asset']
     reb_text = data['truthgame_rebb']
     reb_asset = data['truthgame_rebb_asset']
-    tag_count = (await data_getter("SELECT id FROM truthgame ORDER BY id DESC LIMIT 1"))[0][0]
+    try:
+        tag_count = (await data_getter("SELECT id FROM truthgame ORDER BY id DESC LIMIT 1"))[0][0]
+    except IndexError:
+        tag_count = 0
     st_tag = 'truthgame_' + str(tag_count).zfill(2)
     reb_tag = 't_game_reb_' + str(tag_count).zfill(2)
     isTrue = data['truthgamebool']
