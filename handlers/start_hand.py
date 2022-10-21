@@ -32,7 +32,7 @@ from states.antiprop_states import propaganda_victim
 from states.main_menu_states import MainMenuStates
 from states.true_goals_states import TrueGoalsState
 from states.welcome_states import start_dialog
-from utilts import MasterCommander
+from utilts import MasterCommander, simple_media_bot
 
 flags = {"throttling_key": "True"}
 router = Router()
@@ -58,7 +58,7 @@ async def commands_start(update: Message | CallbackQuery, bot: Bot, state: FSMCo
                 inmarkup = InlineKeyboardBuilder()
                 inmarkup.add(types.InlineKeyboardButton(text="♻️ Начать заново! ♻️", callback_data="restarting"))
                 text = await sql_safe_select("text", "texts", {"name": "restart_are_you_sure"})
-                await update.answer(text, reply_markup=inmarkup.as_markup())
+                await simple_media_bot(bot, user_obj.id, "restart_are_you_sure", reply_markup=inmarkup.as_markup())
                 return
         else:
             await MasterCommander(bot, 'chat', user_obj.id).rewrite({})
