@@ -604,7 +604,6 @@ async def stopwar_result(message: Message, state: FSMContext):
 
 @router.message(F.text.contains('🤝'), state=StopWarState.final, flags=flags)
 async def stopwar_true_face(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'stopwar_true_face'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Как это сделать? 🤔"))
     await simple_media(message, 'stopwar_true_face', nmarkup.as_markup(resize_keyboard=True))
