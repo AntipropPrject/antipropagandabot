@@ -17,6 +17,7 @@ from handlers import start_hand, shop
 from handlers.admin_handlers import admin_factory, marketing, admin_for_games, new_admin_hand
 from handlers.advertising import start_spam, user_returner, return_spam_send
 from handlers.other import status, other_file, reports
+from handlers.start_hand import Start_router
 from handlers.story import preventive_strike, true_resons_hand, welcome_messages, nazi_hand, \
     donbass_hand, main_menu_hand, anti_prop_hand, putin_hand, smi_hand, stopwar_hand, welcome_stories, true_goals_hand, \
     nato_hand, mob_hand, power_change_hand
@@ -76,7 +77,7 @@ async def main():
     dp.include_router(admin_for_games.router)
 
     dp.include_router(status.router)
-    dp.include_router(start_hand.router)
+    dp.include_router(start_hand.Start_router.router)
 
     # Начало и антипропаганда
     dp.include_router(welcome_stories.router)
