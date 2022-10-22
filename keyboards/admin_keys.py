@@ -43,9 +43,9 @@ def games_keyboard(t_id=None):
     nmarkup.row(types.KeyboardButton(text="Путин (Обещания) 🍜"))
     nmarkup.row(types.KeyboardButton(text="Игра Абсурда 🗯"))
     nmarkup.row(types.KeyboardButton(text="Игра Нацизма 💤"))
-    nmarkup.row(types.KeyboardButton(text="Превентивный удар 🐓"))
-    nmarkup.row(types.KeyboardButton(text="Вернуться в меню администрирования"))
+    # nmarkup.row(types.KeyboardButton(text="Превентивный удар 🪳"))
     nmarkup.adjust(2)
+    nmarkup.row(types.KeyboardButton(text="Вернуться в меню администрирования"))
     return nmarkup.as_markup(resize_keyboard=True, input_field_placeholder=random.choice(usless_list))
 
 
@@ -177,3 +177,4 @@ def secretrebornkb():
     nmarkup.adjust(2)
     nmarkup.row(types.KeyboardButton(text="Вернуться в менее опасное место"))
     return nmarkup.as_markup(resize_keyboard=True)
+

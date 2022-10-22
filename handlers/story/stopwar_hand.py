@@ -269,8 +269,16 @@ async def stopwar_rather_no(message: Message):
 
 
 @router.message((F.text == "Ну, допустим, проскакивала мысль, и что? 🤔"), flags=flags)
-async def stopwar_front_death(message: Message, state: FSMContext):
+async def stopwar_front_death(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_front_death'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.add(types.KeyboardButton(text="Что будет дальше? 🤔"))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message((F.text == "Что будет дальше? 🤔"), flags=flags)
+async def stopwar_front_death_2(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'stopwar_front_death_2'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.add(types.KeyboardButton(text="Продолжим 👉"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
@@ -595,6 +603,13 @@ async def stopwar_result(message: Message, state: FSMContext):
 
 
 @router.message(F.text.contains('🤝'), state=StopWarState.final, flags=flags)
+async def stopwar_true_face(message: Message):
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Как это сделать? 🤔"))
+    await simple_media(message, 'stopwar_true_face', nmarkup.as_markup(resize_keyboard=True))
+
+
+@router.message(F.text.contains('Как это сделать? 🤔'), state=StopWarState.final, flags=flags)
 async def stopwar_pre_timer(message: Message):
     text_1 = await sql_safe_select('text', 'texts', {'name': 'stopwar_pre_timer'})
     time = await day_counter(message.from_user)

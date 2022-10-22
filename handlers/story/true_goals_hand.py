@@ -13,10 +13,10 @@ from data_base.DBuse import poll_get, poll_write, del_key, data_getter, mongo_ga
 from data_base.DBuse import sql_safe_select, mongo_count_docs
 from filters.MapFilters import FakeGoals, WarGoals
 from filters.MapFilters import OperationWar
-from handlers.story.bionuclear_hand import goals_fact_1
 from handlers.story.donbass_hand import donbass_big_tragedy
 from handlers.story.nato_hand import nato_start
 from handlers.story.nazi_hand import NaziState, nazi_first_poll
+from handlers.story.power_change_hand import goals_fact_1
 from handlers.story.preventive_strike import prevent_strike_any_brutality
 from middleware.report_ware import Reportware
 from resources.all_polls import welc_message_one
@@ -481,8 +481,11 @@ async def goals_pls_use_goal_nazi(message: Message):
 
 
 @router.message((F.text.contains("🤯")), state=WarGoalsState.bio, flags=flags)
-async def goals_bio_enterence(message: Message, state: FSMContext):
-    await goals_fact_1(message, state)
+async def goals_nazi_enterence(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'goals_will_add_bio_sorry'})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text='Кнопка'))
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message(((F.text.contains("Уверен(а), проп")) | (F.text.in_({"Кнопка", 'Продолжим 👌'}))),
@@ -642,19 +645,15 @@ async def goals_change_of_power(message: Message, state: FSMContext):
         text = text.replace('XX', round(XX))
     except Exception:
         text = text.replace('XX', 'N/A')
-
-
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Взглянем на факты 👀"))
     nmarkup.row(types.KeyboardButton(text="Пропустим 👉"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-# @router.message((F.text.contains('на факты 👀')), state=TrueGoalsState.power_change, flags=flags)
-# async def goals_will_add_sorry(message: Message):
-#     text = await sql_safe_select('text', 'texts', {'name': 'goals_will_add_sorry'})
-#     await message.answer(text)
-#     await goals_why_power_change(message)
+@router.message((F.text.contains('на факты 👀')), state=TrueGoalsState.power_change, flags=flags)
+async def goals_will_add_sorry(message: Message, state: FSMContext):
+    await goals_fact_1(message, state)
 
 
 @router.message(F.text == "Пропустим 👉", state=TrueGoalsState.power_change, flags=flags)
@@ -666,9 +665,9 @@ async def goals_sure_power_change(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(F.text == "Да, двигаемся дальше 👉", state=TrueGoalsState.power_change, flags=flags)
 @router.message(F.text == "Достаточно фактов ✋", state=TrueGoalsState, flags=flags)
 @router.message(F.text == "Хорошо, продолжим 👌", state=TrueGoalsState.goals_fact_7, flags=flags)
+@router.message(F.text == "Да, двигаемся дальше 👉", state=TrueGoalsState.power_change, flags=flags)
 async def goals_why_power_change(message: Message, state: FSMContext):
     await state.set_state(TrueGoalsState.power_change)
     text = await sql_safe_select('text', 'texts', {'name': 'goals_why_power_change'})
@@ -999,13 +998,10 @@ async def goals_no_winners_in_war(message: Message):
 
 
 @router.message((F.text == "Не верю / Докажи 🤔"), state=TrueGoalsState.final, flags=flags)
-async def goals_russia_already_lost(message: Message):
+async def goals_wars_of_past(message: Message):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжим 👌"))
-    text = await sql_safe_select('text', 'texts', {'name': 'goals_wars_of_past'})
-    day = await get_time_from_war_started()
-    text = text.replace("AA", f"{day}")
-    await simple_media(message, 'goals_wars_of_past', nmarkup.as_markup(resize_keyboard=True),custom_caption=text)
+    await simple_media(message, 'goals_wars_of_past', nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text.in_({"Продолжай ⏳", "А что, Путин этого не знал? 🤔", "Продолжим 👌"})),
@@ -1013,6 +1009,8 @@ async def goals_russia_already_lost(message: Message):
 async def goals_russia_already_lost(message: Message, state: FSMContext):
     await state.set_state(StopWarState.main)
     text = await sql_safe_select('text', 'texts', {'name': 'goals_russia_already_lost'})
+    day = await get_time_from_war_started()
+    text = text.replace("AA", f"{day}")
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Подведём итоги 📊"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
