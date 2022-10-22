@@ -17,7 +17,7 @@ channel_for_reports = -1001563584793
 
 @router.message(commands=['report'], state='*')
 async def report(message: types.Message):
-    user_report_str = await redis_just_one_read(f'{message.from_user.id}: report')
+    user_report_str = await redis_just_one_read(f'report: Users: {message.chat.id}')
     user_report_dict = eval(user_report_str)
     date_message = user_report_dict['date_message']
     user_id = user_report_dict['user_id']
