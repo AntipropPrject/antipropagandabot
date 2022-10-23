@@ -52,7 +52,7 @@ async def start_spam(datet):
     except:
         pass
     end_datetime_spam = datetime.now()
-    result_spam_time = start_datetime_spam - end_datetime_spam
+    result_spam_time = end_datetime_spam - start_datetime_spam
     count = int(await redis_just_one_read('adversting: spam_count:'))
     logger.info(f'Рассылка завершена, сообщение получили {count}')
     asyncio.create_task(send_to_chat(f"Рассылка завершена\n\nБыло отправлено: +-{count} сообщений\n"
