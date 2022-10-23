@@ -249,6 +249,7 @@ async def sadmins(message: Message, state: FSMContext):
             except:
                 await message.answer_video(video=media, caption=spam['caption'],
                                            reply_markup=nmarkup.as_markup())
+            count += 1
             await asyncio.sleep(0.1)
     else:
         nmarkup = InlineKeyboardBuilder()
