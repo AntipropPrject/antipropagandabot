@@ -240,6 +240,9 @@ async def sadmins(message: Message, state: FSMContext):
             media = spam["media"]
             nmarkup.button(text='Удалить', callback_data=f'del_{media[:47]}_actu')
             nmarkup.button(text='Редактировать', callback_data=f'red_{media[:47]}_actu')
+            print(count_for_button)
+            print(count)
+            count += 1
             if count == count_for_button:
                 nmarkup.button(text='Добавить новость', callback_data=f'add_actual_news')
             nmarkup.adjust(2)
@@ -249,7 +252,6 @@ async def sadmins(message: Message, state: FSMContext):
             except:
                 await message.answer_video(video=media, caption=spam['caption'],
                                            reply_markup=nmarkup.as_markup())
-            count += 1
             await asyncio.sleep(0.1)
     else:
         nmarkup = InlineKeyboardBuilder()
