@@ -405,7 +405,7 @@ async def mob_links(message: Message):
                             "Скучновато, да ещё и вопросы остались 👎"}),
                 state=MobState.save_yourself, flags=flags)
 async def mob_feedback(message: Message, bot: Bot, state: FSMContext):
-    await mongo_update_stat_new(message.from_user.id, 'mob_feedback', message.text)
+    await mongo_update_stat_new(message.from_user.id, 'mob_feedback', value=message.text)
     await message.answer("Спасибо за оценку! 🙂")
     await mob_to_the_stopwar(message, bot, state)
 

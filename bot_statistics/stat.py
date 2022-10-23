@@ -42,7 +42,7 @@ async def mongo_update_stat_new(tg_id, column, options='$set', value: Any = True
             del conditions_dict[column]
         await collection_stat_new.update_one(conditions_dict, {options: {column: value}})
     except Exception as error:
-        await logg.get_error(f"Updating statistics for user {tg_id} failed!:\n{error}", __file__)
+        await logg.get_error(f"Updating statistics key {column} for user {tg_id} failed!:\n{error}", __file__)
 
 
 async def mongo_update_stat(tg_id, column, options='$set', value=1):
