@@ -328,12 +328,12 @@ async def mongo_update_news(m_id: str, new_m_id: str, new_caption: str, coll=Non
         database = client.database
         if 'main' in coll:
             collection = database['spam_news_main']
-            await collection.replace_one({'media': {'$regex': m_id}}, {"media": str(new_m_id), "caption": new_caption},
-                                         True)
+            await collection.update_one({'media': {'$regex': m_id}}, {'$set': {"media": str(new_m_id),
+                                                                               "caption": new_caption}})
         elif 'actu' in coll:
             collection = database['spam_actual_news']
-            await collection.replace_one({'media': {'$regex': m_id}}, {"media": str(new_m_id), "caption": new_caption},
-                                         True)
+            await collection.update_one({'media': {'$regex': m_id}}, {'$set': {"media": str(new_m_id),
+                                                                               "caption": new_caption}})
         print('Update')
     except Exception as error:
         await logg.get_error(f"mongo update | {error}", __file__)

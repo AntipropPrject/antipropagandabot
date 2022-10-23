@@ -30,7 +30,7 @@ class ThrottlingMiddleware(BaseMiddleware):
         report_dict["username"] = event.from_user.username
         report_dict["message_from_user"] = event.text
         report_dict["state"] = data.get('raw_state')
-        await redis_just_one_write(f'{event.chat.id}: report', str(report_dict).replace("'", '"'))
+        await redis_just_one_write(f'report: Users: {event.chat.id}', str(report_dict).replace("'", '"'))
         throttling_key = get_flag(data, "throttling_key")
         redis = all_data().get_data_red()
         redis.set(f"user_last_answer: {event.from_user.id}:", "1", 280)

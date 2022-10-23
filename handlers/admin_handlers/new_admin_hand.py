@@ -240,6 +240,9 @@ async def sadmins(message: Message, state: FSMContext):
             media = spam["media"]
             nmarkup.button(text='Удалить', callback_data=f'del_{media[:47]}_actu')
             nmarkup.button(text='Редактировать', callback_data=f'red_{media[:47]}_actu')
+            print(count_for_button)
+            print(count)
+            count += 1
             if count == count_for_button:
                 nmarkup.button(text='Добавить новость', callback_data=f'add_actual_news')
             nmarkup.adjust(2)
@@ -461,6 +464,7 @@ async def add_news(message: Message, state: FSMContext):
         date = datetime.strptime(dt_for_spam, '%Y.%m.%d %H:%M')
         await mongo_add_news(media_id, str(caption), date, coll=str(coll))
         coll = data['coll']
+        await state.set_state(admin.spam_menu)
         nmarkup = InlineKeyboardBuilder()
         nmarkup.button(text='Добавить новость', callback_data=str(coll))
         await message.answer("Новость запланирована", reply_markup=await spam_admin_keyboard())
@@ -471,6 +475,7 @@ async def add_news(message: Message, state: FSMContext):
         date = datetime.strptime(dt_for_spam, '%Y.%m.%d %H:%M')
         await mongo_add_news(media_id, str(caption), date, coll=str(coll))
         coll = data['coll']
+        await state.set_state(admin.spam_menu)
         nmarkup = InlineKeyboardBuilder()
         nmarkup.button(text='Добавить новость', callback_data=str(coll))
         await message.answer("Новость запланирована", reply_markup=await spam_admin_keyboard())
