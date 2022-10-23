@@ -52,6 +52,7 @@ async def periodic():
 
         await start_spam(f'{date} 11:00')
         await asyncio.sleep(30)
+        await start_spam(f'{date} 19:00')
 
 
 async def main():
