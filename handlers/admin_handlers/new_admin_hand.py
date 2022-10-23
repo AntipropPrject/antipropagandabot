@@ -461,6 +461,7 @@ async def add_news(message: Message, state: FSMContext):
         date = datetime.strptime(dt_for_spam, '%Y.%m.%d %H:%M')
         await mongo_add_news(media_id, str(caption), date, coll=str(coll))
         coll = data['coll']
+        await state.set_state(admin.spam_menu)
         nmarkup = InlineKeyboardBuilder()
         nmarkup.button(text='Добавить новость', callback_data=str(coll))
         await message.answer("Новость запланирована", reply_markup=await spam_admin_keyboard())
@@ -471,6 +472,7 @@ async def add_news(message: Message, state: FSMContext):
         date = datetime.strptime(dt_for_spam, '%Y.%m.%d %H:%M')
         await mongo_add_news(media_id, str(caption), date, coll=str(coll))
         coll = data['coll']
+        await state.set_state(admin.spam_menu)
         nmarkup = InlineKeyboardBuilder()
         nmarkup.button(text='Добавить новость', callback_data=str(coll))
         await message.answer("Новость запланирована", reply_markup=await spam_admin_keyboard())
