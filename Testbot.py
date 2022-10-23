@@ -49,7 +49,11 @@ async def periodic():
                 await start_spam(f'{date} 19:00')
         if c_time == '19:00:01':
             await backup.dump_all(name=f'DUMP_{datefor_backup}')
-        await asyncio.sleep(1)
+
+        await start_spam(f'{date} 11:00')
+        await asyncio.sleep(30)
+        await start_spam(f'{date} 19:00')
+        await asyncio.sleep(30)
 
 
 async def main():
