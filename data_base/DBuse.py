@@ -522,15 +522,18 @@ async def mongo_count_docs(database: str, collection: str, conditions: dict | li
     client = all_data().get_mongo()
     database = client[database]
     collection = database[collection]
-    conditions.update({'datetime': {"$gte": release_date['v3']}})
+    version_flag = {'datetime': {"$gte": release_date['v3']}}
     if isinstance(conditions, list) and hard_link:
+        collection.append(version_flag)
         return await collection.count_documents({"$and": conditions})
     elif isinstance(conditions, list) and not hard_link:
+        collection.append(version_flag)
         a = 0
         for d in conditions:
             a += await collection.count_documents(d)
         return a
     elif isinstance(conditions, dict):
+        conditions.update(version_flag)
         return await collection.count_documents(conditions)
 
 
