@@ -1,25 +1,19 @@
-from datetime import datetime
-
 from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-
 from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
-from data_base.DBuse import poll_write, sql_safe_select, mongo_add, mongo_select, redis_just_one_write, \
-    redis_just_one_read, mongo_count_docs
+from data_base.DBuse import poll_write, sql_safe_select, mongo_add, mongo_select, redis_just_one_write, mongo_count_docs
 from handlers.story.anti_prop_hand import antip_wolves
-from middleware.report_ware import Reportware
 from resources.all_polls import web_prop, welc_message_one, people_prop
 from resources.variables import release_date
 from states import welcome_states
 from states.antiprop_states import propaganda_victim
-from utilts import simple_media, simple_media_bot, CoolPercReplacer
+from utilts import CoolPercReplacer
 
 flags = {"throttling_key": "True"}
 router = Router()
-router.message.middleware(Reportware())
 router.message.filter(state=welcome_states.start_dialog)
 
 

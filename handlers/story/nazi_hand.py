@@ -12,9 +12,7 @@ from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
 from data_base.DBuse import data_getter, poll_write, sql_safe_select, redis_delete_from_list, poll_get, \
     mongo_game_answer
 from filters.MapFilters import NaziFilter, RusHate_pr, NotNaziFilter
-from handlers.story import true_resons_hand
 from keyboards.map_keys import polls_continue_kb
-from middleware.report_ware import Reportware
 from resources.all_polls import nazizm, nazizm_pr
 from states.true_goals_states import WarGoalsState
 from utilts import simple_media
@@ -49,7 +47,6 @@ async def denanazification(message, state):
 flags = {"throttling_key": "True"}
 router = Router()
 router.message.filter(state=NaziState)
-router.message.middleware(Reportware())
 
 
 @router.message((F.text == "Покажи варианты ✍️"), state=NaziState.first_poll, flags=flags)

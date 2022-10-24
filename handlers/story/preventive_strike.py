@@ -6,7 +6,6 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from bot_statistics.stat import mongo_update_stat_new, mongo_update_stat
 from data_base.DBuse import sql_safe_select, mongo_count_docs, sql_games_row_selecter, mongo_game_answer
-from middleware.report_ware import Reportware
 from resources.all_polls import welc_message_one
 from states.preventstrike_states import PreventStrikeState
 from states.true_goals_states import WarGoalsState
@@ -15,7 +14,6 @@ from utilts import simple_media, CoolPercReplacer, game_answer
 flags = {"throttling_key": "True"}
 router = Router()
 router.message.filter(state=PreventStrikeState)
-router.message.middleware(Reportware())
 
 
 async def prevent_strike_any_brutality(message: Message, state: FSMContext):
