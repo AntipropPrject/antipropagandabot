@@ -527,9 +527,9 @@ async def mongo_count_docs(database: str, collection: str, conditions: dict | li
         conditions.append(version_flag)
         return await collection.count_documents({"$and": conditions})
     elif isinstance(conditions, list) and not hard_link:
-        conditions.append(version_flag)
         a = 0
         for d in conditions:
+            d.update(version_flag)
             a += await collection.count_documents(d)
         return a
     elif isinstance(conditions, dict):
