@@ -21,12 +21,11 @@ from handlers.story.donbass_hand import donbass_big_tragedy
 from handlers.story.main_menu_hand import mainmenu_really_menu
 from handlers.story.preventive_strike import prevent_strike_any_brutality
 from handlers.story.putin_hand import stopwar_start
-from handlers.story.stopwar_hand import stopwar_first_manipulation_argument, stopwar_lets_fight, stopwar_mob_start
+from handlers.story.stopwar_hand import  stopwar_lets_fight, stopwar_mob_start
 from handlers.story.true_goals_hand import goals_war_point_now
 from handlers.story.true_resons_hand import reasons_who_to_blame
 from handlers.story.welcome_messages import message_2
 from handlers.story.welcome_stories import start_how_to_manipulate
-from middleware.report_ware import Reportware
 from resources.variables import all_test_commands
 from states.antiprop_states import propaganda_victim
 from states.main_menu_states import MainMenuStates
@@ -36,7 +35,7 @@ from utilts import MasterCommander, simple_media_bot
 
 flags = {"throttling_key": "True"}
 router = Router()
-router.message.middleware(Reportware())
+
 
 
 @router.message(CommandStart(command_magic=F.args), flags=flags)

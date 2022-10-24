@@ -2,7 +2,7 @@ import asyncio
 
 from aiogram import Router, F, Bot
 from aiogram.dispatcher.fsm.context import FSMContext
-from aiogram.types import Message, KeyboardButton, PollAnswer, ReplyKeyboardRemove
+from aiogram.types import Message, KeyboardButton, PollAnswer
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from bata import all_data
