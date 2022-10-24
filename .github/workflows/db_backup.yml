@@ -23,7 +23,7 @@ jobs:
             echo DUMPING PG
             sudo -S docker exec -t antiprop_posgres pg_dumpall -c -U postgres > ./PGDUMP.sql
             echo DUMPING MONGO
-            sudo -S docker exec antipropagandabot-mongodb-1 mongodump -u mongoOTPOR -p mongoOTPOR --authenticationDatabase admin --db database -o /home
+            sudo -S docker exec antipropagandabot-mongodb-1 mongodump -u mongoOTPOR -p ${{ secrets.MONGO_PWD }} --authenticationDatabase admin --db database -o /home
             sudo -S docker cp antipropagandabot-mongodb-1:/home/database /root/Backups
             echo COPY REDIS DUMP
             cp /root/antipropagandabot/storage/redis/data/dump.rdb dump.rdb
