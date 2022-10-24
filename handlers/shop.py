@@ -33,7 +33,7 @@ price_dict = {'1000 x 🚀 Детская площадка': 1150000,
               '10 x 💊 Детский онкологический центр': 1500000000,
               '10 x 🏥 Корпус ядерной медицины': 2600000000,
               '1 x 🔥 Северный поток — 2': 1037000000000,
-              '100 x 🧸 Спасти жизнь ребёнку': 121000000
+              '1000 x 🧸 Спасти жизнь ребёнку': 121000000
               }
 
 inline = InlineKeyboardBuilder()
@@ -348,7 +348,7 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
                 reply_markup=inline2.as_markup(resize_keyboard=True))
 
         seen_cild_message = (await state.get_data())["seen_child_message"]
-        if int(data_dict["100 x 🧸 Спасти жизнь ребёнку"]) > 7000:
+        if int(data_dict["1000 x 🧸 Спасти жизнь ребёнку"]) > 7000:
             if seen_cild_message == "0":
                 nmarkup = ReplyKeyboardBuilder()
                 nmarkup.row(types.KeyboardButton(text="Отлично!"))
@@ -422,8 +422,8 @@ async def shop_children_ok(message: types.Message, bot: Bot, state: FSMContext):
     chat_id = message.from_user.id
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Выйти из магазина ⬇"))
-    # await bot.edit_message_text(text=text_shop, chat_id=chat_id, message_id=message_id_shop,
-    #                             reply_markup=inline1.as_markup(resize_keyboard=True))
+    await bot.edit_message_text(text=text_shop, chat_id=chat_id, message_id=message_id_shop,
+                                reply_markup=inline1.as_markup(resize_keyboard=True))
     await bot.send_message(text="Продолжите покупки", chat_id=chat_id, reply_markup=nmarkup.as_markup(resize_keyboard=True))
     await bot.delete_message(chat_id, message_id)
     await bot.delete_message(chat_id, message_id + 1)
