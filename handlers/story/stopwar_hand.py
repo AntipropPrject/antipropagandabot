@@ -337,7 +337,7 @@ async def stopwar_ukraine_at_the_borders(message: Message, state: FSMContext):
     await state.set_state(StopWarState.stopwar_ukraine_at_the_borders)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Скорее да, будет ⚔️"))
-    nmarkup.add(types.KeyboardButton(text="Скорее нет, не будет "))
+    nmarkup.add(types.KeyboardButton(text="Скорее нет, не будет 🕊"))
     nmarkup.row(types.KeyboardButton(text="Я не знаю 🤷‍♂️"))
     nmarkup.adjust(2, 1)
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
@@ -351,7 +351,7 @@ async def stopwar_borders_result(message: Message, state: FSMContext):
     answer_1 = await mongo_count_docs('database', 'statistics_new',
                                       {'stopwar_borders_result': 'Скорее да, будет ⚔️'})
     answer_2 = await mongo_count_docs('database', 'statistics_new',
-                                      {'stopwar_borders_result': 'Скорее нет, не будет '})
+                                      {'stopwar_borders_result': 'Скорее нет, не будет 🕊'})
     answer_3 = await mongo_count_docs('database', 'statistics_new',
                                       {'stopwar_borders_result': 'Я не знаю 🤷‍♂️'})
     txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'stopwar_borders_result'}), all_answers)
