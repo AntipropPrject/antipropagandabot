@@ -71,7 +71,7 @@ async def nato_poll_answer(poll_answer: types.PollAnswer, bot: Bot, state: FSMCo
     await state.set_state(Nato_states.poll_answer)
     await state.update_data(nato_poll_answer=poll_answer.option_ids[0])
 
-    txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'nato_other_questions'}), all_answers)
+    txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'nato_poll_answer'}), all_answers)
     txt.replace("AA", right_answers)
     txt.replace("BB", answer_1)
     txt.replace("CC", answer_2)

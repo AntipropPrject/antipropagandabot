@@ -100,6 +100,7 @@ async def goals_sort_reveal(message: Message, state: FSMContext):
                                            {'war_aims_ex': {'$regex': "Объединить русский народ"}})
     secret_dev = await mongo_count_docs('database', 'statistics_new',
                                         {'war_aims_ex': {'$regex': "Предотвратить секретные разработки"}})
+
     all_count = await mongo_count_docs('database', 'statistics_new', {'war_aims_ex': {'$exists': True}})
     var_aims['✅ ' + welc_message_one[4]] = round(pwr_ukr / all_count * 100)
     var_aims['❌ ' + welc_message_one[5]] = round(nato / all_count * 100)
@@ -112,6 +113,7 @@ async def goals_sort_reveal(message: Message, state: FSMContext):
     var_aims['❌ ' + welc_message_one[8]] = round(secret_dev / all_count * 100)
 
     sorted_dict = dict(sorted(var_aims.items(), key=lambda x: x[1], reverse=True))
+
     result_text = await sql_safe_select('text', 'texts', {'name': 'goals_sort_hided'})
     result_text = result_text + '\n\n'
     for text, value in sorted_dict.items():
@@ -970,7 +972,7 @@ async def goals_putin_why_still_belive(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Расскажи 👌"), тstate=TrueGoalsState.final, flags=flags)
+@router.message((F.text == "Расскажи 👌"), state=TrueGoalsState.final, flags=flags)
 async def goals_bad_tzar_bad(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'goals_bad_tzar_bad'})
     nmarkup = ReplyKeyboardBuilder()
