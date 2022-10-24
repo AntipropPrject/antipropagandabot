@@ -778,7 +778,7 @@ async def goals_how_many_mobs_result(message: Message, state: FSMContext):
 
     m_all = await mongo_count_docs('database', 'statistics_new', {'goals_many_mobs': {'$exists': True}})
     m_300 = await mongo_count_docs('database', 'statistics_new',
-                                    {'goals_many_mobs': "Около 300 тысяч, как и обещали 👌"})
+                                   {'goals_many_mobs': "Около 300 тысяч, как и обещали 👌"})
     m_less = await mongo_count_docs('database', 'statistics_new',
                                     {'goals_many_mobs': "Меньше 300 тыс. человек 🔻"})
     m_more = await mongo_count_docs('database', 'statistics_new', {'goals_many_mobs': "Больше 300 тыс. человек 🔺"})
@@ -970,8 +970,7 @@ async def goals_putin_why_still_belive(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Расскажи 👌") | (F.text == "Мне это не интересно, пропустим 👉"),
-                state=TrueGoalsState.final, flags=flags)
+@router.message((F.text == "Расскажи 👌"), тstate=TrueGoalsState.final, flags=flags)
 async def goals_bad_tzar_bad(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'goals_bad_tzar_bad'})
     nmarkup = ReplyKeyboardBuilder()
@@ -979,7 +978,8 @@ async def goals_bad_tzar_bad(message: Message):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text == "Давай 🪖"), state=TrueGoalsState.final, flags=flags)
+@router.message(((F.text == "Давай 🪖") | (F.text == "Мне это не интересно, пропустим 👉")), state=TrueGoalsState.final,
+                flags=flags)
 async def goals_putin_not_a_sport(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'goals_putin_not_a_sport'})
     nmarkup = ReplyKeyboardBuilder()
