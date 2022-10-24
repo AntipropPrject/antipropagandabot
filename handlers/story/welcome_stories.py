@@ -324,26 +324,23 @@ async def start_continue_or_peace_results(message: Message, state: FSMContext):
                                 value=message.text)
     await poll_write(f'Usrs: {message.from_user.id}: Start_answers: NewPolitList:', message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'start_continue_or_peace_results'})
-    try:
-        client = all_data().get_mongo()
-        database = client.database
-        collection = database['statistics_new']
-        war = await collection.count_documents({'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'})
-        stop_war = await collection.count_documents(
-            {'start_continue_or_peace_results': 'Переходить к мирным переговорам 🕊'})
-        dont_know = await collection.count_documents({'start_continue_or_peace_results': 'Затрудняюсь ответить 🤷‍♀️'})
-        all_people = war + stop_war + dont_know
-        text = text.replace('XX', f"{(round(war / all_people * 100, 1) if all_people > 0 else 'N/A')}")
-        text = text.replace('YY', f"{(round(stop_war / all_people * 100, 1) if all_people > 0 else 'N/A')}")
-        text = text.replace('ZZ', f"{(round(dont_know / all_people * 100, 1) if all_people > 0 else 'N/A')}")
-    except:
-        text = text.replace('XX', 'N/A')
-        text = text.replace('YY', 'N/A')
-        text = text.replace('ZZ', 'N/A')
+
+    war = await mongo_count_docs('database', 'statistics_new',
+                                 {'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'})
+    stop_war = await mongo_count_docs('database', 'statistics_new',
+                                      {'start_continue_or_peace_results': 'Переходить к мирным переговорам 🕊'})
+    dont_know = await mongo_count_docs('database', 'statistics_new',
+                                       {'start_continue_or_peace_results': 'Затрудняюсь ответить 🤷‍♀️'})
+    all_people = war + stop_war + dont_know
+
+    txt = CoolPercReplacer(text, all_people)
+    txt.replace('XX', war)
+    txt.replace('YY', stop_war)
+    txt.replace('ZZ', dont_know)
     await state.set_state(start_dialog.ask_1)
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Задавай 👌"))
-    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+    await message.answer(txt(), disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
 @router.message(start_dialog.ask_1, (F.text == "Задавай 👌"), flags=flags)
@@ -383,25 +380,23 @@ async def start_now_you_putin_results(message: Message, bot: Bot):
         await ref_spy_sender(bot, message.from_user.id, parent_text,
                              {'[first_q]': user_answers[0], '[second_q]': user_answers[1], '[polit_status]': status})
 
+    war = await mongo_count_docs('database', 'statistics_new',
+                                 {'start_now_you_putin_results': 'Начну военную операцию ⚔️'})
+    stop_war = await mongo_count_docs('database', 'statistics_new',
+                                      {'start_now_you_putin_results': 'Не стану этого делать 🕊'})
+    hz = await mongo_count_docs('database', 'statistics_new',
+                                {'start_now_you_putin_results': 'Затрудняюсь  ответить  🤷‍♀️'})
+    all_people = war + stop_war + hz
+
     text = await sql_safe_select('text', 'texts', {'name': 'start_now_you_putin_results'})
-    try:
-        client = all_data().get_mongo()
-        database = client.database
-        collection = database['statistics_new']
-        war = await collection.count_documents({'start_now_you_putin_results': 'Начну военную операцию ⚔️'})
-        stop_war = await collection.count_documents({'start_now_you_putin_results': 'Не стану этого делать 🕊'})
-        hz = await collection.count_documents({'start_now_you_putin_results': 'Затрудняюсь  ответить  🤷‍♀️'})
-        all_people = war + stop_war + hz
-        text = text.replace('XX', f"{(round(war / all_people * 100, 1) if all_people > 0 else 'N/A')}")
-        text = text.replace('YY', f"{(round(stop_war / all_people * 100, 1) if all_people > 0 else 'N/A')}")
-        text = text.replace('ZZ', f"{(round(hz / all_people * 100, 1) if all_people > 0 else 'N/A')}")
-    except:
-        text = text.replace('XX', 'N/A')
-        text = text.replace('YY', 'N/A')
-        text = text.replace('ZZ', 'N/A')
+    txt = CoolPercReplacer(text, all_people)
+    txt.replace('XX', war)
+    txt.replace('YY', stop_war)
+    txt.replace('ZZ', hz)
+
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Давай посмотрим 👌"))
-    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+    await message.answer(txt(), disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text == "Давай посмотрим 👌"), flags=flags)
@@ -418,6 +413,7 @@ async def start_donbas_OOH(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'start_donbas_OOH'})
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Продолжим  👌"))
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='start_donbas_results', value=message.text)
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
@@ -425,25 +421,22 @@ async def start_donbas_OOH(message: Message):
 async def start_donbas_results(message: Message):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='start_donbas_results',
                                 value=message.text)
+
+    knew = await mongo_count_docs('database', 'statistics_new', {'start_donbas_results': 'Знал(а) ✅'})
+    dont_knew = await mongo_count_docs('database', 'statistics_new', [{'start_donbas_results': 'Не знал(а) ❌'},
+                                                                      {'start_donbas_results': "Докажи 🤔"}])
+    all_people = knew + dont_knew
+
     text = await sql_safe_select('text', 'texts', {'name': 'start_donbas_results'})
-    try:
-        client = all_data().get_mongo()
-        database = client.database
-        collection = database['statistics_new']
-        knew = await collection.count_documents({'start_donbas_results': 'Знал(а) ✅'})
-        dont_knew = await collection.count_documents({'start_donbas_results': 'Не знал(а) ❌'})
-        all_people = knew + dont_knew
-        text = text.replace('XX', f"{(round(knew / all_people * 100, 1) if all_people > 0 else 'N/A')}")
-        text = text.replace('YY', f"{(round(dont_knew / all_people * 100, 1) if all_people > 0 else 'N/A')}")
-    except Exception as e:
-        print(e)
-        text = text.replace('XX', 'N/A')
-        text = text.replace('YY', 'N/A')
+    txt = CoolPercReplacer(text, all_people)
+    txt.replace('XX', knew)
+    txt.replace('YY', dont_knew)
+
     await redis_just_one_write(f'Usrs: {message.from_user.id}: StartDonbas:', message.text)
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Продолжай ⌛️"))
     await simple_media(message, 'start_donbas_results', nmarkap.as_markup(resize_keyboard=True),
-                       custom_caption=text)
+                       custom_caption=txt())
 
 
 @router.message((F.text == "Продолжай ⌛️"), flags=flags)
