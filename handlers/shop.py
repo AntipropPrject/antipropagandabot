@@ -1,5 +1,6 @@
 import datetime
 import re
+import time
 
 from aiogram import Router, F, Bot
 from aiogram import types
@@ -195,6 +196,7 @@ async def shop_bucket(message: types.Message, state: FSMContext):
         asset = await sql_safe_select("t_id", "assets", {"name": tag})
         asset_list.append(InputMediaPhoto(media=asset))
     try:
+        time.sleep(3)
         await message.answer_media_group(asset_list)
     except Exception as e:
         print(e)
