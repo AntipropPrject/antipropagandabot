@@ -6,6 +6,7 @@ from psycopg2 import sql
 from bata import all_data
 from data_base.connect_pool import get_cursor
 from log import logg
+from resources.variables import release_date
 
 """^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^PostgreSQL^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"""
 
@@ -529,6 +530,7 @@ async def mongo_count_docs(database: str, collection: str, conditions: dict | li
             a += await collection.count_documents(d)
         return a
     elif isinstance(conditions, dict):
+        conditions.update({'datetime': {"$gte": release_date['v3']}})
         return await collection.count_documents(conditions)
 
 
