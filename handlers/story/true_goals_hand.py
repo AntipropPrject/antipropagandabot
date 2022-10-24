@@ -18,6 +18,7 @@ from handlers.story.nato_hand import nato_start
 from handlers.story.nazi_hand import NaziState, nazi_first_poll
 from handlers.story.power_change_hand import goals_fact_1
 from handlers.story.preventive_strike import prevent_strike_any_brutality
+from keyboards.map_keys import polls_continue_kb
 from middleware.report_ware import Reportware
 from resources.all_polls import welc_message_one
 from resources.variables import mobilisation_date
@@ -259,7 +260,7 @@ async def goals_add_goals_poll(message: Message, state: FSMContext):
     answers = await poll_get(f'Usrs: {message.from_user.id}: TrueGoals: NotChosenFakeGoals:')
     answers.append('Я передумал(а). Не хочу обсуждать ничего из вышеперечисленного.')
     await message.answer_poll(text, answers, allows_multiple_answers=True, is_anonymous=False,
-                              reply_markup=ReplyKeyboardRemove())
+                              reply_markup=polls_continue_kb())
 
 
 @router.poll_answer(state=TrueGoalsState.more_goals_poll, flags=flags)

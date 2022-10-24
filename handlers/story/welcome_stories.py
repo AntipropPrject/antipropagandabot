@@ -28,6 +28,7 @@ async def start_why_belive(message: types.Message):
     text = await sql_safe_select("text", "texts", {"name": "start_why_belive"})
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
+
 @router.message((F.text.contains("Начнём 🇷🇺🇺🇦")), flags=flags)
 async def start_why_communicate(message: Message):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='first_button', value=message.text)
@@ -39,12 +40,14 @@ async def start_why_communicate(message: Message):
     nmarkap.row(types.KeyboardButton(text="Другое 🤔"))
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
+
 @router.message((F.text.contains("Хочу узнать правду")), flags=flags)
 async def start_info_first(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'start_info_first'})
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Хорошо 👌"))
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+
 
 @router.message((F.text.contains("Хочу получить советы")), flags=flags)
 async def start_info_second(message: Message):
@@ -53,6 +56,7 @@ async def start_info_second(message: Message):
     nmarkap.row(types.KeyboardButton(text="Хорошо 👌"))
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
+
 @router.message((F.text.contains("уговорили пообщаться")), flags=flags)
 async def start_info_third(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'start_info_third'})
@@ -60,12 +64,14 @@ async def start_info_third(message: Message):
     nmarkap.row(types.KeyboardButton(text="Хорошо 👌"))
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
+
 @router.message((F.text.contains("Другое 🤔")), flags=flags)
 async def start_info_fourth(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'start_info_fourth'})
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Хорошо 👌"))
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+
 
 @router.message((F.text.contains("Хорошо 👌")), flags=flags)
 async def start_info_fourth(message: Message, state: FSMContext):
@@ -75,6 +81,7 @@ async def start_info_fourth(message: Message, state: FSMContext):
     nmarkap.row(types.KeyboardButton(text="Затрудняюсь ответить 🤷‍♀️"))
     await state.set_state(start_dialog.dont_know_1)
     await simple_media(message, 'start_putin_mobilization', reply_markup=nmarkap.as_markup(resize_keyboard=True))
+
 
 @router.message((F.text.in_({"На частичную мобилизацию 🧍‍♂️", "На общую мобилизацию 🧍‍♂️🧍‍♂️🧍‍♂️",
                              "Затрудняюсь ответить 🤷‍♀️"})), state=start_dialog.dont_know_1, flags=flags)
@@ -99,7 +106,8 @@ async def start_mobilisation_result(message: Message, state: FSMContext):
     await state.set_state(start_dialog.button_next_1)
     await message.answer(txt(), reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
-@router.message((F.text.contains("Продолжим 👌")), state=start_dialog.button_next_1,  flags=flags)
+
+@router.message((F.text.contains("Продолжим 👌")), state=start_dialog.button_next_1, flags=flags)
 async def start_shoigu_loss(message: Message, state: FSMContext):
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Да, доверяю 👍"))
@@ -107,6 +115,7 @@ async def start_shoigu_loss(message: Message, state: FSMContext):
     nmarkap.row(types.KeyboardButton(text="Затрудняюсь ответить 🤷‍♀️"))
     await state.set_state(start_dialog.ask_2)
     await simple_media(message, 'start_shoigu_loss', reply_markup=nmarkap.as_markup(resize_keyboard=True))
+
 
 @router.message((F.text.in_({"Да, доверяю 👍", "Думаю погибло больше ☹️",
                              "Затрудняюсь ответить 🤷‍♀️"})), state=start_dialog.ask_2, flags=flags)
@@ -297,6 +306,7 @@ async def start_key_questions(message: Message):
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Задавай вопросы 👌"))
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+
 
 @router.message((F.text == "Задавай вопросы 👌"), flags=flags)
 async def start_continue_or_peace(message: Message, state: FSMContext):
