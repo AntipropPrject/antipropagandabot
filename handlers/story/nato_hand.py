@@ -17,7 +17,7 @@ from filters.MapFilters import WebPropagandaFilter, PplPropagandaFilter, \
     NotYandexPropagandaFilter
 from filters.isAdmin import IsAdmin
 from handlers.story import true_resons_hand
-from keyboards.map_keys import antip_killme_kb
+from keyboards.map_keys import antip_killme_kb, polls_continue_kb
 from middleware.report_ware import Reportware
 from resources.all_polls import antip_q1_options, antip_q2_options, antip_q3_options, welc_message_one
 from resources.variables import release_date
@@ -56,7 +56,7 @@ async def nato_first_poll(message: Message, bot: Bot, state: FSMContext):
     await message.answer_poll("Сколько раз?",
                               explanation_parse_mode="HTML",
                               options=poll_options, correct_option_id=0, is_anonymous=False, type='quiz',
-                              reply_markup=ReplyKeyboardRemove())
+                              reply_markup=polls_continue_kb())
 
 
 @router.poll_answer(state=Nato_states.first_poll, flags=flags)

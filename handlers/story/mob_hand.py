@@ -8,6 +8,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from bata import all_data
 from bot_statistics.stat import mongo_update_stat_new
 from data_base.DBuse import sql_safe_select, mongo_count_docs
+from keyboards.map_keys import polls_continue_kb
 from resources.all_polls import mob_city, mob_front
 from resources.all_polls import mob_wot_mvps_poll, mob_is_he_insane_poll, mob_laws_lol_poll, \
     mob_street_fighter_poll, mob_why_he_did_it_poll
@@ -46,7 +47,7 @@ async def mob_save_vv_start(message: Message, bot: Bot, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'mob_save_vv_start'})
     await message.answer(text, disable_web_page_preview=True)
     await bot.send_poll(message.from_user.id, 'Где безопаснее?', mob_city, is_anonymous=False,
-                        type='quiz', correct_option_id=0, reply_markup=ReplyKeyboardRemove())
+                        type='quiz', correct_option_id=0, reply_markup=polls_continue_kb())
 
 
 @router.poll_answer(MobState.city_poll)
@@ -74,7 +75,7 @@ async def mob_wot_mvps(message: Message, bot: Bot, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'mob_wot_mvps'})
     await message.answer(text, disable_web_page_preview=True)
     await bot.send_poll(message.from_user.id, 'Кто в большей безопасности от мобилизации?', mob_wot_mvps_poll,
-                        is_anonymous=False, reply_markup=ReplyKeyboardRemove(),
+                        is_anonymous=False, reply_markup=polls_continue_kb(),
                         type='quiz', correct_option_id=0)
 
 
@@ -103,7 +104,7 @@ async def mob_is_he_insane(message: Message, bot: Bot, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'mob_is_he_insane'})
     await message.answer(text, disable_web_page_preview=True)
     await bot.send_poll(message.from_user.id, 'В каком случае?', mob_is_he_insane_poll, is_anonymous=False,
-                        type='quiz', correct_option_id=3, reply_markup=ReplyKeyboardRemove())
+                        type='quiz', correct_option_id=3, reply_markup=polls_continue_kb())
 
 
 @router.poll_answer(MobState.mob_is_he_insane)
@@ -132,7 +133,7 @@ async def mob_laws_lol(message: Message, bot: Bot, state: FSMContext):
     await message.answer(text, disable_web_page_preview=True)
     await bot.send_poll(message.from_user.id, 'Каким образом вручённая повестка имеет юридическую силу?',
                         mob_laws_lol_poll, is_anonymous=False,
-                        type='quiz', correct_option_id=3, reply_markup=ReplyKeyboardRemove())
+                        type='quiz', correct_option_id=3, reply_markup=polls_continue_kb())
 
 
 @router.poll_answer(MobState.mob_laws_lol)
@@ -170,7 +171,7 @@ async def mob_street_fighter(message: Message, bot: Bot, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'mob_street_fighter'})
     await message.answer(text, disable_web_page_preview=True)
     await bot.send_poll(message.from_user.id, 'Что делать?',
-                        mob_street_fighter_poll, reply_markup=ReplyKeyboardRemove(), is_anonymous=False,
+                        mob_street_fighter_poll, reply_markup=polls_continue_kb(), is_anonymous=False,
                         type='regular')
 
 
@@ -212,7 +213,7 @@ async def mob_why_he_did_it(message: Message, bot: Bot, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'mob_why_he_did_it'})
     await message.answer(text, disable_web_page_preview=True)
     await bot.send_poll(message.from_user.id, 'Что его ждёт, если не пойти в военкомат?',
-                        mob_why_he_did_it_poll, reply_markup=ReplyKeyboardRemove(), is_anonymous=False,
+                        mob_why_he_did_it_poll, reply_markup=polls_continue_kb(), is_anonymous=False,
                         type='quiz', correct_option_id=2)
 
 
@@ -318,7 +319,7 @@ async def mob_still_human(message: Message, state: FSMContext):
 async def mob_too_late_to_run(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'mob_too_late_to_run'})
     await message.answer(text, disable_web_page_preview=True)
-    await message.answer_poll("Как поступить?", mob_front, is_anonymous=False, reply_markup=ReplyKeyboardRemove())
+    await message.answer_poll("Как поступить?", mob_front, is_anonymous=False, reply_markup=polls_continue_kb())
 
 
 @router.poll_answer(MobState.jail)

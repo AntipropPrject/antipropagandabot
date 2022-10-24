@@ -10,6 +10,7 @@ from data_base.DBuse import poll_write, sql_safe_select, poll_get, redis_delete_
 from filters.MapFilters import DonbassOptionsFilter, WarGoals
 from handlers.story.true_resons_hand import TruereasonsState
 from keyboards.main_keys import filler_kb
+from keyboards.map_keys import polls_continue_kb
 from middleware.report_ware import Reportware
 from resources.all_polls import donbass_first_poll, welc_message_one
 from states.donbass_states import donbass_state
@@ -69,7 +70,7 @@ async def donbas_args_poll(message: Message):
 @router.message(donbass_state.poll, (F.text == 'Продолжить'), flags=flags)
 async def poll_filler(message: types.Message):
     await message.answer('Чтобы продолжить — отметьте варианты выше и нажмите «ГОЛОСОВАТЬ» или «VOTE»',
-                         reply_markup=ReplyKeyboardRemove())
+                         reply_markup=polls_continue_kb())
 
 
 @router.poll_answer(state=donbass_state.poll)

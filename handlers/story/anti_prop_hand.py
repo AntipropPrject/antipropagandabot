@@ -17,7 +17,7 @@ from filters.MapFilters import WebPropagandaFilter, PplPropagandaFilter, \
     NotYandexPropagandaFilter
 from filters.isAdmin import IsAdmin
 from handlers.story import true_resons_hand
-from keyboards.map_keys import antip_killme_kb
+from keyboards.map_keys import antip_killme_kb, polls_continue_kb
 from middleware.report_ware import Reportware
 from resources.all_polls import antip_q1_options, antip_q2_options, antip_q3_options
 from resources.variables import release_date
@@ -727,7 +727,7 @@ async def antip_funny_propaganda(message: Message, state: FSMContext):
 async def antip_quiz_1(message: Message, bot: Bot):
     await bot.send_poll(message.from_user.id, 'Сколько?', antip_q1_options,
                         is_anonymous=False, correct_option_id=3, type='quiz',
-                        reply_markup=ReplyKeyboardRemove())
+                        reply_markup=polls_continue_kb())
 
 
 @router.poll_answer(state=propaganda_victim.quiz_1, flags=flags)
@@ -763,10 +763,10 @@ async def antip_how_much_they_lie(message: Message, state: FSMContext):
 
 
 @router.message((F.text == "Покажи варианты ✍️"), state=propaganda_victim.quiz_2, flags=flags)
-async def antip_quiz_1(message: Message, bot: Bot):
+async def antip_quiz_2(message: Message, bot: Bot):
     await bot.send_poll(message.from_user.id, 'Сколько?', antip_q2_options,
                         is_anonymous=False, correct_option_id=3, type='quiz',
-                        reply_markup=ReplyKeyboardRemove())
+                        reply_markup=polls_continue_kb())
 
 
 @router.poll_answer(state=propaganda_victim.quiz_2, flags=flags)
@@ -814,7 +814,7 @@ async def antip_what_they_told_us(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_what_they_told_us'})
     await message.answer(text, disable_web_page_preview=True)
     await message.answer_poll('Какие?', antip_q3_options, allows_multiple_answers=True, is_anonymous=False,
-                              reply_markup=ReplyKeyboardRemove())
+                              reply_markup=polls_continue_kb())
 
 
 @router.poll_answer(state=propaganda_victim.quiz_3, flags=flags)
