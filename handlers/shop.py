@@ -469,7 +469,7 @@ async def shop_bucket(message: types.Message, bot: Bot, state: FSMContext):
     await state.set_state(TrueGoalsState.main)
     chat_id = message.from_user.id
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Понятно 👌"))
+    nmarkup.row(types.KeyboardButton(text="Понятно..."))
     text = await sql_safe_select('text', 'texts', {'name': 'shop_sorry_no_more'})
     await bot.send_message(
         text=text,
