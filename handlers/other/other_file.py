@@ -21,6 +21,7 @@ router = Router()
                                                welcome_states.start_dialog.dialogue_7,
                                                propaganda_victim.quiz_1,
                                                propaganda_victim.quiz_2,
+                                               propaganda_victim.quiz_3,
                                                MobState.mob_wot_mvps,
                                                MobState.nazi_poll,
                                                MobState.mob_is_he_insane,
