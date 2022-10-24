@@ -10,7 +10,8 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
 from data_base.DBuse import sql_safe_select, redis_just_one_write, redis_just_one_read, \
-    mongo_select_info, mongo_update_end, del_key, poll_write, redis_delete_from_list, poll_get, mongo_count_docs
+    mongo_select_info, mongo_update_end, del_key, poll_write, redis_delete_from_list, poll_get, mongo_count_docs, \
+    mongo_easy_upsert
 from filters.MapFilters import FinalPolFiler
 from handlers.story.main_menu_hand import mainmenu_really_menu
 from handlers.story.mob_hand import mob_lifesaver
@@ -631,7 +632,7 @@ async def stopwar_timer(message: Message, bot: Bot):
     nmarkup.row(types.KeyboardButton(text="Какие советы? 🤔"))
     nmarkup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
     user_info = await mongo_select_info(message.from_user.id)
-    if user_info['datetime_end'] is None:
+    if user_info['timer'] is False:
         sec = 299
         markup = ReplyKeyboardBuilder()
         markup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
@@ -653,6 +654,7 @@ async def stopwar_timer(message: Message, bot: Bot):
             await bot.edit_message_text(chat_id=message.from_user.id, message_id=m_id, text=f'{sec_t}')
             await asyncio.sleep(1)
             sec -= 1
+        await mongo_easy_upsert('database', 'userinfo', {'_id': int(message.from_user.id)}, {'timer': True})
         await mongo_update_stat(message.from_user.id, 'end')
         await asyncio.sleep(1)
         await del_key(f"Current_users: {message.from_user.id}")
