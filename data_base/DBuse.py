@@ -174,6 +174,14 @@ async def sql_games_row_selecter(tablename: str, row: int):
                                              left outer join texts on {tablename}.text_name = texts.name)
                                              AS sub WHERE row_number = {row}"""))[0]
             keys = ('id', 'plot_media', 'plot_text', 'belivers', 'nonbelivers', 'ROW_NUMBER')
+        elif tablename == 'strikememes':
+            data = (await data_getter(f"""
+                                    SELECT id, t_id, funny_reaction, positive_reaction, negative_reaction FROM (
+                                    SELECT row_number() over (order by id), * from strikememes
+                                    left join assets a on a.name = strikememes.asset_name
+                                    ) as sub WHERE sub.row_number = {row}
+                                    """))[0]
+            keys = ('id', 't_id', 'funny_reaction', 'positive_reaction', 'negative_reaction')
         datadict = dict(zip(keys, data))
         return datadict
     except IndexError:
@@ -320,12 +328,12 @@ async def mongo_update_news(m_id: str, new_m_id: str, new_caption: str, coll=Non
         database = client.database
         if 'main' in coll:
             collection = database['spam_news_main']
-            await collection.replace_one({'media': {'$regex': m_id}}, {"media": str(new_m_id), "caption": new_caption},
-                                         True)
+            await collection.update_one({'media': {'$regex': m_id}}, {'$set': {"media": str(new_m_id),
+                                                                               "caption": new_caption}})
         elif 'actu' in coll:
             collection = database['spam_actual_news']
-            await collection.replace_one({'media': {'$regex': m_id}}, {"media": str(new_m_id), "caption": new_caption},
-                                         True)
+            await collection.update_one({'media': {'$regex': m_id}}, {'$set': {"media": str(new_m_id),
+                                                                               "caption": new_caption}})
         print('Update')
     except Exception as error:
         await logg.get_error(f"mongo update | {error}", __file__)
@@ -340,7 +348,7 @@ async def mongo_user_info(tg_id, username):
         database = client.database
         collection = database['userinfo']
         user_answer = {'_id': int(tg_id), 'username': str(username), 'datetime': f'{today}_{time}',
-                       'datetime_end': None, 'viewed_news': []}
+                       'datetime_end': None, 'viewed_news': [], 'timer': False}
         await collection.insert_one(user_answer)
     except Exception as error:
         pass
@@ -648,7 +656,6 @@ async def redis_delete_first_item(key):
 async def redis_write(key, value):
     try:
         all_data().get_data_red().lpush(key, value)
-
     except Exception as error:
         await logg.get_error(f"redis write | {error}", __file__)
 
@@ -679,3 +686,8 @@ async def redis_check(key):
         return all_data().get_data_red().exists(key)
     except Exception as error:
         await logg.get_error(f"{error}", __file__)
+
+
+def add_current_user(user_id: int):
+    redis = all_data().get_data_red()
+    redis.set(f"Current_users: {user_id}", datetime.now().strftime("%m/%d/%Y %H:%M:%S"), 597602)

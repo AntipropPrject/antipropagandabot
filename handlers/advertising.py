@@ -5,21 +5,21 @@ from aiogram import Router
 from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError
 
 from bata import all_data
-from data_base.DBuse import mongo_update_viewed_news, mongo_pop_news, mongo_update
+from data_base.DBuse import mongo_update_viewed_news, mongo_pop_news, mongo_update, sql_safe_select, mongo_easy_upsert, \
+    redis_just_one_write, redis_just_one_read, mongo_update_end
 from log.logg import send_to_chat, get_logger
 
 router = Router()
 data = all_data()
 bot = data.get_bot()
 
-
 logger = get_logger('SPAM')
 
 
 async def start_spam(datet):
+    await redis_just_one_write('adversting: spam_count:', '0')
     asyncio.create_task(send_to_chat("Рассылка началась"))
     logger.info("Функция рассылки запущена")
-    print('start spam')
     date = datetime.strptime(datet, '%Y.%m.%d %H:%M')
     client = data.get_mongo()
     database = client['database']
@@ -37,22 +37,26 @@ async def start_spam(datet):
     async for n in main_news_base:
         main_news_list.append(n)
         main_news_ids.append(n['_id'])
-    count = 0
     logger.info('Начало рассылки')
+    start_datetime_spam = datetime.now()
     async for user in userinfo.find({'datetime_end': {'$lt': datetime.utcnow() - timedelta(days=1)}}):
-        if all_data().get_data_red().get(f"user_last_answer: {user['_id']}:") != '1':
-            asyncio.create_task(news_for_user(user, main_news_list, today_actual, main_news_ids))
-            count += 1
-        else:
-            asyncio.create_task(latecomers(user, main_news_list, today_actual, main_news_ids))
-            count += 1
+        if user.get('is_ban') is not True:
+            if all_data().get_data_red().get(f"user_last_answer: {user['_id']}:") != '1':
+                asyncio.create_task(news_for_user(user, main_news_list, today_actual, main_news_ids))
+            else:
+                asyncio.create_task(latecomers(user, main_news_list, today_actual, main_news_ids))
         await asyncio.sleep(0.033)
+
     try:
         asyncio.create_task(mongo_pop_news(m_id=today_actual['media'], coll='actu'))
     except:
         pass
+    end_datetime_spam = datetime.now()
+    result_spam_time = end_datetime_spam - start_datetime_spam
+    count = int(await redis_just_one_read('adversting: spam_count:'))
     logger.info(f'Рассылка завершена, сообщение получили {count}')
-    asyncio.create_task(send_to_chat(f"Рассылка завершена\n\nБыло отправлено: +-{count} сообщений"))
+    asyncio.create_task(send_to_chat(f"Рассылка завершена\n\nБыло отправлено: +-{count} сообщений\n"
+                                     f"Время рассылки: {result_spam_time}"))
 
 
 async def latecomers(user, main_news_base, today_actual, main_news_ids):
@@ -80,11 +84,14 @@ async def news_for_user(user, main_news_base, today_actual, main_news_ids):
                     await mongo_update_viewed_news(user_id, main_news['_id'])
 
         else:
-            print('Главные новости для пользователя кончились, а актуальной не было')
+            #print('Главные новости для пользователя кончились, а актуальной не было')
+            pass
 
 
 async def send_spam(user_id, caption, media_id=None):
     try:
+        count = int(await redis_just_one_read('adversting: spam_count:'))
+        await redis_just_one_write('adversting: spam_count:', f'{count+1}')
         if caption and media_id is None:
             await bot.send_message(chat_id=int(user_id), text=caption)
         else:
@@ -98,7 +105,43 @@ async def send_spam(user_id, caption, media_id=None):
                     await bot.send_video(chat_id=int((user_id)), video=(media_id))
                 except TelegramBadRequest:
                     await bot.send_photo(chat_id=int(user_id), photo=(media_id))
+
     except TelegramForbiddenError:
         await mongo_update(int(user_id), 'userinfo', 'is_ban')
-        print(f"ПОЛЬЗОВАТЕЛЬ {user_id} -- Заблокировал бота")
 
+
+async def user_returner():
+    client = all_data().get_mongo()
+    redis = all_data().get_data_red()
+    database = client['database']
+    collection = database['userinfo']
+    cursor = collection.find({'datetime_end': None})
+    list_of_users = await cursor.to_list(length=None)
+    for user in list_of_users:
+        redis.set(f'Must_return_list: {user["_id"]}:', user['datetime'])
+
+
+async def return_spam_send():
+    asyncio.create_task(return_spam_send_task(datetime.now()))
+
+
+async def return_spam_send_task(time_now: datetime):
+    redis = all_data().get_data_red()
+    for key in redis.scan_iter(f"Current_users:*"):
+        user_time = datetime.strptime(redis.get(key), '%m/%d/%Y %H:%M:%S')
+        past_time = time_now - user_time
+        user = int(key.strip('Current_users: '))
+        try:
+            if timedelta(hours=22) <= past_time <= timedelta(hours=22, seconds=1):
+                text = await sql_safe_select('text', 'texts', {'name': 'come_back_22'})
+                await bot.send_message(user, text)
+            elif timedelta(hours=46) <= past_time <= timedelta(hours=46, seconds=1):
+                text = await sql_safe_select('text', 'texts', {'name': 'come_back_46'})
+                await bot.send_message(user, text)
+            elif timedelta(hours=166) <= past_time <= timedelta(hours=166, seconds=1):
+                text = await sql_safe_select('text', 'texts', {'name': 'come_back_166'})
+                await mongo_update_end(user)
+                await bot.send_message(user, text)
+        except TelegramForbiddenError:
+            redis.delete(key)
+            await mongo_easy_upsert('database', 'userinfo', {'_id': user}, {'is_ban': True})

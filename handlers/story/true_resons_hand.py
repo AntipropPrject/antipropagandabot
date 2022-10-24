@@ -11,10 +11,10 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
 from data_base.DBuse import data_getter, sql_safe_select, redis_just_one_write, poll_write, mongo_game_answer
 from data_base.DBuse import redis_delete_from_list
-from filters.MapFilters import OperationWar, WarReason, PoliticsFilter
-from handlers.story import anti_prop_hand
+from filters.MapFilters import PoliticsFilter, OperationWar, WarReason
 from handlers.story.nazi_hand import NaziState
-from handlers.story.preventive_strike import PreventStrikeState
+from middleware.report_ware import Reportware
+from states.preventstrike_states import PreventStrikeState
 from handlers.story.putin_hand import StateofPutin
 from resources.all_polls import welc_message_one
 from states.donbass_states import donbass_state
@@ -22,6 +22,7 @@ from utilts import simple_media
 
 
 class TruereasonsState(StatesGroup):
+    after_game = State()
     main = State()
     opp_root = State()
     game = State()
@@ -31,6 +32,7 @@ class TruereasonsState(StatesGroup):
 flags = {"throttling_key": "True"}
 router = Router()
 router.message.filter(state=TruereasonsState)
+router.message.middleware(Reportware())
 
 
 @router.message(PoliticsFilter(title='Сторонник войны'), ((F.text.contains('нтересно')) | (F.text.contains('скучно'))),

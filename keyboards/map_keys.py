@@ -21,3 +21,16 @@ def antip_killme_kb():
     nmarkup.row(types.KeyboardButton(text="Я и так знал(а), что по ТВ врут 🤨"))
     nmarkup.adjust(2, 2, 1, 1)
     return nmarkup.as_markup(resize_keyboard=True)
+
+
+def stopwar_lecture_kb():
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Ну, допустим, проскакивала мысль, и что? 🤔"))
+    nmarkup.row(types.KeyboardButton(text="Ни за что! 🙅‍♂️"))
+    return nmarkup.as_markup(resize_keyboard=True)
+
+
+def polls_continue_kb():
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Продолжить"))
+    return nmarkup.as_markup(resize_keyboard=True)

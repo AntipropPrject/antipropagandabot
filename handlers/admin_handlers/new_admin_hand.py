@@ -240,6 +240,9 @@ async def sadmins(message: Message, state: FSMContext):
             media = spam["media"]
             nmarkup.button(text='Удалить', callback_data=f'del_{media[:47]}_actu')
             nmarkup.button(text='Редактировать', callback_data=f'red_{media[:47]}_actu')
+            print(count_for_button)
+            print(count)
+            count += 1
             if count == count_for_button:
                 nmarkup.button(text='Добавить новость', callback_data=f'add_actual_news')
             nmarkup.adjust(2)
@@ -306,12 +309,13 @@ async def mass_spam(message: Message, state: FSMContext):
         await state.update_data(spam_media=message.photo[0].file_id)
     if message.video:
         await state.update_data(spam_media=message.video.file_id)
-    await message.answer("Подтвердите сообщение.\n\n<b>ВНИМАНИЕ: ПОСЛЕ ПОДТВЕРЖДЕНИЯ ОНО ОТПРАВИТСЯ ВСЕМ "
-                         "ПОЛЬЗОВАТЕЛЯМ БОТА</b>", reply_markup=markup.as_markup(resize_keyboard=True))
-    if message.photo or message.video:
-        media = (await state.get_data())['spam_media']
-        text = message.html_text if message.html_text else None
-        await game_answer(message, media, text)
+    await message.answer("Подтвердите сообщение.\n\n🅰️<b>ВНИМАНИЕ: ПОСЛЕ ПОДТВЕРЖДЕНИЯ ОНО ОТПРАВИТСЯ ВСЕМ "
+                         "ПОЛЬЗОВАТЕЛЯМ БОТА\n\n🅱️Также обратите внимание, что для сообщения ниже выключено"
+                         " превью для ссылок, но для сообщения в рассылке превью включено! </b>",
+                         reply_markup=markup.as_markup(resize_keyboard=True))
+    media = (await state.get_data())['spam_media'] if message.photo or message.video else None
+    text = message.html_text if message.html_text else None
+    await game_answer(message, media, text)
 
 
 @router.message(IsSudo(), (F.text == 'Подтвердить'), state=admin.big_spam_confirm)
@@ -460,6 +464,7 @@ async def add_news(message: Message, state: FSMContext):
         date = datetime.strptime(dt_for_spam, '%Y.%m.%d %H:%M')
         await mongo_add_news(media_id, str(caption), date, coll=str(coll))
         coll = data['coll']
+        await state.set_state(admin.spam_menu)
         nmarkup = InlineKeyboardBuilder()
         nmarkup.button(text='Добавить новость', callback_data=str(coll))
         await message.answer("Новость запланирована", reply_markup=await spam_admin_keyboard())
@@ -470,6 +475,7 @@ async def add_news(message: Message, state: FSMContext):
         date = datetime.strptime(dt_for_spam, '%Y.%m.%d %H:%M')
         await mongo_add_news(media_id, str(caption), date, coll=str(coll))
         coll = data['coll']
+        await state.set_state(admin.spam_menu)
         nmarkup = InlineKeyboardBuilder()
         nmarkup.button(text='Добавить новость', callback_data=str(coll))
         await message.answer("Новость запланирована", reply_markup=await spam_admin_keyboard())

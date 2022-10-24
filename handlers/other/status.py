@@ -2,9 +2,11 @@ from aiogram import Router
 from aiogram import types
 
 from filters.filter_status import Status
+from middleware.report_ware import Reportware
 
 flags = {"throttling_key": "True"}
 router = Router()
+router.message.middleware(Reportware())
 
 
 @router.message(Status(), flags=flags)

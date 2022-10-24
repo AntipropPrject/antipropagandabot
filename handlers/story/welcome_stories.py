@@ -1,5 +1,6 @@
 from aiogram import Router, F, Bot
 from aiogram import types
+from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
@@ -8,27 +9,147 @@ from bot_statistics.stat import mongo_update_stat_new
 from data_base.DBuse import poll_write, sql_safe_select, redis_just_one_write, \
     poll_get, redis_just_one_read, mongo_count_docs
 from log.logg import get_logger
+from middleware.report_ware import Reportware
 from states.welcome_states import start_dialog
 from utilts import simple_media, ref_spy_sender, CoolPercReplacer
 
 flags = {"throttling_key": "True"}
 router = Router()
-
-router.message.filter(state=start_dialog.big_story)
+router.message.filter(state=start_dialog)
+router.message.middleware(Reportware())
 logger = get_logger('welcome_stories')
 
 
 @router.message((F.text.contains('верить') | F.text.contains('50 000')), flags=flags)  # А с чего мне тебе верить?
 async def start_why_belive(message: types.Message):
-    await mongo_update_stat_new(tg_id=message.from_user.id, column='first_button', value='А с чего мне тебе верить?')
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='first_button', value=message.text)
     markup = ReplyKeyboardBuilder()
     markup.add(types.KeyboardButton(text="Начнём 🇷🇺🇺🇦"))
     text = await sql_safe_select("text", "texts", {"name": "start_why_belive"})
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.contains('Начнём 🇷🇺🇺🇦')), flags=flags)
-async def start_is_war_bad(message: Message):
+@router.message((F.text.contains("Начнём 🇷🇺🇺🇦")), flags=flags)
+async def start_why_communicate(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='first_button', value=message.text)
+    text = await sql_safe_select('text', 'texts', {'name': 'start_why_communicate'})
+    nmarkap = ReplyKeyboardBuilder()
+    nmarkap.row(types.KeyboardButton(text="Хочу узнать правду о кофликте России и Украины 🇷🇺🇺🇦"))
+    nmarkap.row(types.KeyboardButton(text="Хочу получить советы по поводу мобилизации 🪖"))
+    nmarkap.row(types.KeyboardButton(text="Да просто знакомые уговорили пообщаться 🤷‍♂️"))
+    nmarkap.row(types.KeyboardButton(text="Другое 🤔"))
+    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+
+
+@router.message((F.text.contains("Хочу узнать правду")), flags=flags)
+async def start_info_first(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'start_info_first'})
+    nmarkap = ReplyKeyboardBuilder()
+    nmarkap.row(types.KeyboardButton(text="Хорошо 👌"))
+    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+
+
+@router.message((F.text.contains("Хочу получить советы")), flags=flags)
+async def start_info_second(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'start_info_second'})
+    nmarkap = ReplyKeyboardBuilder()
+    nmarkap.row(types.KeyboardButton(text="Хорошо 👌"))
+    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+
+
+@router.message((F.text.contains("уговорили пообщаться")), flags=flags)
+async def start_info_third(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'start_info_third'})
+    nmarkap = ReplyKeyboardBuilder()
+    nmarkap.row(types.KeyboardButton(text="Хорошо 👌"))
+    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+
+
+@router.message((F.text.contains("Другое 🤔")), flags=flags)
+async def start_info_fourth(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'start_info_fourth'})
+    nmarkap = ReplyKeyboardBuilder()
+    nmarkap.row(types.KeyboardButton(text="Хорошо 👌"))
+    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+
+
+@router.message((F.text.contains("Хорошо 👌")), flags=flags)
+async def start_info_fourth(message: Message, state: FSMContext):
+    nmarkap = ReplyKeyboardBuilder()
+    nmarkap.row(types.KeyboardButton(text="На частичную мобилизацию 🧍‍♂️"))
+    nmarkap.row(types.KeyboardButton(text="На общую мобилизацию 🧍‍♂️🧍‍♂️🧍‍♂️"))
+    nmarkap.row(types.KeyboardButton(text="Затрудняюсь ответить 🤷‍♀️"))
+    await state.set_state(start_dialog.dont_know_1)
+    await simple_media(message, 'start_putin_mobilization', reply_markup=nmarkap.as_markup(resize_keyboard=True))
+
+
+@router.message((F.text.in_({"На частичную мобилизацию 🧍‍♂️", "На общую мобилизацию 🧍‍♂️🧍‍♂️🧍‍♂️",
+                             "Затрудняюсь ответить 🤷‍♀️"})), state=start_dialog.dont_know_1, flags=flags)
+async def start_mobilisation_result(message: Message, state: FSMContext):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='start_mobilisation', value=message.text)
+    text = await sql_safe_select('text', 'texts', {'name': 'start_mobilisation_result'})
+
+    m_all = await mongo_count_docs('database', 'statistics_new', {'start_mobilisation': {'$exists': True}})
+    m_part = await mongo_count_docs('database', 'statistics_new',
+                                    {'start_mobilisation': "На частичную мобилизацию 🧍‍♂️"})
+    m_full = await mongo_count_docs('database', 'statistics_new',
+                                    {'start_mobilisation': "На общую мобилизацию 🧍‍♂️🧍‍♂️🧍‍♂️"})
+    a_idk = await mongo_count_docs('database', 'statistics_new', {'start_mobilisation': "Затрудняюсь ответить 🤷‍♀️"})
+
+    txt = CoolPercReplacer(text, m_all)
+    txt.replace("AA", m_part)
+    txt.replace("BB", m_full)
+    txt.replace("CC", a_idk)
+
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Продолжим 👌"))
+    await state.set_state(start_dialog.button_next_1)
+    await message.answer(txt(), reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message((F.text.contains("Продолжим 👌")), state=start_dialog.button_next_1, flags=flags)
+async def start_shoigu_loss(message: Message, state: FSMContext):
+    nmarkap = ReplyKeyboardBuilder()
+    nmarkap.row(types.KeyboardButton(text="Да, доверяю 👍"))
+    nmarkap.row(types.KeyboardButton(text="Думаю погибло больше ☹️"))
+    nmarkap.row(types.KeyboardButton(text="Затрудняюсь ответить 🤷‍♀️"))
+    await state.set_state(start_dialog.ask_2)
+    await simple_media(message, 'start_shoigu_loss', reply_markup=nmarkap.as_markup(resize_keyboard=True))
+
+
+@router.message((F.text.in_({"Да, доверяю 👍", "Думаю погибло больше ☹️",
+                             "Затрудняюсь ответить 🤷‍♀️"})), state=start_dialog.ask_2, flags=flags)
+async def start_result_loss(message: Message, state: FSMContext):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='start_result_loss', value=message.text)
+    text = await sql_safe_select('text', 'texts', {'name': 'start_result_loss'})
+
+    m_all = await mongo_count_docs('database', 'statistics_new', {'start_result_loss': {'$exists': True}})
+    m_part = await mongo_count_docs('database', 'statistics_new', {'start_result_loss': "Да, доверяю 👍"})
+    m_full = await mongo_count_docs('database', 'statistics_new', {'start_result_loss': "Думаю погибло больше ☹️"})
+    a_idk = await mongo_count_docs('database', 'statistics_new', {'start_result_loss': "Затрудняюсь ответить 🤷‍♀️"})
+
+    txt = CoolPercReplacer(text, m_all)
+    txt.replace("AA", m_part)
+    txt.replace("BB", m_full)
+    txt.replace("CC", a_idk)
+    await state.set_state(start_dialog.button_next_2)
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Давай 👌"))
+    nmarkup.row(types.KeyboardButton(text="Что такое пропаганда? 🤔"))
+    await message.answer(txt(), reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+
+
+@router.message(start_dialog.button_next_2, (F.text.contains('такое пропаганда')), flags=flags)
+async def start_what_is_prop(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'start_what_is_prop'})
+    nmarkap = ReplyKeyboardBuilder()
+    nmarkap.row(types.KeyboardButton(text="Давай 👌"))
+    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+
+
+@router.message(start_dialog.button_next_2, (F.text.contains('Давай 👌')), flags=flags)
+async def start_is_war_bad(message: Message, state: FSMContext):
+    await state.set_state(start_dialog.big_story)
     text = await sql_safe_select('text', 'texts', {'name': 'start_is_war_bad'})
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Какой феномен? 🤔"))
@@ -144,11 +265,11 @@ async def start_are_you_ready(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'start_are_you_ready'})
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Продолжим 👌"))
-    nmarkap.row(types.KeyboardButton(text="Дай ссылку на лекцию про моральную сторону убийства 🔫"))
+    nmarkap.row(types.KeyboardButton(text="Дай ссылку на лекцию про моральную сторону убийства 🛤"))
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Дай ссылку на лекцию про моральную сторону убийства 🔫"), flags=flags)
+@router.message((F.text == "Дай ссылку на лекцию про моральную сторону убийства 🛤"), flags=flags)
 async def start_good_lecture(message: Message):
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Продолжим 👌"))
@@ -180,52 +301,27 @@ async def start_red_pill(message: Message):
 
 
 @router.message((F.text == 'Я понимаю, готов(а) продолжить 👌'), flags=flags)
-async def start_dumb_dam(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'start_dumb_dam'})
-    nmarkap = ReplyKeyboardBuilder()
-    nmarkap.row(types.KeyboardButton(text="Ничего не  буду делать  🙅‍♂️"))
-    nmarkap.add(types.KeyboardButton(text="Взорву дамбу 💥"))
-    await simple_media(message, "start_dumb_dam", nmarkap.as_markup(resize_keyboard=True))
-
-
-@router.message(F.text.in_({"Ничего не  буду делать  🙅‍♂️", "Взорву дамбу 💥"}), flags=flags)
-async def start_dam_results(message: Message):
-    await mongo_update_stat_new(tg_id=message.from_user.id, column='start_dam_results',
-                                value=message.text)
-    text = await sql_safe_select('text', 'texts', {'name': 'start_dam_results'})
-
-    try:
-        client = all_data().get_mongo()
-        database = client.database
-        collection = database['statistics_new']
-        passive = await collection.count_documents({'start_dam_results': 'Ничего не  буду делать  🙅‍♂️'})
-        active = await collection.count_documents({'start_dam_results': 'Взорву дамбу 💥'})
-        all_people = passive + active
-        text = text.replace('XX', f"{(round(passive / all_people * 100, 1) if all_people > 0 else 'N/A')}")
-        text = text.replace('YY', f"{(round(active / all_people * 100, 1) if all_people > 0 else 'N/A')}")
-    except Exception as e:
-        print(e)
-        text = text.replace('XX', 'N/A')
-        text = text.replace('YY', 'N/A')
-
+async def start_key_questions(message: Message):
+    text = await sql_safe_select('text', 'texts', {'name': 'start_key_questions'})
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Задавай вопросы 👌"))
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text == "Задавай вопросы 👌"), flags=flags)
-async def start_continue_or_peace(message: Message):
+async def start_continue_or_peace(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'start_continue_or_peace'})
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Продолжать военную операцию ⚔️"))
     nmarkap.row(types.KeyboardButton(text="Переходить к мирным переговорам 🕊"))
     nmarkap.row(types.KeyboardButton(text="Затрудняюсь ответить 🤷‍♀️"))
+    await state.set_state(start_dialog.dont_know_2)
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text.in_({"Продолжать военную операцию ⚔️", "Переходить к мирным переговорам 🕊",
-                             "Затрудняюсь ответить 🤷‍♀️"})), flags=flags)
-async def start_continue_or_peace_results(message: Message):
+                             "Затрудняюсь ответить 🤷‍♀️"})), state=start_dialog.dont_know_2, flags=flags)
+async def start_continue_or_peace_results(message: Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='start_continue_or_peace_results',
                                 value=message.text)
     await poll_write(f'Usrs: {message.from_user.id}: Start_answers: NewPolitList:', message.text)
@@ -237,32 +333,32 @@ async def start_continue_or_peace_results(message: Message):
         war = await collection.count_documents({'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'})
         stop_war = await collection.count_documents(
             {'start_continue_or_peace_results': 'Переходить к мирным переговорам 🕊'})
-        hz = await collection.count_documents({'start_continue_or_peace_results': 'Затрудняюсь ответить 🤷‍♀️'})
-        all_people = war + stop_war + hz
+        dont_know = await collection.count_documents({'start_continue_or_peace_results': 'Затрудняюсь ответить 🤷‍♀️'})
+        all_people = war + stop_war + dont_know
         text = text.replace('XX', f"{(round(war / all_people * 100, 1) if all_people > 0 else 'N/A')}")
         text = text.replace('YY', f"{(round(stop_war / all_people * 100, 1) if all_people > 0 else 'N/A')}")
-        text = text.replace('ZZ', f"{(round(hz / all_people * 100, 1) if all_people > 0 else 'N/A')}")
+        text = text.replace('ZZ', f"{(round(dont_know / all_people * 100, 1) if all_people > 0 else 'N/A')}")
     except:
         text = text.replace('XX', 'N/A')
         text = text.replace('YY', 'N/A')
         text = text.replace('ZZ', 'N/A')
-
+    await state.set_state(start_dialog.ask_1)
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Задавай 👌"))
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text == "Задавай 👌"), flags=flags)
+@router.message(start_dialog.ask_1, (F.text == "Задавай 👌"), flags=flags)
 async def start_now_you_putin(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'start_now_you_putin'})
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Начну военную операцию ⚔️"))
-    nmarkap.row(types.KeyboardButton(text="Не стану этого делать 🙅‍♂️"))
+    nmarkap.row(types.KeyboardButton(text="Не стану этого делать 🕊"))
     nmarkap.row(types.KeyboardButton(text="Затрудняюсь  ответить  🤷‍♀️"))
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.in_({"Начну военную операцию ⚔️", "Не стану этого делать 🙅‍♂️",
+@router.message((F.text.in_({"Начну военную операцию ⚔️", "Не стану этого делать 🕊",
                              "Затрудняюсь  ответить  🤷‍♀️"})), flags=flags)
 async def start_now_you_putin_results(message: Message, bot: Bot):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='start_now_you_putin_results',
@@ -275,7 +371,7 @@ async def start_now_you_putin_results(message: Message, bot: Bot):
                                    'Сторонник спецоперации ⚔️')
         await mongo_update_stat_new(tg_id=message.from_user.id, column='NewPolitStat_start',
                                     value='Сторонник спецоперации')
-    elif "Переходить к мирным переговорам 🕊" in user_answers and "Не стану этого делать 🙅‍♂️" in user_answers:
+    elif "Переходить к мирным переговорам 🕊" in user_answers and "Не стану этого делать 🕊" in user_answers:
         status = 'Противник войны 🕊'
         await redis_just_one_write(f'Usrs: {message.from_user.id}: Start_answers: NewPolitStat:', 'Противник войны 🕊')
         await mongo_update_stat_new(tg_id=message.from_user.id, column='NewPolitStat_start', value='Противник войны')
@@ -295,7 +391,7 @@ async def start_now_you_putin_results(message: Message, bot: Bot):
         database = client.database
         collection = database['statistics_new']
         war = await collection.count_documents({'start_now_you_putin_results': 'Начну военную операцию ⚔️'})
-        stop_war = await collection.count_documents({'start_now_you_putin_results': 'Не стану этого делать 🙅‍♂️'})
+        stop_war = await collection.count_documents({'start_now_you_putin_results': 'Не стану этого делать 🕊'})
         hz = await collection.count_documents({'start_now_you_putin_results': 'Затрудняюсь  ответить  🤷‍♀️'})
         all_people = war + stop_war + hz
         text = text.replace('XX', f"{(round(war / all_people * 100, 1) if all_people > 0 else 'N/A')}")

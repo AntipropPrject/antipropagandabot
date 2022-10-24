@@ -8,12 +8,14 @@ from data_base.DBuse import mongo_select_admin_levels
 
 
 class IsAdmin(BaseFilter):
-    level: Union[list, None]
+    level: Union[list[str], None]
+    custom_user_id: int | None = None
 
-    async def __call__(self, message: Message) -> bool:
-        user_access_levels = await mongo_select_admin_levels(message.from_user.id)
+    async def __call__(self, message: Message | None = None) -> bool:
+        user_id = message.from_user.id if not self.custom_user_id else self.custom_user_id
+        user_access_levels = await mongo_select_admin_levels(user_id)
         superadmins = bata.all_data().super_admins
-        if message.from_user.id in superadmins:
+        if user_id in superadmins:
             return True
         if self.level is None and user_access_levels:
             return True

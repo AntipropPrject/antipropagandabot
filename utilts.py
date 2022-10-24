@@ -9,11 +9,11 @@ from aiogram.exceptions import TelegramBadRequest, TelegramNetworkError, Telegra
 from aiogram.types import Message, ReplyKeyboardRemove, InlineKeyboardMarkup, ReplyKeyboardMarkup, ForceReply, \
     FSInputFile, InputFile, InputMediaVideo, InputMediaPhoto, BotCommandScopeChat, BotCommandScopeDefault, \
     BotCommandScopeAllPrivateChats, BotCommandScopeAllGroupChats, BotCommandScopeAllChatAdministrators, \
-    BotCommandScopeChatAdministrators, BotCommandScopeChatMember, BotCommand
+    BotCommandScopeChatAdministrators, BotCommandScopeChatMember, BotCommand, User
 
 import bata
 from data_base.DBuse import sql_safe_select, sql_safe_insert, sql_safe_update, data_getter, sql_select_row_like, \
-    mongo_ez_find_one
+    mongo_ez_find_one, mongo_count_docs, mongo_select_info, mongo_select_admin_levels
 from log import logg
 from utils.spacebot import SpaceBot
 
@@ -111,7 +111,7 @@ async def simple_video_album(message: Message, bot: Bot, tags: list[str], text_t
             await simple_media(message, 'ERROR_SORRY')
 
 
-async def game_answer(message: Message, telegram_media_id: Union[int, InputFile] = None, text: str = None,
+async def game_answer(message: Message, telegram_media_id: Union[int, str, InputFile] = None, text: str = None,
                       reply_markup: Union[InlineKeyboardMarkup, ReplyKeyboardMarkup,
                                           ReplyKeyboardRemove, ForceReply, None] = None):
     if telegram_media_id is not None:
@@ -132,6 +132,7 @@ def percentage_replace(text: str, symbol: str, part: int, base: int):
     except ZeroDivisionError:
         perc = 0
     return text.replace(symbol, str(round(perc)))
+
 
 def change_number_format(number:int):
     return '{0:,}'.format(number).replace(',', ' ')
@@ -167,7 +168,20 @@ class CoolPercReplacer:
                 perc = 0
             self.text = self.text.replace(symbol, str(round(perc, 1)))
 
+    @staticmethod
+    async def make_sorted_statistics_dict(new_statistics_column: str, full_list: list, reverse: bool = True):
+        base_number = await mongo_count_docs('database', 'statistics_new', {new_statistics_column: {'$exists': True}})
+        main_dict = dict()
+        for item in full_list:
+            item_number = await mongo_count_docs('database', 'statistics_new', {new_statistics_column: item})
+            main_dict[item] = round(item_number / base_number * 100) if base_number else 0
+        return dict(sorted(main_dict.items(), key=lambda x: x[1], reverse=reverse))
 
+async def get_time_from_war_started():
+    now = datetime.now().date()
+    old = datetime(year=2022, month=2, day=24).date()
+    day = now-old
+    return day.days
 
 async def bot_send_spam(bot: Bot, user_id: Union[int, str], telegram_media_id: Union[int, InputFile] = None,
                         text: str = None, reply_markup: Union[InlineKeyboardMarkup, ReplyKeyboardMarkup,
@@ -203,6 +217,22 @@ async def dynamic_media_answer(message: Message, similarity_tag: str, row_number
 
 async def ref_master(bot: Bot, link: str | int):
     return f'https://t.me/{(await bot.get_me()).username.replace(" ", "_")}?start={str(link)}'
+
+
+async def day_counter(user: User):
+    user_info = await mongo_select_info(user.id)
+    date_start = user_info['datetime'].replace('_', ' ')
+    usertime = datetime.strptime(date_start, "%d-%m-%Y %H:%M")
+    time_bot = datetime.strptime(datetime.strftime(datetime.now(), "%d-%m-%Y %H:%M"), "%d-%m-%Y %H:%M") - usertime
+    days, seconds = time_bot.days, time_bot.seconds
+    hs = days * 24 + seconds // 3600
+    hours = hs - days * 24
+    minutes = (seconds % 3600) // 60
+    if days >= 1:
+        time = f"{days} д. {hours} ч. {minutes} мин"
+    else:
+        time = f"{hours} ч. {minutes} мин"
+    return time
 
 
 async def ref_spy_sender(bot: Bot, child_telegram_id: str | int, message_to_send: str, replace_dict: dict):

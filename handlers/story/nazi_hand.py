@@ -13,7 +13,10 @@ from data_base.DBuse import data_getter, poll_write, sql_safe_select, redis_dele
     mongo_game_answer
 from filters.MapFilters import NaziFilter, RusHate_pr, NotNaziFilter
 from handlers.story import true_resons_hand
+from keyboards.map_keys import polls_continue_kb
+from middleware.report_ware import Reportware
 from resources.all_polls import nazizm, nazizm_pr
+from states.true_goals_states import WarGoalsState
 from utilts import simple_media
 
 
@@ -46,6 +49,7 @@ async def denanazification(message, state):
 flags = {"throttling_key": "True"}
 router = Router()
 router.message.filter(state=NaziState)
+router.message.middleware(Reportware())
 
 
 @router.message((F.text == "Покажи варианты ✍️"), state=NaziState.first_poll, flags=flags)
@@ -61,7 +65,7 @@ async def nazi_first_poll(message: Message):
 @router.message((F.text == "Продолжить"), state=NaziState.first_poll, flags=flags)
 async def nazi_poll_filler(message: Message):
     text = await sql_safe_select("text", "texts", {"name": "POLL_CONTINUE"})
-    await message.answer(text, reply_markup=ReplyKeyboardRemove())
+    await message.answer(text, reply_markup=polls_continue_kb())
 
 
 @router.poll_answer(state=NaziState.first_poll, flags=flags)
@@ -308,7 +312,7 @@ async def nazi_second_poll(message: Message, state: FSMContext):
 @router.message(NaziState.rushate, (F.text == 'Продолжить'), flags=flags)
 async def poll_filler(message: types.Message):
     await message.answer('Чтобы продолжить — отметьте варианты выше и нажмите «ГОЛОСОВАТЬ» или «VOTE»',
-                         reply_markup=ReplyKeyboardRemove())
+                         reply_markup=polls_continue_kb())
 
 
 @router.poll_answer(state=NaziState.rushate, flags=flags)
@@ -589,7 +593,7 @@ async def putin_in_the_past(message: Message, state: FSMContext):
     if message.text == 'Пропустим игру 🙅‍♂️':
         await mongo_update_stat_new(tg_id=message.from_user.id, column='game_ru_or_usr', value='Пропустили')
     await state.clear()
-    await state.set_state(true_resons_hand.TruereasonsState.main)
+    await state.set_state(WarGoalsState.main)
     await mongo_update_stat(message.from_user.id, 'nazi')
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Продолжим 👌"))
