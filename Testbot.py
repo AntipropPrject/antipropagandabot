@@ -6,11 +6,12 @@ from aiohttp import web
 import bata
 from bata import all_data
 from export_to_csv import pg_mg
-from handlers import start_hand
+from handlers import start_hand, shop
 from handlers.admin_handlers import admin_factory, marketing, admin_for_games, new_admin_hand
-from handlers.other import status, other_file
+from handlers.other import status, other_file, reports
 from handlers.story import preventive_strike, true_resons_hand, welcome_messages, nazi_hand, \
-    donbass_hand, main_menu_hand, anti_prop_hand, putin_hand, smi_hand, stopwar_hand, welcome_stories
+    donbass_hand, main_menu_hand, anti_prop_hand, putin_hand, smi_hand, stopwar_hand, welcome_stories, true_goals_hand, \
+    power_change_hand, nato_hand, mob_hand
 from middleware.trottling import ThrottlingMiddleware
 from periodic_func import periodic
 from utilts import happy_tester
@@ -68,11 +69,12 @@ def configure_app(dp, bot) -> web.Application:
 def main():
     # Технические роутеры
     # TablesCreator.tables_god()
+    dp.include_router(reports.router)
     dp.include_router(pg_mg.router)
     dp.include_router(new_admin_hand.router)
-    dp.include_router(admin_for_games.router)
-    dp.include_router(marketing.router)
     dp.include_router(admin_factory.router)
+    dp.include_router(marketing.router)
+    dp.include_router(admin_for_games.router)
 
     dp.include_router(status.router)
     dp.include_router(start_hand.router)
@@ -84,16 +86,23 @@ def main():
     dp.include_router(smi_hand.router)
 
     # Роутеры причин войны
+    dp.include_router(true_goals_hand.router)
+    dp.include_router(power_change_hand.router)
+    dp.include_router(nato_hand.router)
+    dp.include_router(shop.router)
     dp.include_router(true_resons_hand.router)
     dp.include_router(donbass_hand.router)
     dp.include_router(nazi_hand.router)
     dp.include_router(preventive_strike.router)
     dp.include_router(putin_hand.router)
     dp.include_router(stopwar_hand.router)
+    dp.include_router(mob_hand.router)
     dp.include_router(main_menu_hand.router)
+
 
     dp.message.middleware(ThrottlingMiddleware())
     # Роутер для неподошедшего
+
     dp.include_router(other_file.router)
 
     # session = aiohttp.ClientSession()
