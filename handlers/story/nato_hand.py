@@ -60,7 +60,7 @@ async def nato_first_poll(message: Message, bot: Bot, state: FSMContext):
 
 
 @router.poll_answer(state=Nato_states.first_poll, flags=flags)
-async def poll_answer(poll_answer: types.PollAnswer, bot: Bot, state: FSMContext):
+async def nato_poll_answer(poll_answer: types.PollAnswer, bot: Bot, state: FSMContext):
     await mongo_update_stat_new(tg_id=poll_answer.user.id, column='nato_poll_answer',
                                 value=poll_answer.option_ids[0])
     right_answers = await mongo_count_docs('database', 'statistics_new', {'nato_poll_answer': 0})
@@ -71,22 +71,18 @@ async def poll_answer(poll_answer: types.PollAnswer, bot: Bot, state: FSMContext
     await state.set_state(Nato_states.poll_answer)
     await state.update_data(nato_poll_answer=poll_answer.option_ids[0])
 
-    result = (right_answers * 100) / all_answers  # TODO test this percentage
-    result_1 = (answer_1 * 100) / all_answers
-    result_2 = (answer_2 * 100) / all_answers
-    result_3 = (answer_3 * 100) / all_answers
+    txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'nato_other_questions'}), all_answers)
+    txt.replace("AA", right_answers)
+    txt.replace("BB", answer_1)
+    txt.replace("CC", answer_2)
+    txt.replace("DD", answer_3)
 
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Скорее да, согласен(а) 👍"))
     nmarkup.row(types.KeyboardButton(text="Скорее нет, не согласен(а) 👎"))
     nmarkup.row(types.KeyboardButton(text="Затрудняюсь ответить 🤷‍♀"))
     nmarkup.adjust(2, 1)
-    text = await sql_safe_select('text', 'texts', {'name': 'nato_poll_answer'})
-    text = text.replace("AA", f"{str(result)[:-2]}")
-    text = text.replace("BB", f"{str(result_1)[:-2]}")
-    text = text.replace("CC", f"{str(result_2)[:-2]}")
-    text = text.replace("DD", f"{str(result_3)[:-2]}")
-    await bot.send_message(text=text, chat_id=poll_answer.user.id, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await bot.send_message(text=txt(), chat_id=poll_answer.user.id, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text.in_({'Скорее да, согласен(а) 👍', 'Скорее нет, не согласен(а) 👎',
