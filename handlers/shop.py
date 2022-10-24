@@ -205,7 +205,6 @@ async def shop_bucket(message: types.Message, state: FSMContext):
         asset = await sql_safe_select("t_id", "assets", {"name": tag})
         asset_list.append(InputMediaPhoto(media=asset))
     try:
-        time.sleep(3)
         await message.answer_media_group(asset_list)
     except Exception as e:
         print(e)
@@ -226,7 +225,7 @@ async def shop_bucket(message: types.Message, state: FSMContext):
                 check_text = check_text + f"<b>{data_dict[key]}</b> {good} " + "\n"
     text = re.sub(r'\[[^\]]+\]', '0', text)
     text = text.replace("MM", f"{change_number_format(data_dict['balance'])}")
-
+    time.sleep(3)
     bot_message = await message.answer(text, reply_markup=inline.as_markup(resize_keyboard=True),
                                        disable_web_page_preview=True)  # TODO СДЕЛАТЬ АЛЬБОМ
 
