@@ -134,6 +134,7 @@ async def shop_transfer(message: types.Message, state: FSMContext):
     sum = day * 55000000000
     await state.update_data(balance_all=sum)
     data = await state.get_data()
+    why_so_many = (await state.get_data())['why_so_many']
     balance_all = change_number_format(data['balance_all'])
     try:
         balance = change_number_format(data['balance'])
@@ -144,7 +145,8 @@ async def shop_transfer(message: types.Message, state: FSMContext):
     text = text.replace("MM", f"{balance_all}")
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Перейти к покупкам 🛒"))
-    nmarkup.row(types.KeyboardButton(text="Откуда такие цифры?🤔"))
+    if why_so_many == "1":
+        nmarkup.row(types.KeyboardButton(text="Откуда такие цифры?🤔"))
     await state.update_data(seen_child_message="0")
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
@@ -155,6 +157,7 @@ async def shop_why_so_many(message: types.Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Перейти к покупкам 🛒"))
     await state.set_state(Shop.shop_why_so_many)
+    await state.update_data(why_so_many='1')
     text = await sql_safe_select("text", "texts", {"name": "shop_why_so_many"})
 
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
