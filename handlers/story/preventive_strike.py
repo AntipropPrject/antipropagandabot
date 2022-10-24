@@ -226,7 +226,8 @@ async def prevent_strike_honesty_time(message: Message, state: FSMContext):
     luca_all = await mongo_count_docs('database', 'statistics_new', {'preventive_final_result': {'$exists': True},
                                                                      'war_aims_ex': welc_message_one[1]})
     luca_yes = await mongo_count_docs('database', 'statistics_new',
-                                      {'preventive_final_result': 'Скорее да, это лишь предлог 👌'})
+                                      {'preventive_final_result': 'Скорее да, это лишь предлог 👌',
+                                       'war_aims_ex': welc_message_one[1]})
     luca_idk = await mongo_count_docs('database', 'statistics_new',
                                       {'preventive_final_result': 'Скорее нет, это настоящая причина 🙅‍♂️',
                                        'war_aims_ex': welc_message_one[1]})
