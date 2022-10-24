@@ -632,7 +632,8 @@ async def stopwar_timer(message: Message, bot: Bot):
     nmarkup.row(types.KeyboardButton(text="Какие советы? 🤔"))
     nmarkup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
     user_info = await mongo_select_info(message.from_user.id)
-    if user_info['timer'] is False:
+    timer = user_info.get('timer')
+    if timer is False or timer is None:
         sec = 299
         markup = ReplyKeyboardBuilder()
         markup.row(types.KeyboardButton(text="Перейти в главное меню 👇"))
