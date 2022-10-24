@@ -534,7 +534,7 @@ async def country_game_question(message: Message, state: FSMContext):
                                  reply_markup=nmarkup.as_markup(resize_keyboard=True))
     else:
         nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(types.KeyboardButton(text="Хорошо, давай дальше"))
+        nmarkup.row(types.KeyboardButton(text="Спасибо 🤝"))
         await message.answer(
             "Боюсь, что пока что у меня кончились примеры. Я поищу еще, а пока что продолжим",
             reply_markup=nmarkup.as_markup(resize_keyboard=True))
