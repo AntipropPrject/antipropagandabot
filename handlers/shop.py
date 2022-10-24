@@ -95,6 +95,7 @@ inline2.adjust(2)
 async def shop_welcome(message: types.Message, state: FSMContext):
     await state.set_state(Shop.main)
     text = await sql_safe_select("text", "texts", {"name": "shop_welcome"})
+    await state.update_data(why_so_many="0")
     await message.answer(text, disable_web_page_preview=True)
     await message.answer_poll("Как думаете, сколько денег Россия уже потратила на войну?",
                               explanation_parse_mode="HTML",
@@ -228,9 +229,13 @@ async def shop_bucket(message: types.Message, state: FSMContext):
     time.sleep(2)
     bot_message = await message.answer(text, reply_markup=inline.as_markup(resize_keyboard=True),
                                        disable_web_page_preview=True)  # TODO СДЕЛАТЬ АЛЬБОМ
+    if check_text == "":
+        text_bucket = f"<b>БАЛАНС</b>: <b>{change_number_format(data_dict['balance'])} руб                                                          💵</b>\n\n<b>Корзина пока пуста</b>"
+    else:
+        text_bucket= f"<b>БАЛАНС</b>: <b>{change_number_format(data_dict['balance'])} руб                                                          💵</b>\n\n<b>В корзине:</b>\n{check_text}"
 
     await message.answer(
-        text=f"<b>БАЛАНС</b>:   <i>{change_number_format(data_dict['balance'])} руб                                                          💵</i>\n\n{check_text}",
+        text=text_bucket,
         reply_markup=inline2.as_markup(resize_keyboard=True))
 
     await state.update_data(message_id_shop=bot_message.message_id)
@@ -299,9 +304,13 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
             text = text.replace("MM", f"{change_number_format(balance)}")
             # await bot.edit_message_text(text=text, chat_id=chat_id, message_id=message_id_shop,  # TODO СДЕЛАТЬ АЛЬБОМ
             #                             reply_markup=new_inline.as_markup())
-
+            print(check_text)
+            if check_text == "":
+                text_bucket = f"<b>БАЛАНС</b>: <b>{change_number_format(data_dict['balance'])} руб                                                          💵</b>\n\n<b>Корзина пока пуста</b>"
+            else:
+                text_bucket = f"<b>БАЛАНС</b>: <b>{change_number_format(data_dict['balance'])} руб                                                          💵</b>\n\n<b>В корзине:</b>\n{check_text}"
             await bot.edit_message_text(
-                text=f"<b>БАЛАНС</b>:   <i>{change_number_format(data_dict['balance'])} руб                                                          💵</i>\n\n{check_text}",
+                text=text_bucket,
                 chat_id=chat_id,
                 message_id=(message_id_shop + 1),
                 reply_markup=inline2.as_markup(resize_keyboard=True))
@@ -309,6 +318,7 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
 
         else:
             balance = int(data_dict['balance']) + (price_dict[f'{query.data}'] * num_list[0])
+            print(balance)
             await state.update_data(balance=balance)
             for key in data_dict:
                 text = text.replace(f"[{key}]", f"{data_dict[key]}")
@@ -325,8 +335,13 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
             text = text.replace("MM", f"{change_number_format(balance)}")
             # await bot.edit_message_text(text=text, chat_id=chat_id, message_id=message_id_shop,  # TODO СДЕЛАТЬ АЛЬБОМ
             #                             reply_markup=new_inline.as_markup())
+            print(check_text)
+            if check_text == "":
+                text_bucket = f"<b>БАЛАНС</b>: <b>{change_number_format(balance)} руб                                                          💵</b>\n\n<b>Корзина пока пуста</b>"
+            else:
+                text_bucket = f"<b>БАЛАНС</b>: <b>{change_number_format(balance)} руб                                                          💵</b>\n\n<b>В корзине:</b>\n{check_text}"
             await bot.edit_message_text(
-                text=f"<b>БАЛАНС</b>:   <i>0 руб                                                          💵</i>\n\n{check_text}",
+                text=text_bucket,
                 chat_id=chat_id,
                 message_id=(message_id_shop + 1),
                 reply_markup=inline2.as_markup(resize_keyboard=True))
@@ -343,6 +358,7 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
                 await state.update_data(seen_child_message="1")
 
     if query.data == "Очистить корзину":
+        check_text= ""
         data_dict = await state.get_data()
         await state.update_data({'seen_child_message':'0'})
         for key in data_dict:
@@ -355,13 +371,19 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
         for key in data_dict:
             text = text.replace(f"[{key}]", f"{data_dict[key]}")
             if key[0] == "1":
-                check_text = check_text + f"{key} : {data_dict[key]}" + "\n"
+                if int(data_dict[key]) > 0:
+                    check_text = check_text + f"{key} : {data_dict[key]}" + "\n"
         text = re.sub(r'\[[^\]]+\]', '0', text)
         text = text.replace("MM", f"{balance}")
         # await bot.edit_message_text(text=text, chat_id=chat_id, message_id=message_id_shop,  # TODO СДЕЛАТЬ АЛЬБОМ
         #                             reply_markup=inline.as_markup())
+        print(check_text)
+        if check_text == "":
+            text_bucket = f"<b>БАЛАНС</b>: <b>{change_number_format(data_dict['balance'])} руб                                                          💵</b>\n\n<b>Корзина пока пуста</b>"
+        else:
+            text_bucket = f"<b>БАЛАНС</b>: <b>{change_number_format(data_dict['balance'])} руб                                                          💵</b>\n\n<b>В корзине:</b>\n{check_text}"
         await bot.edit_message_text(
-            text=f"<b>БАЛАНС</b>:   <i>{data_dict['balance_all']} руб                                                          💵</i>\n\n",
+            text=text_bucket,
             chat_id=chat_id,
             message_id=(message_id_shop + 1),
             reply_markup=inline2.as_markup(resize_keyboard=True))
@@ -447,7 +469,8 @@ async def shop_bucket(message: types.Message, bot: Bot, state: FSMContext):
     chat_id = message.from_user.id
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Понятно 👌"))
+    text = await sql_safe_select('text', 'texts', {'name': 'shop_sorry_no_more'})
     await bot.send_message(
-        text="<b>Невозможно оформить заказ.</b> К сожалению, пока вы выбирали товары, наша страна уже потратила эти деньги на войну. 🤷‍♂️",
+        text=text,
         chat_id=chat_id,
         reply_markup=nmarkup.as_markup(resize_keyboard=True), parse_mode="HTML")
