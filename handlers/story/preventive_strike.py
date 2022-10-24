@@ -21,7 +21,7 @@ async def prevent_strike_any_brutality(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_any_brutality'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Каким образом? 🤔'))
-    nmarkup.row(types.KeyboardButton(text='Ну попробуй 😕'))
+    nmarkup.add(types.KeyboardButton(text='Ну попробуй 😕'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
@@ -39,7 +39,7 @@ async def prevent_strike_q1(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_q1'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Да, это странно 🤔'))
-    nmarkup.row(types.KeyboardButton(text='Ничего подозрительного 🙅‍♂️'))
+    nmarkup.add(types.KeyboardButton(text='Ничего подозрительного 🙅‍♂️'))
     await state.set_state(PreventStrikeState.q2)
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
@@ -52,7 +52,7 @@ async def prevent_strike_q2(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_q2'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Да, это странно 🤔'))
-    nmarkup.row(types.KeyboardButton(text='Ничего подозрительного 🙅‍♂️'))
+    nmarkup.add(types.KeyboardButton(text='Ничего подозрительного 🙅‍♂️'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
@@ -64,7 +64,7 @@ async def prevent_strike_q3(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_q3'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Да, это странно 🤔'))
-    nmarkup.row(types.KeyboardButton(text='Ничего подозрительного 🙅‍♂️'))
+    nmarkup.add(types.KeyboardButton(text='Ничего подозрительного 🙅‍♂️'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
@@ -76,7 +76,7 @@ async def prevent_strike_q4(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'prevent_strike_q4'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text='Да, это странно 🤔'))
-    nmarkup.row(types.KeyboardButton(text='Ничего подозрительного 🙅‍♂️'))
+    nmarkup.add(types.KeyboardButton(text='Ничего подозрительного 🙅‍♂️'))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
