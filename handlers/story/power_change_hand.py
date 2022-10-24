@@ -3,10 +3,7 @@ from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-from werkzeug.exceptions import BadRequest
-
 from data_base.DBuse import sql_safe_select
-from middleware.report_ware import Reportware
 from states.true_goals_states import TrueGoalsState, WarGoalsState
 from states.welcome_states import start_dialog
 from utilts import simple_media
@@ -15,7 +12,6 @@ flags = {"throttling_key": "True"}
 router = Router()
 router.message.filter(state=(TrueGoalsState, WarGoalsState, start_dialog.big_story))
 router.poll_answer.filter(state=TrueGoalsState)
-router.message.middleware(Reportware())
 
 
 @router.message(commands=['goals_facts_test'], state='*', flags=flags)

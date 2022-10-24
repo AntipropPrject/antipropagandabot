@@ -13,7 +13,6 @@ from data_base.DBuse import data_getter, sql_safe_select, redis_just_one_write, 
 from data_base.DBuse import redis_delete_from_list
 from filters.MapFilters import PoliticsFilter, OperationWar, WarReason
 from handlers.story.nazi_hand import NaziState
-from middleware.report_ware import Reportware
 from states.preventstrike_states import PreventStrikeState
 from handlers.story.putin_hand import StateofPutin
 from resources.all_polls import welc_message_one
@@ -32,7 +31,6 @@ class TruereasonsState(StatesGroup):
 flags = {"throttling_key": "True"}
 router = Router()
 router.message.filter(state=TruereasonsState)
-router.message.middleware(Reportware())
 
 
 @router.message(PoliticsFilter(title='Сторонник войны'), ((F.text.contains('нтересно')) | (F.text.contains('скучно'))),

@@ -1,35 +1,21 @@
-import asyncio
-from typing import List
-
 from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
-from aiogram.exceptions import TelegramBadRequest
-from aiogram.types import Message, ReplyKeyboardRemove
+from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-
-from bata import all_data
 from bot_statistics.stat import mongo_update_stat_new
-from data_base.DBuse import poll_get, redis_just_one_read, sql_select_row_like, mongo_game_answer, mongo_count_docs, \
-    redis_just_one_write, mongo_select, mongo_ez_find_one
-from data_base.DBuse import sql_safe_select, data_getter
-from filters.MapFilters import WebPropagandaFilter, PplPropagandaFilter, \
-    NotYandexPropagandaFilter
-from filters.isAdmin import IsAdmin
-from handlers.story import true_resons_hand
-from keyboards.map_keys import antip_killme_kb, polls_continue_kb
-from middleware.report_ware import Reportware
-from resources.all_polls import antip_q1_options, antip_q2_options, antip_q3_options, welc_message_one
-from resources.variables import release_date
-from states.antiprop_states import propaganda_victim
-from states.true_goals_states import TrueGoalsState, WarGoalsState
-from utilts import simple_media, dynamic_media_answer, simple_media_bot, simple_video_album, CoolPercReplacer
+from data_base.DBuse import  mongo_count_docs
+from data_base.DBuse import sql_safe_select
+from keyboards.map_keys import polls_continue_kb
+from resources.all_polls import welc_message_one
+
+from states.true_goals_states import  WarGoalsState
+from utilts import simple_media, CoolPercReplacer
 
 from states.nato_states import Nato_states
 
 flags = {"throttling_key": "True"}
 router = Router()
-router.message.middleware(Reportware())
 
 
 # router.message.filter(state=Nato_states)

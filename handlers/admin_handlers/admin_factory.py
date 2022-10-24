@@ -6,7 +6,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 import bata
 from data_base.DBuse import mongo_all_admins, mongo_select_info, mongo_add_admin, mongo_select_admin_levels, \
     mongo_edit_admin, \
-    mongo_pop_admin_level, mongo_ez_find_one
+    mongo_pop_admin_level
 from filters.isAdmin import IsSudo
 from keyboards.admin_keys import redct_editors
 from log import logg
