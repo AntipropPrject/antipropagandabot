@@ -864,8 +864,8 @@ async def antip_torture(message: Message, bot: Bot):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(((F.text.contains('родолж')) & ~(F.text.contains('аем'))), state=propaganda_victim.quiz_3,
-                flags=flags)
+@router.message(((F.text.contains('родолж')) & (F.text.contains('👉'))
+                 & ~(F.text.contains('аем'))), state=propaganda_victim.quiz_3, flags=flags)
 async def antip_chicken_and_egg(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'antip_chicken_and_egg'})
     nmarkup = ReplyKeyboardBuilder()
@@ -907,7 +907,7 @@ async def antip_truth_game_start(message: Message):
 
 
 @router.message((F.text == "Начнем! 🚀") | (F.text == "Продолжаем, давай еще! 👉") |
-                (F.text == "Нет, поиграем ещё! 👉"), flags=flags)
+                (F.text == "Нет, поиграем ещё! 👈"), flags=flags)
 async def antip_truth_game_start_question(message: Message, state: FSMContext):
     if message.text == 'Начнем! 🚀':
         await mongo_update_stat_new(tg_id=message.from_user.id, column='game_false_or_true',
@@ -999,8 +999,8 @@ async def antip_truth_game_answer(message: Message, state: FSMContext):
 @router.message(F.text == 'Достаточно, двигаемся дальше  🙅‍♀️', flags=flags)
 async def sure_you_are(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Нет, поиграем ещё! 👈"))
     nmarkup.row(types.KeyboardButton(text="Да, продолжим общаться 👌"))
-    nmarkup.row(types.KeyboardButton(text="Нет, поиграем ещё! 👉"))
     await message.answer('Уверены?', reply_markup=nmarkup.as_markup(resize_keyboard=True),
                          disable_web_page_preview=True)
 

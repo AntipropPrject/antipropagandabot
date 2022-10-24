@@ -9,7 +9,7 @@ from states.antiprop_states import propaganda_victim
 from states.donbass_states import donbass_state
 from states.mob_states import MobState
 from states.nato_states import Nato_states
-from states.true_goals_states import TrueGoalsState
+from states.true_goals_states import TrueGoalsState, Shop
 from utilts import simple_media
 
 flags = {"throttling_key": "True"}
@@ -30,7 +30,7 @@ router = Router()
                                                MobState.mob_why_he_did_it,
                                                MobState.jail,
                                                TrueGoalsState.more_goals_poll, Nato_states.first_poll,
-                                               NaziState.first_poll, NaziState.rushate, donbass_state.poll
+                                               NaziState.first_poll, NaziState.rushate, donbass_state.poll, Shop.main
                                                ), flags=flags)
 async def all_polls_continue(message: types.Message):
     await message.answer('Чтобы продолжить — отметьте варианты выше и нажмите «ГОЛОСОВАТЬ» или «VOTE»')

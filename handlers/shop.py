@@ -10,6 +10,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 from bot_statistics.stat import mongo_update_stat_new
 from data_base.DBuse import sql_safe_select, mongo_count_docs
+from keyboards.map_keys import polls_continue_kb
 from middleware.report_ware import Reportware
 from resources.all_polls import shop_poll
 from states.true_goals_states import Shop, TrueGoalsState
@@ -99,7 +100,7 @@ async def shop_welcome(message: types.Message, state: FSMContext):
     await message.answer_poll("Как думаете, сколько денег Россия уже потратила на войну?",
                               explanation_parse_mode="HTML",
                               options=shop_poll, correct_option_id=2, is_anonymous=False, type='quiz',
-                              reply_markup=ReplyKeyboardRemove())
+                              reply_markup=polls_continue_kb())
     Logger.log("TEST TEST TEST")
 
 
