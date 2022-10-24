@@ -8,10 +8,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
 from data_base.DBuse import poll_write, sql_safe_select, poll_get, redis_delete_from_list, mongo_count_docs
 from filters.MapFilters import DonbassOptionsFilter, WarGoals
-from handlers.story.true_resons_hand import TruereasonsState
-from keyboards.main_keys import filler_kb
 from keyboards.map_keys import polls_continue_kb
-from middleware.report_ware import Reportware
 from resources.all_polls import donbass_first_poll, welc_message_one
 from states.donbass_states import donbass_state
 from states.true_goals_states import WarGoalsState
@@ -20,7 +17,6 @@ from utilts import simple_media, CoolPercReplacer
 flags = {"throttling_key": "True"}
 router = Router()
 router.message.filter(state=donbass_state)
-router.message.middleware(Reportware())
 router.poll_answer.filter(state=donbass_state)
 
 

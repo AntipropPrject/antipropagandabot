@@ -4,7 +4,7 @@ from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.exceptions import TelegramBadRequest
-from aiogram.types import Message, ReplyKeyboardRemove
+from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from bata import all_data
@@ -19,7 +19,6 @@ from handlers.story.nazi_hand import NaziState, nazi_first_poll
 from handlers.story.power_change_hand import goals_fact_1
 from handlers.story.preventive_strike import prevent_strike_any_brutality
 from keyboards.map_keys import polls_continue_kb
-from middleware.report_ware import Reportware
 from resources.all_polls import welc_message_one
 from resources.variables import mobilisation_date
 from states.stopwar_states import StopWarState
@@ -31,7 +30,6 @@ flags = {"throttling_key": "True"}
 router = Router()
 router.message.filter(state=(TrueGoalsState, WarGoalsState))
 router.poll_answer.filter(state=TrueGoalsState)
-router.message.middleware(Reportware())
 
 
 @router.message((F.text.contains('нтересно')) | (F.text.contains('скучно')), state=TrueGoalsState.main, flags=flags)

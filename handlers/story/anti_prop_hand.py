@@ -11,14 +11,11 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from bata import all_data
 from bot_statistics.stat import mongo_update_stat_new
 from data_base.DBuse import poll_get, redis_just_one_read, sql_select_row_like, mongo_game_answer, mongo_count_docs, \
-    redis_just_one_write, mongo_select, mongo_ez_find_one
+    redis_just_one_write
 from data_base.DBuse import sql_safe_select, data_getter
 from filters.MapFilters import WebPropagandaFilter, PplPropagandaFilter, \
     NotYandexPropagandaFilter
-from filters.isAdmin import IsAdmin
-from handlers.story import true_resons_hand
 from keyboards.map_keys import antip_killme_kb, polls_continue_kb
-from middleware.report_ware import Reportware
 from resources.all_polls import antip_q1_options, antip_q2_options, antip_q3_options
 from resources.variables import release_date
 from states.antiprop_states import propaganda_victim
@@ -29,7 +26,6 @@ flags = {"throttling_key": "True"}
 router = Router()
 
 router.message.filter(state=propaganda_victim)
-router.message.middleware(Reportware())
 
 
 async def antip_wolves(user: User, bot: Bot, state: FSMContext):

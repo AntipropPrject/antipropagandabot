@@ -1,17 +1,15 @@
-import datetime
 import re
 import time
 
 from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
-from aiogram.types import InputMediaPhoto, ReplyKeyboardRemove
+from aiogram.types import InputMediaPhoto
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 from bot_statistics.stat import mongo_update_stat_new
 from data_base.DBuse import sql_safe_select, mongo_count_docs
 from keyboards.map_keys import polls_continue_kb
-from middleware.report_ware import Reportware
 from resources.all_polls import shop_poll
 from states.true_goals_states import Shop, TrueGoalsState
 from utils.elk_logger import Logger
@@ -20,7 +18,6 @@ from utilts import change_number_format, get_time_from_war_started
 flags = {"throttling_key": "True"}
 router = Router()
 router.message.filter(state=(Shop, TrueGoalsState.before_shop, TrueGoalsState.main))
-router.message.middleware(Reportware())
 router.poll_answer.filter(state=Shop)
 router.callback_query.filter(state=Shop)
 
