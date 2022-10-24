@@ -134,7 +134,12 @@ async def shop_transfer(message: types.Message, state: FSMContext):
     sum = day * 55000000000
     await state.update_data(balance_all=sum)
     data = await state.get_data()
-    why_so_many = (await state.get_data())['why_so_many']
+    print('1')
+    try:
+        why_so_many = data['why_so_many']
+    except Exception:
+        why_so_many = "0"
+    print('2')
     balance_all = change_number_format(data['balance_all'])
     try:
         balance = change_number_format(data['balance'])
@@ -145,7 +150,7 @@ async def shop_transfer(message: types.Message, state: FSMContext):
     text = text.replace("MM", f"{balance_all}")
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Перейти к покупкам 🛒"))
-    if why_so_many == "1":
+    if why_so_many == "0":
         nmarkup.row(types.KeyboardButton(text="Откуда такие цифры?🤔"))
     await state.update_data(seen_child_message="0")
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
@@ -157,7 +162,7 @@ async def shop_why_so_many(message: types.Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Перейти к покупкам 🛒"))
     await state.set_state(Shop.shop_why_so_many)
-    await state.update_data(why_so_many='1')
+    await state.update_data(why_so_many="1")
     text = await sql_safe_select("text", "texts", {"name": "shop_why_so_many"})
 
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
@@ -169,6 +174,7 @@ async def shop_why_so_many(message: types.Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Посетить магазин 💵"))
     await state.set_state(Shop.shop_why_so_many)
+    await state.update_data(why_so_many="1")
     text = await sql_safe_select("text", "texts", {"name": "shop_why_so_many"})
 
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
@@ -292,8 +298,8 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
                         check_text = check_text + f"<b>{data_dict[key]}</b> {good} " + "\n"
             text = re.sub(r'\[[^\]]+\]', '0', text)
             text = text.replace("MM", f"{change_number_format(balance)}")
-            await bot.edit_message_text(text=text, chat_id=chat_id, message_id=message_id_shop,  # TODO СДЕЛАТЬ АЛЬБОМ
-                                        reply_markup=new_inline.as_markup())
+            # await bot.edit_message_text(text=text, chat_id=chat_id, message_id=message_id_shop,  # TODO СДЕЛАТЬ АЛЬБОМ
+            #                             reply_markup=new_inline.as_markup())
 
             await bot.edit_message_text(
                 text=f"<b>БАЛАНС</b>:   <i>{change_number_format(data_dict['balance'])} руб                                                          💵</i>\n\n{check_text}",
@@ -318,8 +324,8 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
                         check_text = check_text + f"<b>{data_dict[key]}</b> {good} " + "\n"
             text = re.sub(r'\[[^\]]+\]', '0', text)
             text = text.replace("MM", f"{change_number_format(balance)}")
-            await bot.edit_message_text(text=text, chat_id=chat_id, message_id=message_id_shop,  # TODO СДЕЛАТЬ АЛЬБОМ
-                                        reply_markup=new_inline.as_markup())
+            # await bot.edit_message_text(text=text, chat_id=chat_id, message_id=message_id_shop,  # TODO СДЕЛАТЬ АЛЬБОМ
+            #                             reply_markup=new_inline.as_markup())
             await bot.edit_message_text(
                 text=f"<b>БАЛАНС</b>:   <i>0 руб                                                          💵</i>\n\n{check_text}",
                 chat_id=chat_id,
@@ -353,8 +359,8 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
                 check_text = check_text + f"{key} : {data_dict[key]}" + "\n"
         text = re.sub(r'\[[^\]]+\]', '0', text)
         text = text.replace("MM", f"{balance}")
-        await bot.edit_message_text(text=text, chat_id=chat_id, message_id=message_id_shop,  # TODO СДЕЛАТЬ АЛЬБОМ
-                                    reply_markup=inline.as_markup())
+        # await bot.edit_message_text(text=text, chat_id=chat_id, message_id=message_id_shop,  # TODO СДЕЛАТЬ АЛЬБОМ
+        #                             reply_markup=inline.as_markup())
         await bot.edit_message_text(
             text=f"<b>БАЛАНС</b>:   <i>{data_dict['balance_all']} руб                                                          💵</i>\n\n",
             chat_id=chat_id,
@@ -394,8 +400,8 @@ async def shop_children_ok(message: types.Message, bot: Bot, state: FSMContext):
     chat_id = message.from_user.id
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Выйти из магазина ⬇"))
-    await bot.edit_message_text(text=text_shop, chat_id=chat_id, message_id=message_id_shop,
-                                reply_markup=inline1.as_markup(resize_keyboard=True))
+    # await bot.edit_message_text(text=text_shop, chat_id=chat_id, message_id=message_id_shop,
+    #                             reply_markup=inline1.as_markup(resize_keyboard=True))
     await bot.send_message(text="Продолжите покупки", chat_id=chat_id, reply_markup=nmarkup.as_markup(resize_keyboard=True))
     await bot.delete_message(chat_id, message_id)
     await bot.delete_message(chat_id, message_id + 1)
