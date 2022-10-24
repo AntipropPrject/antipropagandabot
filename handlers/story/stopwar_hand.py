@@ -467,18 +467,15 @@ async def stopwar_peacemaker_ending(message: Message, state: FSMContext):
 async def stopwar_putin_already_lost(message: Message, state: FSMContext):
     user_status = await redis_just_one_read(f'Usrs: {message.from_user.id}: StopWar: NewPolitStat:')
     nmarkup = ReplyKeyboardBuilder()
-    text = "не сработал иф"
+    text = await sql_safe_select('text', 'texts', {'name': 'stopwar_russia_will_fall'})
     if user_status == "Сторонник спецоперации ⚔️":
         nmarkup.row(types.KeyboardButton(text="Я всё же хочу поговорить о том, как остановить войну 👌"))
         nmarkup.row(types.KeyboardButton(text="Пропустить и перейти в главное меню 👇"))
-        text = "Заглушка"
     if user_status == "Сомневающийся 🤷":
         nmarkup.row(types.KeyboardButton(text="Давай 👌"))
         nmarkup.row(types.KeyboardButton(text="Пропустить и перейти в главное меню 👇"))
-        text = "Заглушка"
     if user_status == "Противник войны 🕊":
         nmarkup.row(types.KeyboardButton(text="Давай 👌"))
-        text = "Заглушка"
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
