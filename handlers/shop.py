@@ -55,8 +55,8 @@ inline.button(text='10 x 🏥',
               callback_data='10 x 🏥 Корпус ядерной медицины')
 inline.button(text='1 x 🔥',
               callback_data='1 x 🔥 Северный поток — 2')
-inline.button(text='100 x 🧸',
-              callback_data='100 x 🧸 Спасти жизнь ребёнку')
+inline.button(text='1000 x 🧸',
+              callback_data='1000 x 🧸 Спасти жизнь ребёнку')
 
 inline.adjust(3, 3, 4)
 
