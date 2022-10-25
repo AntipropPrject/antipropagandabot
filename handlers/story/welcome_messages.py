@@ -40,21 +40,14 @@ async def message_3(message: types.Message, state: FSMContext):  # Начало 
     await poll_write(f'Usrs: {message.from_user.id}: Start_answers: Is_it_war:', message.text)
     await mongo_update_stat_new(tg_id=message.from_user.id, column='war_or_not', value=message.text)
 
-    all_count = await mongo_count_docs('database', 'statistics_new', [{'war_or_not': {'$exists': True}},
-                                                                      {'datetime': {'$gte': release_date['v2_1']}}],
-                                       hard_link=True)
-    war = await mongo_count_docs('database', 'statistics_new',
-                                 [{'war_or_not': '2️⃣ Война'}, {'datetime': {'$gte': release_date['v2_1']}}],
-                                 hard_link=True)
+    all_count = await mongo_count_docs('database', 'statistics_new', {'war_or_not': {'$exists': True}}, hard_link=True)
+    war = await mongo_count_docs('database', 'statistics_new', {'war_or_not': '2️⃣ Война'}, hard_link=True)
     not_war = await mongo_count_docs('database', 'statistics_new',
-                                     [{'war_or_not': '1️⃣ Специальная военная операция (СВО)'},
-                                      {'datetime': {'$gte': release_date['v2_1']}}], hard_link=True)
+                                     {'war_or_not': '1️⃣ Специальная военная операция (СВО)'}, hard_link=True)
     FSB_not_war = await mongo_count_docs('database', 'statistics_new',
-                                         [{'FSB': "Да"}, {'war_or_not': '1️⃣ Специальная военная операция (СВО)'},
-                                          {'datetime': {'$gte': release_date['v2_1']}}], hard_link=True)
-    FSB_war = await mongo_count_docs('database', 'statistics_new', [{'FSB': "Да", 'war_or_not': '2️⃣ Война'},
-                                                                    {'datetime': {'$gte': release_date['v2_1']}}],
-                                     hard_link=True)
+                                         {'FSB': "Да", 'war_or_not': '1️⃣ Специальная военная операция (СВО)'},
+                                         hard_link=True)
+    FSB_war = await mongo_count_docs('database', 'statistics_new', {'FSB': "Да", 'war_or_not': '2️⃣ Война'})
 
     text = await sql_safe_select("text", "texts", {"name": "start_lets_start"})
     if '(СВО)' in message.text:
