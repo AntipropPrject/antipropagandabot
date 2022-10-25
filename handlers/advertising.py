@@ -93,7 +93,7 @@ async def send_spam(user_id, caption, media_id=None):
         count = await redis_just_one_read('adversting: spam_count:')
         await redis_just_one_write('adversting: spam_count:', f'{int(count)+1 if count else 0}')
         if caption and media_id is None:
-            await bot.send_message(chat_id=int(user_id), text=caption)
+            await bot.send_message(chat_id=int(user_id), text=caption, disable_web_page_preview=True)
         else:
             if caption:
                 try:
