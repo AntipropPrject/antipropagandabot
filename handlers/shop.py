@@ -433,7 +433,6 @@ async def shop_children_ok(message: types.Message, bot: Bot, state: FSMContext):
 @router.message(TrueGoalsState.main, (F.text.contains("Вернуться в магазин")), flags=flags)
 async def shop_go_back(message: types.Message, bot: Bot, state: FSMContext):
     chat_id = message.from_user.id
-    await state.set_state(Shop.shop_bucket)
     await bot.delete_message(chat_id, message.message_id - 1)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Выйти из магазина ⬇"))
@@ -462,7 +461,7 @@ async def shop_out(message: types.Message, bot: Bot, state: FSMContext):
 
 
 @router.message((F.text.contains('Да, оформить заказ')), state=Shop.shop_callback)
-async def shop_bucket(message: types.Message, bot: Bot, state: FSMContext):
+async def shop_sorry_no_more(message: types.Message, bot: Bot, state: FSMContext):
     await state.set_state(TrueGoalsState.main)
     chat_id = message.from_user.id
     nmarkup = ReplyKeyboardBuilder()
