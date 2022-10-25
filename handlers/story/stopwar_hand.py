@@ -113,6 +113,8 @@ async def stopwar_how_it_was(message: Message, state: FSMContext):
     start_doubting_count = await mongo_count_docs('database', 'statistics_new',
                                                   {'NewPolitStat_start': 'Сомневающийся'})
     all_count = start_doubting_count + start_peacefull_count + start_warbringers_count
+    if all_count == 0:
+        all_count = 1
     start_war_percentage = str(round(start_warbringers_count / all_count * 100))
     start_peace_percentage = str(round(start_peacefull_count / all_count * 100))
     start_doubt_percentage = str(round(start_doubting_count / all_count * 100))

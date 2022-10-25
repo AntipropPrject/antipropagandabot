@@ -9,8 +9,8 @@ from aiogram.types import Message, User, CallbackQuery, Update, ReplyKeyboardRem
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 from bata import all_data
-from bot_statistics.stat import mongo_is_done, mongo_stat, mongo_nstat_create, advertising_value
-from data_base.DBuse import mongo_user_info, sql_safe_select, mongo_ez_find_one, redis_just_one_write
+from bot_statistics.stat import mongo_is_done, mongo_stat, mongo_nstat_create, advertising_value, recycle_old_user
+from data_base.DBuse import mongo_user_info, sql_safe_select, mongo_ez_find_one, redis_just_one_write, mongo_count_docs
 from day_func import day_count
 from filters.isAdmin import IsAdmin
 from handlers.shop import shop_welcome
@@ -26,7 +26,7 @@ from handlers.story.true_goals_hand import goals_war_point_now
 from handlers.story.true_resons_hand import reasons_who_to_blame
 from handlers.story.welcome_messages import message_2
 from handlers.story.welcome_stories import start_how_to_manipulate
-from resources.variables import all_test_commands
+from resources.variables import all_test_commands, release_date
 from states.antiprop_states import propaganda_victim
 from states.main_menu_states import MainMenuStates
 from states.true_goals_states import TrueGoalsState
@@ -84,6 +84,12 @@ async def start_base(user: User):
     redis = all_data().get_data_red()
     for key in redis.scan_iter(f"Usrs: {user.id}:*"):
         redis.delete(key)
+
+    if await mongo_count_docs("database", "statistics_new",
+                              {'_id': int(user.id), 'datetime': {"$lt": release_date['v3']}},
+                              current_version_check=False):
+        await recycle_old_user(user.id)
+
     await mongo_stat(user_id)
     await mongo_nstat_create(user_id)
     await mongo_user_info(user_id, user.username)

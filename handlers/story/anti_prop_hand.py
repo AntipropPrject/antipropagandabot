@@ -70,63 +70,35 @@ async def antip_TV_makes_them_bad(message: Message):
     if 'Всё равно не хочу смотреть ложь' in message.text:
         await message.answer('Хорошо 👌')
 
-    trust = await mongo_count_docs('database', 'statistics_new', [{'tv_love_gen': 'Да, полностью доверяю ✅'},
-                                                                  {'datetime': {'$gte': release_date['v2_1']}}],
-                                   hard_link=True)
-    dont_trust = await mongo_count_docs('database', 'statistics_new', [{'tv_love_gen': 'Нет, не верю ни слову ⛔'},
-                                                                       {'datetime': {'$gte': release_date['v2_1']}}],
-                                        hard_link=True)
-    maybe_trust = await mongo_count_docs('database', 'statistics_new',
-                                         [{'tv_love_gen': 'Скорее да 👍'}, {'datetime': {'$gte': release_date['v2_1']}}],
-                                         hard_link=True)
-    maybe_dont_trust = await mongo_count_docs('database', 'statistics_new', [{'tv_love_gen': 'Скорее нет 👎'}, {
-        'datetime': {'$gte': release_date['v2_1']}}], hard_link=True)
+    trust = await mongo_count_docs('database', 'statistics_new', {'tv_love_gen': 'Да, полностью доверяю ✅'})
+    dont_trust = await mongo_count_docs('database', 'statistics_new', {'tv_love_gen': 'Нет, не верю ни слову ⛔'})
+    maybe_trust = await mongo_count_docs('database', 'statistics_new', {'tv_love_gen': 'Скорее да 👍'})
+    maybe_dont_trust = await mongo_count_docs('database', 'statistics_new', {'tv_love_gen': 'Скорее нет 👎'})
 
     var_true_and_trust = await mongo_count_docs(
-        'database', 'statistics_new', [{'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'},
-                                       {'tv_love_gen': 'Да, полностью доверяю ✅'},
-                                       {'datetime': {'$gte': release_date['v2_1']}}], hard_link=True
-    )
+        'database', 'statistics_new', {'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️',
+                                       'tv_love_gen': 'Да, полностью доверяю ✅'})
     var_true_and_dont_trust = await mongo_count_docs(
-        'database', 'statistics_new', [{
-            'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'},
-            {'tv_love_gen': 'Нет, не верю ни слову ⛔'},
-            {'datetime': {'$gte': release_date['v2_1']}}], hard_link=True)
+        'database', 'statistics_new', {'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️',
+                                       'tv_love_gen': 'Нет, не верю ни слову ⛔'})
     var_true_and_maybe_trust = await mongo_count_docs(
-        'database', 'statistics_new', [{
-            'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'},
-            {'tv_love_gen': 'Скорее да 👍'},
-            {'datetime': {'$gte': release_date['v2_1']}}], hard_link=True)
+        'database', 'statistics_new', {'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️',
+                                       'tv_love_gen': 'Скорее да 👍'})
     var_true_and_maybe_dont_trust = await mongo_count_docs(
-        'database', 'statistics_new', [{
-            'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'},
-            {'tv_love_gen': 'Скорее нет 👎'},
-            {'datetime': {'$gte': release_date['v2_1']}}],
-        hard_link=True)
+        'database', 'statistics_new', {'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️',
+                                       'tv_love_gen': 'Скорее нет 👎'})
 
-    text = await sql_safe_select('text', 'texts', {'name': 'antip_TV_makes_them_bad'})
-    try:
-        trust = str(round(var_true_and_trust / trust * 100, 1) if trust > 0 else 'N/A')
-        dont_trust = str(round(var_true_and_dont_trust / dont_trust * 100, 1) if dont_trust > 0 else 'N/A')
-        maybe_trust = str(round(var_true_and_maybe_trust / maybe_trust * 100, 1) if maybe_trust > 0 else 'N/A')
-        maybe_dont_trust = str(
-            round(var_true_and_maybe_dont_trust / maybe_dont_trust * 100, 1) if maybe_dont_trust > 0 else 'N/A')
-
-        text = text.replace('AA', trust)
-        text = text.replace('BB', maybe_trust)
-        text = text.replace('CC', maybe_dont_trust)
-        text = text.replace('DD', dont_trust)
-    except:
-        text = text.replace('AA', 'N/A')
-        text = text.replace('BB', 'N/A')
-        text = text.replace('CC', 'N/A')
-        text = text.replace('DD', 'N/A')
+    txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'antip_TV_makes_them_bad'}), trust)
+    txt.replace('AA', var_true_and_trust)
+    txt.replace('BB', var_true_and_maybe_trust, temp_base=maybe_trust)
+    txt.replace('CC', var_true_and_maybe_dont_trust, temp_base=maybe_dont_trust)
+    txt.replace('DD', var_true_and_dont_trust, temp_base=dont_trust)
 
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Интересно 🤔"))
     nmarkap.row(types.KeyboardButton(text="Это и так понятно 👌"))
     nmarkap.adjust(2)
-    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+    await message.answer(txt(), disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
 @router.message(((F.text == 'Это интересно 👌') | F.text.contains('Хорошо, убедил') |

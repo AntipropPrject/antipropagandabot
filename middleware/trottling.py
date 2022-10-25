@@ -8,7 +8,9 @@ from aiogram.types import Message
 from cachetools import TTLCache
 
 from bata import all_data
-from data_base.DBuse import mongo_ez_find_one, mongo_update, add_current_user, redis_just_one_write
+from data_base.DBuse import mongo_ez_find_one, mongo_update, add_current_user, redis_just_one_write, mongo_count_docs, \
+    redis_just_one_read, sql_safe_select
+from resources.variables import release_date
 
 THROTTLE_TIME = all_data().get_THROTTLE_TIME()
 
@@ -24,8 +26,14 @@ class ThrottlingMiddleware(BaseMiddleware):
             event: Message,
             data: Dict[str, Any],
     ) -> Any:
-        asyncio.create_task(anban(event.from_user.id))
+        asyncio.create_task(unban(event.from_user.id))
 
+        if not await redis_just_one_read(f"Usrs: {event.from_user.id}: old_checked"):
+            if await mongo_count_docs("database", "statistics_new",
+                                      {'_id': int(event.from_user.id), 'datetime': {"$lt": release_date['v3']}},
+                                      current_version_check=False) and event.text != "/start":
+                await you_too_old_boy(event.from_user.id)
+            await redis_just_one_write(f"Usrs: {event.from_user.id}: old_checked", "ok")
         report_dict = dict()
         report_dict["last_message"] = event.message_id
         report_dict["date_message"] = event.date
@@ -46,7 +54,13 @@ class ThrottlingMiddleware(BaseMiddleware):
         return await handler(event, data)
 
 
-async def anban(telegram_id):
+async def you_too_old_boy(user_id):
+    bot = all_data().get_bot()
+    text = await sql_safe_select('text', 'texts', {'name': 'you_too_old_boy'})
+    await bot.send_message(user_id, text)
+
+
+async def unban(telegram_id):
     user_info = await mongo_ez_find_one('database', 'userinfo', {'_id': telegram_id})
     if user_info:
         if not user_info.get('datetime_end'):
