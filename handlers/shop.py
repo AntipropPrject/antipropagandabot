@@ -440,15 +440,15 @@ async def shop_go_back(message: types.Message, bot: Bot, state: FSMContext):
     await bot.send_message(text="Продолжите покупки", chat_id=chat_id, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(Shop.shop_callback, (F.text.contains("Вернуться в магазин 🛒")), flags=flags)
-@router.message(Shop.shop_bucket, (F.text.contains("Вернуться в магазин 🛒") | F.text.contains("Да, выйти ⬇")),
-                flags=flags)
-async def shop_go_back(message: types.Message, bot: Bot, state: FSMContext):
-    chat_id = message.from_user.id
-    await bot.delete_message(chat_id, message.message_id - 1)
-    nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Выйти из магазина ⬇"))
-    await bot.send_message(text="Продолжите покупки", chat_id=chat_id, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+# @router.message(Shop.shop_callback, (F.text.contains("Вернуться в магазин 🛒")), flags=flags)
+# @router.message(Shop.shop_bucket, (F.text.contains("Вернуться в магазин 🛒") | F.text.contains("Да, выйти ⬇")),
+#                 flags=flags)
+# async def shop_go_back(message: types.Message, bot: Bot, state: FSMContext):
+#     chat_id = message.from_user.id
+#     await bot.delete_message(chat_id, message.message_id - 1)
+#     nmarkup = ReplyKeyboardBuilder()
+#     nmarkup.row(types.KeyboardButton(text="Выйти из магазина ⬇"))
+#     await bot.send_message(text="Продолжите покупки", chat_id=chat_id, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message(Shop.shop_callback, F.text.contains("Выйти из магазина ⬇"), flags=flags)
