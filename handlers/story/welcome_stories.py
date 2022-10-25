@@ -75,7 +75,7 @@ async def start_info_fourth(message: Message):
 async def start_info_fourth(message: Message, state: FSMContext):
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="На частичную мобилизацию 🧍‍♂️"))
-    nmarkap.row(types.KeyboardButton(text="На общую мобилизацию 🧍‍♂️🧍‍♂️🧍‍♂️"))
+    nmarkap.add(types.KeyboardButton(text="На общую мобилизацию 🧍‍♂️🧍‍♂️🧍‍♂️"))
     nmarkap.row(types.KeyboardButton(text="Затрудняюсь ответить 🤷‍♀️"))
     await state.set_state(start_dialog.dont_know_1)
     await simple_media(message, 'start_putin_mobilization', reply_markup=nmarkap.as_markup(resize_keyboard=True))
@@ -109,7 +109,7 @@ async def start_mobilisation_result(message: Message, state: FSMContext):
 async def start_shoigu_loss(message: Message, state: FSMContext):
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Да, доверяю 👍"))
-    nmarkap.row(types.KeyboardButton(text="Думаю погибло больше ☹️"))
+    nmarkap.add(types.KeyboardButton(text="Думаю погибло больше ☹️"))
     nmarkap.row(types.KeyboardButton(text="Затрудняюсь ответить 🤷‍♀️"))
     await state.set_state(start_dialog.ask_2)
     await simple_media(message, 'start_shoigu_loss', reply_markup=nmarkap.as_markup(resize_keyboard=True))
