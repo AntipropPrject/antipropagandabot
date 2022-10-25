@@ -845,12 +845,11 @@ async def goals_politics_is_here(message: Message):
                                                                          "datetime": {'$gte': mobilisation_date}})
     who_love_putin_now = await mongo_count_docs('database', 'statistics_new', {'prop_ex': "Владимир Путин",
                                                                                "datetime": {'$gte': mobilisation_date}})
-    if not who_love_all:
-        who_love_all = 1
-    text = text.replace("XX", str(round(who_love_putin_now / who_love_all)))
+    txt = CoolPercReplacer(text, who_love_all)
+    txt.replace("XX", who_love_putin_now)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Какой факт? 🤔"))
-    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
+    await message.answer(txt(), reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
 @router.message(F.text == "Какой факт? 🤔", state=TrueGoalsState.putin_next_next, flags=flags)
