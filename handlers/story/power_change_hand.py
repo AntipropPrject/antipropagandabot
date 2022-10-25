@@ -90,7 +90,8 @@ async def goals_fact_7(message: Message, state: FSMContext):
     await state.set_state(TrueGoalsState.goals_fact_7)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Хорошо, продолжим 👌"))
-    await simple_media(message, 'goals_fact_7', reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    text = await sql_safe_select('text', 'texts', {'name': 'goals_fact_7'})
+    await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     import time
     time.sleep(1)
     await message.answer(
