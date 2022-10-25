@@ -433,6 +433,7 @@ async def shop_children_ok(message: types.Message, bot: Bot, state: FSMContext):
 @router.message(TrueGoalsState.main, (F.text.contains("Вернуться в магазин")), flags=flags)
 async def shop_go_back(message: types.Message, bot: Bot, state: FSMContext):
     chat_id = message.from_user.id
+    await state.set_state(Shop.shop_bucket)
     await bot.delete_message(chat_id, message.message_id - 1)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Выйти из магазина ⬇"))
