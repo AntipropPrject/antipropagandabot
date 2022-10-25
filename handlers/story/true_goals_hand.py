@@ -841,10 +841,8 @@ async def goals_agreed_to_die_result(message: Message):
 async def goals_politics_is_here(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'goals_politics_is_here'})
 
-    who_love_all = await mongo_count_docs('database', 'statistics_new', {'prop_ex': {"$exists": True},
-                                                                         "datetime": {'$gte': mobilisation_date}})
-    who_love_putin_now = await mongo_count_docs('database', 'statistics_new', {'prop_ex': "Владимир Путин",
-                                                                               "datetime": {'$gte': mobilisation_date}})
+    who_love_all = await mongo_count_docs('database', 'statistics_new', {'prop_ex': {"$exists": True}})
+    who_love_putin_now = await mongo_count_docs('database', 'statistics_new', {'prop_ex': "Владимир Путин"})
     txt = CoolPercReplacer(text, who_love_all)
     txt.replace("XX", who_love_putin_now)
     nmarkup = ReplyKeyboardBuilder()
