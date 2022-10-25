@@ -13,7 +13,7 @@ from bata import all_data
 from bot_statistics.stat import mongo_select_stat, mongo_select_stat_all_user
 from data_base.DBuse import sql_safe_select, sql_safe_update, sql_safe_insert, sql_delete, redis_just_one_write, \
     redis_just_one_read, mongo_select_news, \
-    mongo_add_news, mongo_pop_news, mongo_update_news, check_avtual_news
+    mongo_add_news, mongo_pop_news, mongo_update_news, check_avtual_news, del_key
 from day_func import day_count
 from export_to_csv.pg_mg import Backup
 from filters.isAdmin import IsAdmin, IsSudo, IsKamaga
@@ -327,10 +327,16 @@ async def mass_spam(message: Message, state: FSMContext):
     client = data.get_mongo()
     database = client.database
     userinfo = database['userinfo']
-    async for user in userinfo.find():
+    count = 0
+    await redis_just_one_write('adversting: spam_count:', 0)
+    async for user in userinfo.find({"is_ban": {"$ne": True}}):
         asyncio.create_task(send_spam(user['_id'], text, media))
+        count = await redis_just_one_read('adversting: spam_count:')
+        if int(count) != 0 and not int(count) % 5000:
+            await message.answer(f"Отправлено {count} сообщений")
         await asyncio.sleep(0.033)
-    await message.answer("Массовая рассылка закончена.")
+    await message.answer(f"Массовая рассылка закончена. Всего отправлено {count} сообщений")
+    await del_key('adversting: spam_count:')
     await messenger(message, state)
 
 
