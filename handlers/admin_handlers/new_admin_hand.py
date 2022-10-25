@@ -332,10 +332,11 @@ async def mass_spam(message: Message, state: FSMContext):
     async for user in userinfo.find({"is_ban": {"$ne": True}}):
         asyncio.create_task(send_spam(user['_id'], text, media))
         count = await redis_just_one_read('adversting: spam_count:')
+        print(count)
         if int(count) != 0 and not int(count) % 5000:
             await message.answer(f"Отправлено {count} сообщений")
         await asyncio.sleep(0.033)
-    await message.answer(f"Массовая рассылка закончена. Всего отправлено {count} сообщений")
+    await message.answer(f"Массовая рассылка закончена. Всего отправлено {int(count)+1} сообщений")
     await del_key('adversting: spam_count:')
     await messenger(message, state)
 
