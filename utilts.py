@@ -224,10 +224,15 @@ async def day_counter(user: User):
     date_start = user_info['datetime']
     time_now = datetime.now()
     result_time = time_now - date_start
-    if result_time.days >= 1:
-        time = f"{result_time.days} д. {result_time.hour} ч. {result_time.minute} мин"
+    days, seconds = result_time.days, result_time.seconds
+    hs = days * 24 + seconds // 3600
+    hours = hs - days * 24
+    minutes = (seconds % 3600) // 60
+
+    if days >= 1:
+        time = f"{days} д. {hours} ч. {minutes} мин"
     else:
-        time = f"{result_time.hour} ч. {result_time.minute} мин"
+        time = f"{hours} ч. {minutes} мин"
     return time
 
 
