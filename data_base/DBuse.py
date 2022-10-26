@@ -348,7 +348,7 @@ async def mongo_user_info(tg_id, username):
         client = all_data().get_mongo()
         database = client.database
         collection = database['userinfo']
-        user_answer = {'_id': int(tg_id), 'username': str(username), 'datetime': datetime.now(),
+        user_answer = {'_id': int(tg_id), 'username': str(username), 'datetime': datetime.utcnow(),
                        'datetime_end': None, 'viewed_news': [], 'timer': False}
         await collection.insert_one(user_answer)
     except Exception as error:
