@@ -220,24 +220,28 @@ async def start_trolley_2_result(message: Message):
         text_tag = 'start_trolley_2_peace_result'
     text = await sql_safe_select('text', 'texts', {'name': text_tag})
 
+    count_straight = await mongo_count_docs('database', 'statistics_new', {'start_trolley_1_result': "Сверну направо ➡️"})
+    all_people = await mongo_count_docs('database', 'statistics_new', {'start_trolley_1_result': {'$exists': True}})
+
     fat_all = await mongo_count_docs('database', 'statistics_new', {'start_trolley_2_result': {'$exists': True}})
-    fat_not = await mongo_count_docs('database', 'statistics_new',
-                                     {'start_trolley_2_result': "Ничего не буду делать 🙅‍♂️"})
-    fat_kill = await mongo_count_docs('database', 'statistics_new',
-                                      {'start_trolley_2_result': "Столкну толстяка с моста ⬇️"})
-    right_turn = await mongo_count_docs('database', 'statistics_new',
-                                        {'start_trolley_1_result': "Сверну направо ➡️"})
-    txt = CoolPercReplacer(text, fat_all)
-    txt.replace('XX', fat_not)
-    txt.replace('YY', fat_kill)
-    txt.replace('ZZ', right_turn - fat_kill)
+    fat_not = await mongo_count_docs('database', 'statistics_new', {'start_trolley_2_result': "Ничего не буду делать 🙅‍♂️"})
+    fat_kill = await mongo_count_docs('database', 'statistics_new', {'start_trolley_2_result': "Столкну толстяка с моста ⬇️"})
+
+    turn_right = (round(count_straight / all_people * 100, 1) if all_people > 0 else 'N/A')
+    fat_not = (round(fat_not / fat_all * 100, 1) if fat_all > 0 else 'N/A')
+    fat_kill = (round(fat_kill / fat_all * 100, 1) if fat_all > 0 else 'N/A')
+
+    text = text.replace('XX', fat_not)
+    text = text.replace('YY', fat_kill)
+    text = text.replace('ZZ', (turn_right - fat_kill if fat_all > 0 and all_people > 0 else 'N/A'))
+
     nmarkap = ReplyKeyboardBuilder()
     if text_tag != 'start_trolley_2_peace_result':
         nmarkap.row(types.KeyboardButton(text="В отличии от рабочего на путях, толстяк не замешан в этой ситуации 🤔"))
         nmarkap.row(types.KeyboardButton(text="Во втором случае мы лишь наблюдаем, а не участвуем — это другое 👀"))
         nmarkap.row(types.KeyboardButton(text="Убивать своими руками — это совсем другое ☝️"))
         nmarkap.row(types.KeyboardButton(text="Я не знаю / Другая причина 🤷‍♀️"))
-    await message.answer(txt(), disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
     if text_tag == 'start_trolley_2_peace_result':
         await start_are_you_ready(message)
 
