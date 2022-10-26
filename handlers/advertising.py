@@ -90,10 +90,10 @@ async def news_for_user(user, main_news_base, today_actual, main_news_ids):
 
 async def send_spam(user_id, caption, media_id=None):
     try:
-        count = int(await redis_just_one_read('adversting: spam_count:'))
-        await redis_just_one_write('adversting: spam_count:', f'{count+1}')
+        count = await redis_just_one_read('adversting: spam_count:')
+        await redis_just_one_write('adversting: spam_count:', f'{int(count)+1 if count else 0}')
         if caption and media_id is None:
-            await bot.send_message(chat_id=int(user_id), text=caption)
+            await bot.send_message(chat_id=int(user_id), text=caption, disable_web_page_preview=True)
         else:
             if caption:
                 try:
@@ -105,10 +105,10 @@ async def send_spam(user_id, caption, media_id=None):
                     await bot.send_video(chat_id=int((user_id)), video=(media_id))
                 except TelegramBadRequest:
                     await bot.send_photo(chat_id=int(user_id), photo=(media_id))
-
     except TelegramForbiddenError:
         await mongo_update(int(user_id), 'userinfo', 'is_ban')
-
+    except Exception as err:
+        print(err)
 
 async def user_returner():
     client = all_data().get_mongo()

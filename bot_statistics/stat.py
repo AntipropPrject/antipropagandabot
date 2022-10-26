@@ -7,7 +7,7 @@ from aiogram.types import User
 from pymongo.errors import DuplicateKeyError
 
 from bata import all_data
-from data_base.DBuse import data_getter, sql_add_value, mongo_user_info, mongo_easy_upsert
+from data_base.DBuse import data_getter, sql_add_value, mongo_user_info, mongo_easy_upsert, mongo_count_docs
 from filters.isAdmin import IsAdmin
 from log import logg
 
@@ -24,6 +24,22 @@ async def mongo_stat(tg_id):
         await collection_stat.insert_one(user_answer)
     except Exception as error:
         print(error)
+
+
+async def recycle_old_user(user_id: int):
+    await collection_stat_new.delete_one({'_id': user_id})
+
+"""    
+    today = datetime.datetime.today().strftime("%d-%m-%Y")
+
+    time = datetime.datetime.now().strftime("%H:%M")
+    try:
+        await collection_stat_all.update_one({'_id': user_id}, {"$unset": {"datetime_end": ""}, "$set": {
+            "datetime": f'{today}_{time}'}})
+    except Exception as err:
+        print(err)
+
+"""
 
 
 async def mongo_nstat_create(tg_id):

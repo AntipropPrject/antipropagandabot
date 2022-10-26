@@ -518,22 +518,26 @@ async def mongo_game_answer(user_id, game, number, answer_group, condict):
         pass
 
 
-async def mongo_count_docs(database: str, collection: str, conditions: dict | list, hard_link: bool = False):
+async def mongo_count_docs(database: str, collection: str, conditions: dict | list, hard_link: bool = False,
+                           current_version_check: bool = True):
     client = all_data().get_mongo()
     database = client[database]
     collection = database[collection]
-    version_flag = {'datetime': {"$gte": release_date['v3']}}
+    current_version_flag = {'datetime': {"$gte": release_date['v3']}}
     if isinstance(conditions, list) and hard_link:
-        conditions.append(version_flag)
+        if current_version_check:
+            conditions.append(current_version_flag)
         return await collection.count_documents({"$and": conditions})
     elif isinstance(conditions, list) and not hard_link:
         a = 0
         for d in conditions:
-            d.update(version_flag)
+            if current_version_check:
+                d.update(current_version_flag)
             a += await collection.count_documents(d)
         return a
     elif isinstance(conditions, dict):
-        conditions.update(version_flag)
+        if current_version_check:
+            conditions.update(current_version_flag)
         return await collection.count_documents(conditions)
 
 
