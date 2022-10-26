@@ -392,7 +392,7 @@ async def shop_callback(query: types.CallbackQuery, bot: Bot, state: FSMContext)
         low_amount = int(balance_all) * 0.2
         if balance < low_amount:
             nmarkup = ReplyKeyboardBuilder()
-            nmarkup.row(types.KeyboardButton(text="Понятно 👌"))
+            nmarkup.row(types.KeyboardButton(text="Понятно..."))
             await state.set_state(TrueGoalsState.main)
             await bot.send_message(
                 text="<b>Невозможно оформить заказ.</b> К сожалению, пока вы выбирали товары, наша страна уже потратила эти деньги на войну. 🤷‍♂️",
@@ -434,7 +434,7 @@ async def shop_children_ok(message: types.Message, bot: Bot, state: FSMContext):
 async def shop_go_back(message: types.Message, bot: Bot, state: FSMContext):
     chat_id = message.from_user.id
     await state.set_state(Shop.shop_bucket)
-    await bot.delete_message(chat_id, message.message_id - 1)
+    # await bot.delete_message(chat_id, message.message_id - 1)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Выйти из магазина ⬇"))
     await bot.send_message(text="Продолжите покупки", chat_id=chat_id, reply_markup=nmarkup.as_markup(resize_keyboard=True))
@@ -445,7 +445,7 @@ async def shop_go_back(message: types.Message, bot: Bot, state: FSMContext):
                 flags=flags)
 async def shop_go_back(message: types.Message, bot: Bot, state: FSMContext):
     chat_id = message.from_user.id
-    await bot.delete_message(chat_id, message.message_id - 1)
+    # await bot.delete_message(chat_id, message.message_id - 1)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Выйти из магазина ⬇"))
     await bot.send_message(text="Продолжите покупки", chat_id=chat_id, reply_markup=nmarkup.as_markup(resize_keyboard=True))
