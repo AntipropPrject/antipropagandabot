@@ -1,9 +1,10 @@
 import datetime
 from aiogram import Router
 from aiogram import types
+from aiogram.types import Message, CallbackQuery
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from bata import all_data
-from data_base.DBuse import redis_just_one_read, mongo_ez_find_one, mongo_easy_upsert
+from data_base.DBuse import redis_just_one_read, mongo_ez_find_one, mongo_easy_upsert, redis_just_one_write
 
 flags = {"throttling_key": "True"}
 router = Router()
@@ -14,28 +15,44 @@ database = client.database
 collection_reports = database['reports']
 channel_for_reports = -1001563584793
 
+@router.message(commands=['report'], state='*', flags=flags)
+@router.callback_query(lambda call: call.data == "user_report")
+async def report(update: Message | CallbackQuery):
+    user_obj = update.from_user
 
-@router.message(commands=['report'], state='*')
-async def report(message: types.Message):
-    user_report_str = await redis_just_one_read(f'report: Users: {message.chat.id}')
-    user_report_dict = eval(user_report_str)
-    date_message = user_report_dict['date_message']
-    user_id = user_report_dict['user_id']
-    username = user_report_dict['username']
-    state = user_report_dict['state']
-    nmarkup = InlineKeyboardBuilder()
-    nmarkup.button(text='Показать чат', callback_data=f'report_chat {user_id} {date_message}')
-    nmarkup.button(text='Закрыть репорт', callback_data=f'close_report {user_id} {date_message}')
-    report = await bot.send_message(channel_for_reports, f"🔴 New user report 🔴\n\n"
-                                                            f"User: @{username}\n"
-                                                            f"User_id: {user_id}\n"
-                                                            f"State: {state}\n"
-                                                            f"Date_message: {date_message}",
-                                    reply_markup=nmarkup.as_markup())
+    if isinstance(update, CallbackQuery):
+        await update.message.delete()
+        user_id = user_obj.id
+        answ = update.message
+    else:
+        answ = update
+        user_id = user_obj.id
 
-    user_report_dict['report_id'] = report.message_id
-    await report_mongo(user_report_dict)
-    await message.answer('Спасибо, ваш отчет об ошибке отправлен разработчикам.')
+    if await redis_just_one_read(f"report: trottling: {user_obj.id}") != 'trottled':
+
+        user_report_str = await redis_just_one_read(f'report: Users: {user_id}')
+        user_report_dict = eval(user_report_str)
+        date_message = user_report_dict['date_message']
+        user_id = user_report_dict['user_id']
+        username = user_report_dict['username']
+        state = user_report_dict['state']
+        nmarkup = InlineKeyboardBuilder()
+        nmarkup.button(text='Показать чат', callback_data=f'report_chat {user_id} {date_message}')
+        nmarkup.button(text='Закрыть репорт', callback_data=f'close_report {user_id} {date_message}')
+        report = await bot.send_message(channel_for_reports, f"🔴 New user report 🔴\n\n"
+                                                                f"User: @{username}\n"
+                                                                f"User_id: {user_id}\n"
+                                                                f"State: {state}\n"
+                                                                f"Date_message: {date_message}",
+                                        reply_markup=nmarkup.as_markup())
+
+        user_report_dict['report_id'] = report.message_id
+        await report_mongo(user_report_dict)
+        await answ.answer('Спасибо, ваш отчет об ошибке отправлен разработчикам.'
+                          ' В скором времени мы разберемся c этой проблемой.')
+        await redis_just_one_write(f"report: trottling: {user_obj.id}", 'trottled', ttl=60)
+    else:
+        await answ.answer('Вы можете отправлять отчет об ошибках раз в минуту, спасибо.')
 
 
 async def report_mongo(user_report_dict):
