@@ -221,17 +221,13 @@ async def ref_master(bot: Bot, link: str | int):
 
 async def day_counter(user: User):
     user_info = await mongo_select_info(user.id)
-    date_start = user_info['datetime'].replace('_', ' ')
-    usertime = datetime.strptime(date_start, "%d-%m-%Y %H:%M")
-    time_bot = datetime.strptime(datetime.strftime(datetime.now(), "%d-%m-%Y %H:%M"), "%d-%m-%Y %H:%M") - usertime
-    days, seconds = time_bot.days, time_bot.seconds
-    hs = days * 24 + seconds // 3600
-    hours = hs - days * 24
-    minutes = (seconds % 3600) // 60
-    if days >= 1:
-        time = f"{days} д. {hours} ч. {minutes} мин"
+    date_start = user_info['datetime']
+    time_now = datetime.now()
+    result_time = time_now - date_start
+    if result_time.days >= 1:
+        time = f"{result_time.days} д. {result_time.hour} ч. {result_time.minute} мин"
     else:
-        time = f"{hours} ч. {minutes} мин"
+        time = f"{result_time.hour} ч. {result_time.minute} мин"
     return time
 
 
