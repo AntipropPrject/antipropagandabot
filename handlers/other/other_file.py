@@ -2,6 +2,7 @@ import asyncio
 
 from aiogram import Router, F
 from aiogram import types
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from handlers.story.nazi_hand import NaziState
 from states import welcome_states
@@ -43,4 +44,6 @@ async def empty(message: types.Message):
         await asyncio.sleep(0.8)
         await message.delete()
     else:
-        await simple_media(message, 'other_text')
+        nmarkup = InlineKeyboardBuilder()
+        nmarkup.button(text='Сообщить о проблеме', callback_data='user_report')
+        await simple_media(message, 'other_text', reply_markup=nmarkup.as_markup())
