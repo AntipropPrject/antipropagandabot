@@ -190,6 +190,7 @@ async def antip_stop_emotions(message: Message, state: FSMContext):
         await state.set_state(propaganda_victim.start)
         nmarkap.row(types.KeyboardButton(text="Открой мне глаза 👀"))
         nmarkap.row(types.KeyboardButton(text="Ну, удиви меня 🧐"))
+        nmarkap.adjust(2)
         await message.answer(text, reply_markup=nmarkap.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
