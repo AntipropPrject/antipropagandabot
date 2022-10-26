@@ -237,7 +237,7 @@ async def start_trolley_2_result(message: Message):
         fat_kill = (round(fat_kill / fat_all * 100, 1) if fat_all > 0 else 'N/A')
         text = text.replace('XX', str(fat_not))
         text = text.replace('YY', str(fat_kill))
-        text = text.replace('ZZ', str((turn_right - fat_kill if fat_all > 0 and all_people > 0 else 'N/A')))
+        text = text.replace('ZZ', str((round(turn_right - fat_kill, 1) if fat_all > 0 and all_people > 0 else 'N/A')))
     except Exception as e:
         print(e)
 
