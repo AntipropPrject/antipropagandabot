@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 
 from aiogram import Router
 from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError
+from bson import ObjectId
 
 from bata import all_data
 from data_base.DBuse import mongo_update_viewed_news, mongo_pop_news, mongo_update, sql_safe_select, mongo_easy_upsert, \
@@ -16,11 +17,10 @@ bot = data.get_bot()
 logger = get_logger('SPAM')
 
 
-async def start_spam(datet):
+async def start_spam():
     await redis_just_one_write('adversting: spam_count:', '0')
     asyncio.create_task(send_to_chat("Рассылка началась"))
     logger.info("Функция рассылки запущена")
-    date = datetime.strptime(datet, '%Y.%m.%d %H:%M')
     client = data.get_mongo()
     database = client['database']
     all_mass_media_main = database['spam_news_main']
@@ -28,18 +28,21 @@ async def start_spam(datet):
     userinfo = database['userinfo']
     main_news_base = all_mass_media_main.find()
     logger.info("Главные новости были получены")
-    today_actual = await actual_mass_media.find_one({'datetime': {'$eq': date}})
+    today_actual_object = actual_mass_media.find()
     logger.info("Актуальные новости были получены новости были получены")
 
     main_news_ids = list()
     main_news_list = list()
-
+    today_actual = list()
     async for n in main_news_base:
         main_news_list.append(n)
         main_news_ids.append(n['_id'])
+
+    async for n in today_actual_object:
+        today_actual.append(n)
     logger.info('Начало рассылки')
     start_datetime_spam = datetime.now()
-    async for user in userinfo.find({'datetime_end': {'$lt': datetime.utcnow() - timedelta(days=1)}}):
+    async for user in userinfo.find({'datetime': {'$lt': datetime.utcnow() - timedelta(days=1)}}):
         if user.get('is_ban') is not True:
             if all_data().get_data_red().get(f"user_last_answer: {user['_id']}:") != '1':
                 asyncio.create_task(news_for_user(user, main_news_list, today_actual, main_news_ids))
@@ -48,9 +51,10 @@ async def start_spam(datet):
         await asyncio.sleep(0.033)
 
     try:
-        asyncio.create_task(mongo_pop_news(m_id=today_actual['media'], coll='actu'))
-    except:
+        asyncio.create_task(mongo_pop_news(m_id=today_actual[0]['media'], coll='actu'))
+    except Exception:
         pass
+
     end_datetime_spam = datetime.now()
     result_spam_time = end_datetime_spam - start_datetime_spam
     count = int(await redis_just_one_read('adversting: spam_count:'))
@@ -69,23 +73,24 @@ async def latecomers(user, main_news_base, today_actual, main_news_ids):
 
 async def news_for_user(user, main_news_base, today_actual, main_news_ids):
     user_id = user['_id']
-    user_viewed_news = user['viewed_news']
-    if len(user_viewed_news) >= len(main_news_base):
-        if today_actual is not None:
-            await send_spam(user_id=user_id, media_id=today_actual['media'], caption=today_actual['caption'])
-        else:
-            return
-    else:
-        list_not_view = [i for i in main_news_ids if i not in user_viewed_news]
-        if list_not_view:
-            for main_news in main_news_base:
-                if main_news['_id'] == list_not_view[0]:
-                    await send_spam(user_id=user_id, media_id=main_news['media'], caption=main_news['caption'])
-                    await mongo_update_viewed_news(user_id, main_news['_id'])
+    print(today_actual)
+    print('start start')
+    for news in main_news_base:
+        print('0001')
+        if news['_id'] not in user['viewed_news']:
+            print('1111')
+            await send_spam(user_id=user_id, media_id=news['media'], caption=news['caption'])
+            await mongo_update_viewed_news(user_id, news['_id'])
 
         else:
-            #print('Главные новости для пользователя кончились, а актуальной не было')
-            pass
+            print('2222')
+            if len(today_actual) != 0:
+                print('3333')
+                await send_spam(user_id=user_id, media_id=today_actual[0]['media'], caption=today_actual[0]['caption'])
+            print('4444')
+
+    return True
+
 
 
 async def send_spam(user_id, caption, media_id=None):
