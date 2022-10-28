@@ -983,7 +983,8 @@ async def statistics(message: Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Статистика бота'")
     await state.set_state(admin.edit_context)
     past = datetime.now() - timedelta(days=1)
-    day_unt = await mongo_count_docs('database', 'statistics_new', {"daytime": {"gte": past}})
+    day_unt = await mongo_count_docs('database', 'statistics_new', {"daytime": {"gte": past}},
+                                     current_version_check=False)
     stat = await mongo_count_docs('database', 'statistics_new', {})
     all_user = len(await mongo_select_stat_all_user())
     text = ""
