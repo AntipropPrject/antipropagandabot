@@ -106,7 +106,7 @@ async def advertising_value(tag, user: User):
         all_tags = await data_getter("SELECT id FROM dumbstats.advertising")
         await mongo_user_info(user.id, user.username)
         await mongo_easy_upsert('database', 'userinfo', {'_id': user.id},
-                                {'ref_parent': tag, 'name_surname': user.full_name})
+                                {'advertising': tag, 'name_surname': user.full_name})
         for row in all_tags:
             if tag in row:
                 await sql_add_value("dumbstats.advertising", "count", {"id": tag})
