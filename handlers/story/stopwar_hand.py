@@ -287,12 +287,11 @@ async def stopwar_front_death_2(message: Message):
 
 @router.message((F.text.in_({'Ни за что! 🙅‍♂️', "Продолжим 👉"})), state=StopWarState.after_new_stat, flags=flags)
 async def stopwar_mob_start(message: Message, state: FSMContext):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='sum_up_done')
     if message.text == 'Ни за что! 🙅‍♂️':
         await message.answer("Рад это слышать!", disable_web_page_preview=True)
     await mob_lifesaver(message, state)
 
-
-# -- дальше надо будет изменить роутеры на прием сообщений из конца мобилизации
 
 @router.message((F.text == 'ПЕРЕХОД'), state=StopWarState.stopwar_how_and_when, flags=flags)
 async def stopwar_how_and_when(message: Message, state: FSMContext):
@@ -602,6 +601,7 @@ async def stopwar_result(message: Message, state: FSMContext):
 
 @router.message(F.text.contains('🤝'), state=StopWarState.final, flags=flags)
 async def stopwar_true_face(message: Message):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='stopwar_done')
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Как это сделать? 🤔"))
     await simple_media(message, 'stopwar_true_face', nmarkup.as_markup(resize_keyboard=True))
