@@ -42,14 +42,22 @@ async def periodic():
             await day_count(count_delete=True)
         if c_time == '07:00:01':
             await backup.dump_all(name=f'DUMP_{datefor_backup}')
-        if status_spam == '1':
-            if c_time == '08:00:01':
-                await start_spam(f'{date} 11:00')
-            if c_time == '16:00:01':
-                await start_spam(f'{date} 19:00')
+        #if status_spam == '1':
+        #    if c_time == '08:00:01':
+        #        await start_spam(f'{date} 11:00')
+        #    if c_time == '16:00:01':
+        #        await start_spam(f'{date} 19:00')
         if c_time == '19:00:01':
             await backup.dump_all(name=f'DUMP_{datefor_backup}')
         await asyncio.sleep(1)
+
+
+async def periodic_advs():
+    while True:
+        status_spam = await redis_just_one_read('Usrs: admins: spam: status:')
+        if status_spam == '1':
+            await start_spam()
+        await asyncio.sleep(1800)
 
 
 async def main():
@@ -109,7 +117,7 @@ async def main():
 
     #periodic function
     asyncio.create_task(periodic())
-
+    asyncio.create_task(periodic_advs())
     await session.close()
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
