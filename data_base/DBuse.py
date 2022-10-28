@@ -520,6 +520,16 @@ async def mongo_game_answer(user_id, game, number, answer_group, condict):
 
 async def mongo_count_docs(database: str, collection: str, conditions: dict | list, hard_link: bool = False,
                            current_version_check: bool = True):
+    """
+
+    :param database: database in mongodb
+    :param collection: collection in mongodb
+    :param conditions: conditions in mongodb
+    :param hard_link: if you want use same field in query, $and operator
+    :param current_version_check: mark "False" if you query not in statistics_new collection or want to use custom
+    datetime field conditions
+    :return:
+    """
     client = all_data().get_mongo()
     database = client[database]
     collection = database[collection]
