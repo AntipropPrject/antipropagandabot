@@ -115,8 +115,8 @@ async def poll_filler(message: types.Message):
 async def start_do_you_love_politics(message: types.Message, state: FSMContext):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Скорее да  🙂"), types.KeyboardButton(text="Скорее нет  🙅‍♂"))
-    markup.row(types.KeyboardButton(text="Начал(а) интересоваться из-за мобилизации (после 21 сентября) 🪖"))
     markup.row(types.KeyboardButton(text="Начал(а) интересоваться после 24 февраля 🇷🇺🇺🇦"))
+    markup.row(types.KeyboardButton(text="Начал(а) интересоваться из-за мобилизации (после 21 сентября) 🪖"))
     text = await sql_safe_select("text", "texts", {"name": "start_do_you_love_politics"})
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     await state.set_state(welcome_states.start_dialog.dialogue_6)
