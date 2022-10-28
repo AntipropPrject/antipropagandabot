@@ -183,21 +183,18 @@ async def start_trolley_1_result(message: Message):
                                 value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'start_trolley_1_result'})
 
-    try:
-        client = all_data().get_mongo()
-        database = client.database
-        collection = database['statistics_new']
-        count_right = await collection.count_documents({'start_trolley_1_result': "Сверну направо ➡️"})
-        count_straight = await collection.count_documents({'start_trolley_1_result': 'Продолжу ехать прямо ⬆️'})
-        all_people = count_straight + count_right
-        text = text.replace('XX', f"{(round(count_straight / all_people * 100, 1) if all_people > 0 else 'N/A')}")
-        text = text.replace('YY', f"{(round(count_right / all_people * 100, 1) if all_people > 0 else 'N/A')}")
-    except:
-        text = text.replace('XX', 'N/A')
-        text = text.replace('YY', 'N/A')
+    turn_all = await mongo_count_docs('database', 'statistics_new', {'start_trolley_1_result': {'$exists': True}})
+    turn_straight = await mongo_count_docs('database', 'statistics_new',
+                                           {'start_trolley_1_result': 'Продолжу ехать прямо ⬆️'})
+    turn_right = await mongo_count_docs('database', 'statistics_new',
+                                        {'start_trolley_1_result': "Сверну направо ➡️"})
+
+    txt = CoolPercReplacer(text, turn_all)
+    txt.replace('XX', turn_straight)
+    txt.replace('YY', turn_right)
     nmarkap = ReplyKeyboardBuilder()
     nmarkap.row(types.KeyboardButton(text="Продолжай 🤔"))
-    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+    await message.answer(txt(), disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text == "Продолжай 🤔"), flags=flags)
@@ -229,13 +226,12 @@ async def start_trolley_2_result(message: Message):
                                         {'start_trolley_1_result': "Сверну направо ➡️"})
     first_result_all = await mongo_count_docs('database', 'statistics_new',
                                               {'start_trolley_1_result': {'$exists': True}})
-
     txt = CoolPercReplacer(text, fat_all)
     txt.replace('XX', fat_not)
     fat_kill_perc = txt.perc(fat_kill)
     txt.replace('YY', fat_kill_perc, just_replace=True)
     right_turn_perc = txt.perc(right_turn, temp_base=first_result_all)
-    txt.replace('ZZ', right_turn_perc-fat_kill_perc, just_replace=True)
+    txt.replace('ZZ', right_turn_perc - fat_kill_perc, just_replace=True)
 
     nmarkap = ReplyKeyboardBuilder()
     if text_tag != 'start_trolley_2_peace_result':
