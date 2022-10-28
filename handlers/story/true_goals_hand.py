@@ -701,11 +701,11 @@ async def goals_why_he_is_continued(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'goals_why_he_is_continued'})
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Давай 👌"))
-    nmarkup.row(types.KeyboardButton(text="Подожди! А почему Путин решил напасть именно сейчас? 🤔"))
+    nmarkup.row(types.KeyboardButton(text="Подожди! А почему Путин решил напасть именно в феврале 2022? 🤔"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(F.text == "Подожди! А почему Путин решил напасть именно сейчас? 🤔",
+@router.message(F.text == "Подожди! А почему Путин решил напасть именно в феврале 2022? 🤔",
                 state=TrueGoalsState.putin, flags=flags)
 async def goals_best_moment(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'goals_best_moment'})
