@@ -986,11 +986,10 @@ async def statistics(message: Message, state: FSMContext):
     day_unt = await mongo_count_docs('database', 'statistics_new', {"datetime": {"$gte": past}},
                                      current_version_check=False)
     stat = await mongo_count_docs('database', 'statistics_new', {"come": {"$exists": True}})
-    all_user = len(await mongo_select_stat_all_user())
     text = ""
     for point in stat_points:
         users_count = await mongo_count_docs('database', 'statistics_new', {stat_points[point]: {'$exists': True}})
-        text += count_visual(all_user, users_count, point)
+        text += count_visual(stat, users_count, point)
     text = f"<code>Всего пользователей: {stat}\nНовых пользователей за сутки: {day_unt}</code>\n\n" + text
     await message.answer(text)
 
