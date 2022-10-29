@@ -27,6 +27,7 @@ bot = data.get_bot()
 storage = RedisStorage.from_url(data.redis_url)
 dp = Dispatcher(storage)
 
+
 async def on_startup(dispatcher: Dispatcher) -> None:
     webhook = await bot.get_webhook_info()
     if webhook is not None:
@@ -44,6 +45,7 @@ async def on_startup(dispatcher: Dispatcher) -> None:
     print("🚀 Bot launched as Hoook!")
     print(f"webhook: https://kamaga777123.xyz/")
 
+
 async def on_shutdown(dispatcher: Dispatcher) -> None:
     print("😴 Bot shutdown...")
 
@@ -58,15 +60,7 @@ def configure_app(dp, bot) -> web.Application:
     return app
 
 
-
-async def main():
-    bot_info = await bot.get_me()
-    print(f"Hello, i'm {bot_info.first_name} | {bot_info.username}")
-
-    if bata.Check_tickets is True and os.getenv('PIPELINE') is None:
-        await happy_tester(bot)
-    else:
-        print('Tickets checking is disabled, so noone will know...')
+def main():
 
     scheduler = AsyncIOScheduler(timezone=str(tzlocal.get_localzone()))
     scheduler.add_job(return_spam_send, 'interval', seconds=1)
@@ -112,14 +106,13 @@ async def main():
 
     dp.include_router(other_file.router)
 
+    # session = aiohttp.ClientSession()
     # use the session here
-    session = aiohttp.ClientSession()
 
-    #periodic function
-    #await session.close()
-    #await bot.delete_webhook(drop_pending_updates=True)
-    #await dp.start_polling(bot)
+    # periodic function
 
+    # await session.close()
+    # await dp.start_polling(bot)
     dp.startup.register(on_startup)
     dp.shutdown.register(on_shutdown)
     app = configure_app(dp, bot)
@@ -127,4 +120,4 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

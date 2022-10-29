@@ -11,7 +11,6 @@ logger = get_logger('periodic')
 
 
 async def return_spam_send():
-    print(datetime.now())
     asyncio.create_task(return_spam_send_task(datetime.now()))
 
 
