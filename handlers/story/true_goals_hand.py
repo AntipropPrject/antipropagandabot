@@ -32,8 +32,11 @@ router.message.filter(state=(TrueGoalsState, WarGoalsState))
 router.poll_answer.filter(state=TrueGoalsState)
 
 
-@router.message((F.text.contains('нтересно')) | (F.text.contains('скучно')), state=TrueGoalsState.main, flags=flags)
+@router.message((F.text.in_({"Очень интересно 👍", "Интересно, но слегка затянуто 🤏",
+                             "Где-то интересно, где-то скучно 🙂", "Довольно скучно 🥱"})),
+                state=TrueGoalsState.main, flags=flags)
 async def goals_war_point_now(message: Message, state: FSMContext):
+    await mongo_update_stat_new(message.from_user.id, "antip_final_reaction", value=message.text)
     await state.set_state(TrueGoalsState.before_shop)
     text = await sql_safe_select('text', 'texts', {'name': 'goals_war_point_now'})
     nmarkup = ReplyKeyboardBuilder()
@@ -1004,6 +1007,7 @@ async def goals_wars_of_past(message: Message):
 @router.message((F.text.in_({"Продолжай ⏳", "А что, Путин этого не знал? 🤔", "Продолжим 👌"})),
                 state=TrueGoalsState.final, flags=flags)
 async def goals_russia_already_lost(message: Message, state: FSMContext):
+    await mongo_update_stat_new(tg_id=message.from_user.id, column='goals_final_result', value=message.text)
     await state.set_state(StopWarState.main)
     text = await sql_safe_select('text', 'texts', {'name': 'goals_russia_already_lost'})
     day = await get_time_from_war_started()

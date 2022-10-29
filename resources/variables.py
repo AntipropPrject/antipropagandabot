@@ -3,10 +3,9 @@ from datetime import datetime
 release_date = {
     'v2_1': datetime.strptime("2022-09-10 10:00:00.00", "%Y-%m-%d %H:%M:%S.%f"),
     'v3': datetime.strptime("2022-10-24 12:00:00.00", "%Y-%m-%d %H:%M:%S.%f")
-    }
+}
 
 mobilisation_date = datetime.strptime("2022-09-21 10", "%Y-%m-%d %H")
-
 
 all_test_commands = {
     'polls_start': 'Начало: опросы (start_how_to_manipulate)',
@@ -24,4 +23,17 @@ all_test_commands = {
     'mainskip69': 'Главное меню (mainmenu_really_menu)',
     'commands_clear': 'Сбросить команды на стандартный для всех юзеров набор',
     'commands_restore': 'Получить все тестовые команды в меню'
+}
+
+stat_points = {
+    "Вступление:": "prop_ex",
+    "Антипропаганда:": "antip_final_reaction",
+    "Донбас": "donbas_final_result",
+    "Превентивный Удар": "preventive_final_result",
+    "НАТО": "nato_end",
+    "Причины войны": "goals_final_result",
+    "Подведем итоги": "sum_up_done",
+    "Мобилизация": "mob_feedback",
+    "Как закончить войну": "stopwar_done",
+    "Полностью прошли бота": "main_menu"
 }

@@ -36,23 +36,21 @@ async def marketing_new_link_name(message: Message, state: FSMContext):
 
 @router.message(state=admin.market_new_link)
 async def marketing_new_link(message: Message, bot: Bot, state: FSMContext):
-    query = "SELECT * FROM dumbstats.advertising WHERE id like 'adv_%'"
-    all_adv = await data_getter(query)
-    if isinstance(all_adv, list):
-        leng = len(all_adv)
-        label = message.text.replace(" ", "_")
-        link = f'adv_{leng + 1}'
-        await ref_master(bot, link)
-        await sql_safe_insert('dumbstats', 'advertising', {'id': link, 'label': label, 'count': 0})
-        nmarkup = ReplyKeyboardBuilder()
-        nmarkup.row(types.KeyboardButton(text="Получить новую ссылку"))
-        nmarkup.row(types.KeyboardButton(text="Проверить все ссылки"))
-        nmarkup.row(types.KeyboardButton(text="Вернуться в меню администрирования"))
-        await state.set_state(admin.marketing)
-        bot_link = f'https://t.me/{(await bot.get_me()).username.replace(" ", "_")}?start={link}'
-        await message.answer(f'Создание ссылки под названием {label} успешно завершено:\n{bot_link}',
-                             reply_markup=nmarkup.as_markup(resize_keyboard=True))
-    # ДОБАВИТЬ СОЗДАНИЕ ТАБЛИЦЫ ЛИБО СЮДА, ЛИБО ЕЩЕ КУДА-ТО ПРИ СТАРТЕ
+    all_adv = await data_getter("SELECT * FROM dumbstats.advertising WHERE id like 'adv_%'")
+    leng = len(all_adv) if isinstance(all_adv, list) else 0
+    label = message.text.replace(" ", "_")
+    link = f'adv_{leng + 1}'
+    await ref_master(bot, link)
+    await sql_safe_insert('dumbstats', 'advertising', {'id': link, 'label': label, 'count': 0})
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Получить новую ссылку"))
+    nmarkup.row(types.KeyboardButton(text="Проверить все ссылки"))
+    nmarkup.row(types.KeyboardButton(text="Вернуться в меню администрирования"))
+    await state.set_state(admin.marketing)
+    bot_link = f'https://t.me/{(await bot.get_me()).username.replace(" ", "_")}?start={link}'
+    await message.answer(f'Создание ссылки под названием {label} успешно завершено:\n{bot_link}',
+                         reply_markup=nmarkup.as_markup(resize_keyboard=True))
+
 
 @router.message((F.text == "Проверить все ссылки"), state=admin.marketing)
 async def marketing_all_links(message: Message, bot: Bot, state: FSMContext):

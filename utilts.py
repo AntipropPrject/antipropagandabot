@@ -154,19 +154,24 @@ class CoolPercReplacer:
     def __call__(self, *args, **kwargs):
         return str(self.text)
 
-    def replace(self, symbol: str, part: int, *args, temp_base: int = None):
+    def replace(self, symbol: str, part: int, *args, temp_base: int = None, just_replace: bool = False):
         """symbol: placeholder needed to be replaced ('AA')\n
         part: number to calculate percent from base\n
         temp_base: replace object base (100%) for this calculation"""
-        whole = self.base
-        if temp_base:
-            whole = temp_base
-        if self.text:
-            try:
-                perc = part / whole * 100
-            except ZeroDivisionError:
-                perc = 0
-            self.text = self.text.replace(symbol, str(round(perc, 1)))
+        temp_base = 100 if just_replace else temp_base
+        perc = self.perc(part, temp_base=temp_base)
+        self.text = self.text.replace(symbol, str(perc))
+
+    def perc(self, part, *args, temp_base: int = None):
+        whole = temp_base if temp_base else self.base
+        try:
+            perc = part / whole * 100
+        except ZeroDivisionError:
+            perc = 0
+        return round(perc, 1)
+
+
+
 
     @staticmethod
     async def make_sorted_statistics_dict(new_statistics_column: str, full_list: list, reverse: bool = True):

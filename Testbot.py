@@ -1,5 +1,9 @@
 import asyncio
+import os
+
+import tzlocal
 from aiogram import Dispatcher
+from aiogram.client.session import aiohttp
 from aiogram.dispatcher.fsm.storage.redis import RedisStorage
 from aiogram.dispatcher.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 from aiohttp import web
@@ -9,15 +13,13 @@ import bata
 from bata import all_data
 from export_to_csv import pg_mg
 from handlers import start_hand, shop
-from sheduled_jobs import return_spam_send, backups, periodic_advs
 from handlers.admin_handlers import admin_factory, marketing, admin_for_games, new_admin_hand
-from handlers.advertising import return_spam_send
+from sheduled_jobs import return_spam_send, backups, periodic_advs
 from handlers.other import status, other_file, reports
 from handlers.story import preventive_strike, true_resons_hand, welcome_messages, nazi_hand, \
     donbass_hand, main_menu_hand, anti_prop_hand, putin_hand, smi_hand, stopwar_hand, welcome_stories, true_goals_hand, \
-    power_change_hand, nato_hand, mob_hand
+    nato_hand, mob_hand, power_change_hand
 from middleware.trottling import ThrottlingMiddleware
-from periodic_func import periodic
 from utilts import happy_tester
 
 data = all_data()
@@ -27,7 +29,6 @@ dp = Dispatcher(storage)
 
 
 async def on_startup(dispatcher: Dispatcher) -> None:
-    asyncio.create_task(periodic())
     webhook = await bot.get_webhook_info()
     if webhook is not None:
         await bot.delete_webhook(drop_pending_updates=True)
@@ -45,17 +46,6 @@ async def on_startup(dispatcher: Dispatcher) -> None:
     print(f"webhook: https://kamaga777123.xyz/")
 
 
-async def main():
-    bot_info = await bot.get_me()
-
-    print(f"Hello, i'm {bot_info.first_name} | {bot_info.username}")
-
-    if bata.Check_tickets is True:
-        await happy_tester(bot)
-    else:
-        print('Tickets checking is disabled, so noone will know...')
-
-
 async def on_shutdown(dispatcher: Dispatcher) -> None:
     print("😴 Bot shutdown...")
 
@@ -69,14 +59,8 @@ def configure_app(dp, bot) -> web.Application:
     setup_application(app, dp, bot=bot)
     return app
 
-async def main():
-    bot_info = await bot.get_me()
-    print(f"Hello, i'm {bot_info.first_name} | {bot_info.username}")
 
-    if bata.Check_tickets is True and os.getenv('PIPELINE') is None:
-        await happy_tester(bot)
-    else:
-        print('Tickets checking is disabled, so noone will know...')
+def main():
 
     scheduler = AsyncIOScheduler(timezone=str(tzlocal.get_localzone()))
     scheduler.add_job(return_spam_send, 'interval', seconds=1)

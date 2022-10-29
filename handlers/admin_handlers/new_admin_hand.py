@@ -1,6 +1,6 @@
 import asyncio
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from aiogram import Router, F, Bot
 from aiogram import types
@@ -13,7 +13,7 @@ from bata import all_data
 from bot_statistics.stat import mongo_select_stat, mongo_select_stat_all_user
 from data_base.DBuse import sql_safe_select, sql_safe_update, sql_safe_insert, sql_delete, redis_just_one_write, \
     redis_just_one_read, mongo_select_news, \
-    mongo_add_news, mongo_pop_news, mongo_update_news, check_avtual_news, del_key
+    mongo_add_news, mongo_pop_news, mongo_update_news, check_avtual_news, del_key, mongo_count_docs
 from day_func import day_count
 from export_to_csv.pg_mg import Backup
 from filters.isAdmin import IsAdmin, IsSudo, IsKamaga
@@ -24,6 +24,7 @@ from keyboards.admin_keys import main_admin_keyboard, middle_admin_keyboard, app
     redct_media, redct_games, settings_bot, spam_admin_keyboard
 from keyboards.admin_keys import secretrebornkb
 from log import logg
+from resources.variables import stat_points
 from states.admin_states import admin
 from utilts import Phoenix, MasterCommander, simple_media_bot, simple_media, game_answer
 
@@ -282,7 +283,6 @@ async def sadmins(message: Message, state: FSMContext):
     await message.answer("Запланированная рассылка была отключена", reply_markup=await spam_admin_keyboard())
 
 
-
 @router.message(IsSudo(), (F.text == '🛑 Массовая рассылка 🛑'), state=admin.spam_menu)
 async def mass_spam(message: Message, state: FSMContext):
     await state.set_state(admin.big_spam)
@@ -336,10 +336,9 @@ async def mass_spam(message: Message, state: FSMContext):
         if int(count) != 0 and not int(count) % 5000:
             await message.answer(f"Отправлено {count} сообщений")
         await asyncio.sleep(0.033)
-    await message.answer(f"Массовая рассылка закончена. Всего отправлено {int(count)+1} сообщений")
+    await message.answer(f"Массовая рассылка закончена. Всего отправлено {int(count) + 1} сообщений")
     await del_key('adversting: spam_count:')
     await messenger(message, state)
-
 
 
 @router.callback_query(lambda call: call.data == "add_main_news" or call.data == "add_actual_news")
@@ -967,38 +966,33 @@ async def import_csv(query: types.CallbackQuery, state: FSMContext):
     await query.message.answer("Импорт завершен успешно", reply_markup=await settings_bot())
 
 
-def count_visual(all_user, count):
-    pr = round(int(count) / int(all_user) * 100)
-    if pr <= 20:
-        return f'<b>{pr}%</b> 🔴'
-    elif pr <= 40:
-        return f"<b>{pr}%</b> 🟤"
-    elif pr <= 60:
-        return f"<b>{pr}%</b> 🟠"
-    elif pr <= 80:
-        return f"<b>{pr}%</b> 🟡"
-    elif pr >= 80:
-        return f"<b>{pr}%</b> 🟢"
+def count_visual(full_count, part_count, name: str):
+    pr = round(int(part_count) / int(full_count) * 100)
+    exit_string = ""
+    for ten in range(round(pr / 10)):
+        exit_string += '🟩'
+    exit_string = exit_string.ljust(10, "⬜")
+    title = f'{name}: {pr}%'
+    foot = f'Всего {part_count}'.ljust(10, ' ')
+    exit_string = f'<code>{title}\n' + exit_string + f'\n{foot}</code>\n\n'
+    return exit_string
 
 
 @router.message((F.text == 'Статистика бота'), state=admin.edit_context)
 async def statistics(message: Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Статистика бота'")
     await state.set_state(admin.edit_context)
-    day_unt = await day_count(get_count=True)
-    stat = await mongo_select_stat()
+    past = datetime.now() - timedelta(days=1)
+    day_unt = await mongo_count_docs('database', 'statistics_new', {"datetime": {"$gte": past}},
+                                     current_version_check=False)
+    stat = await mongo_count_docs('database', 'statistics_new', {})
     all_user = len(await mongo_select_stat_all_user())
-    await message.answer('<b>СТАТИСТИКА БОТА</b>\n'
-                         '➖➖➖➖➖➖➖➖➖➖\n\n'
-                         f'Пользователей за всё время: <b>{all_user}</b>\n'
-                         f'Пользователей за 24 часа: <b>{day_unt}</b>\n'
-                         f'➖➖➖➖➖➖➖➖➖➖\n\n'
-                         f'Прошли вступление: {stat["start"]} ({count_visual(all_user, stat["start"])})\n'
-                         f'Прошли пропаганду: {stat["antiprop"]} ({count_visual(all_user, stat["antiprop"])})\n'
-                         f'Прошли кт.Донбасс: {stat["donbass"]} ({count_visual(all_user, stat["donbass"])})\n'
-                         f'Прошли Цели войны: {stat["war_aims"]} ({count_visual(all_user, stat["war_aims"])})\n'
-                         f'Прошли Президента: {stat["putin"]} ({count_visual(all_user, stat["putin"])})\n'
-                         f'Прошли до   конца: {stat["end"]} ({count_visual(all_user, stat["end"])})')
+    text = ""
+    for point in stat_points:
+        users_count = await mongo_count_docs('database', 'statistics_new', {stat_points[point]: {'$exists': True}})
+        text += count_visual(all_user, users_count, point)
+    text = f"<code>Всего пользователей: {stat}\nНовых пользователей за сутки: {day_unt}</code>\n\n" + text
+    await message.answer(text)
 
 
 @router.message(IsSudo(), commands=["reborn"], state=admin.edit_context)

@@ -115,8 +115,8 @@ async def poll_filler(message: types.Message):
 async def start_do_you_love_politics(message: types.Message, state: FSMContext):
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Скорее да  🙂"), types.KeyboardButton(text="Скорее нет  🙅‍♂"))
-    markup.row(types.KeyboardButton(text="Начал(а) интересоваться из-за мобилизации (после 21 сентября) 🪖"))
     markup.row(types.KeyboardButton(text="Начал(а) интересоваться после 24 февраля 🇷🇺🇺🇦"))
+    markup.row(types.KeyboardButton(text="Начал(а) интересоваться из-за мобилизации (после 21 сентября) 🪖"))
     text = await sql_safe_select("text", "texts", {"name": "start_do_you_love_politics"})
     await message.answer(text, reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
     await state.set_state(welcome_states.start_dialog.dialogue_6)
@@ -294,7 +294,6 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
     await mongo_update_stat_new(tg_id=poll_answer.user.id, column='prop_ex', value=lst_str)
     text = await sql_safe_select("text", "texts", {"name": "start_thank_you"})
     await bot.send_message(poll_answer.user.id, text)
-    await mongo_update_stat(poll_answer.user.id, 'start')
     if await mongo_select(poll_answer.user.id):  # можно поставить счетчик повторных обращений
         print("Пользователь уже есть в базе")
     else:
@@ -347,5 +346,4 @@ async def poll_answer_handler_three(poll_answer: types.PollAnswer, bot: Bot, sta
         await redis_just_one_write(f'Usrs: {poll_answer.user.id}: Politics:', 'Аполитичный')
         await mongo_update_stat(poll_answer.user.id, column='political_view', value='apolitical', options='$set')
         await mongo_update_stat_new(tg_id=poll_answer.user.id, column='polit_status', value='Аполитичный')
-    await redis_just_one_write(f'Usrs: {poll_answer.user.id}: INFOState:', 'Жертва пропаганды')
     await antip_wolves(poll_answer.user, bot, state)

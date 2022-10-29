@@ -4,6 +4,7 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
+from bot_statistics.stat import mongo_update_stat_new
 from data_base.DBuse import sql_safe_select, data_getter, sql_games_row_selecter, sql_select_row_like, mongo_game_answer
 from filters.MapFilters import SubscriberFilter
 from handlers import start_hand
@@ -25,6 +26,8 @@ ppl_options = ("Владимир Путин 🗣", "Дмитрий Песков 
 
 @router.message(F.text.contains('главное меню'), flags=flags)
 async def mainmenu_really_menu(message: Message, state: FSMContext):
+    if "MainMenuStates" not in await state.get_state():
+        await mongo_update_stat_new(tg_id=message.from_user.id, column='main_menu')
     await state.clear()
     await state.set_state(MainMenuStates.main)
     text = await sql_safe_select('text', 'texts', {'name': 'mainmenu_really_menu'})
