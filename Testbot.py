@@ -5,6 +5,8 @@ import tzlocal
 from aiogram import Dispatcher
 from aiogram.client.session import aiohttp
 from aiogram.dispatcher.fsm.storage.redis import RedisStorage
+from aiogram.dispatcher.webhook.aiohttp_server import SimpleRequestHandler, setup_application
+from aiohttp import web
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 import bata
@@ -24,6 +26,37 @@ data = all_data()
 bot = data.get_bot()
 storage = RedisStorage.from_url(data.redis_url)
 dp = Dispatcher(storage)
+
+async def on_startup(dispatcher: Dispatcher) -> None:
+    webhook = await bot.get_webhook_info()
+    if webhook is not None:
+        await bot.delete_webhook(drop_pending_updates=True)
+        await bot.set_webhook("https://kamaga777123.xyz/")
+    else:
+        await bot.set_webhook("https://kamaga777123.xyz/")
+
+    webhook = await bot.get_webhook_info()
+
+    print(webhook)
+    print(webhook)
+    print(webhook)
+
+    print("🚀 Bot launched as Hoook!")
+    print(f"webhook: https://kamaga777123.xyz/")
+
+async def on_shutdown(dispatcher: Dispatcher) -> None:
+    print("😴 Bot shutdown...")
+
+    await bot.delete_webhook()
+    await dispatcher.storage.close()
+
+
+def configure_app(dp, bot) -> web.Application:
+    app = web.Application()
+    SimpleRequestHandler(dispatcher=dp, bot=bot).register(app, path="")
+    setup_application(app, dp, bot=bot)
+    return app
+
 
 
 async def main():
@@ -83,9 +116,14 @@ async def main():
     session = aiohttp.ClientSession()
 
     #periodic function
-    await session.close()
-    await bot.delete_webhook(drop_pending_updates=True)
-    await dp.start_polling(bot)
+    #await session.close()
+    #await bot.delete_webhook(drop_pending_updates=True)
+    #await dp.start_polling(bot)
+
+    dp.startup.register(on_startup)
+    dp.shutdown.register(on_shutdown)
+    app = configure_app(dp, bot)
+    web.run_app(app, host="0.0.0.0", port=1443)
 
 
 if __name__ == "__main__":
