@@ -37,16 +37,16 @@ async def start_spam():
         main_news_list.append(n)
         main_news_ids.append(n['_id'])
 
-    async for n in today_actual_object:
-        today_actual.append(n)
+    async for j in today_actual_object:
+        today_actual.append(j)
     logger.info('Начало рассылки')
     start_datetime_spam = datetime.now()
     async for user in userinfo.find({'datetime': {'$lt': datetime.utcnow() - timedelta(days=1)}}):
         if user.get('is_ban') is not True:
             if all_data().get_data_red().get(f"user_last_answer: {user['_id']}:") != '1':
-                asyncio.create_task(news_for_user(user, main_news_list, today_actual, main_news_ids))
+                asyncio.create_task(news_for_user(user, main_news_list, today_actual))
             else:
-                asyncio.create_task(latecomers(user, main_news_list, today_actual, main_news_ids))
+                asyncio.create_task(latecomers(user, main_news_list, today_actual))
         await asyncio.sleep(0.033)
 
     try:
@@ -62,15 +62,15 @@ async def start_spam():
                                      f"Время рассылки: {result_spam_time}"))
 
 
-async def latecomers(user, main_news_base, today_actual, main_news_ids):
+async def latecomers(user, main_news_base, today_actual):
     for comers in range(5):
         if all_data().get_data_red().get(f"user_last_answer: {user['_id']}:") != '1':
-            await news_for_user(user, main_news_base, today_actual, main_news_ids)
+            await news_for_user(user, main_news_base, today_actual)
             break
         await asyncio.sleep(300)
 
 
-async def news_for_user(user, main_news_base, today_actual, main_news_ids):
+async def news_for_user(user, main_news_base, today_actual):
     user_id = user['_id']
     print(today_actual)
     print('start start')
