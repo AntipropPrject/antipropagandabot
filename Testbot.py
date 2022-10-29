@@ -3,11 +3,14 @@ from aiogram import Dispatcher
 from aiogram.dispatcher.fsm.storage.redis import RedisStorage
 from aiogram.dispatcher.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 from aiohttp import web
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+
 import bata
 from bata import all_data
 from export_to_csv import pg_mg
 from handlers import start_hand, shop
 from handlers.admin_handlers import admin_factory, marketing, admin_for_games, new_admin_hand
+from handlers.advertising import return_spam_send
 from handlers.other import status, other_file, reports
 from handlers.story import preventive_strike, true_resons_hand, welcome_messages, nazi_hand, \
     donbass_hand, main_menu_hand, anti_prop_hand, putin_hand, smi_hand, stopwar_hand, welcome_stories, true_goals_hand, \
@@ -65,8 +68,22 @@ def configure_app(dp, bot) -> web.Application:
     setup_application(app, dp, bot=bot)
     return app
 
+async def main():
+    bot_info = await bot.get_me()
+    print(f"Hello, i'm {bot_info.first_name} | {bot_info.username}")
 
-def main():
+    if bata.Check_tickets is True and os.getenv('PIPELINE') is None:
+        await happy_tester(bot)
+    else:
+        print('Tickets checking is disabled, so noone will know...')
+
+    scheduler = AsyncIOScheduler(timezone=str(tzlocal.get_localzone()))
+    scheduler.add_job(return_spam_send, 'interval', seconds=1)
+    scheduler.add_job(periodic_advs, 'cron', minute=20)
+    scheduler.add_job(backups, 'cron', hour='*/12')
+
+    scheduler.start()
+
     # Технические роутеры
     # TablesCreator.tables_god()
     dp.include_router(reports.router)
@@ -98,7 +115,6 @@ def main():
     dp.include_router(stopwar_hand.router)
     dp.include_router(mob_hand.router)
     dp.include_router(main_menu_hand.router)
-
 
     dp.message.middleware(ThrottlingMiddleware())
     # Роутер для неподошедшего
