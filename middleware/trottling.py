@@ -34,6 +34,7 @@ class ThrottlingMiddleware(BaseMiddleware):
                                       current_version_check=False) and event.text != "/start":
                 await you_too_old_boy(event.from_user.id)
             await redis_just_one_write(f"Usrs: {event.from_user.id}: old_checked", "ok")
+
         report_dict = dict()
         report_dict["last_message"] = event.message_id
         report_dict["date_message"] = event.date
@@ -42,6 +43,7 @@ class ThrottlingMiddleware(BaseMiddleware):
         report_dict["message_from_user"] = event.text
         report_dict["state"] = data.get('raw_state')
         await redis_just_one_write(f'report: Users: {event.chat.id}', str(report_dict).replace("'", '"'))
+
         throttling_key = get_flag(data, "throttling_key")
         redis = all_data().get_data_red()
         redis.set(f"user_last_answer: {event.from_user.id}:", "1", 280)
