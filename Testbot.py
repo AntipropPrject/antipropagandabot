@@ -9,6 +9,7 @@ import bata
 from bata import all_data
 from export_to_csv import pg_mg
 from handlers import start_hand, shop
+from sheduled_jobs import return_spam_send, backups, periodic_advs
 from handlers.admin_handlers import admin_factory, marketing, admin_for_games, new_admin_hand
 from handlers.advertising import return_spam_send
 from handlers.other import status, other_file, reports
