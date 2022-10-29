@@ -1,7 +1,7 @@
 import asyncio
 import os
-from datetime import datetime
 
+import tzlocal
 from aiogram import Dispatcher
 from aiogram.client.session import aiohttp
 from aiogram.dispatcher.fsm.storage.redis import RedisStorage
@@ -9,13 +9,10 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 import bata
 from bata import all_data
-from data_base.DBuse import redis_just_one_read
-from day_func import day_count
 from export_to_csv import pg_mg
-from export_to_csv.pg_mg import Backup
 from handlers import start_hand, shop
 from handlers.admin_handlers import admin_factory, marketing, admin_for_games, new_admin_hand
-from handlers.advertising import start_spam, user_returner, return_spam_send
+from sheduled_jobs import return_spam_send, backups, periodic_advs
 from handlers.other import status, other_file, reports
 from handlers.story import preventive_strike, true_resons_hand, welcome_messages, nazi_hand, \
     donbass_hand, main_menu_hand, anti_prop_hand, putin_hand, smi_hand, stopwar_hand, welcome_stories, true_goals_hand, \
@@ -29,37 +26,6 @@ storage = RedisStorage.from_url(data.redis_url)
 dp = Dispatcher(storage)
 
 
-async def periodic():
-    print('periodic function has been started')
-    while True:
-        backup = Backup()
-        status_spam = await redis_just_one_read('Usrs: admins: spam: status:')
-        datefor_backup = datetime.now().strftime('%Y-%m-%d_%H-%M')
-        c_time = datetime.now().strftime("%H:%M:%S")
-        date = datetime.now().strftime('%Y.%m.%d')
-        #  удаление дневного счетчика
-        if c_time == '21:00:01':
-            await day_count(count_delete=True)
-        if c_time == '07:00:01':
-            await backup.dump_all(name=f'DUMP_{datefor_backup}')
-        #if status_spam == '1':
-        #    if c_time == '08:00:01':
-        #        await start_spam(f'{date} 11:00')
-        #    if c_time == '16:00:01':
-        #        await start_spam(f'{date} 19:00')
-        if c_time == '19:00:01':
-            await backup.dump_all(name=f'DUMP_{datefor_backup}')
-        await asyncio.sleep(1)
-
-
-async def periodic_advs():
-    while True:
-        status_spam = await redis_just_one_read('Usrs: admins: spam: status:')
-        if status_spam == '1':
-            await start_spam()
-        await asyncio.sleep(1800)
-
-
 async def main():
     bot_info = await bot.get_me()
     print(f"Hello, i'm {bot_info.first_name} | {bot_info.username}")
@@ -69,9 +35,11 @@ async def main():
     else:
         print('Tickets checking is disabled, so noone will know...')
 
-    scheduler = AsyncIOScheduler()
-    # scheduler.add_job(user_returner, 'interval', hours=1)
+    scheduler = AsyncIOScheduler(timezone=str(tzlocal.get_localzone()))
     scheduler.add_job(return_spam_send, 'interval', seconds=1)
+    scheduler.add_job(periodic_advs, 'interval', minutes=30)
+    scheduler.add_job(backups, 'cron', hour='*/12')
+
     scheduler.start()
 
     # Технические роутеры
@@ -106,7 +74,6 @@ async def main():
     dp.include_router(mob_hand.router)
     dp.include_router(main_menu_hand.router)
 
-
     dp.message.middleware(ThrottlingMiddleware())
     # Роутер для неподошедшего
 
@@ -116,8 +83,6 @@ async def main():
     session = aiohttp.ClientSession()
 
     #periodic function
-    asyncio.create_task(periodic())
-    asyncio.create_task(periodic_advs())
     await session.close()
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)

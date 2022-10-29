@@ -118,6 +118,9 @@ async def shop_after_first_poll(poll_answer: types.PollAnswer, bot: Bot, state: 
     text = await sql_safe_select("text", "texts", {"name": "shop_after_first_poll"})
     result = (right_answers * 100) / all_answers
     text = text.replace("AA", f"{str(round(result, 1))}")
+    day = await get_time_from_war_started()
+    big_money = day * 55000000000 / 144000000
+    text = text.replace("BB", change_number_format(round(big_money)))
     await bot.send_message(poll_answer.user.id, text,
                            reply_markup=nmarkup.as_markup(resize_keyboard=True))
 

@@ -3,11 +3,10 @@ from datetime import datetime, timedelta
 
 from aiogram import Router
 from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError
-from bson import ObjectId
 
 from bata import all_data
-from data_base.DBuse import mongo_update_viewed_news, mongo_pop_news, mongo_update, sql_safe_select, mongo_easy_upsert, \
-    redis_just_one_write, redis_just_one_read, mongo_update_end
+from data_base.DBuse import mongo_update_viewed_news, mongo_pop_news, mongo_update, redis_just_one_write, \
+    redis_just_one_read, sql_safe_select, mongo_update_end, mongo_easy_upsert
 from log.logg import send_to_chat, get_logger
 
 router = Router()
@@ -114,20 +113,6 @@ async def send_spam(user_id, caption, media_id=None):
         await mongo_update(int(user_id), 'userinfo', 'is_ban')
     except Exception as err:
         print(err)
-
-async def user_returner():
-    client = all_data().get_mongo()
-    redis = all_data().get_data_red()
-    database = client['database']
-    collection = database['userinfo']
-    cursor = collection.find({'datetime_end': None})
-    list_of_users = await cursor.to_list(length=None)
-    for user in list_of_users:
-        redis.set(f'Must_return_list: {user["_id"]}:', user['datetime'])
-
-
-async def return_spam_send():
-    asyncio.create_task(return_spam_send_task(datetime.now()))
 
 
 async def return_spam_send_task(time_now: datetime):
