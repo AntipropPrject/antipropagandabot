@@ -985,7 +985,7 @@ async def statistics(message: Message, state: FSMContext):
     past = datetime.now() - timedelta(days=1)
     day_unt = await mongo_count_docs('database', 'statistics_new', {"datetime": {"$gte": past}},
                                      current_version_check=False)
-    stat = await mongo_count_docs('database', 'statistics_new', {})
+    stat = await mongo_count_docs('database', 'statistics_new', {"come": {"$exists": True}})
     all_user = len(await mongo_select_stat_all_user())
     text = ""
     for point in stat_points:
