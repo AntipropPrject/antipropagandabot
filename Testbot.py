@@ -37,7 +37,7 @@ async def main():
 
     scheduler = AsyncIOScheduler(timezone=str(tzlocal.get_localzone()))
     scheduler.add_job(return_spam_send, 'interval', seconds=1)
-    scheduler.add_job(periodic_advs, 'interval', minutes=30)
+    scheduler.add_job(periodic_advs, 'interval', minutes=60)
     scheduler.add_job(backups, 'cron', hour='*/12')
 
     scheduler.start()
