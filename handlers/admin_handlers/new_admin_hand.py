@@ -24,7 +24,7 @@ from keyboards.admin_keys import main_admin_keyboard, middle_admin_keyboard, app
     redct_media, redct_games, settings_bot, spam_admin_keyboard
 from keyboards.admin_keys import secretrebornkb
 from log import logg
-from resources.variables import stat_points
+from resources.variables import stat_points, release_date
 from states.admin_states import admin
 from utilts import Phoenix, MasterCommander, simple_media_bot, simple_media, game_answer
 
@@ -967,6 +967,7 @@ async def import_csv(query: types.CallbackQuery, state: FSMContext):
 
 
 def count_visual(full_count, part_count, name: str):
+    full_count = 1 if not full_count else full_count
     pr = round(int(part_count) / int(full_count) * 100)
     exit_string = ""
     for ten in range(round(pr / 10)):
@@ -986,11 +987,17 @@ async def statistics(message: Message, state: FSMContext):
     day_unt = await mongo_count_docs('database', 'statistics_new', {"datetime": {"$gte": past}},
                                      current_version_check=False)
     stat = await mongo_count_docs('database', 'statistics_new', {"come": {"$exists": True}})
+    stat_statistics = await mongo_count_docs('database', 'statistics_new', {"datetime": {"$gte": release_date['v3.1']}},
+                                             current_version_check=False)
     text = ""
     for point in stat_points:
-        users_count = await mongo_count_docs('database', 'statistics_new', {stat_points[point]: {'$exists': True}})
-        text += count_visual(stat, users_count, point)
-    text = f"<code>Всего пользователей: {stat}\nНовых пользователей за сутки: {day_unt}</code>\n\n" + text
+        users_count = await mongo_count_docs('database', 'statistics_new', {stat_points[point]: {'$exists': True},
+                                                                            "datetime": {"$gte": release_date['v3.1']}},
+                                             current_version_check=False)
+        text += count_visual(stat_statistics, users_count, point)
+    text = f"<code>Всего пользователей: {stat}\n" \
+           f"Пользователей после установки всех флагов: {stat_statistics}\n" \
+           f"Новых пользователей за сутки: {day_unt}</code>\n\n" + text
     await message.answer(text)
 
 
