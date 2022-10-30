@@ -5,7 +5,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 from data_base.DBuse import data_getter, sql_safe_insert
 from filters.isAdmin import IsAdmin
-from handlers.admin_handlers.admin_stats import pretty_add_progress_stats
+from handlers.admin_handlers.admin_statistics import pretty_add_progress_stats
 from states.admin_states import admin
 from utilts import ref_master
 

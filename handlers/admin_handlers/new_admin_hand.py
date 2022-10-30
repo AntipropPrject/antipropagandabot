@@ -17,7 +17,7 @@ from export_to_csv.pg_mg import Backup
 from filters.isAdmin import IsAdmin, IsSudo, IsKamaga
 from handlers.admin_handlers.admin_for_games import admin_home_games, admin_truthgame, admin_gam_tv, admin_mistake_lie, \
     admin_normal_game_start
-from handlers.admin_handlers.admin_stats import count_visual, pretty_progress_stats
+from handlers.admin_handlers.admin_statistics import count_visual, pretty_progress_stats
 from handlers.advertising import send_spam
 from keyboards.admin_keys import main_admin_keyboard, middle_admin_keyboard, app_admin_keyboard, redct_text, \
     redct_media, redct_games, settings_bot, spam_admin_keyboard
