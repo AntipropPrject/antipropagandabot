@@ -2,7 +2,8 @@ from datetime import datetime
 
 release_date = {
     'v2_1': datetime.strptime("2022-09-10 10:00:00.00", "%Y-%m-%d %H:%M:%S.%f"),
-    'v3': datetime.strptime("2022-10-24 12:00:00.00", "%Y-%m-%d %H:%M:%S.%f")
+    'v3': datetime.strptime("2022-10-24 12:00:00.00", "%Y-%m-%d %H:%M:%S.%f"),
+    'v3.1': datetime.strptime("2022-10-30 00:00:00.00", "%Y-%m-%d %H:%M:%S.%f"),
 }
 
 mobilisation_date = datetime.strptime("2022-09-21 10", "%Y-%m-%d %H")
