@@ -1,16 +1,16 @@
 from aiogram import Router, types, F, Bot
 from aiogram.dispatcher.fsm.context import FSMContext
-from aiogram.types import Message
-from aiogram.utils.keyboard import ReplyKeyboardBuilder
+from aiogram.types import Message, InlineKeyboardButton, CallbackQuery
+from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 from data_base.DBuse import data_getter, sql_safe_insert
 from filters.isAdmin import IsAdmin
+from handlers.admin_handlers.admin_stats import pretty_add_progress_stats
 from states.admin_states import admin
 from utilts import ref_master
 
 router = Router()
 router.message.filter(state=admin)
-
 
 @router.message(IsAdmin(level=['Маркетинг']), (F.text == 'Маркетинг 📈'), state=admin.menu)
 async def marketing_menu(message: Message, state: FSMContext):
@@ -20,6 +20,7 @@ async def marketing_menu(message: Message, state: FSMContext):
            '\n- Проверить статистику по имеющимся счетчикам\n\nУдачи!'
     nmarkup.row(types.KeyboardButton(text="Получить новую ссылку"))
     nmarkup.row(types.KeyboardButton(text="Проверить все ссылки"))
+    nmarkup.row(types.KeyboardButton(text="Статистика по конкретной кампании"))
     nmarkup.row(types.KeyboardButton(text="Вернуться в меню администрирования"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
@@ -70,3 +71,23 @@ async def marketing_all_links(message: Message, bot: Bot, state: FSMContext):
                 await message.answer(text)
                 count, text = 0, ''
     # ДОБАВИТЬ СОЗДАНИЕ ТАБЛИЦЫ ЛИБО СЮДА, ЛИБО ЕЩЕ КУДА-ТО ПРИ СТАРТЕ
+
+
+@router.message((F.text == "Статистика по конкретной кампании"), state=admin.marketing)
+async def marketing_choose_capmagin(message: Message, state: FSMContext):
+    ads = await data_getter("SELECT * FROM dumbstats.advertising WHERE id like 'adv_%' ORDER BY id")
+    inmarkup = InlineKeyboardBuilder()
+    for ad in ads:
+        print(ad[0])
+        inmarkup.row(InlineKeyboardButton(text=ad[1], callback_data=ad[0]))
+    inmarkup.adjust(2)
+    await message.answer("<b>Нажмите на кнопку с интересующей вас ссылкой:</b>", reply_markup=inmarkup.as_markup())
+
+
+@router.callback_query(F.data.contains("adv_"))
+async def marketing_choose_capmagin(query: CallbackQuery, state: FSMContext):
+    await query.answer()
+    adv_tag = query.data
+    ad_name = (await data_getter(f"SELECT label FROM dumbstats.advertising WHERE id = '{adv_tag}'"))[0][0]
+    text = await pretty_add_progress_stats(adv_tag, ad_name)
+    await query.message.answer(text)

@@ -10,15 +10,14 @@ from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 from bata import all_data
-from bot_statistics.stat import mongo_select_stat, mongo_select_stat_all_user
 from data_base.DBuse import sql_safe_select, sql_safe_update, sql_safe_insert, sql_delete, redis_just_one_write, \
     redis_just_one_read, mongo_select_news, \
     mongo_add_news, mongo_pop_news, mongo_update_news, check_avtual_news, del_key, mongo_count_docs
-from day_func import day_count
 from export_to_csv.pg_mg import Backup
 from filters.isAdmin import IsAdmin, IsSudo, IsKamaga
 from handlers.admin_handlers.admin_for_games import admin_home_games, admin_truthgame, admin_gam_tv, admin_mistake_lie, \
     admin_normal_game_start
+from handlers.admin_handlers.admin_stats import count_visual, pretty_progress_stats
 from handlers.advertising import send_spam
 from keyboards.admin_keys import main_admin_keyboard, middle_admin_keyboard, app_admin_keyboard, redct_text, \
     redct_media, redct_games, settings_bot, spam_admin_keyboard
@@ -26,7 +25,7 @@ from keyboards.admin_keys import secretrebornkb
 from log import logg
 from resources.variables import stat_points, release_date
 from states.admin_states import admin
-from utilts import Phoenix, MasterCommander, simple_media_bot, simple_media, game_answer
+from utilts import Phoenix, game_answer
 
 router = Router()
 data = all_data()
@@ -966,38 +965,11 @@ async def import_csv(query: types.CallbackQuery, state: FSMContext):
     await query.message.answer("Импорт завершен успешно", reply_markup=await settings_bot())
 
 
-def count_visual(full_count, part_count, name: str):
-    full_count = 1 if not full_count else full_count
-    pr = round(int(part_count) / int(full_count) * 100)
-    exit_string = ""
-    for ten in range(round(pr / 10)):
-        exit_string += '🟩'
-    exit_string = exit_string.ljust(10, "⬜")
-    title = f'{name}: {pr}%'
-    foot = f'Всего {part_count}'.ljust(10, ' ')
-    exit_string = f'<code>{title}\n' + exit_string + f'\n{foot}</code>\n\n'
-    return exit_string
-
-
 @router.message((F.text == 'Статистика бота'), state=admin.edit_context)
 async def statistics(message: Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Статистика бота'")
     await state.set_state(admin.edit_context)
-    past = datetime.now() - timedelta(days=1)
-    day_unt = await mongo_count_docs('database', 'statistics_new', {"datetime": {"$gte": past}},
-                                     current_version_check=False)
-    stat = await mongo_count_docs('database', 'statistics_new', {"come": {"$exists": True}})
-    stat_statistics = await mongo_count_docs('database', 'statistics_new', {"datetime": {"$gte": release_date['v3.1']}},
-                                             current_version_check=False)
-    text = ""
-    for point in stat_points:
-        users_count = await mongo_count_docs('database', 'statistics_new', {stat_points[point]: {'$exists': True},
-                                                                            "datetime": {"$gte": release_date['v3.1']}},
-                                             current_version_check=False)
-        text += count_visual(stat_statistics, users_count, point)
-    text = f"<code>Всего пользователей: {stat}\n" \
-           f"Пользователей после установки всех флагов: {stat_statistics}\n" \
-           f"Новых пользователей за сутки: {day_unt}</code>\n\n" + text
+    text = await pretty_progress_stats()
     await message.answer(text)
 
 
