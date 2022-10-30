@@ -134,7 +134,7 @@ async def pretty_add_progress_stats(ad_tag: str, title: str | None = None):
             }}
         ]):
             for point in stat_points:
-                count = result.get(point, 0)
+                count = result.get(stat_points[point], 0)
                 text += count_visual(all_count, count, point)
         return text
     except Exception as ex:
