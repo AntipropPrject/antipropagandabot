@@ -5,7 +5,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 from data_base.DBuse import data_getter, sql_safe_insert
 from filters.isAdmin import IsAdmin
-from handlers.admin_handlers.admin_statistics import pretty_add_progress_stats
+from handlers.admin_handlers.admin_statistics import pretty_add_progress_stats, pretty_polit_stats
 from states.admin_states import admin
 from utilts import ref_master
 
@@ -78,7 +78,6 @@ async def marketing_choose_capmagin(message: Message, state: FSMContext):
     ads = await data_getter("SELECT * FROM dumbstats.advertising WHERE id like 'adv_%' ORDER BY id")
     inmarkup = InlineKeyboardBuilder()
     for ad in ads:
-        print(ad[0])
         inmarkup.row(InlineKeyboardButton(text=ad[1], callback_data=ad[0]))
     inmarkup.adjust(2)
     await message.answer("<b>Нажмите на кнопку с интересующей вас ссылкой:</b>", reply_markup=inmarkup.as_markup())
@@ -90,4 +89,6 @@ async def marketing_choose_capmagin(query: CallbackQuery, state: FSMContext):
     adv_tag = query.data
     ad_name = (await data_getter(f"SELECT label FROM dumbstats.advertising WHERE id = '{adv_tag}'"))[0][0]
     text = await pretty_add_progress_stats(adv_tag, ad_name)
+    text2 = await pretty_polit_stats(adv_tag, ad_name)
     await query.message.answer(text)
+    await query.message.answer(text2)

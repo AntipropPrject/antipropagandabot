@@ -139,3 +139,180 @@ async def pretty_add_progress_stats(ad_tag: str, title: str | None = None):
         return text
     except Exception as ex:
         await logg.get_error(f"Pretty ad stats is failed!\n\n{ex}")
+
+
+async def pretty_polit_stats(ad_tag: str, title: str | None = None):
+    client = all_data().get_mongo()
+    database = client['database']
+    stat_collection = database['statistics_new']
+    text = "————\n"
+    async for result in stat_collection.aggregate([
+        {
+            "$match": {
+                "NewPolitStat_start": {"$exists": True}
+            }
+        },
+        {
+            "$lookup": {
+                "from": "userinfo",
+                "localField": "_id",
+                "foreignField": "_id",
+                "pipeline": [
+                    {
+                        "$match": {
+                            "advertising": ad_tag
+                        }
+                    }
+                ],
+                "as": "userinfo"
+            }
+        },
+        {
+            "$match": {
+                "userinfo": {"$ne": []}
+            }
+        },
+        {
+            "$project": {
+                "NewPolitStat_start": 1,
+                "NewPolitStat_end": 1
+            }
+        },
+        {
+            "$facet": {
+                "Total": [
+                    {
+                        "$count": "Total"
+                    },
+
+                ],
+                "Groups": [
+                    {
+                        "$match": {"NewPolitStat_end": {"$exists": True}}
+                    },
+                    {
+                        "$group": {
+                            "_id": {
+                                "Start": "$NewPolitStat_start",
+                                "End": "$NewPolitStat_end"
+                            },
+                            "users_count": {
+                                "$sum": 1
+                            }
+                        }
+                    }],
+                "StartСounts": [{
+                    "$group": {
+                        "_id": "$NewPolitStat_start",
+                        "users_count": {
+                            "$sum": 1
+                        }
+                    }
+                }],
+                "EndСounts": [
+                    {
+                        "$match": {"NewPolitStat_end": {"$exists": True}}
+                    },
+                    {
+                        "$group": {
+                            "_id": "$NewPolitStat_start",
+                            "users_count": {
+                                "$sum": 1
+                            }
+                        }
+                    }],
+            }
+        },
+        {
+            "$addFields": {
+                "Total": {
+                    "$arrayElemAt": [
+                        "$Total",
+                        0
+                    ]
+                }
+            }
+        },
+        {
+            "$unwind": "$StartСounts",
+        },
+        {
+            "$unwind": "$Groups",
+        },
+        {
+            "$unwind": "$EndСounts",
+        },
+        {"$match": {"$expr": {"$and": [
+            {"$eq": ["$StartСounts._id", "$Groups._id.Start"]},
+            {"$eq": ["$EndСounts._id", "$Groups._id.Start"]}
+        ]
+        }}},
+        {
+            "$project": {
+                "Groups": 1,
+                "StartCount": "$StartСounts.users_count",
+                "EndCount": "$EndСounts.users_count",
+                "Total": "$Total.Total"
+            }
+        },
+
+        {
+            "$project": {
+                "_id": 0,
+                "Start": "$Groups._id.Start",
+                "End": "$Groups._id.End",
+                "changed_percentage": {
+                    "$multiply": [
+                        {
+                            "$divide": [
+                                "$Groups.users_count",
+                                "$EndCount"
+                            ]
+                        },
+                        100
+                    ]
+                },
+                "start_percentage": {
+                    "$multiply": [
+                        {
+                            "$divide": [
+                                "$StartCount",
+                                "$Total"
+                            ]
+                        },
+                        100
+                    ]
+                },
+                "made_it_to_the_end": {
+                    "$multiply": [
+                        {
+                            "$divide": [
+                                "$EndCount",
+                                "$StartCount"
+                            ]
+                        },
+                        100
+                    ]
+                },
+                "Total": "$Total"
+            }
+        },
+        {"$group": {
+            "_id": "$Start",
+            "Start_perc": {"$addToSet": "$start_percentage"},
+            "Made_it": {"$addToSet": "$made_it_to_the_end"},
+            "End_change": {"$addToSet": {"Status": "$End", "Change": "$changed_percentage"}}
+        }}
+    ]):
+        text += f"<code>Группа: </code><b>{result['_id']}</b>\n" \
+                f"<code>В начале: </code><b>{round(result.get('Start_perc', [0])[0])}%</b>\n"
+        text += f"<code>Дошли до конца: </code>{round(result['Made_it'][0])}%\n" \
+                f"<code>————</code>"
+        group_txt, group_title_txt = str(), str()
+        for ingroup in result.get('End_change', []):
+            group_txt += f"\n<code>Из них в конце:</code>\n" \
+                         f"<i>{ingroup['Status']}</i>: <b>{round(ingroup['Change'])}%</b>"
+        text += group_title_txt
+        text += group_txt
+        text += "\n\n————\n"
+    return text
