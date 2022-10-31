@@ -43,7 +43,6 @@ async def start_spam():
     start_datetime_spam = datetime.now()
     async for user in userinfo.aggregate([{'$project': {'hour': {'$hour': "$datetime"}, 'datetime': 1, 'viewed_news': 1,
                                           'is_ban': 1}}, {'$match': {'hour': datetime.now().hour}}]):
-        print(user)
         if user.get('is_ban') is not True:
             if all_data().get_data_red().get(f"user_last_answer: {user['_id']}:") != '1':
                 asyncio.create_task(news_for_user(user, main_news_list, today_actual))

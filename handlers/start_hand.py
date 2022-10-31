@@ -86,7 +86,7 @@ async def start_base(user: User):
 
     if await mongo_count_docs("database", "statistics_new",
                               {'_id': int(user.id), 'datetime': {"$lt": release_date['v3']}},
-                              current_version_check=False):
+                              check_default_version=False):
         await recycle_old_user(user.id)
 
     await mongo_stat(user_id)

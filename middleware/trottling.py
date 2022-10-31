@@ -31,7 +31,7 @@ class ThrottlingMiddleware(BaseMiddleware):
         if not await redis_just_one_read(f"Usrs: {event.from_user.id}: old_checked"):
             if await mongo_count_docs("database", "statistics_new",
                                       {'_id': int(event.from_user.id), 'datetime': {"$lt": release_date['v3']}},
-                                      current_version_check=False) and event.text != "/start":
+                                      check_default_version=False) and event.text != "/start":
                 await you_too_old_boy(event.from_user.id)
             await redis_just_one_write(f"Usrs: {event.from_user.id}: old_checked", "ok")
 

@@ -519,14 +519,14 @@ async def mongo_game_answer(user_id, game, number, answer_group, condict):
 
 
 async def mongo_count_docs(database: str, collection: str, conditions: dict | list, hard_link: bool = False,
-                           current_version_check: bool = True):
+                           check_default_version: bool = True):
     """
 
     :param database: database in mongodb
     :param collection: collection in mongodb
     :param conditions: conditions in mongodb
     :param hard_link: if you want use same field in query, $and operator
-    :param current_version_check: mark "False" if you query not in statistics_new collection or want to use custom
+    :param check_default_version: mark "False" if you query not in statistics_new collection or want to use custom
     datetime field conditions
     :return:
     """
@@ -535,18 +535,18 @@ async def mongo_count_docs(database: str, collection: str, conditions: dict | li
     collection = database[collection]
     current_version_flag = {'datetime': {"$gte": release_date['v3']}}
     if isinstance(conditions, list) and hard_link:
-        if current_version_check:
+        if check_default_version:
             conditions.append(current_version_flag)
         return await collection.count_documents({"$and": conditions})
     elif isinstance(conditions, list) and not hard_link:
         a = 0
         for d in conditions:
-            if current_version_check:
+            if check_default_version:
                 d.update(current_version_flag)
             a += await collection.count_documents(d)
         return a
     elif isinstance(conditions, dict):
-        if current_version_check:
+        if check_default_version:
             conditions.update(current_version_flag)
         return await collection.count_documents(conditions)
 
