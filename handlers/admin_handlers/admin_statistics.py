@@ -145,7 +145,7 @@ async def pretty_polit_stats(ad_tag: str, title: str | None = None):
     client = all_data().get_mongo()
     database = client['database']
     stat_collection = database['statistics_new']
-    text = str()
+    text = "\n\n————————\n————————\n\n"
     async for result in stat_collection.aggregate([
         {
             "$match": {
@@ -307,13 +307,12 @@ async def pretty_polit_stats(ad_tag: str, title: str | None = None):
         text += f"<code>Группа: </code><b>{result['_id']}</b>\n" \
                 f"<code>В начале: </code><b>{round(result.get('Start_perc', [0])[0])}%</b>\n"
         text += f"<code>————————</code>\n" \
-                f"<code>Дошли до конца: </code>{round(result['Made_it'][0])}%\n"
+                f"<code>Дошли до конца: </code>{round(result['Made_it'][0])}%\n<code>Из них</code>\n"
         group_txt, group_title_txt = str(), str()
         for ingroup in result.get('End_change', []):
-            group_txt += f"\n<code>Из них в конце:</code>\n" \
-                         f"<i>{ingroup['Status']}</i>: <b>{round(ingroup['Change'])}%</b>"
+            group_txt += f"<i>{ingroup['Status']}</i>: <b>{round(ingroup['Change'])}%</b>"
         text += group_title_txt
         text += group_txt
-        text += "\n\n————————\n————————\n\n"
+        text += "\n\n————————\n\n"
 
     return text
