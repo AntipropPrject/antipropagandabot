@@ -10,8 +10,11 @@ def count_visual(full_count, part_count, name: str):
     full_count = 1 if not full_count else full_count
     pr = round(int(part_count) / int(full_count) * 100)
     exit_string = ""
+    emojy = '🟩'
+    if name.__contains__("Забанили"):
+        emojy = "🟥"
     for ten in range(round(pr / 10)):
-        exit_string += '🟩'
+        exit_string += emojy
     exit_string = exit_string.ljust(10, "⬜")
     title = f'{name}: {pr}%'
     foot = f'Всего {part_count}'.ljust(10, ' ')
@@ -24,17 +27,27 @@ async def pretty_progress_stats():
     day_unt = await mongo_count_docs('database', 'statistics_new',
                                      {"datetime": {"$gte": past}}, check_default_version=False)
     stat = await mongo_count_docs('database', 'statistics_new', {"come": {"$exists": True}})
+    is_ban = await mongo_count_docs('database', 'userinfo', {"is_ban": {"$exists": True}})
     stat_statistics = await mongo_count_docs('database', 'statistics_new',
                                              {"datetime": {"$gte": release_date['v3.1']}}, check_default_version=False)
+    # is_ban_afterFlags = await mongo_count_docs('database', 'userinfo',
+    #                                            {"is_ban": {'$exists': True},
+    #                                             "datetime": {"$gte": release_date['v3.1']}},
+    #                                            check_default_version=False)
     text = ""
     for point in stat_points:
+        if point=="Забанили бота":
+            continue
         users_count = await mongo_count_docs('database', 'statistics_new',
                                              {stat_points[point]: {'$exists': True},
                                               "datetime": {"$gte": release_date['v3.1']}}, check_default_version=False)
         text += count_visual(stat_statistics, users_count, point)
+    # text += count_visual(stat_statistics, is_ban_afterFlags, 'Забанили бота (после установки всех флагов)')
+    text += count_visual(stat, is_ban, 'Забанили бота')
     text = f"<code>Всего пользователей: {stat}\n" \
            f"Пользователей после установки всех флагов: {stat_statistics}\n" \
-           f"Новых пользователей за сутки: {day_unt}</code>\n\n" + text
+           f"Новых пользователей за сутки: {day_unt}\n\n</code>" \
+           + text
     return text
 
 
@@ -68,7 +81,7 @@ async def pretty_add_progress_stats(ad_tag: str, title: str | None = None):
             }},
             {"$project": {
                 "prop_ex": 1,
-                "antip_final_reaction": 1,
+                "             ": 1,
                 "donbas_final_result": 1,
                 "preventive_final_result": 1,
                 "nato_end": 1,
@@ -76,7 +89,8 @@ async def pretty_add_progress_stats(ad_tag: str, title: str | None = None):
                 "sum_up_done": 1,
                 "mob_feedback": 1,
                 "stopwar_done": 1,
-                "main_menu": 1
+                "main_menu": 1,
+                "userinfo.is_ban": 1,
             }},
             {"$facet": {
                 "prop_ex": [
@@ -118,6 +132,10 @@ async def pretty_add_progress_stats(ad_tag: str, title: str | None = None):
                 "main_menu": [
                     {"$match": {"main_menu": {"$exists": True}}},
                     {"$count": "Sum"}
+                ],
+                "is_ban": [
+                    {"$match": {"userinfo.is_ban": {"$exists": True}}},
+                    {"$count": "Sum"}
                 ]
             }},
             {"$project": {
@@ -130,7 +148,8 @@ async def pretty_add_progress_stats(ad_tag: str, title: str | None = None):
                 "sum_up_done": {"$arrayElemAt": ["$sum_up_done.Sum", 0]},
                 "mob_feedback": {"$arrayElemAt": ["$mob_feedback.Sum", 0]},
                 "stopwar_done": {"$arrayElemAt": ["$stopwar_done.Sum", 0]},
-                "main_menu": {"$arrayElemAt": ["$main_menu.Sum", 0]}
+                "main_menu": {"$arrayElemAt": ["$main_menu.Sum", 0]},
+                "is_ban": {"$arrayElemAt": ["$is_ban.Sum", 0]}
             }}
         ]):
             for point in stat_points:

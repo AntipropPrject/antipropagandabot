@@ -27,8 +27,8 @@ all_test_commands = {
 }
 
 stat_points = {
-    "Вступление:": "prop_ex",
-    "Антипропаганда:": "antip_final_reaction",
+    "Вступление": "prop_ex",
+    "Антипропаганда": "antip_final_reaction",
     "Донбас": "donbas_final_result",
     "Превентивный Удар": "preventive_final_result",
     "НАТО": "nato_end",
@@ -36,5 +36,6 @@ stat_points = {
     "Подведем итоги": "sum_up_done",
     "Мобилизация": "mob_feedback",
     "Как закончить войну": "stopwar_done",
-    "Полностью прошли бота": "main_menu"
+    "Полностью прошли бота": "main_menu",
+    "Забанили бота": "is_ban"
 }
