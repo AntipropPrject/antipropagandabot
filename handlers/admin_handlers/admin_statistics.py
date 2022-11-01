@@ -37,8 +37,7 @@ async def pretty_progress_stats():
                                              {stat_points[point]: {'$exists': True},
                                               "datetime": {"$gte": release_date['v3.1']}}, check_default_version=False)
         text += count_visual(stat_statistics, users_count, point)
-    text += count_visual(stat_statistics, is_ban, 'Забанили бота (после установки всез флагов)')
-    text += count_visual(stat, is_ban, 'Забанили бота(всего)')
+    text += count_visual(stat, is_ban, 'Забанили бота')
     text = f"<code>Всего пользователей: {stat}\n" \
            f"Пользователей после установки всех флагов: {stat_statistics}\n" \
            f"Новых пользователей за сутки: {day_unt}\n\n</code>" \
