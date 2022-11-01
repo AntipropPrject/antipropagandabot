@@ -36,6 +36,8 @@ async def pretty_progress_stats():
     #                                            check_default_version=False)
     text = ""
     for point in stat_points:
+        if point=="is_ban":
+            continue
         users_count = await mongo_count_docs('database', 'statistics_new',
                                              {stat_points[point]: {'$exists': True},
                                               "datetime": {"$gte": release_date['v3.1']}}, check_default_version=False)
