@@ -68,7 +68,7 @@ async def pretty_add_progress_stats(ad_tag: str, title: str | None = None):
             }},
             {"$project": {
                 "prop_ex": 1,
-                "antip_final_reaction": 1,
+                "             ": 1,
                 "donbas_final_result": 1,
                 "preventive_final_result": 1,
                 "nato_end": 1,
@@ -76,7 +76,8 @@ async def pretty_add_progress_stats(ad_tag: str, title: str | None = None):
                 "sum_up_done": 1,
                 "mob_feedback": 1,
                 "stopwar_done": 1,
-                "main_menu": 1
+                "main_menu": 1,
+                "is_ban": 1,
             }},
             {"$facet": {
                 "prop_ex": [
@@ -118,6 +119,10 @@ async def pretty_add_progress_stats(ad_tag: str, title: str | None = None):
                 "main_menu": [
                     {"$match": {"main_menu": {"$exists": True}}},
                     {"$count": "Sum"}
+                ],
+                "is_ban": [
+                    {"$match": {"is_ban": {"$exists": True}}},
+                    {"$count": "Sum"}
                 ]
             }},
             {"$project": {
@@ -130,7 +135,8 @@ async def pretty_add_progress_stats(ad_tag: str, title: str | None = None):
                 "sum_up_done": {"$arrayElemAt": ["$sum_up_done.Sum", 0]},
                 "mob_feedback": {"$arrayElemAt": ["$mob_feedback.Sum", 0]},
                 "stopwar_done": {"$arrayElemAt": ["$stopwar_done.Sum", 0]},
-                "main_menu": {"$arrayElemAt": ["$main_menu.Sum", 0]}
+                "main_menu": {"$arrayElemAt": ["$main_menu.Sum", 0]},
+                "is_ban": {"$arrayElemAt": ["is_ban.Sum", 0]}
             }}
         ]):
             for point in stat_points:
