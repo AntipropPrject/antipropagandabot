@@ -27,8 +27,8 @@ all_test_commands = {
 }
 
 stat_points = {
-    "Вступление:": "prop_ex",
-    "Антипропаганда:": "antip_final_reaction",
+    "Вступление": "prop_ex",
+    "Антипропаганда": "antip_final_reaction",
     "Донбас": "donbas_final_result",
     "Превентивный Удар": "preventive_final_result",
     "НАТО": "nato_end",
