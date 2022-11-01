@@ -30,18 +30,18 @@ async def pretty_progress_stats():
     is_ban = await mongo_count_docs('database', 'userinfo', {"is_ban": {"$exists": True}})
     stat_statistics = await mongo_count_docs('database', 'statistics_new',
                                              {"datetime": {"$gte": release_date['v3.1']}}, check_default_version=False)
-    is_ban_afterFlags = await mongo_count_docs('database', 'userinfo',
-                                               {"is_ban": {'$exists': True},
-                                                "datetime": {"$gte": release_date['v3.1']}},
-                                               check_default_version=False)
+    # is_ban_afterFlags = await mongo_count_docs('database', 'userinfo',
+    #                                            {"is_ban": {'$exists': True},
+    #                                             "datetime": {"$gte": release_date['v3.1']}},
+    #                                            check_default_version=False)
     text = ""
     for point in stat_points:
         users_count = await mongo_count_docs('database', 'statistics_new',
                                              {stat_points[point]: {'$exists': True},
                                               "datetime": {"$gte": release_date['v3.1']}}, check_default_version=False)
         text += count_visual(stat_statistics, users_count, point)
-    text += count_visual(stat_statistics, is_ban_afterFlags, 'Забанили бота (после установки всех флагов)')
-    text += count_visual(stat, is_ban, 'Забанили бота(всего)')
+    # text += count_visual(stat_statistics, is_ban_afterFlags, 'Забанили бота (после установки всех флагов)')
+    text += count_visual(stat, is_ban, 'Забанили бота')
     text = f"<code>Всего пользователей: {stat}\n" \
            f"Пользователей после установки всех флагов: {stat_statistics}\n" \
            f"Новых пользователей за сутки: {day_unt}\n\n</code>" \
@@ -88,7 +88,7 @@ async def pretty_add_progress_stats(ad_tag: str, title: str | None = None):
                 "mob_feedback": 1,
                 "stopwar_done": 1,
                 "main_menu": 1,
-                "is_ban": 1,
+                "userinfo.is_ban": 1,
             }},
             {"$facet": {
                 "prop_ex": [
@@ -132,7 +132,7 @@ async def pretty_add_progress_stats(ad_tag: str, title: str | None = None):
                     {"$count": "Sum"}
                 ],
                 "is_ban": [
-                    {"$match": {"is_ban": {"$exists": True}}},
+                    {"$match": {"userinfo.is_ban": {"$exists": True}}},
                     {"$count": "Sum"}
                 ]
             }},
@@ -147,7 +147,7 @@ async def pretty_add_progress_stats(ad_tag: str, title: str | None = None):
                 "mob_feedback": {"$arrayElemAt": ["$mob_feedback.Sum", 0]},
                 "stopwar_done": {"$arrayElemAt": ["$stopwar_done.Sum", 0]},
                 "main_menu": {"$arrayElemAt": ["$main_menu.Sum", 0]},
-                "is_ban": {"$arrayElemAt": ["is_ban.Sum", 0]}
+                "is_ban": {"$arrayElemAt": ["$is_ban.Sum", 0]}
             }}
         ]):
             for point in stat_points:
