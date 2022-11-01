@@ -26,6 +26,8 @@ async def pretty_progress_stats():
     stat = await mongo_count_docs('database', 'statistics_new', {"come": {"$exists": True}})
     stat_statistics = await mongo_count_docs('database', 'statistics_new',
                                              {"datetime": {"$gte": release_date['v3.1']}}, check_default_version=False)
+    is_ban = await mongo_count_docs('database', 'userinfo',
+                                             {"datetime": {"$gte": release_date['v3.1']}}, check_default_version=False)
     text = ""
     for point in stat_points:
         users_count = await mongo_count_docs('database', 'statistics_new',
@@ -34,7 +36,8 @@ async def pretty_progress_stats():
         text += count_visual(stat_statistics, users_count, point)
     text = f"<code>Всего пользователей: {stat}\n" \
            f"Пользователей после установки всех флагов: {stat_statistics}\n" \
-           f"Новых пользователей за сутки: {day_unt}</code>\n\n" + text
+           f"Новых пользователей за сутки: {day_unt}\n\n" \
+           f"Забанили бота: {is_ban}</code>\n\n"+ text
     return text
 
 
