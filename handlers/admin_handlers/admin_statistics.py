@@ -173,6 +173,7 @@ async def pretty_add_progress_stats(ad_tag: str, title: str | None = None):
         return text
     except Exception as ex:
         await logg.get_error(f"Pretty ad stats is failed!\n\n{ex}")
+        return "mongo error"
 
 
 async def pretty_polit_stats(ad_tag: str, title: str | None = None):
@@ -364,3 +365,4 @@ async def pretty_polit_stats(ad_tag: str, title: str | None = None):
         return text
     except Exception as ex:
         await logg.get_error(f"Pretty polit stats is failed!\n\n{ex}")
+        return "mongo error"
