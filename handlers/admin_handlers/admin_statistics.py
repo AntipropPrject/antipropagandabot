@@ -24,7 +24,10 @@ def count_visual(full_count, part_count, name: str):
 
 async def pretty_progress_stats():
     past = datetime.now() - timedelta(days=1)
-    got_polit_status = await mongo_count_docs('database', 'statistics_new', {"NewPolitStat_start": {"$exists": True}})
+    client = all_data().get_mongo()
+    database = client['database']
+    stat_collection = database['statistics_new']
+    got_polit_status = await stat_collection.count_documents({"NewPolitStat_start": {"$exists": True}})
 
     day_unt = await mongo_count_docs('database', 'statistics_new',
                                      {"datetime": {"$gte": past}}, check_default_version=False)
