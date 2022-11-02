@@ -3,6 +3,7 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message, InlineKeyboardButton, CallbackQuery
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
+from bata import all_data
 from data_base.DBuse import data_getter, sql_safe_insert
 from filters.isAdmin import IsAdmin
 from handlers.admin_handlers.admin_statistics import pretty_add_progress_stats, pretty_polit_stats
@@ -54,9 +55,14 @@ async def marketing_new_link(message: Message, bot: Bot, state: FSMContext):
 
 
 @router.message((F.text == "Проверить все ссылки"), state=admin.marketing)
-async def marketing_all_links(message: Message, bot: Bot, state: FSMContext, user_collection=None):
+async def marketing_all_links(message: Message, bot: Bot, state: FSMContext):
     query = "SELECT * FROM dumbstats.advertising WHERE id like 'adv_%' ORDER BY id"
     companies = await data_getter(query)
+    client = all_data().get_mongo()
+    database = client['database']
+    stat_collection = database['statistics_new']
+    user_collection = database['userinfo']
+    user_collection = database['userinfo']
     if isinstance(companies, list):
         count, text = 0, ''
         for company in companies:
