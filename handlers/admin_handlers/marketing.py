@@ -54,7 +54,7 @@ async def marketing_new_link(message: Message, bot: Bot, state: FSMContext):
 
 
 @router.message((F.text == "Проверить все ссылки"), state=admin.marketing)
-async def marketing_all_links(message: Message, bot: Bot, state: FSMContext):
+async def marketing_all_links(message: Message, bot: Bot, state: FSMContext, user_collection=None):
     query = "SELECT * FROM dumbstats.advertising WHERE id like 'adv_%' ORDER BY id"
     companies = await data_getter(query)
     if isinstance(companies, list):
@@ -62,10 +62,11 @@ async def marketing_all_links(message: Message, bot: Bot, state: FSMContext):
         for company in companies:
             count += 1
             bot_link = f'https://t.me/{(await bot.get_me()).username.replace(" ", "_")}?start={company[0]}'
+            all_count = await user_collection.count_documents({"advertising": company[1]})
             text = text + '-------------------------------------\n' + \
                    f'<code>Название кампании: {company[1]}\n' \
                    f'Ссылка кампании:\n{bot_link}\n' \
-                   f'Количество нажавших "Старт": {company[2]}</code>' + \
+                   f'Количество нажавших "Старт": {all_count}</code>' + \
                    '\n-------------------------------------\n'
             if count == 3 or company == companies[-1]:
                 await message.answer(text)
