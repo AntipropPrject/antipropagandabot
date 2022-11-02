@@ -56,7 +56,7 @@ async def marketing_new_link(message: Message, bot: Bot, state: FSMContext):
 
 @router.message((F.text == "Проверить все ссылки"), state=admin.marketing)
 async def marketing_all_links(message: Message, bot: Bot, state: FSMContext):
-    query = "SELECT * FROM dumbstats.advertising WHERE id like 'adv_%' ORDER BY id"
+    query = "SELECT * FROM dumbstats.advertising WHERE id like 'adv_%' ORDER BY count"
     companies = await data_getter(query)
     client = all_data().get_mongo()
     database = client['database']
