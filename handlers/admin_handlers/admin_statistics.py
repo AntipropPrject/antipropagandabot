@@ -107,6 +107,7 @@ async def pretty_add_progress_stats(ad_tag: str, title: str | None = None):
                 "stopwar_done": 1,
                 "main_menu": 1,
                 "userinfo.is_ban": 1,
+                "NewPolitStat_start" :1,
             }},
             {"$facet": {
                 "prop_ex": [
@@ -149,6 +150,10 @@ async def pretty_add_progress_stats(ad_tag: str, title: str | None = None):
                     {"$match": {"main_menu": {"$exists": True}}},
                     {"$count": "Sum"}
                 ],
+                "NewPolitStat_start": [
+                    {"$match": {"NewPolitStat_start": {"$exists": True}}},
+                    {"$count": "Sum"}
+                ],
                 "is_ban": [
                     {"$match": {"userinfo.is_ban": {"$exists": True}}},
                     {"$count": "Sum"}
@@ -165,6 +170,7 @@ async def pretty_add_progress_stats(ad_tag: str, title: str | None = None):
                 "mob_feedback": {"$arrayElemAt": ["$mob_feedback.Sum", 0]},
                 "stopwar_done": {"$arrayElemAt": ["$stopwar_done.Sum", 0]},
                 "main_menu": {"$arrayElemAt": ["$main_menu.Sum", 0]},
+                "NewPolitStat_start": {"$arrayElemAt": ["NewPolitStat_start.Sum", 0]},
                 "is_ban": {"$arrayElemAt": ["$is_ban.Sum", 0]}
             }}
         ]):
