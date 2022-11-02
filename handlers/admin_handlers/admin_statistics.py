@@ -107,7 +107,6 @@ async def pretty_add_progress_stats(ad_tag: str, title: str | None = None):
                 "stopwar_done": 1,
                 "main_menu": 1,
                 "userinfo.is_ban": 1,
-                "NewPolitStat_start" :1,
             }},
             {"$facet": {
                 "prop_ex": [
@@ -150,10 +149,6 @@ async def pretty_add_progress_stats(ad_tag: str, title: str | None = None):
                     {"$match": {"main_menu": {"$exists": True}}},
                     {"$count": "Sum"}
                 ],
-                "NewPolitStat_start": [
-                    {"$match": {"NewPolitStat_start": {"$exists": True}}},
-                    {"$count": "Sum"}
-                ],
                 "is_ban": [
                     {"$match": {"userinfo.is_ban": {"$exists": True}}},
                     {"$count": "Sum"}
@@ -170,7 +165,6 @@ async def pretty_add_progress_stats(ad_tag: str, title: str | None = None):
                 "mob_feedback": {"$arrayElemAt": ["$mob_feedback.Sum", 0]},
                 "stopwar_done": {"$arrayElemAt": ["$stopwar_done.Sum", 0]},
                 "main_menu": {"$arrayElemAt": ["$main_menu.Sum", 0]},
-                "NewPolitStat_start": {"$arrayElemAt": ["NewPolitStat_start.Sum", 0]},
                 "is_ban": {"$arrayElemAt": ["$is_ban.Sum", 0]}
             }}
         ]):
@@ -187,7 +181,9 @@ async def pretty_polit_stats(ad_tag: str, title: str | None = None):
     client = all_data().get_mongo()
     database = client['database']
     stat_collection = database['statistics_new']
+    all_count = await stat_collection.count_documents({"NewPolitStat_start": {"$exists": True}})
     text = "\n\n————————\n\n"
+    text+= f"<code>Получили политический статус</code>: {all_count}\n\n"
     if ad_tag=="org_traff":
 
         lookup_parametr = {"$lookup": {
