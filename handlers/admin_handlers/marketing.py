@@ -56,7 +56,7 @@ async def marketing_new_link(message: Message, bot: Bot, state: FSMContext):
 
 @router.message((F.text == "Проверить все ссылки"), state=admin.marketing)
 async def marketing_all_links(message: Message, bot: Bot, state: FSMContext):
-    query = "SELECT * FROM dumbstats.advertising WHERE id like 'adv_%' ORDER BY count"
+    query = "SELECT * FROM dumbstats.advertising WHERE id like 'adv_%' ORDER BY id"
     companies = await data_getter(query)
     client = all_data().get_mongo()
     database = client['database']
@@ -82,6 +82,7 @@ async def marketing_all_links(message: Message, bot: Bot, state: FSMContext):
 async def marketing_choose_capmagin(message: Message, state: FSMContext):
     ads = await data_getter("SELECT * FROM dumbstats.advertising WHERE id like 'adv_%' ORDER BY id")
     inmarkup = InlineKeyboardBuilder()
+    inmarkup.row(InlineKeyboardButton(text="Органический трафик", callback_data="org_traff"))
     for ad in ads:
         inmarkup.row(InlineKeyboardButton(text=ad[1], callback_data=ad[0]))
     inmarkup.adjust(2)

@@ -59,14 +59,24 @@ async def pretty_add_progress_stats(ad_tag: str, title: str | None = None):
         user_collection = database['userinfo']
         all_count = await user_collection.count_documents({"advertising": ad_tag})
         text = f"<code>Пришло по ссылке: {all_count}\n\n</code>"
-        if title:
-            text = f"Результаты для\n<b>{title}</b>\n\n" + text
-        async for result in stat_collection.aggregate([
-            {"$match": {
+
+        if ad_tag.isdigit():
+            match_parametr={"$match": {
+                    "datetime": {"$gte": release_date["v3"]},
+                    "is_parent": {"$exists": True}
+                }}
+            lookup_parametr = {"$lookup": {
+                "from": "userinfo",
+                "localField": "_id",
+                "foreignField": "_id",
+                "as": "userinfo"
+            }}
+        else:
+            match_parametr = {"$match": {
                 "datetime": {"$gte": release_date["v3"]},
                 "origin": {"$exists": True}
-            }},
-            {"$lookup": {
+            }}
+            lookup_parametr = {"$lookup": {
                 "from": "userinfo",
                 "localField": "_id",
                 "foreignField": "_id",
@@ -75,7 +85,12 @@ async def pretty_add_progress_stats(ad_tag: str, title: str | None = None):
                         "advertising": ad_tag
                     }}],
                 "as": "userinfo"
-            }},
+            }}
+        if title:
+            text = f"Результаты для\n<b>{title}</b>\n\n" + text
+        async for result in stat_collection.aggregate([
+            match_parametr,
+            lookup_parametr,
             {"$match": {
                 "userinfo": {"$ne": []}
             }},
