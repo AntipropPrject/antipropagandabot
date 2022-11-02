@@ -60,22 +60,19 @@ async def pretty_add_progress_stats(ad_tag: str, title: str | None = None):
         all_count = await user_collection.count_documents({"advertising": ad_tag})
         text = f"<code>Пришло по ссылке: {all_count}\n\n</code>"
 
-        if ad_tag.isdigit():
-            match_parametr={"$match": {
-                    "datetime": {"$gte": release_date["v3"]},
-                    "is_parent": {"$exists": True}
-                }}
+        if ad_tag=="org_traff":
             lookup_parametr = {"$lookup": {
                 "from": "userinfo",
                 "localField": "_id",
                 "foreignField": "_id",
+                "pipeline": [
+                    {"$match": {
+                        "ref_parent": {"$exists": True}
+                    }}],
                 "as": "userinfo"
             }}
+            all_count = await user_collection.count_documents({"ref_parent": {"$exists": True}})
         else:
-            match_parametr = {"$match": {
-                "datetime": {"$gte": release_date["v3"]},
-                "origin": {"$exists": True}
-            }}
             lookup_parametr = {"$lookup": {
                 "from": "userinfo",
                 "localField": "_id",
@@ -89,7 +86,10 @@ async def pretty_add_progress_stats(ad_tag: str, title: str | None = None):
         if title:
             text = f"Результаты для\n<b>{title}</b>\n\n" + text
         async for result in stat_collection.aggregate([
-            match_parametr,
+            {"$match": {
+                "datetime": {"$gte": release_date["v3"]},
+                "origin": {"$exists": True}
+            }},
             lookup_parametr,
             {"$match": {
                 "userinfo": {"$ne": []}
@@ -181,25 +181,20 @@ async def pretty_polit_stats(ad_tag: str, title: str | None = None):
     database = client['database']
     stat_collection = database['statistics_new']
     text = "\n\n————————\n\n"
-    if ad_tag.isdigit():
-        match_parametr = {
-            "$match": {
-                "NewPolitStat_start": {"$exists": True},
-                "is_parent": {"$exists": True}
-            }
-        }
+    if ad_tag=="org_traff":
+
         lookup_parametr = {"$lookup": {
             "from": "userinfo",
             "localField": "_id",
             "foreignField": "_id",
+            "pipeline": [
+                {"$match": {
+                    "ref_parent": {"$exists": True}
+                }}],
             "as": "userinfo"
         }}
     else:
-        match_parametr = {
-            "$match": {
-                "NewPolitStat_start": {"$exists": True}
-            }
-        }
+
         lookup_parametr = {"$lookup": {
             "from": "userinfo",
             "localField": "_id",
@@ -212,7 +207,11 @@ async def pretty_polit_stats(ad_tag: str, title: str | None = None):
         }}
     try:
         async for result in stat_collection.aggregate([
-            match_parametr,
+            {
+                "$match": {
+                    "NewPolitStat_start": {"$exists": True}
+                }
+            },
             lookup_parametr,
             {
                 "$match": {
