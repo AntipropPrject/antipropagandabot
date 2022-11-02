@@ -13,6 +13,7 @@ from utilts import ref_master
 router = Router()
 router.message.filter(state=admin)
 
+
 @router.message(IsAdmin(level=['Маркетинг']), (F.text == 'Маркетинг 📈'), state=admin.menu)
 async def marketing_menu(message: Message, state: FSMContext):
     await state.set_state(admin.marketing)
@@ -89,7 +90,7 @@ async def marketing_choose_capmagin(message: Message, state: FSMContext):
     await message.answer("<b>Нажмите на кнопку с интересующей вас ссылкой:</b>", reply_markup=inmarkup.as_markup())
 
 
-@router.callback_query(F.data.contains("adv_"))
+@router.callback_query(F.data.contains("adv_") | F.data.contains("org_traff"))
 async def marketing_choose_capmagin(query: CallbackQuery, state: FSMContext):
     await query.answer()
     adv_tag = query.data
