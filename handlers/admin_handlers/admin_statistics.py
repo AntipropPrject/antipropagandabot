@@ -55,40 +55,41 @@ async def pretty_progress_stats():
 
 
 async def pretty_add_progress_stats(ad_tag: str, title: str | None = None):
+
+    client = all_data().get_mongo()
+    database = client['database']
+    stat_collection = database['statistics_new']
+    user_collection = database['userinfo']
+    all_count = await user_collection.count_documents({"advertising": ad_tag})
+
+    if ad_tag=="org_traff":
+        lookup_parametr = {"$lookup": {
+            "from": "userinfo",
+            "localField": "_id",
+            "foreignField": "_id",
+            "pipeline": [
+                {"$match": {
+                    "ref_parent": {"$exists": True}
+                }}],
+            "as": "userinfo"
+        }}
+        all_count = await user_collection.count_documents({"ref_parent": {"$exists": True}})
+    else:
+        lookup_parametr = {"$lookup": {
+            "from": "userinfo",
+            "localField": "_id",
+            "foreignField": "_id",
+            "pipeline": [
+                {"$match": {
+                    "advertising": ad_tag
+                }}],
+            "as": "userinfo"
+        }}
+    text = f"<code>Пришло по ссылке: {all_count}\n\n</code>"
+
+    if title:
+        text = f"Результаты для\n<b>{title}</b>\n\n" + text
     try:
-        client = all_data().get_mongo()
-        database = client['database']
-        stat_collection = database['statistics_new']
-        user_collection = database['userinfo']
-        all_count = await user_collection.count_documents({"advertising": ad_tag})
-
-        if ad_tag=="org_traff":
-            lookup_parametr = {"$lookup": {
-                "from": "userinfo",
-                "localField": "_id",
-                "foreignField": "_id",
-                "pipeline": [
-                    {"$match": {
-                        "ref_parent": {"$exists": True}
-                    }}],
-                "as": "userinfo"
-            }}
-            all_count = await user_collection.count_documents({"ref_parent": {"$exists": True}})
-        else:
-            lookup_parametr = {"$lookup": {
-                "from": "userinfo",
-                "localField": "_id",
-                "foreignField": "_id",
-                "pipeline": [
-                    {"$match": {
-                        "advertising": ad_tag
-                    }}],
-                "as": "userinfo"
-            }}
-        text = f"<code>Пришло по ссылке: {all_count}\n\n</code>"
-
-        if title:
-            text = f"Результаты для\n<b>{title}</b>\n\n" + text
         async for result in stat_collection.aggregate([
             {"$match": {
                 "datetime": {"$gte": release_date["v3"]},
