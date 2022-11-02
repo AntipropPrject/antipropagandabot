@@ -58,7 +58,6 @@ async def pretty_add_progress_stats(ad_tag: str, title: str | None = None):
         stat_collection = database['statistics_new']
         user_collection = database['userinfo']
         all_count = await user_collection.count_documents({"advertising": ad_tag})
-        text = f"<code>Пришло по ссылке: {all_count}\n\n</code>"
 
         if ad_tag=="org_traff":
             lookup_parametr = {"$lookup": {
@@ -83,6 +82,8 @@ async def pretty_add_progress_stats(ad_tag: str, title: str | None = None):
                     }}],
                 "as": "userinfo"
             }}
+        text = f"<code>Пришло по ссылке: {all_count}\n\n</code>"
+
         if title:
             text = f"Результаты для\n<b>{title}</b>\n\n" + text
         async for result in stat_collection.aggregate([
