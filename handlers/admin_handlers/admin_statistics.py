@@ -24,6 +24,8 @@ def count_visual(full_count, part_count, name: str):
 
 async def pretty_progress_stats():
     past = datetime.now() - timedelta(days=1)
+    got_polit_status = await mongo_count_docs('database', 'statistics_new', {"NewPolitStat_start": {"$exists": True}})
+
     day_unt = await mongo_count_docs('database', 'statistics_new',
                                      {"datetime": {"$gte": past}}, check_default_version=False)
     stat = await mongo_count_docs('database', 'statistics_new', {"come": {"$exists": True}})
@@ -46,6 +48,7 @@ async def pretty_progress_stats():
     text += count_visual(stat, is_ban, 'Забанили бота')
     text = f"<code>Всего пользователей: {stat}\n" \
            f"Пользователей после установки всех флагов: {stat_statistics}\n" \
+           f"Получили политический статус: {got_polit_status}\n\n</code>" \
            f"Новых пользователей за сутки: {day_unt}\n\n</code>" \
            + text
     return text
