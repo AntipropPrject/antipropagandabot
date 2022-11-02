@@ -111,7 +111,7 @@ async def pretty_add_progress_stats(ad_tag: str, title: str | None = None):
                 "stopwar_done": 1,
                 "main_menu": 1,
                 "polit_status" : 1,
-                "userinfo.is_ban": 1,
+                "userinfo.is_ban": 1
             }},
             {"$facet": {
                 "prop_ex": [
