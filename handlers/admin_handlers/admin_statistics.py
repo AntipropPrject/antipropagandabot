@@ -174,7 +174,7 @@ async def pretty_add_progress_stats(ad_tag: str, title: str | None = None):
                 "mob_feedback": {"$arrayElemAt": ["$mob_feedback.Sum", 0]},
                 "stopwar_done": {"$arrayElemAt": ["$stopwar_done.Sum", 0]},
                 "main_menu": {"$arrayElemAt": ["$main_menu.Sum", 0]},
-                "polit_status": {"$arrayElemAt": ["$NewPolitStat_start.Sum", 0]},
+                "NewPolitStat_start": {"$arrayElemAt": ["$NewPolitStat_start.Sum", 0]},
                 "is_ban": {"$arrayElemAt": ["$is_ban.Sum", 0]}
             }}
         ]):
