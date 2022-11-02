@@ -60,15 +60,13 @@ async def marketing_all_links(message: Message, bot: Bot, state: FSMContext):
     companies = await data_getter(query)
     client = all_data().get_mongo()
     database = client['database']
-    stat_collection = database['statistics_new']
-    user_collection = database['userinfo']
     user_collection = database['userinfo']
     if isinstance(companies, list):
         count, text = 0, ''
         for company in companies:
             count += 1
             bot_link = f'https://t.me/{(await bot.get_me()).username.replace(" ", "_")}?start={company[0]}'
-            all_count = await user_collection.count_documents({"advertising": company[1]})
+            all_count = await user_collection.count_documents({"advertising": "adv_17"})
             text = text + '-------------------------------------\n' + \
                    f'<code>Название кампании: {company[1]}\n' \
                    f'Ссылка кампании:\n{bot_link}\n' \
