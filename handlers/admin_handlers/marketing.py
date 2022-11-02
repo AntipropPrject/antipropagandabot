@@ -94,7 +94,10 @@ async def marketing_choose_capmagin(message: Message, state: FSMContext):
 async def marketing_choose_capmagin(query: CallbackQuery, state: FSMContext):
     await query.answer()
     adv_tag = query.data
-    ad_name = (await data_getter(f"SELECT label FROM dumbstats.advertising WHERE id = '{adv_tag}'"))[0][0]
+    if adv_tag=="org_traff":
+        ad_name = "Органический трафик"
+    else:
+        ad_name = (await data_getter(f"SELECT label FROM dumbstats.advertising WHERE id = '{adv_tag}'"))[0][0]
     text = await pretty_add_progress_stats(adv_tag, ad_name)
     text2 = await pretty_polit_stats(adv_tag, ad_name)
     await query.message.answer("1")
