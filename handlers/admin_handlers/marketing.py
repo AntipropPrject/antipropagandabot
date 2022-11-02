@@ -66,7 +66,7 @@ async def marketing_all_links(message: Message, bot: Bot, state: FSMContext):
         for company in companies:
             count += 1
             bot_link = f'https://t.me/{(await bot.get_me()).username.replace(" ", "_")}?start={company[0]}'
-            all_count = await user_collection.count_documents({"advertising": "adv_17"})
+            all_count = await user_collection.count_documents({"advertising": f"{company[0]}"})
             text = text + '-------------------------------------\n' + \
                    f'<code>Название кампании: {company[1]}\n' \
                    f'Ссылка кампании:\n{bot_link}\n' \
