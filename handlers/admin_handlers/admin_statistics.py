@@ -364,7 +364,6 @@ async def pretty_polit_stats(ad_tag: str, title: str | None = None):
                     f"<code>В начале: </code><b>{round(result.get('Start_perc', [0])[0])}%</b>\n"
             text += f"<code>————————</code>\n" \
                     f"<code>Дошли до конца: </code>{round(result['Made_it'][0])}%\n<code>Из них:</code>\n"
-            text+=  f"<code>Получили политический статус</code>: {all_count}\n\n"
 
             group_txt, group_title_txt = str(), str()
             for ingroup in result.get('End_change', []):
