@@ -6,13 +6,11 @@ from log import logg
 from resources.variables import stat_points, release_date
 
 
-def count_visual(full_count, part_count, name: str):
+def count_visual(full_count, part_count, name: str, filler: str = '🟩'):
     full_count = 1 if not full_count else full_count
     pr = round(int(part_count) / int(full_count) * 100)
     exit_string = ""
     emojy = '🟩'
-    if name.__contains__("Забанили"):
-        emojy = "🟥"
     for ten in range(round(pr / 10)):
         exit_string += emojy
     exit_string = exit_string.ljust(10, "⬜")
@@ -27,23 +25,16 @@ async def pretty_progress_stats():
     day_unt = await mongo_count_docs('database', 'statistics_new',
                                      {"datetime": {"$gte": past}}, check_default_version=False)
     stat = await mongo_count_docs('database', 'statistics_new', {"come": {"$exists": True}})
-    is_ban = await mongo_count_docs('database', 'userinfo', {"is_ban": {"$exists": True}})
     stat_statistics = await mongo_count_docs('database', 'statistics_new',
                                              {"datetime": {"$gte": release_date['v3.1']}}, check_default_version=False)
-    # is_ban_afterFlags = await mongo_count_docs('database', 'userinfo',
-    #                                            {"is_ban": {'$exists': True},
-    #                                             "datetime": {"$gte": release_date['v3.1']}},
-    #                                            check_default_version=False)
     text = ""
     for point in stat_points:
-        if point=="Забанили бота":
-            continue
         users_count = await mongo_count_docs('database', 'statistics_new',
                                              {stat_points[point]: {'$exists': True},
                                               "datetime": {"$gte": release_date['v3.1']}}, check_default_version=False)
         text += count_visual(stat_statistics, users_count, point)
-    # text += count_visual(stat_statistics, is_ban_afterFlags, 'Забанили бота (после установки всех флагов)')
-    text += count_visual(stat, is_ban, 'Забанили бота')
+    is_ban = await mongo_count_docs('database', 'userinfo', {"is_ban": True})
+    text += count_visual(stat, is_ban, 'Забанили бота', filler='🟥')
     text = f"<code>Всего пользователей: {stat}\n" \
            f"Пользователей после установки всех флагов: {stat_statistics}\n" \
            f"Новых пользователей за сутки: {day_unt}\n\n</code>" \
@@ -61,7 +52,7 @@ async def pretty_add_progress_stats(ad_tag: str, title: str | None = None):
         text = f"<code>Пришло по ссылке: {all_count}\n\n</code>"
 
         if ad_tag.isdigit():
-            match_parametr={"$match": {
+            match_parametr = {"$match": {
                     "datetime": {"$gte": release_date["v3"]},
                     "is_parent": {"$exists": True}
                 }}

@@ -85,7 +85,7 @@ async def marketing_choose_capmagin(message: Message, state: FSMContext):
     inmarkup.row(InlineKeyboardButton(text="Органический трафик", callback_data="org_traff"))
     for ad in ads:
         inmarkup.row(InlineKeyboardButton(text=ad[1], callback_data=ad[0]))
-    inmarkup.adjust(2)
+    inmarkup.adjust(1, 2)
     await message.answer("<b>Нажмите на кнопку с интересующей вас ссылкой:</b>", reply_markup=inmarkup.as_markup())
 
 
