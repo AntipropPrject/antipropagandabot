@@ -37,4 +37,6 @@ stat_points = {
     "Мобилизация": "mob_feedback",
     "Как закончить войну": "stopwar_done",
     "Полностью прошли бота": "main_menu",
+    "Получили политический статус": "NewPolitStat_start",
+    "Забанили бота": "is_ban"
 }
