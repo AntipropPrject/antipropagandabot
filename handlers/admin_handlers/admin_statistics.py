@@ -22,21 +22,12 @@ def count_visual(full_count, part_count, name: str, filler: str = '🟩'):
 
 async def pretty_progress_stats():
     past = datetime.now() - timedelta(days=1)
-    client = all_data().get_mongo()
-
     day_unt = await mongo_count_docs('database', 'statistics_new',
                                      {"datetime": {"$gte": past}}, check_default_version=False)
     stat = await mongo_count_docs('database', 'statistics_new', {"come": {"$exists": True}})
     stat_statistics = await mongo_count_docs('database', 'statistics_new',
                                              {"datetime": {"$gte": release_date['v3.1']}}, check_default_version=False)
-    text = ""
-    for point in stat_points:
-        if point == "Забанили бота":
-            continue
-        users_count = await mongo_count_docs('database', 'statistics_new',
-                                             {stat_points[point]: {'$exists': True},
-                                              "datetime": {"$gte": release_date['v3.1']}}, check_default_version=False)
-        text += count_visual(stat_statistics, users_count, point)
+    text = await pretty_add_progress_stats()
     is_ban = await mongo_count_docs('database', 'userinfo', {"is_ban": True})
     text += count_visual(stat, is_ban, 'Забанили бота', filler='🟥')
     text = f"<code>Всего пользователей: {stat}\n" \
@@ -51,12 +42,13 @@ async def pretty_add_progress_stats(ad_tag: str = None, title: str | None = None
     database = client['database']
     stat_collection = database['statistics_new']
     user_collection = database['userinfo']
-    if ad_tag == "org_traff":
-        lookup_pipline = [{"$match": {"ref_parent": {"$exists": True}}}]
-        all_count = await user_collection.count_documents({"ref_parent": {"$exists": True}})
-    elif "adv_" in ad_tag:
-        lookup_pipline = [{"$match": {"advertising": ad_tag}}]
-        all_count = await user_collection.count_documents({"advertising": ad_tag})
+    if ad_tag:
+        if ad_tag == "org_traff":
+            lookup_pipline = [{"$match": {"ref_parent": {"$exists": True}}}]
+            all_count = await user_collection.count_documents({"ref_parent": {"$exists": True}})
+        else:
+            lookup_pipline = [{"$match": {"advertising": ad_tag}}]
+            all_count = await user_collection.count_documents({"advertising": ad_tag})
     else:
         lookup_pipline = [{"$match": {"datetime": {"$exists": True}}}]
         all_count = await user_collection.count_documents({"datetime": {"$gte": release_date["v3.1"]}})
@@ -68,9 +60,10 @@ async def pretty_add_progress_stats(ad_tag: str = None, title: str | None = None
             "as": "userinfo"
         }}
 
-    text = f"<code>Пришло по ссылке: {all_count}\n\n</code>"
     if title:
-        text = f"Результаты для\n<b>{title}</b>\n\n" + text
+        text = f"<b>{title}</b>\n\n<code>Пришло по ссылке: {all_count}\n\n</code>"
+    else:
+        text = str()
     try:
         async for result in stat_collection.aggregate([
             {"$match": {
