@@ -13,6 +13,7 @@ from utilts import ref_master
 router = Router()
 router.message.filter(state=admin)
 
+
 @router.message(IsAdmin(level=['Маркетинг']), (F.text == 'Маркетинг 📈'), state=admin.menu)
 async def marketing_menu(message: Message, state: FSMContext):
     await state.set_state(admin.marketing)
@@ -89,11 +90,14 @@ async def marketing_choose_capmagin(message: Message, state: FSMContext):
     await message.answer("<b>Нажмите на кнопку с интересующей вас ссылкой:</b>", reply_markup=inmarkup.as_markup())
 
 
-@router.callback_query(F.data.contains("adv_"))
+@router.callback_query(F.data.contains("adv_") | F.data.contains("org_traff"))
 async def marketing_choose_capmagin(query: CallbackQuery, state: FSMContext):
     await query.answer()
     adv_tag = query.data
-    ad_name = (await data_getter(f"SELECT label FROM dumbstats.advertising WHERE id = '{adv_tag}'"))[0][0]
+    if adv_tag=="org_traff":
+        ad_name = "Органический трафик"
+    else:
+        ad_name = (await data_getter(f"SELECT label FROM dumbstats.advertising WHERE id = '{adv_tag}'"))[0][0]
     text = await pretty_add_progress_stats(adv_tag, ad_name)
     text2 = await pretty_polit_stats(adv_tag, ad_name)
     await query.message.answer(text)
