@@ -22,7 +22,6 @@ async def backups():
 
 
 async def periodic_advs():
-    # Включение/выключение можно попробовать сделать через планировщик
     status_spam = await redis_just_one_read('Usrs: admins: spam: status:')
     if status_spam == '1':
         print("Mailing")

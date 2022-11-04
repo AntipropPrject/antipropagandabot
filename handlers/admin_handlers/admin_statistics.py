@@ -6,13 +6,11 @@ from log import logg
 from resources.variables import stat_points, release_date
 
 
-def count_visual(full_count, part_count, name: str):
+def count_visual(full_count, part_count, name: str, filler: str = '🟩'):
     full_count = 1 if not full_count else full_count
     pr = round(int(part_count) / int(full_count) * 100)
     exit_string = ""
     emojy = '🟩'
-    if name.__contains__("Забанили"):
-        emojy = "🟥"
     for ten in range(round(pr / 10)):
         exit_string += emojy
     exit_string = exit_string.ljust(10, "⬜")
@@ -24,29 +22,14 @@ def count_visual(full_count, part_count, name: str):
 
 async def pretty_progress_stats():
     past = datetime.now() - timedelta(days=1)
-    client = all_data().get_mongo()
-
-
     day_unt = await mongo_count_docs('database', 'statistics_new',
                                      {"datetime": {"$gte": past}}, check_default_version=False)
     stat = await mongo_count_docs('database', 'statistics_new', {"come": {"$exists": True}})
-    is_ban = await mongo_count_docs('database', 'userinfo', {"is_ban": {"$exists": True}})
     stat_statistics = await mongo_count_docs('database', 'statistics_new',
                                              {"datetime": {"$gte": release_date['v3.1']}}, check_default_version=False)
-    # is_ban_afterFlags = await mongo_count_docs('database', 'userinfo',
-    #                                            {"is_ban": {'$exists': True},
-    #                                             "datetime": {"$gte": release_date['v3.1']}},
-    #                                            check_default_version=False)
-    text = ""
-    for point in stat_points:
-        if point=="Забанили бота":
-            continue
-        users_count = await mongo_count_docs('database', 'statistics_new',
-                                             {stat_points[point]: {'$exists': True},
-                                              "datetime": {"$gte": release_date['v3.1']}}, check_default_version=False)
-        text += count_visual(stat_statistics, users_count, point)
-    # text += count_visual(stat_statistics, is_ban_afterFlags, 'Забанили бота (после установки всех флагов)')
-    text += count_visual(stat, is_ban, 'Забанили бота')
+    text = await pretty_add_progress_stats()
+    is_ban = await mongo_count_docs('database', 'userinfo', {"is_ban": True})
+    text += count_visual(stat, is_ban, 'Забанили бота', filler='🟥')
     text = f"<code>Всего пользователей: {stat}\n" \
            f"Пользователей после установки всех флагов: {stat_statistics}\n" \
            f"Новых пользователей за сутки: {day_unt}\n\n</code>" \
@@ -54,45 +37,37 @@ async def pretty_progress_stats():
     return text
 
 
-async def pretty_add_progress_stats(ad_tag: str, title: str | None = None):
-
+async def pretty_add_progress_stats(ad_tag: str = None, title: str | None = None):
     client = all_data().get_mongo()
     database = client['database']
     stat_collection = database['statistics_new']
     user_collection = database['userinfo']
-    all_count = await user_collection.count_documents({"advertising": ad_tag})
-
-    if ad_tag=="org_traff":
-        lookup_parametr = {"$lookup": {
-            "from": "userinfo",
-            "localField": "_id",
-            "foreignField": "_id",
-            "pipeline": [
-                {"$match": {
-                    "ref_parent": {"$exists": True}
-                }}],
-            "as": "userinfo"
-        }}
-        all_count = await user_collection.count_documents({"ref_parent": {"$exists": True}})
+    if ad_tag:
+        if ad_tag == "org_traff":
+            lookup_pipline = [{"$match": {"ref_parent": {"$exists": True}}}]
+            all_count = await user_collection.count_documents({"ref_parent": {"$exists": True}})
+        else:
+            lookup_pipline = [{"$match": {"advertising": ad_tag}}]
+            all_count = await user_collection.count_documents({"advertising": ad_tag})
     else:
-        lookup_parametr = {"$lookup": {
+        lookup_pipline = [{"$match": {"datetime": {"$exists": True}}}]
+        all_count = await user_collection.count_documents({"datetime": {"$gte": release_date["v3.1"]}})
+    lookup_parametr = {"$lookup": {
             "from": "userinfo",
             "localField": "_id",
             "foreignField": "_id",
-            "pipeline": [
-                {"$match": {
-                    "advertising": ad_tag
-                }}],
+            "pipeline": lookup_pipline,
             "as": "userinfo"
         }}
-    text = f"<code>Пришло по ссылке: {all_count}\n\n</code>"
 
     if title:
-        text = f"Результаты для\n<b>{title}</b>\n\n" + text
+        text = f"<b>{title}</b>\n\n<code>Пришло по ссылке: {all_count}\n\n</code>"
+    else:
+        text = str()
     try:
         async for result in stat_collection.aggregate([
             {"$match": {
-                "datetime": {"$gte": release_date["v3"]},
+                "datetime": {"$gte": release_date["v3.1"]},
                 "origin": {"$exists": True}
             }},
             lookup_parametr,
@@ -191,8 +166,8 @@ async def pretty_polit_stats(ad_tag: str, title: str | None = None):
     client = all_data().get_mongo()
     database = client['database']
     stat_collection = database['statistics_new']
-    text = "\n\n————————\n\n"
-    if ad_tag=="org_traff":
+    text = "\n\n————————\n"
+    if ad_tag == "org_traff":
 
         lookup_parametr = {"$lookup": {
             "from": "userinfo",
@@ -351,27 +326,46 @@ async def pretty_polit_stats(ad_tag: str, title: str | None = None):
                             100
                         ]
                     },
+                    "EndCount": 1,
+                    "StartCount": 1,
+                    "Group count": "$Groups.users_count",
                     "Total": "$Total"
                 }
             },
             {"$group": {
                 "_id": "$Start",
-                "Start_perc": {"$addToSet": "$start_percentage"},
-                "Made_it": {"$addToSet": "$made_it_to_the_end"},
-                "End_change": {"$addToSet": {"Status": "$End", "Change": "$changed_percentage"}}
+                "Start": {
+                    "$addToSet": {
+                        "Perc": "$start_percentage",
+                        "Raw count": "$StartCount"
+                    }},
+                "Made_it": {
+                    "$addToSet": {
+                        "Perc": "$made_it_to_the_end",
+                        "Raw count": "$EndCount"
+                    }},
+                "End_change": {
+                    "$addToSet": {
+                        "Status": "$End",
+                        "Change": "$changed_percentage",
+                        "Raw count": "$Group count"}}
             }}
         ]):
+            start_data = result.get('Start')[0]
             text += f"<code>Группа: </code><b>{result['_id']}</b>\n" \
-                    f"<code>В начале: </code><b>{round(result.get('Start_perc', [0])[0])}%</b>\n"
+                    f"<code>В начале: </code><b>{round(start_data['Perc'])}%</b> ({start_data['Raw count']})\n"
+            end_data = result.get('Made_it')[0]
             text += f"<code>————————</code>\n" \
-                    f"<code>Дошли до конца: </code>{round(result['Made_it'][0])}%\n<code>Из них:</code>\n"
+                    f"<code>Дошли до конца: </code><b>{round(end_data['Perc'])}%</b> ({start_data['Raw count']})" \
+                    f"\n<code>Из них:</code>\n"
 
             group_txt, group_title_txt = str(), str()
             for ingroup in result.get('End_change', []):
-                group_txt += f"<i>{ingroup['Status']}</i>: <b>{round(ingroup['Change'])}%</b>\n"
+                group_txt += f"<code>- {ingroup['Status']}</code>: <b>{round(ingroup['Change'])}%</b> " \
+                             f"({ingroup['Raw count']})"
             text += group_title_txt
             text += group_txt
-            text += "\n\n————————\n\n"
+            text += "\n————————\n"
 
         return text
     except Exception as ex:
