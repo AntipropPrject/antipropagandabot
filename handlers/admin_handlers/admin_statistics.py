@@ -166,8 +166,8 @@ async def pretty_polit_stats(ad_tag: str, title: str | None = None):
     client = all_data().get_mongo()
     database = client['database']
     stat_collection = database['statistics_new']
-    text = "\n\n————————\n\n"
-    if ad_tag=="org_traff":
+    text = "\n\n————————\n"
+    if ad_tag == "org_traff":
 
         lookup_parametr = {"$lookup": {
             "from": "userinfo",
@@ -326,27 +326,46 @@ async def pretty_polit_stats(ad_tag: str, title: str | None = None):
                             100
                         ]
                     },
+                    "EndCount": 1,
+                    "StartCount": 1,
+                    "Group count": "$Groups.users_count",
                     "Total": "$Total"
                 }
             },
             {"$group": {
                 "_id": "$Start",
-                "Start_perc": {"$addToSet": "$start_percentage"},
-                "Made_it": {"$addToSet": "$made_it_to_the_end"},
-                "End_change": {"$addToSet": {"Status": "$End", "Change": "$changed_percentage"}}
+                "Start": {
+                    "$addToSet": {
+                        "Perc": "$start_percentage",
+                        "Raw count": "$StartCount"
+                    }},
+                "Made_it": {
+                    "$addToSet": {
+                        "Perc": "$made_it_to_the_end",
+                        "Raw count": "$EndCount"
+                    }},
+                "End_change": {
+                    "$addToSet": {
+                        "Status": "$End",
+                        "Change": "$changed_percentage",
+                        "Raw count": "$Group count"}}
             }}
         ]):
+            start_data = result.get('Start')[0]
             text += f"<code>Группа: </code><b>{result['_id']}</b>\n" \
-                    f"<code>В начале: </code><b>{round(result.get('Start_perc', [0])[0])}%</b>\n"
+                    f"<code>В начале: </code><b>{round(start_data['Perc'])}%</b> <i>({start_data['Raw count']})</i>\n"
+            end_data = result.get('Made_it')[0]
             text += f"<code>————————</code>\n" \
-                    f"<code>Дошли до конца: </code>{round(result['Made_it'][0])}%\n<code>Из них:</code>\n"
+                    f"<code>Дошли до конца: </code>{round(end_data['Perc'])}% <i>({start_data['Raw count']})</i>" \
+                    f"\n<code>Из них:</code>\n"
 
             group_txt, group_title_txt = str(), str()
             for ingroup in result.get('End_change', []):
-                group_txt += f"<i>{ingroup['Status']}</i>: <b>{round(ingroup['Change'])}%</b>\n"
+                group_txt += f"<i>{ingroup['Status']}</i>: <b>{round(ingroup['Change'])}%</b> " \
+                             f"<i>({ingroup['Raw count']})</i>"
             text += group_title_txt
             text += group_txt
-            text += "\n\n————————\n\n"
+            text += "\n————————\n"
 
         return text
     except Exception as ex:
