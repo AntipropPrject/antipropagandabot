@@ -352,18 +352,19 @@ async def pretty_polit_stats(ad_tag: str, title: str | None = None):
             }}
         ]):
             start_data = result.get('Start')[0]
-            text += f"<code>Группа: </code><b>{result['_id']}</b>\n" \
-                    f"<code>В начале: </code><b>{round(start_data['Perc'])}%</b> ({start_data['Raw count']})\n"
+            text += f"<code>Группа:</code> <code>{result['_id']}</code>\n"
+            text += f"<code>В начале:</code> <code>{round(start_data['Perc'])}%</code>".ljust(62)
+            text += f"<code>{start_data['Raw count']}</code>".rjust(19) + "\n"
             end_data = result.get('Made_it')[0]
-            text += f"<code>————————</code>\n" \
-                    f"<code>Дошли до конца: </code><b>{round(end_data['Perc'])}%</b>".ljust(28)
-            text += f" {start_data['Raw count']}".rjust(5)
+            text += f"<code>————————</code>\n"
+            text += f"<code>Дошли до конца:</code> <code>{round(end_data['Perc'])}%</code>".ljust(55)
+            text += f"<code>{start_data['Raw count']}</code>".rjust(19) + "\n"
             text += f"\n<code>Из них:</code>\n"
 
             group_txt, group_title_txt = str(), str()
             for ingroup in result.get('End_change', []):
-                group_txt += f"<code>- {ingroup['Status']}:</code> <b>{round(ingroup['Change'])}%</b>".ljust(28)
-                group_txt += f"{ingroup['Raw count']}\n".rjust(5)
+                group_txt += f"<code>- {ingroup['Status']}:</code> <code>{round(ingroup['Change'])}%</code>".ljust(55)
+                group_txt += f"<code>{ingroup['Raw count']}</code>".rjust(19) + "\n"
             text += group_title_txt
             text += group_txt
             text += "\n————————\n"
