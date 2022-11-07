@@ -6,7 +6,7 @@ from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
-from data_base.DBuse import poll_write, sql_safe_select, poll_get, redis_delete_from_list, mongo_count_docs
+from data_base.DBuse import poll_write, sql_safe_select, poll_get, redis_delete_from_list, mongo_count_stats
 from filters.MapFilters import DonbassOptionsFilter, WarGoals
 from keyboards.map_keys import polls_continue_kb
 from resources.all_polls import donbass_first_poll, welc_message_one
@@ -100,13 +100,12 @@ async def donbass_arguments_result(poll_answer: types.PollAnswer, bot: Bot, stat
         sorted_text += line
     text = text.replace('[[LIST]]', sorted_text)
 
-    all_sumary = await mongo_count_docs('database', 'statistics_new', {'donbas_poll_summary': {'$exists': True}})
-    agree_sumary = await mongo_count_docs('database', 'statistics_new',
-                                          {'donbas_poll_summary': '🤝 Согласились без возражений'})
-    agree_but_sumary = await mongo_count_docs('database', 'statistics_new',
-                                              {'donbas_poll_summary': '☝️ Согласились, но возразили'})
-    not_agree_sumary = await mongo_count_docs('database', 'statistics_new',
-                                              {'donbas_poll_summary': '🙅‍♂️ Не согласились и возразили'})
+    all_sumary = await mongo_count_stats('statistics_new', {'donbas_poll_summary': {'$exists': True}})
+    agree_sumary = await mongo_count_stats('statistics_new', {'donbas_poll_summary': '🤝 Согласились без возражений'})
+    agree_but_sumary = await mongo_count_stats('statistics_new',
+                                               {'donbas_poll_summary': '☝️ Согласились, но возразили'})
+    not_agree_sumary = await mongo_count_stats('statistics_new',
+                                               {'donbas_poll_summary': '🙅‍♂️ Не согласились и возразили'})
     txt = CoolPercReplacer(text, all_sumary)
     txt.replace('XX', agree_sumary)
     txt.replace('YY', agree_but_sumary)
@@ -372,17 +371,17 @@ async def donbass_can_you_agree(message: Message):
 async def donbass_honest_result(message: Message, state: FSMContext):
     await state.set_state(WarGoalsState.main)
     await mongo_update_stat_new(tg_id=message.from_user.id, column='donbas_final_result', value=message.text)
-    d_all = await mongo_count_docs('database', 'statistics_new', {'donbas_final_result': {'$exists': True},
-                                                                  'war_aims_ex': welc_message_one[0]})
-    d_yes = await mongo_count_docs('database', 'statistics_new',
-                                   {'donbas_final_result': "Скорее да, это лишь предлог 👌",
+    d_all = await mongo_count_stats('statistics_new', {'donbas_final_result': {'$exists': True},
+                                                       'war_aims_ex': welc_message_one[0]})
+    d_yes = await mongo_count_stats('statistics_new',
+                                    {'donbas_final_result': "Скорее да, это лишь предлог 👌",
+                                     'war_aims_ex': welc_message_one[0]})
+    d_no = await mongo_count_stats('statistics_new',
+                                   {'donbas_final_result': "Скорее нет, это настоящая причина 🙅‍♂️",
                                     'war_aims_ex': welc_message_one[0]})
-    d_no = await mongo_count_docs('database', 'statistics_new',
-                                  {'donbas_final_result': "Скорее нет, это настоящая причина 🙅‍♂️",
-                                   'war_aims_ex': welc_message_one[0]})
-    d_idk = await mongo_count_docs('database', 'statistics_new',
-                                   {'donbas_final_result': "Затрудняюсь ответить 🤷‍♀️",
-                                    'war_aims_ex': welc_message_one[0]})
+    d_idk = await mongo_count_stats('statistics_new',
+                                    {'donbas_final_result': "Затрудняюсь ответить 🤷‍♀️",
+                                     'war_aims_ex': welc_message_one[0]})
     txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'donbass_honest_result'}), d_all)
     txt.replace('AA', d_yes)
     txt.replace('BB', d_idk)

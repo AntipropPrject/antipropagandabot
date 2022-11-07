@@ -518,37 +518,31 @@ async def mongo_game_answer(user_id, game, number, answer_group, condict):
         pass
 
 
-async def mongo_count_docs(database: str, collection: str, conditions: dict | list, hard_link: bool = False,
-                           check_default_version: bool = True):
+async def mongo_count_stats(collection: str, conditions: dict | list, database: str = 'database',
+                            hard_link: bool = False, version: str | None = 'v3'):
     """
 
     :param database: database in mongodb
     :param collection: collection in mongodb
-    :param conditions: conditions in mongodb
-    :param hard_link: if you want use same field in query, $and operator
-    :param check_default_version: mark "False" if you query not in statistics_new collection or want to use custom
-    datetime field conditions
+    :param conditions: conditions in mongodb. If passed as dict, hard_link value will be ignored and '$and' will be used
+    :param hard_link: '$and' operator. If False all params will sum up ('$or' operator)
+    :param version: pass str with version number on None if you do not want version check
     :return:
     """
     client = all_data().get_mongo()
     database = client[database]
     collection = database[collection]
-    current_version_flag = {'datetime': {"$gte": release_date['v3']}}
-    if isinstance(conditions, list) and hard_link:
-        if check_default_version:
+    operand = "$and" if hard_link or isinstance(conditions, dict) else "$or"
+    if isinstance(conditions, dict):
+        conditions = [conditions]
+    if version:
+        current_version_flag = {'datetime': {"$gte": release_date[version]}}
+        if operand == "$and":
             conditions.append(current_version_flag)
-        return await collection.count_documents({"$and": conditions})
-    elif isinstance(conditions, list) and not hard_link:
-        a = 0
-        for d in conditions:
-            if check_default_version:
-                d.update(current_version_flag)
-            a += await collection.count_documents(d)
-        return a
-    elif isinstance(conditions, dict):
-        if check_default_version:
-            conditions.update(current_version_flag)
-        return await collection.count_documents(conditions)
+        else:
+            for condition in conditions:
+                condition.update(current_version_flag)
+    return await collection.count_documents({operand: conditions})
 
 
 async def mongo_easy_upsert(database: str, collection: str, condition_dict: dict, main_dict: dict):

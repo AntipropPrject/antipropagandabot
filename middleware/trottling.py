@@ -8,7 +8,7 @@ from aiogram.types import Message
 from cachetools import TTLCache
 
 from bata import all_data
-from data_base.DBuse import mongo_ez_find_one, mongo_update, add_current_user, redis_just_one_write, mongo_count_docs, \
+from data_base.DBuse import mongo_ez_find_one, mongo_update, add_current_user, redis_just_one_write, mongo_count_stats, \
     redis_just_one_read, sql_safe_select
 from resources.variables import release_date
 
@@ -29,9 +29,10 @@ class ThrottlingMiddleware(BaseMiddleware):
         asyncio.create_task(unban(event.from_user.id))
 
         if not await redis_just_one_read(f"Usrs: {event.from_user.id}: old_checked"):
-            if await mongo_count_docs("database", "statistics_new",
-                                      {'_id': int(event.from_user.id), 'datetime': {"$lt": release_date['v3']}},
-                                      check_default_version=False) and event.text != "/start":
+            if await mongo_count_stats(
+                    "statistics_new",
+                    {'_id': int(event.from_user.id), 'datetime': {"$lt": release_date['v3']}},
+                    version=None) and event.text != "/start":
                 await you_too_old_boy(event.from_user.id)
             await redis_just_one_write(f"Usrs: {event.from_user.id}: old_checked", "ok")
 

@@ -8,7 +8,7 @@ from aiogram.types import InputMediaPhoto
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 from bot_statistics.stat import mongo_update_stat_new
-from data_base.DBuse import sql_safe_select, mongo_count_docs
+from data_base.DBuse import sql_safe_select, mongo_count_stats
 from keyboards.map_keys import polls_continue_kb
 from resources.all_polls import shop_poll
 from states.true_goals_states import Shop, TrueGoalsState
@@ -106,8 +106,8 @@ async def shop_welcome(message: types.Message, state: FSMContext):
 async def shop_after_first_poll(poll_answer: types.PollAnswer, bot: Bot, state: FSMContext):
     await mongo_update_stat_new(tg_id=poll_answer.user.id, column='shop_after_first_poll',
                                 value=poll_answer.option_ids[0])
-    right_answers = await mongo_count_docs('database', 'statistics_new', {'shop_after_first_poll': 2})
-    all_answers = await mongo_count_docs('database', 'statistics_new', {'shop_after_first_poll': {'$exists': True}})
+    right_answers = await mongo_count_stats('statistics_new', {'shop_after_first_poll': 2})
+    all_answers = await mongo_count_stats('statistics_new', {'shop_after_first_poll': {'$exists': True}})
     await state.set_state(Shop.after_first_poll)
     await state.update_data(shop_after_first_poll=poll_answer.option_ids[0])
     await mongo_update_stat_new(tg_id=poll_answer.user.id, column='shop_after_first_poll',

@@ -12,7 +12,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 from bata import all_data
 from data_base.DBuse import sql_safe_select, sql_safe_update, sql_safe_insert, sql_delete, redis_just_one_write, \
     redis_just_one_read, mongo_select_news, \
-    mongo_add_news, mongo_pop_news, mongo_update_news, check_avtual_news, del_key, mongo_count_docs
+    mongo_add_news, mongo_pop_news, mongo_update_news, check_avtual_news, del_key, mongo_count_stats
 from export_to_csv.pg_mg import Backup
 from filters.isAdmin import IsAdmin, IsSudo, IsKamaga
 from handlers.admin_handlers.admin_for_games import admin_home_games, admin_truthgame, admin_gam_tv, admin_mistake_lie, \
