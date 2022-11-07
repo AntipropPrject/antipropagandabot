@@ -71,14 +71,14 @@ async def start_info_fourth(message: Message):
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.contains("Хорошо 👌")), flags=flags)
-async def start_info_fourth(message: Message, state: FSMContext):
-    nmarkap = ReplyKeyboardBuilder()
-    nmarkap.row(types.KeyboardButton(text="На частичную мобилизацию 🧍‍♂️"))
-    nmarkap.add(types.KeyboardButton(text="На общую мобилизацию 🧍‍♂️🧍‍♂️🧍‍♂️"))
-    nmarkap.row(types.KeyboardButton(text="Затрудняюсь ответить 🤷‍♀️"))
-    await state.set_state(start_dialog.dont_know_1)
-    await simple_media(message, 'start_putin_mobilization', reply_markup=nmarkap.as_markup(resize_keyboard=True))
+#@router.message((F.text.contains("Хорошо 👌")), flags=flags)
+#async def start_info_fourth(message: Message, state: FSMContext):
+#    nmarkap = ReplyKeyboardBuilder()
+#    nmarkap.row(types.KeyboardButton(text="На частичную мобилизацию 🧍‍♂️"))
+#    nmarkap.add(types.KeyboardButton(text="На общую мобилизацию 🧍‍♂️🧍‍♂️🧍‍♂️"))
+#    nmarkap.row(types.KeyboardButton(text="Затрудняюсь ответить 🤷‍♀️"))
+#    await state.set_state(start_dialog.dont_know_1)
+#    await simple_media(message, 'start_putin_mobilization', reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text.in_({"На частичную мобилизацию 🧍‍♂️", "На общую мобилизацию 🧍‍♂️🧍‍♂️🧍‍♂️",
@@ -145,7 +145,8 @@ async def start_what_is_prop(message: Message):
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
-@router.message(start_dialog.button_next_2, (F.text.contains('Давай 👌')), flags=flags)
+#@router.message(start_dialog.button_next_2, (F.text.contains('Давай 👌')), flags=flags)
+@router.message((F.text.contains("Хорошо 👌")), flags=flags)
 async def start_is_war_bad(message: Message, state: FSMContext):
     await state.set_state(start_dialog.big_story)
     text = await sql_safe_select('text', 'texts', {'name': 'start_is_war_bad'})
