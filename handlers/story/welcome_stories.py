@@ -289,16 +289,17 @@ async def start_they_show_bad_things(message: Message):
 async def start_hard_questions(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'start_hard_questions'})
     nmarkap = ReplyKeyboardBuilder()
-    nmarkap.row(types.KeyboardButton(text="О чём? 🤔"))
-    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
-
-
-@router.message((F.text == 'О чём? 🤔'), flags=flags)
-async def start_red_pill(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'start_red_pill'})
-    nmarkap = ReplyKeyboardBuilder()
+    #nmarkap.row(types.KeyboardButton(text="О чём? 🤔"))
     nmarkap.row(types.KeyboardButton(text="Я понимаю, готов(а) продолжить 👌"))
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
+
+
+#@router.message((F.text == 'О чём? 🤔'), flags=flags)
+#async def start_red_pill(message: Message):
+#    text = await sql_safe_select('text', 'texts', {'name': 'start_red_pill'})
+#    nmarkap = ReplyKeyboardBuilder()
+#    nmarkap.row(types.KeyboardButton(text="Я понимаю, готов(а) продолжить 👌"))
+#    await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text == 'Я понимаю, готов(а) продолжить 👌'), flags=flags)
