@@ -314,14 +314,14 @@ async def start_key_questions(message: Message):
 async def start_continue_or_peace(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'start_continue_or_peace'})
     nmarkap = ReplyKeyboardBuilder()
-    nmarkap.row(types.KeyboardButton(text="Продолжать военную операцию ⚔️"))
-    nmarkap.row(types.KeyboardButton(text="Переходить к мирным переговорам 🕊"))
+    nmarkap.row(types.KeyboardButton(text="Продолжать военные действия ⚔️️"))
+    nmarkap.row(types.KeyboardButton(text="Вывести войска с занятых территорий 🕊"))
     nmarkap.row(types.KeyboardButton(text="Затрудняюсь ответить 🤷‍♀️"))
     await state.set_state(start_dialog.dont_know_2)
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
-@router.message((F.text.in_({"Продолжать военную операцию ⚔️", "Переходить к мирным переговорам 🕊",
+@router.message((F.text.in_({"Продолжать военные действия ⚔️️", "Вывести войска с занятых территорий 🕊",
                              "Затрудняюсь ответить 🤷‍♀️"})), state=start_dialog.dont_know_2, flags=flags)
 async def start_continue_or_peace_results(message: Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='start_continue_or_peace_results',
@@ -329,12 +329,15 @@ async def start_continue_or_peace_results(message: Message, state: FSMContext):
     await poll_write(f'Usrs: {message.from_user.id}: Start_answers: NewPolitList:', message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'start_continue_or_peace_results'})
 
-    war = await mongo_count_docs('database', 'statistics_new',
-                                 {'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️'})
-    stop_war = await mongo_count_docs('database', 'statistics_new',
-                                      {'start_continue_or_peace_results': 'Переходить к мирным переговорам 🕊'})
-    dont_know = await mongo_count_docs('database', 'statistics_new',
-                                       {'start_continue_or_peace_results': 'Затрудняюсь ответить 🤷‍♀️'})
+    war = await mongo_count_docs('database', 'statistics_new', [{'datetime': {"$gte": release_date['v3.2']}},
+                                {'start_continue_or_peace_results': "Продолжать военные действия ⚔️️"}],
+                                 check_default_version=False, hard_link=True)
+    stop_war = await mongo_count_docs('database', 'statistics_new', [{'datetime': {"$gte": release_date['v3.2']}},
+                                      {'start_continue_or_peace_results': "Вывести войска с занятых территорий 🕊"}],
+                                      check_default_version=False, hard_link=True)
+    dont_know = await mongo_count_docs('database', 'statistics_new', [{'datetime': {"$gte": release_date['v3.2']}},
+                                       {'start_continue_or_peace_results': "Затрудняюсь ответить 🤷‍♀️"}],
+                                       check_default_version=False, hard_link=True)
     all_people = war + stop_war + dont_know
 
     txt = CoolPercReplacer(text, all_people)
@@ -364,13 +367,13 @@ async def start_now_you_putin_results(message: Message, bot: Bot):
                                 value=message.text)
     await poll_write(f'Usrs: {message.from_user.id}: Start_answers: NewPolitList:', message.text)
     user_answers = await poll_get(f'Usrs: {message.from_user.id}: Start_answers: NewPolitList:')
-    if "Начну военную операцию ⚔️" in user_answers and "Продолжать военную операцию ⚔️" in user_answers:
+    if "Начну военную операцию ⚔️" in user_answers and "Продолжать военные действия ⚔️️" in user_answers:
         status = 'Сторонник спецоперации ⚔️'
         await redis_just_one_write(f'Usrs: {message.from_user.id}: Start_answers: NewPolitStat:',
                                    'Сторонник спецоперации ⚔️')
         await mongo_update_stat_new(tg_id=message.from_user.id, column='NewPolitStat_start',
                                     value='Сторонник спецоперации')
-    elif "Переходить к мирным переговорам 🕊" in user_answers and "Не стану этого делать 🕊" in user_answers:
+    elif "Вывести войска с занятых территорий 🕊" in user_answers and "Не стану этого делать 🕊" in user_answers:
         status = 'Противник войны 🕊'
         await redis_just_one_write(f'Usrs: {message.from_user.id}: Start_answers: NewPolitStat:', 'Противник войны 🕊')
         await mongo_update_stat_new(tg_id=message.from_user.id, column='NewPolitStat_start', value='Противник войны')
@@ -384,12 +387,15 @@ async def start_now_you_putin_results(message: Message, bot: Bot):
         await ref_spy_sender(bot, message.from_user.id, parent_text,
                              {'[first_q]': user_answers[0], '[second_q]': user_answers[1], '[polit_status]': status})
 
-    war = await mongo_count_docs('database', 'statistics_new',
-                                 {'start_now_you_putin_results': 'Начну военную операцию ⚔️'})
-    stop_war = await mongo_count_docs('database', 'statistics_new',
-                                      {'start_now_you_putin_results': 'Не стану этого делать 🕊'})
-    hz = await mongo_count_docs('database', 'statistics_new',
-                                {'start_now_you_putin_results': 'Затрудняюсь  ответить  🤷‍♀️'})
+    war = await mongo_count_docs('database', 'statistics_new', [{'datetime': {"$gte": release_date['v3.2']}},
+                                 {'start_now_you_putin_results': 'Начну военную операцию ⚔️'}],
+                                 check_default_version=False, hard_link=True)
+    stop_war = await mongo_count_docs('database', 'statistics_new', [{'datetime': {"$gte": release_date['v3.2']}},
+                                      {'start_now_you_putin_results': 'Не стану этого делать 🕊'}],
+                                      check_default_version=False, hard_link=True)
+    hz = await mongo_count_docs('database', 'statistics_new', [{'datetime': {"$gte": release_date['v3.2']}},
+                                {'start_now_you_putin_results': 'Затрудняюсь  ответить  🤷‍♀️'}],
+                                check_default_version=False, hard_link=True)
     all_people = war + stop_war + hz
 
     text = await sql_safe_select('text', 'texts', {'name': 'start_now_you_putin_results'})

@@ -144,14 +144,19 @@ async def stopwar_how_was_warbringers(message: Message, state: FSMContext):
                                         hard_link=True)
     start_war = (await state.get_data())['start_warbringers_count']
     end_war_war = await mongo_count_docs('database', 'statistics_new',
-                                         [{'NewPolitStat_start': 'Сторонник спецоперации'},
-                                          {'NewPolitStat_end': 'Сторонник спецоперации'}], hard_link=True)
+                                         [{'datetime': {"$gte": release_date['v3.2']}}, {'NewPolitStat_start': 'Сторонник спецоперации'},
+                                          {'NewPolitStat_end': 'Сторонник спецоперации'}],
+                                         check_default_version=False, hard_link=True)
     end_war_peace = await mongo_count_docs('database', 'statistics_new',
-                                           [{'NewPolitStat_start': 'Сторонник спецоперации'},
-                                            {'NewPolitStat_end': 'Противник войны'}], hard_link=True)
+                                           [{'datetime': {"$gte": release_date['v3.2']}},
+                                            {'NewPolitStat_start': 'Сторонник спецоперации'},
+                                            {'NewPolitStat_end': 'Противник войны'}],
+                                           hard_link=True, check_default_version=False)
     end_war_doubt = await mongo_count_docs('database', 'statistics_new',
-                                           [{'NewPolitStat_start': 'Сторонник спецоперации'},
-                                            {'NewPolitStat_end': 'Сомневающийся'}], hard_link=True)
+                                           [{'datetime': {"$gte": release_date['v3.2']}},
+                                            {'NewPolitStat_start': 'Сторонник спецоперации'},
+                                            {'NewPolitStat_end': 'Сомневающийся'}],
+                                           hard_link=True, check_default_version=False)
 
     text = percentage_replace(text, 'MM', at_the_end, start_war)
     text = percentage_replace(text, 'AA', end_war_war, at_the_end)
@@ -166,19 +171,26 @@ async def stopwar_how_was_warbringers(message: Message, state: FSMContext):
 async def stopwar_how_was_doubting(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_how_was_doubting'})
     at_the_end = await mongo_count_docs('database', 'statistics_new',
-                                        [{'NewPolitStat_start': 'Сомневающийся'},
+                                        [{'datetime': {"$gte": release_date['v3.2']}},
+                                         {'NewPolitStat_start': 'Сомневающийся'},
                                          {'NewPolitStat_end': {'$exists': True}}],
-                                        hard_link=True)
+                                        hard_link=True, check_default_version=False)
     start_doub = (await state.get_data())['start_doubting_count']
     end_doub_war = await mongo_count_docs('database', 'statistics_new',
-                                          [{'NewPolitStat_start': 'Сомневающийся'},
-                                           {'NewPolitStat_end': 'Сторонник спецоперации'}], hard_link=True)
+                                          [{'datetime': {"$gte": release_date['v3.2']}},
+                                           {'NewPolitStat_start': 'Сомневающийся'},
+                                           {'NewPolitStat_end': 'Сторонник спецоперации'}],
+                                          hard_link=True, check_default_version=False)
     end_doub_doub = await mongo_count_docs('database', 'statistics_new',
-                                           [{'NewPolitStat_start': 'Сомневающийся'},
-                                            {'NewPolitStat_end': 'Сомневающийся'}], hard_link=True)
+                                           [{'datetime': {"$gte": release_date['v3.2']}},
+                                            {'NewPolitStat_start': 'Сомневающийся'},
+                                            {'NewPolitStat_end': 'Сомневающийся'}],
+                                           hard_link=True, check_default_version=False)
     end_doub_peace = await mongo_count_docs('database', 'statistics_new',
-                                            [{'NewPolitStat_start': 'Сомневающийся'},
-                                             {'NewPolitStat_end': 'Противник войны'}], hard_link=True)
+                                            [{'datetime': {"$gte": release_date['v3.2']}},
+                                             {'NewPolitStat_start': 'Сомневающийся'},
+                                             {'NewPolitStat_end': 'Противник войны'}],
+                                            hard_link=True, check_default_version=False)
 
     text = percentage_replace(text, 'NN', at_the_end, start_doub)
     text = percentage_replace(text, 'DD', end_doub_war, at_the_end)
@@ -193,19 +205,26 @@ async def stopwar_how_was_doubting(message: Message, state: FSMContext):
 async def stopwar_how_was_peacefull(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_how_was_peacefull'})
     at_the_end = await mongo_count_docs('database', 'statistics_new',
-                                        [{'NewPolitStat_start': 'Противник войны'},
+                                        [{'datetime': {"$gte": release_date['v3.2']}},
+                                         {'NewPolitStat_start': 'Противник войны'},
                                          {'NewPolitStat_end': {'$exists': True}}],
-                                        hard_link=True)
+                                        hard_link=True, check_default_version=False)
     start_peace = (await state.get_data())['start_peacefull_count']
     end_peace_war = await mongo_count_docs('database', 'statistics_new',
-                                           [{'NewPolitStat_start': 'Противник войны'},
-                                            {'NewPolitStat_end': 'Сторонник спецоперации'}], hard_link=True)
+                                           [{'datetime': {"$gte": release_date['v3.2']}},
+                                            {'NewPolitStat_start': 'Противник войны'},
+                                            {'NewPolitStat_end': 'Сторонник спецоперации'}],
+                                           hard_link=True, check_default_version=False)
     end_peace_doub = await mongo_count_docs('database', 'statistics_new',
-                                            [{'NewPolitStat_start': 'Противник войны'},
-                                             {'NewPolitStat_end': 'Сомневающийся'}], hard_link=True)
+                                            [{'datetime': {"$gte": release_date['v3.2']}},
+                                             {'NewPolitStat_start': 'Противник войны'},
+                                             {'NewPolitStat_end': 'Сомневающийся'}],
+                                            hard_link=True, check_default_version=False)
     end_peace_peace = await mongo_count_docs('database', 'statistics_new',
-                                             [{'NewPolitStat_start': 'Противник войны'},
-                                              {'NewPolitStat_end': 'Противник войны'}], hard_link=True)
+                                             [{'datetime': {"$gte": release_date['v3.2']}},
+                                              {'NewPolitStat_start': 'Противник войны'},
+                                              {'NewPolitStat_end': 'Противник войны'}],
+                                             hard_link=True, check_default_version=False)
 
     text = percentage_replace(text, 'OO', at_the_end, start_peace)
     text = percentage_replace(text, 'GG', end_peace_war, at_the_end)

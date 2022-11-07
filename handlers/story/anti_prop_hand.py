@@ -76,16 +76,16 @@ async def antip_TV_makes_them_bad(message: Message):
     maybe_dont_trust = await mongo_count_docs('database', 'statistics_new', {'tv_love_gen': 'Скорее нет 👎'})
 
     var_true_and_trust = await mongo_count_docs(
-        'database', 'statistics_new', {'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️',
+        'database', 'statistics_new', {'start_continue_or_peace_results': "Продолжать военные действия ⚔️️",
                                        'tv_love_gen': 'Да, полностью доверяю ✅'})
     var_true_and_dont_trust = await mongo_count_docs(
-        'database', 'statistics_new', {'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️',
+        'database', 'statistics_new', {'start_continue_or_peace_results': "Продолжать военные действия ⚔️️",
                                        'tv_love_gen': 'Нет, не верю ни слову ⛔'})
     var_true_and_maybe_trust = await mongo_count_docs(
-        'database', 'statistics_new', {'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️',
+        'database', 'statistics_new', {'start_continue_or_peace_results': "Продолжать военные действия ⚔️️",
                                        'tv_love_gen': 'Скорее да 👍'})
     var_true_and_maybe_dont_trust = await mongo_count_docs(
-        'database', 'statistics_new', {'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️',
+        'database', 'statistics_new', {'start_continue_or_peace_results': "Продолжать военные действия ⚔️️",
                                        'tv_love_gen': 'Скорее нет 👎'})
 
     txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'antip_TV_makes_them_bad'}), trust)
