@@ -7,7 +7,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from bata import all_data
 from bot_statistics.stat import mongo_update_stat_new
-from data_base.DBuse import sql_safe_select, mongo_count_docs
+from data_base.DBuse import sql_safe_select, mongo_count_stats
 from keyboards.map_keys import polls_continue_kb
 from resources.all_polls import mob_city, mob_front
 from resources.all_polls import mob_wot_mvps_poll, mob_is_he_insane_poll, mob_laws_lol_poll, \
@@ -56,9 +56,9 @@ async def mob_size_matters(poll_answer: PollAnswer, bot: Bot, state: FSMContext)
     answer = mob_city[poll_answer.option_ids[0]]
     await mongo_update_stat_new(poll_answer.user.id, 'mob_city_poll', value=answer)
 
-    c_all = await mongo_count_docs('database', 'statistics_new', {'mob_city_poll': {'$exists': True}})
-    c_city = await mongo_count_docs('database', 'statistics_new', {'mob_city_poll': mob_city[0]})
-    c_village = await mongo_count_docs('database', 'statistics_new', {'mob_city_poll': mob_city[1]})
+    c_all = await mongo_count_stats('statistics_new', {'mob_city_poll': {'$exists': True}})
+    c_city = await mongo_count_stats('statistics_new', {'mob_city_poll': mob_city[0]})
+    c_village = await mongo_count_stats('statistics_new', {'mob_city_poll': mob_city[1]})
     txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'mob_size_matters'}), c_all)
     txt.replace('AA', c_city)
     txt.replace('BB', c_village)
@@ -85,9 +85,9 @@ async def mob_nazi_is_here(poll_answer: PollAnswer, bot: Bot, state: FSMContext)
     answer = mob_wot_mvps_poll[poll_answer.option_ids[0]]
     await mongo_update_stat_new(poll_answer.user.id, 'mob_nazi_is_here', value=answer)
 
-    c_all = await mongo_count_docs('database', 'statistics_new', {'mob_nazi_is_here': {'$exists': True}})
-    c_vova = await mongo_count_docs('database', 'statistics_new', {'mob_nazi_is_here': mob_wot_mvps_poll[0]})
-    c_aisen = await mongo_count_docs('database', 'statistics_new', {'mob_nazi_is_here': mob_wot_mvps_poll[1]})
+    c_all = await mongo_count_stats('statistics_new', {'mob_nazi_is_here': {'$exists': True}})
+    c_vova = await mongo_count_stats('statistics_new', {'mob_nazi_is_here': mob_wot_mvps_poll[0]})
+    c_aisen = await mongo_count_stats('statistics_new', {'mob_nazi_is_here': mob_wot_mvps_poll[1]})
     txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'mob_nazi_is_here'}), c_all)
     txt.replace('AA', c_vova)
     txt.replace('BB', c_aisen)
@@ -113,8 +113,8 @@ async def mob_only_to_lit(poll_answer: PollAnswer, bot: Bot, state: FSMContext):
     answer = mob_is_he_insane_poll[poll_answer.option_ids[0]]
     await mongo_update_stat_new(poll_answer.user.id, 'mob_only_to_lit', value=answer)
 
-    c_all = await mongo_count_docs('database', 'statistics_new', {'mob_only_to_lit': {'$exists': True}})
-    c_right = await mongo_count_docs('database', 'statistics_new', {'mob_only_to_lit': mob_is_he_insane_poll[3]})
+    c_all = await mongo_count_stats('statistics_new', {'mob_only_to_lit': {'$exists': True}})
+    c_right = await mongo_count_stats('statistics_new', {'mob_only_to_lit': mob_is_he_insane_poll[3]})
 
     txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'mob_only_to_lit'}), c_all)
     txt.replace('XX', c_right)
@@ -142,8 +142,8 @@ async def mob_ignore_it_go_away(poll_answer: PollAnswer, bot: Bot, state: FSMCon
     answer = mob_laws_lol_poll[poll_answer.option_ids[0]]
     await mongo_update_stat_new(poll_answer.user.id, 'mob_ignore_it_go_away', value=answer)
 
-    c_all = await mongo_count_docs('database', 'statistics_new', {'mob_ignore_it_go_away': {'$exists': True}})
-    c_right = await mongo_count_docs('database', 'statistics_new', {'mob_ignore_it_go_away': mob_laws_lol_poll[3]})
+    c_all = await mongo_count_stats('statistics_new', {'mob_ignore_it_go_away': {'$exists': True}})
+    c_right = await mongo_count_stats('statistics_new', {'mob_ignore_it_go_away': mob_laws_lol_poll[3]})
 
     txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'mob_ignore_it_go_away'}), c_all)
     txt.replace('XX', c_right)
@@ -223,10 +223,10 @@ async def mob_still_ignore_it(poll_answer: PollAnswer, bot: Bot, state: FSMConte
     answer = mob_why_he_did_it_poll[poll_answer.option_ids[0]]
     await mongo_update_stat_new(poll_answer.user.id, 'mob_still_ignore_it', value=answer)
 
-    c_all = await mongo_count_docs('database', 'statistics_new', {'mob_still_ignore_it': {'$exists': True}})
-    c_right = await mongo_count_docs('database', 'statistics_new', {'mob_still_ignore_it': mob_why_he_did_it_poll[2]})
-    c_wrong_1 = await mongo_count_docs('database', 'statistics_new', {'mob_still_ignore_it': mob_why_he_did_it_poll[0]})
-    c_wrong_2 = await mongo_count_docs('database', 'statistics_new', {'mob_still_ignore_it': mob_why_he_did_it_poll[1]})
+    c_all = await mongo_count_stats('statistics_new', {'mob_still_ignore_it': {'$exists': True}})
+    c_right = await mongo_count_stats('statistics_new', {'mob_still_ignore_it': mob_why_he_did_it_poll[2]})
+    c_wrong_1 = await mongo_count_stats('statistics_new', {'mob_still_ignore_it': mob_why_he_did_it_poll[0]})
+    c_wrong_2 = await mongo_count_stats('statistics_new', {'mob_still_ignore_it': mob_why_he_did_it_poll[1]})
 
     txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'mob_still_ignore_it'}), c_all)
     txt.replace('AA', c_wrong_1)
@@ -328,10 +328,10 @@ async def mob_no_talking_to_ghouls(poll_answer: PollAnswer, bot: Bot, state: FSM
     answer = mob_front[poll_answer.option_ids[0]]
     await mongo_update_stat_new(poll_answer.user.id, 'mob_front_poll', value=answer)
 
-    f_all = await mongo_count_docs('database', 'statistics_new', {'mob_front_poll': {'$exists': True}})
-    f_run = await mongo_count_docs('database', 'statistics_new', {'mob_front_poll': mob_front[0]})
-    f_law = await mongo_count_docs('database', 'statistics_new', {'mob_front_poll': mob_front[1]})
-    f_why = await mongo_count_docs('database', 'statistics_new', {'mob_front_poll': mob_front[2]})
+    f_all = await mongo_count_stats('statistics_new', {'mob_front_poll': {'$exists': True}})
+    f_run = await mongo_count_stats('statistics_new', {'mob_front_poll': mob_front[0]})
+    f_law = await mongo_count_stats('statistics_new', {'mob_front_poll': mob_front[1]})
+    f_why = await mongo_count_stats('statistics_new', {'mob_front_poll': mob_front[2]})
 
     txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'mob_no_talking_to_ghouls'}), f_all)
     txt.replace('AA', f_run)
@@ -359,12 +359,10 @@ async def mob_hard_way(message: Message):
 async def mob_hard_way_results(message: Message):
     await mongo_update_stat_new(message.from_user.id, 'mob_save_methods', value=message.text)
 
-    s_all = await mongo_count_docs('database', 'statistics_new', {'mob_save_methods': {'$exists': True}})
-    s_fork = await mongo_count_docs('database', 'statistics_new', {'mob_save_methods': "Лучше в тюрьму 🗝"})
-    s_chance = await mongo_count_docs('database', 'statistics_new',
-                                      {'mob_save_methods': "Лучше попытаться сдаться в плен 🏳️"})
-    s_idk = await mongo_count_docs('database', 'statistics_new',
-                                   {'mob_save_methods': "Затрудняюсь ответить 🤷‍♀️"})
+    s_all = await mongo_count_stats('statistics_new', {'mob_save_methods': {'$exists': True}})
+    s_fork = await mongo_count_stats('statistics_new', {'mob_save_methods': "Лучше в тюрьму 🗝"})
+    s_chance = await mongo_count_stats('statistics_new', {'mob_save_methods': "Лучше попытаться сдаться в плен 🏳️"})
+    s_idk = await mongo_count_stats('statistics_new', {'mob_save_methods': "Затрудняюсь ответить 🤷‍♀️"})
 
     txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'mob_hard_way_results'}), s_all)
     txt.replace('AA', s_fork)

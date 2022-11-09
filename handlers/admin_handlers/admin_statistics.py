@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from bata import all_data
-from data_base.DBuse import mongo_count_docs
+from data_base.DBuse import mongo_count_stats
 from log import logg
 from resources.variables import stat_points, release_date
 
@@ -22,13 +22,11 @@ def count_visual(full_count, part_count, name: str, filler: str = '🟩'):
 
 async def pretty_progress_stats():
     past = datetime.now() - timedelta(days=1)
-    day_unt = await mongo_count_docs('database', 'statistics_new',
-                                     {"datetime": {"$gte": past}}, check_default_version=False)
-    stat = await mongo_count_docs('database', 'statistics_new', {"come": {"$exists": True}})
-    stat_statistics = await mongo_count_docs('database', 'statistics_new',
-                                             {"datetime": {"$gte": release_date['v3.1']}}, check_default_version=False)
+    day_unt = await mongo_count_stats('statistics_new', {"datetime": {"$gte": past}}, version=None)
+    stat = await mongo_count_stats('statistics_new', {"come": {"$exists": True}})
+    stat_statistics = await mongo_count_stats('statistics_new', {}, version="v3.1")
     text = await pretty_add_progress_stats()
-    is_ban = await mongo_count_docs('database', 'userinfo', {"is_ban": True})
+    is_ban = await mongo_count_stats('userinfo', {"is_ban": True})
     text += count_visual(stat, is_ban, 'Забанили бота', filler='🟥')
     text = f"<code>Всего пользователей: {stat}\n" \
            f"Пользователей после установки всех флагов: {stat_statistics}\n" \

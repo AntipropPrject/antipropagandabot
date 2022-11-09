@@ -4,7 +4,7 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from bot_statistics.stat import mongo_update_stat, mongo_update_stat_new
-from data_base.DBuse import poll_write, sql_safe_select, mongo_add, mongo_select, redis_just_one_write, mongo_count_docs
+from data_base.DBuse import poll_write, sql_safe_select, mongo_add, mongo_select, redis_just_one_write, mongo_count_stats
 from handlers.story.anti_prop_hand import antip_wolves
 from resources.all_polls import web_prop, welc_message_one, people_prop
 from resources.variables import release_date
@@ -40,13 +40,13 @@ async def message_3(message: types.Message, state: FSMContext):  # Начало 
     await poll_write(f'Usrs: {message.from_user.id}: Start_answers: Is_it_war:', message.text)
     await mongo_update_stat_new(tg_id=message.from_user.id, column='war_or_not', value=message.text)
 
-    all_count = await mongo_count_docs('database', 'statistics_new', {'war_or_not': {'$exists': True}})
-    war = await mongo_count_docs('database', 'statistics_new', {'war_or_not': '2️⃣ Война'})
-    not_war = await mongo_count_docs('database', 'statistics_new',
-                                     {'war_or_not': '1️⃣ Специальная военная операция (СВО)'})
-    FSB_not_war = await mongo_count_docs('database', 'statistics_new',
-                                         {'FSB': "Да", 'war_or_not': '1️⃣ Специальная военная операция (СВО)'})
-    FSB_war = await mongo_count_docs('database', 'statistics_new', {'FSB': "Да", 'war_or_not': '2️⃣ Война'})
+    all_count = await mongo_count_stats('statistics_new', {'war_or_not': {'$exists': True}})
+    war = await mongo_count_stats('statistics_new', {'war_or_not': '2️⃣ Война'})
+    not_war = await mongo_count_stats('statistics_new',
+                                      {'war_or_not': '1️⃣ Специальная военная операция (СВО)'})
+    FSB_not_war = await mongo_count_stats('statistics_new',
+                                          {'FSB': "Да", 'war_or_not': '1️⃣ Специальная военная операция (СВО)'})
+    FSB_war = await mongo_count_stats('statistics_new', {'FSB': "Да", 'war_or_not': '2️⃣ Война'})
 
     text = await sql_safe_select("text", "texts", {"name": "start_lets_start"})
     if '(СВО)' in message.text:

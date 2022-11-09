@@ -10,7 +10,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 from bata import all_data
 from bot_statistics.stat import mongo_is_done, mongo_stat, mongo_nstat_create, advertising_value, recycle_old_user
-from data_base.DBuse import mongo_user_info, sql_safe_select, mongo_ez_find_one, redis_just_one_write, mongo_count_docs
+from data_base.DBuse import mongo_user_info, sql_safe_select, mongo_ez_find_one, redis_just_one_write, mongo_count_stats
 from day_func import day_count
 from filters.isAdmin import IsAdmin
 from handlers.shop import shop_welcome
@@ -84,9 +84,7 @@ async def start_base(user: User):
     for key in redis.scan_iter(f"Usrs: {user.id}:*"):
         redis.delete(key)
 
-    if await mongo_count_docs("database", "statistics_new",
-                              {'_id': int(user.id), 'datetime': {"$lt": release_date['v3']}},
-                              check_default_version=False):
+    if await mongo_count_stats("statistics_new", {'_id': int(user.id)}):
         await recycle_old_user(user.id)
 
     await mongo_stat(user_id)

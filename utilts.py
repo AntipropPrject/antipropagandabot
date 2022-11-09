@@ -13,7 +13,7 @@ from aiogram.types import Message, ReplyKeyboardRemove, InlineKeyboardMarkup, Re
 
 import bata
 from data_base.DBuse import sql_safe_select, sql_safe_insert, sql_safe_update, data_getter, sql_select_row_like, \
-    mongo_ez_find_one, mongo_count_docs, mongo_select_info, mongo_select_admin_levels
+    mongo_ez_find_one, mongo_count_stats, mongo_select_info, mongo_select_admin_levels
 from log import logg
 from utils.spacebot import SpaceBot
 
@@ -175,10 +175,10 @@ class CoolPercReplacer:
 
     @staticmethod
     async def make_sorted_statistics_dict(new_statistics_column: str, full_list: list, reverse: bool = True):
-        base_number = await mongo_count_docs('database', 'statistics_new', {new_statistics_column: {'$exists': True}})
+        base_number = await mongo_count_stats('statistics_new', {new_statistics_column: {'$exists': True}})
         main_dict = dict()
         for item in full_list:
-            item_number = await mongo_count_docs('database', 'statistics_new', {new_statistics_column: item})
+            item_number = await mongo_count_stats('statistics_new', {new_statistics_column: item})
             main_dict[item] = round(item_number / base_number * 100) if base_number else 0
         return dict(sorted(main_dict.items(), key=lambda x: x[1], reverse=reverse))
 

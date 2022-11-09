@@ -10,7 +10,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from bata import all_data
 from bot_statistics.stat import mongo_update_stat_new, mongo_update_stat
 from data_base.DBuse import poll_get, poll_write, del_key, data_getter, mongo_game_answer, redis_delete_from_list
-from data_base.DBuse import sql_safe_select, mongo_count_docs
+from data_base.DBuse import sql_safe_select, mongo_count_stats
 from filters.MapFilters import FakeGoals, WarGoals
 from filters.MapFilters import OperationWar
 from handlers.story.donbass_hand import donbass_big_tragedy
@@ -85,24 +85,22 @@ async def goals_big_war(message: Message, state: FSMContext):
 @router.message((F.text.contains("Покажи результаты 📊")), state=TrueGoalsState.more_goals_sort, flags=flags)
 async def goals_sort_reveal(message: Message, state: FSMContext):
     var_aims = dict()
-    pwr_ukr = await mongo_count_docs('database', 'statistics_new',
-                                     {'war_aims_ex': {'$regex': "Сменить власть на Украине"}})
-    nato = await mongo_count_docs('database', 'statistics_new', {'war_aims_ex': {'$regex': "НАТО на Украине"}})
-    putins_reting = await mongo_count_docs('database', 'statistics_new',
-                                           {'war_aims_ex': {'$regex': "рейтинг доверия Владимира Путина"}})
-    russians_donbass = await mongo_count_docs('database', 'statistics_new',
-                                              {'war_aims_ex': {'$regex': "Защитить русских в Донбассе"}})
-    prevent_the_invasion = await mongo_count_docs('database', 'statistics_new',
-                                                  {'war_aims_ex': {'$regex': "Предотвратить вторжение"}})
-    denazification = await mongo_count_docs('database', 'statistics_new', {'war_aims_ex': {'$regex': "Денацификация"}})
-    demilitarization = await mongo_count_docs('database', 'statistics_new',
-                                              {'war_aims_ex': {'$regex': "Демилитаризация"}})
-    unite_russian = await mongo_count_docs('database', 'statistics_new',
-                                           {'war_aims_ex': {'$regex': "Объединить русский народ"}})
-    secret_dev = await mongo_count_docs('database', 'statistics_new',
-                                        {'war_aims_ex': {'$regex': "Предотвратить секретные разработки"}})
+    pwr_ukr = await mongo_count_stats('statistics_new', {'war_aims_ex': {'$regex': "Сменить власть на Украине"}})
+    nato = await mongo_count_stats('statistics_new', {'war_aims_ex': {'$regex': "НАТО на Украине"}})
+    putins_reting = await mongo_count_stats('statistics_new',
+                                            {'war_aims_ex': {'$regex': "рейтинг доверия Владимира Путина"}})
+    russians_donbass = await mongo_count_stats('statistics_new',
+                                               {'war_aims_ex': {'$regex': "Защитить русских в Донбассе"}})
+    prevent_the_invasion = await mongo_count_stats('statistics_new',
+                                                   {'war_aims_ex': {'$regex': "Предотвратить вторжение"}})
+    denazification = await mongo_count_stats('statistics_new', {'war_aims_ex': {'$regex': "Денацификация"}})
+    demilitarization = await mongo_count_stats('statistics_new',
+                                               {'war_aims_ex': {'$regex': "Демилитаризация"}})
+    unite_russian = await mongo_count_stats('statistics_new', {'war_aims_ex': {'$regex': "Объединить русский народ"}})
+    secret_dev = await mongo_count_stats('statistics_new',
+                                         {'war_aims_ex': {'$regex': "Предотвратить секретные разработки"}})
 
-    all_count = await mongo_count_docs('database', 'statistics_new', {'war_aims_ex': {'$exists': True}})
+    all_count = await mongo_count_stats('statistics_new', {'war_aims_ex': {'$exists': True}})
     var_aims['✅ ' + welc_message_one[4]] = round(pwr_ukr / all_count * 100)
     var_aims['❌ ' + welc_message_one[5]] = round(nato / all_count * 100)
     var_aims['❓ ' + welc_message_one[6]] = round(putins_reting / all_count * 100)
@@ -291,8 +289,8 @@ async def goals_answer(update: types.PollAnswer | Message, bot: Bot, state: FSMC
 async def goals_donbas_start(message: Message, state: FSMContext):
     await state.set_state(WarGoalsState.donbas_enter)
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: TrueGoals: UserFakeGoals:', welc_message_one[0])
-    g_all = await mongo_count_docs('database', 'statistics_new', {'war_aims_ex': {'$exists': True}})
-    donbass = await mongo_count_docs('database', 'statistics_new', {'war_aims_ex': welc_message_one[0]})
+    g_all = await mongo_count_stats('statistics_new', {'war_aims_ex': {'$exists': True}})
+    donbass = await mongo_count_stats('statistics_new', {'war_aims_ex': welc_message_one[0]})
     txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'goals_donbas_start'}), g_all)
     txt.replace('XX', donbass)
     nmarkup = ReplyKeyboardBuilder()
@@ -322,8 +320,8 @@ async def goals_donbas_enterence(message: Message, state: FSMContext):
 async def goals_preventive_start(message: Message, state: FSMContext):
     await state.set_state(WarGoalsState.preventive_enter)
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: TrueGoals: UserFakeGoals:', welc_message_one[1])
-    g_all = await mongo_count_docs('database', 'statistics_new', {'war_aims_ex': {'$exists': True}})
-    prevent = await mongo_count_docs('database', 'statistics_new', {'war_aims_ex': welc_message_one[1]})
+    g_all = await mongo_count_stats('statistics_new', {'war_aims_ex': {'$exists': True}})
+    prevent = await mongo_count_stats('statistics_new', {'war_aims_ex': welc_message_one[1]})
     txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'goals_preventive_start'}), g_all)
     txt.replace('XX', prevent)
     nmarkup = ReplyKeyboardBuilder()
@@ -353,8 +351,8 @@ async def goals_preventive_enterence(message: Message, state: FSMContext):
 async def goals_nazi_start(message: Message, state: FSMContext):
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: TrueGoals: UserFakeGoals:', welc_message_one[2])
     await state.set_state(WarGoalsState.nazi_enter)
-    g_all = await mongo_count_docs('database', 'statistics_new', {'war_aims_ex': {'$exists': True}})
-    nazi = await mongo_count_docs('database', 'statistics_new', {'war_aims_ex': welc_message_one[2]})
+    g_all = await mongo_count_stats('statistics_new', {'war_aims_ex': {'$exists': True}})
+    nazi = await mongo_count_stats('statistics_new', {'war_aims_ex': welc_message_one[2]})
     txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'goals_nazi_start'}), g_all)
     txt.replace('XX', nazi)
     nmarkup = ReplyKeyboardBuilder()
@@ -384,8 +382,8 @@ async def goals_nazi_enterence(message: Message, state: FSMContext):
 async def goals_demilitari_start(message: Message, state: FSMContext):
     await state.set_state(WarGoalsState.demilitari)
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: TrueGoals: UserFakeGoals:', welc_message_one[3])
-    g_all = await mongo_count_docs('database', 'statistics_new', {'war_aims_ex': {'$exists': True}})
-    demil = await mongo_count_docs('database', 'statistics_new', {'war_aims_ex': welc_message_one[3]})
+    g_all = await mongo_count_stats('statistics_new', {'war_aims_ex': {'$exists': True}})
+    demil = await mongo_count_stats('statistics_new', {'war_aims_ex': welc_message_one[3]})
     txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'goals_demilitari_start'}), g_all)
     txt.replace('XX', demil)
     nmarkup = ReplyKeyboardBuilder()
@@ -432,8 +430,8 @@ async def goals_demilitari_nukes(message: Message):
 async def goals_NATO_start(message: Message, state: FSMContext):
     await state.set_state(WarGoalsState.nato)
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: TrueGoals: UserFakeGoals:', welc_message_one[5])
-    g_all = await mongo_count_docs('database', 'statistics_new', {'war_aims_ex': {'$exists': True}})
-    nato = await mongo_count_docs('database', 'statistics_new', {'war_aims_ex': welc_message_one[5]})
+    g_all = await mongo_count_stats('statistics_new', {'war_aims_ex': {'$exists': True}})
+    nato = await mongo_count_stats('statistics_new', {'war_aims_ex': welc_message_one[5]})
     txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'goals_NATO_start'}), g_all)
     txt.replace('XX', nato)
     nmarkup = ReplyKeyboardBuilder()
@@ -464,8 +462,8 @@ async def goals_nazi_enterence(message: Message, state: FSMContext):
 async def goals_bio_start(message: Message, state: FSMContext):
     await state.set_state(WarGoalsState.bio)
     await redis_delete_from_list(f'Usrs: {message.from_user.id}: TrueGoals: UserFakeGoals:', welc_message_one[8])
-    g_all = await mongo_count_docs('database', 'statistics_new', {'war_aims_ex': {'$exists': True}})
-    bio = await mongo_count_docs('database', 'statistics_new', {'war_aims_ex': welc_message_one[8]})
+    g_all = await mongo_count_stats('statistics_new', {'war_aims_ex': {'$exists': True}})
+    bio = await mongo_count_stats('statistics_new', {'war_aims_ex': welc_message_one[8]})
     txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'goals_bio_start'}), g_all)
     txt.replace('XX', bio)
     nmarkup = ReplyKeyboardBuilder()
@@ -609,11 +607,11 @@ async def goals_no_conspirasy(message: Message):
                                 value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'goals_no_conspirasy'})
 
-    a_all = await mongo_count_docs('database', 'statistics_new', {'goals_absurd_summary': {'$exists': True}})
-    a_funny = await mongo_count_docs('database', 'statistics_new', {'goals_absurd_summary': "Забавно 🙂"})
-    a_sad = await mongo_count_docs('database', 'statistics_new', {'goals_absurd_summary': "Грустно 😔"})
-    a_bok = await mongo_count_docs('database', 'statistics_new', {'goals_absurd_summary': "Однобоко 👎"})
-    a_plain = await mongo_count_docs('database', 'statistics_new', {'goals_absurd_summary': "Просто продолжим 👉"})
+    a_all = await mongo_count_stats('statistics_new', {'goals_absurd_summary': {'$exists': True}})
+    a_funny = await mongo_count_stats('statistics_new', {'goals_absurd_summary': "Забавно 🙂"})
+    a_sad = await mongo_count_stats('statistics_new', {'goals_absurd_summary': "Грустно 😔"})
+    a_bok = await mongo_count_stats('statistics_new', {'goals_absurd_summary': "Однобоко 👎"})
+    a_plain = await mongo_count_stats('statistics_new', {'goals_absurd_summary': "Просто продолжим 👉"})
 
     txt = CoolPercReplacer(text, a_all)
     txt.replace("AA", a_funny)
@@ -641,8 +639,8 @@ async def goals_change_of_power(message: Message, state: FSMContext):
     await state.set_state(TrueGoalsState.power_change)
     text = await sql_safe_select('text', 'texts', {'name': 'goals_change_of_power'})
 
-    g_all = await mongo_count_docs('database', 'statistics_new', {'war_aims_ex': {'$exists': True}})
-    change_power = await mongo_count_docs('database', 'statistics_new', {'war_aims_ex': welc_message_one[4]})
+    g_all = await mongo_count_stats('statistics_new', {'war_aims_ex': {'$exists': True}})
+    change_power = await mongo_count_stats('statistics_new', {'war_aims_ex': welc_message_one[4]})
     try:
         XX = change_power / g_all * 100
         text = text.replace('XX', round(XX))
@@ -779,13 +777,13 @@ async def goals_how_many_mobs_result(message: Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='goals_many_mobs', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'goals_how_many_mobs_result'})
 
-    m_all = await mongo_count_docs('database', 'statistics_new', {'goals_many_mobs': {'$exists': True}})
-    m_300 = await mongo_count_docs('database', 'statistics_new',
-                                   {'goals_many_mobs': "Около 300 тысяч, как и обещали 👌"})
-    m_less = await mongo_count_docs('database', 'statistics_new',
-                                    {'goals_many_mobs': "Меньше 300 тыс. человек 🔻"})
-    m_more = await mongo_count_docs('database', 'statistics_new', {'goals_many_mobs': "Больше 300 тыс. человек 🔺"})
-    m_idk = await mongo_count_docs('database', 'statistics_new', {'goals_many_mobs': "Затрудняюсь ответить 🤷‍♀️"})
+    m_all = await mongo_count_stats('statistics_new', {'goals_many_mobs': {'$exists': True}})
+    m_300 = await mongo_count_stats('statistics_new',
+                                    {'goals_many_mobs': "Около 300 тысяч, как и обещали 👌"})
+    m_less = await mongo_count_stats('statistics_new',
+                                     {'goals_many_mobs': "Меньше 300 тыс. человек 🔻"})
+    m_more = await mongo_count_stats('statistics_new', {'goals_many_mobs': "Больше 300 тыс. человек 🔺"})
+    m_idk = await mongo_count_stats('statistics_new', {'goals_many_mobs': "Затрудняюсь ответить 🤷‍♀️"})
 
     txt = CoolPercReplacer(text, m_all)
     txt.replace("AA", m_300)
@@ -821,13 +819,10 @@ async def goals_agreed_to_die_result(message: Message):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='goals_mobilisation_terror', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'goals_agreed_to_die_result'})
 
-    terr_all = await mongo_count_docs('database', 'statistics_new', {'goals_mobilisation_terror': {'$exists': True}})
-    terr_yes = await mongo_count_docs('database', 'statistics_new',
-                                      {'goals_mobilisation_terror': "Да, ощущаю угрозу ⚔️"})
-    terr_no = await mongo_count_docs('database', 'statistics_new',
-                                     {'goals_mobilisation_terror': "Нет, не ощущаю угрозы 🤷‍♂️"})
-    terr_idk = await mongo_count_docs('database', 'statistics_new',
-                                      {'goals_mobilisation_terror': "Затрудняюсь ответить 🤔"})
+    terr_all = await mongo_count_stats('statistics_new', {'goals_mobilisation_terror': {'$exists': True}})
+    terr_yes = await mongo_count_stats('statistics_new', {'goals_mobilisation_terror': "Да, ощущаю угрозу ⚔️"})
+    terr_no = await mongo_count_stats('statistics_new', {'goals_mobilisation_terror': "Нет, не ощущаю угрозы 🤷‍♂️"})
+    terr_idk = await mongo_count_stats('statistics_new', {'goals_mobilisation_terror': "Затрудняюсь ответить 🤔"})
 
     txt = CoolPercReplacer(text, terr_all)
     txt.replace("AA", terr_yes)
@@ -844,8 +839,8 @@ async def goals_agreed_to_die_result(message: Message):
 async def goals_politics_is_here(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'goals_politics_is_here'})
 
-    who_love_all = await mongo_count_docs('database', 'statistics_new', {'prop_ex': {"$exists": True}})
-    who_love_putin_now = await mongo_count_docs('database', 'statistics_new', {'prop_ex': "Владимир Путин"})
+    who_love_all = await mongo_count_stats('statistics_new', {'prop_ex': {"$exists": True}})
+    who_love_putin_now = await mongo_count_stats('statistics_new', {'prop_ex': "Владимир Путин"})
     txt = CoolPercReplacer(text, who_love_all)
     txt.replace("XX", who_love_putin_now)
     nmarkup = ReplyKeyboardBuilder()

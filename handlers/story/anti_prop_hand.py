@@ -10,7 +10,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from bata import all_data
 from bot_statistics.stat import mongo_update_stat_new
-from data_base.DBuse import poll_get, redis_just_one_read, sql_select_row_like, mongo_game_answer, mongo_count_docs, \
+from data_base.DBuse import poll_get, redis_just_one_read, sql_select_row_like, mongo_game_answer, mongo_count_stats, \
     redis_just_one_write
 from data_base.DBuse import sql_safe_select, data_getter
 from filters.MapFilters import WebPropagandaFilter, PplPropagandaFilter, \
@@ -70,23 +70,23 @@ async def antip_TV_makes_them_bad(message: Message):
     if 'Всё равно не хочу смотреть ложь' in message.text:
         await message.answer('Хорошо 👌')
 
-    trust = await mongo_count_docs('database', 'statistics_new', {'tv_love_gen': 'Да, полностью доверяю ✅'})
-    dont_trust = await mongo_count_docs('database', 'statistics_new', {'tv_love_gen': 'Нет, не верю ни слову ⛔'})
-    maybe_trust = await mongo_count_docs('database', 'statistics_new', {'tv_love_gen': 'Скорее да 👍'})
-    maybe_dont_trust = await mongo_count_docs('database', 'statistics_new', {'tv_love_gen': 'Скорее нет 👎'})
+    trust = await mongo_count_stats('statistics_new', {'tv_love_gen': 'Да, полностью доверяю ✅'})
+    dont_trust = await mongo_count_stats('statistics_new', {'tv_love_gen': 'Нет, не верю ни слову ⛔'})
+    maybe_trust = await mongo_count_stats('statistics_new', {'tv_love_gen': 'Скорее да 👍'})
+    maybe_dont_trust = await mongo_count_stats('statistics_new', {'tv_love_gen': 'Скорее нет 👎'})
 
-    var_true_and_trust = await mongo_count_docs(
-        'database', 'statistics_new', {'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️',
-                                       'tv_love_gen': 'Да, полностью доверяю ✅'})
-    var_true_and_dont_trust = await mongo_count_docs(
-        'database', 'statistics_new', {'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️',
-                                       'tv_love_gen': 'Нет, не верю ни слову ⛔'})
-    var_true_and_maybe_trust = await mongo_count_docs(
-        'database', 'statistics_new', {'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️',
-                                       'tv_love_gen': 'Скорее да 👍'})
-    var_true_and_maybe_dont_trust = await mongo_count_docs(
-        'database', 'statistics_new', {'start_continue_or_peace_results': 'Продолжать военную операцию ⚔️',
-                                       'tv_love_gen': 'Скорее нет 👎'})
+    var_true_and_trust = await mongo_count_stats(
+        'statistics_new', {'start_continue_or_peace_results': "Продолжать военные действия ⚔️️",
+                           'tv_love_gen': 'Да, полностью доверяю ✅'})
+    var_true_and_dont_trust = await mongo_count_stats(
+        'statistics_new', {'start_continue_or_peace_results': "Продолжать военные действия ⚔️️",
+                           'tv_love_gen': 'Нет, не верю ни слову ⛔'})
+    var_true_and_maybe_trust = await mongo_count_stats(
+        'statistics_new', {'start_continue_or_peace_results': "Продолжать военные действия ⚔️️",
+                           'tv_love_gen': 'Скорее да 👍'})
+    var_true_and_maybe_dont_trust = await mongo_count_stats(
+        'statistics_new', {'start_continue_or_peace_results': "Продолжать военные действия ⚔️️",
+                           'tv_love_gen': 'Скорее нет 👎'})
 
     txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'antip_TV_makes_them_bad'}), trust)
     txt.replace('AA', var_true_and_trust)
@@ -142,15 +142,12 @@ async def antip_eye_log(message: Message, state: FSMContext):
     await state.update_data(antip_eye_log_answ=message.text)
     await mongo_update_stat_new(tg_id=message.from_user.id, column='corpses', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'antip_how_could_they'})
-    fake_1 = await mongo_count_docs('database', 'statistics_new',
-                                    {'antip_eye_log': 'Это намеренная ложь 🗣'})
-    fake_2 = await mongo_count_docs('database', 'statistics_new',
-                                    {'antip_eye_log': 'Это намеренная ложь, но и на Украине так же делают ☝️'})
-    random = await mongo_count_docs('database', 'statistics_new',
-                                    {'antip_eye_log': 'Это случайность 🤷‍♀️️'})
+    fake_1 = await mongo_count_stats('statistics_new', {'antip_eye_log': 'Это намеренная ложь 🗣'})
+    fake_2 = await mongo_count_stats('statistics_new',
+                                     {'antip_eye_log': 'Это намеренная ложь, но и на Украине так же делают ☝️'})
+    random = await mongo_count_stats('statistics_new', {'antip_eye_log': 'Это случайность 🤷‍♀️️'})
 
-    dont_know = await mongo_count_docs('database', 'statistics_new',
-                                       {'antip_eye_log': 'Не знаю 🤷‍♂️'})
+    dont_know = await mongo_count_stats('statistics_new', {'antip_eye_log': 'Не знаю 🤷‍♂️'})
     fake = fake_1 + fake_2
     all_count = fake + random + dont_know
     try:
@@ -705,11 +702,11 @@ async def antip_quiz_1_answer(poll_answer: types.PollAnswer, bot: Bot, state: FS
     answer = poll_answer.option_ids[0]
     await mongo_update_stat_new(tg_id=poll_answer.user.id, column='antiprop_quiz_1',
                                 value=antip_q1_options[answer])
-    p_all = await mongo_count_docs('database', 'statistics_new', {'antiprop_quiz_1': {'$exists': True}})
-    p3000 = await mongo_count_docs('database', 'statistics_new', {'antiprop_quiz_1': 'Около 3000 человек'})
-    p11000 = await mongo_count_docs('database', 'statistics_new', {'antiprop_quiz_1': 'Около 11000 человек'})
-    p25000 = await mongo_count_docs('database', 'statistics_new', {'antiprop_quiz_1': 'Около 25000 человек'})
-    p40000 = await mongo_count_docs('database', 'statistics_new', {'antiprop_quiz_1': 'Около 40000 человек'})
+    p_all = await mongo_count_stats('statistics_new', {'antiprop_quiz_1': {'$exists': True}})
+    p3000 = await mongo_count_stats('statistics_new', {'antiprop_quiz_1': 'Около 3000 человек'})
+    p11000 = await mongo_count_stats('statistics_new', {'antiprop_quiz_1': 'Около 11000 человек'})
+    p25000 = await mongo_count_stats('statistics_new', {'antiprop_quiz_1': 'Около 25000 человек'})
+    p40000 = await mongo_count_stats('statistics_new', {'antiprop_quiz_1': 'Около 40000 человек'})
 
     txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'antip_quiz_1_answer'}), p_all)
     txt.replace('AA', p3000)
@@ -744,11 +741,11 @@ async def antip_quiz_2_answer(poll_answer: types.PollAnswer, bot: Bot):
     answer = poll_answer.option_ids[0]
     await mongo_update_stat_new(tg_id=poll_answer.user.id, column='antiprop_quiz_2',
                                 value=antip_q2_options[answer])
-    s_all = await mongo_count_docs('database', 'statistics_new', {'antiprop_quiz_2': {'$exists': True}})
-    s1000 = await mongo_count_docs('database', 'statistics_new', {'antiprop_quiz_2': 'Около 1000 скоплений'})
-    s4000 = await mongo_count_docs('database', 'statistics_new', {'antiprop_quiz_2': 'Около 4000 скоплений'})
-    s12000 = await mongo_count_docs('database', 'statistics_new', {'antiprop_quiz_2': 'Около 12000 скоплений'})
-    s39000 = await mongo_count_docs('database', 'statistics_new', {'antiprop_quiz_2': 'Около 39000 скоплений'})
+    s_all = await mongo_count_stats('statistics_new', {'antiprop_quiz_2': {'$exists': True}})
+    s1000 = await mongo_count_stats('statistics_new', {'antiprop_quiz_2': 'Около 1000 скоплений'})
+    s4000 = await mongo_count_stats('statistics_new', {'antiprop_quiz_2': 'Около 4000 скоплений'})
+    s12000 = await mongo_count_stats('statistics_new', {'antiprop_quiz_2': 'Около 12000 скоплений'})
+    s39000 = await mongo_count_stats('statistics_new', {'antiprop_quiz_2': 'Около 39000 скоплений'})
 
     txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'antip_quiz_2_answer'}), s_all)
     txt.replace('AA', s1000)
@@ -796,8 +793,8 @@ async def antip_unhumanity(poll_answer: types.PollAnswer, bot: Bot):
         tomongo = 'Не отметил все'
     await mongo_update_stat_new(tg_id=poll_answer.user.id, column='antiprop_quiz_3',
                                 value=tomongo)
-    l_all = await mongo_count_docs('database', 'statistics_new', {'antiprop_quiz_3': {'$exists': True}})
-    l_right = await mongo_count_docs('database', 'statistics_new', {'antiprop_quiz_3': 'Отметил все'})
+    l_all = await mongo_count_stats('statistics_new', {'antiprop_quiz_3': {'$exists': True}})
+    l_right = await mongo_count_stats('statistics_new', {'antiprop_quiz_3': 'Отметил все'})
     txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'antip_unhumanity'}), l_all)
     txt.replace('XX', l_right)
 
@@ -1071,9 +1068,9 @@ async def antip_family_conflicts(message: Message, state: FSMContext):
 async def antip_people_conflicts(message: Message):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='family_conflicts', value=message.text)
     await redis_just_one_write(f'Usrs: {message.from_user.id}: Antip: family:', message.text)
-    f_all = await mongo_count_docs('database', 'statistics_new', {'family_conflicts': {'$exists': True}})
-    f_no = await mongo_count_docs('database', 'statistics_new', {'family_conflicts': "Нет, ссор не было 🙏"})
-    f_yes = await mongo_count_docs('database', 'statistics_new', {'family_conflicts': "Да, были ссоры 🗣"})
+    f_all = await mongo_count_stats('statistics_new', {'family_conflicts': {'$exists': True}})
+    f_no = await mongo_count_stats('statistics_new', {'family_conflicts': "Нет, ссор не было 🙏"})
+    f_yes = await mongo_count_stats('statistics_new', {'family_conflicts': "Да, были ссоры 🗣"})
     txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'antip_people_conflicts'}), f_all)
     txt.replace('XX', f_yes)
     txt.replace('YY', f_no)
@@ -1087,9 +1084,9 @@ async def antip_people_conflicts(message: Message):
                 state=propaganda_victim.final, flags=flags)
 async def antip_zombie_everywere(message: Message):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='breaking_conflicts', value=message.text)
-    b_all = await mongo_count_docs('database', 'statistics_new', {'breaking_conflicts': {'$exists': True}})
-    b_no = await mongo_count_docs('database', 'statistics_new', {'breaking_conflicts': "Нет, таких нет 🙏"})
-    b_yes = await mongo_count_docs('database', 'statistics_new', {'breaking_conflicts': "Да, такие есть 🤐"})
+    b_all = await mongo_count_stats('statistics_new', {'breaking_conflicts': {'$exists': True}})
+    b_no = await mongo_count_stats('statistics_new', {'breaking_conflicts': "Нет, таких нет 🙏"})
+    b_yes = await mongo_count_stats('statistics_new', {'breaking_conflicts': "Да, такие есть 🤐"})
     if 'Нет' in await redis_just_one_read(f'Usrs: {message.from_user.id}: Antip: family:') \
             and 'Нет' in message.text:
         text_tag = 'antip_zombie_everywere_not_you'
@@ -1117,10 +1114,10 @@ async def antip_honesty_in_2022(message: Message):
                  | (F.text == "Может да, может нет 🤷‍♀️")), state=propaganda_victim.final, flags=flags)
 async def antip_normal_sources(message: Message):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='antip_honest_sources', value=message.text)
-    h_all = await mongo_count_docs('database', 'statistics_new', {'antip_honest_sources': {'$exists': True}})
-    h_no = await mongo_count_docs('database', 'statistics_new', {'antip_honest_sources': "Скорее нет, все СМИ врут 👎"})
-    h_yes = await mongo_count_docs('database', 'statistics_new', {'antip_honest_sources': "Скорее да, существуют 👍"})
-    h_mb = await mongo_count_docs('database', 'statistics_new', {'antip_honest_sources': "Может да, может нет 🤷‍♀️"})
+    h_all = await mongo_count_stats('statistics_new', {'antip_honest_sources': {'$exists': True}})
+    h_no = await mongo_count_stats('statistics_new', {'antip_honest_sources': "Скорее нет, все СМИ врут 👎"})
+    h_yes = await mongo_count_stats('statistics_new', {'antip_honest_sources': "Скорее да, существуют 👍"})
+    h_mb = await mongo_count_stats('statistics_new', {'antip_honest_sources': "Может да, может нет 🤷‍♀️"})
     if message.text == 'Скорее да, существуют 👍':
         text_tag = 'antip_normal_sources_normal'
     else:
@@ -1212,10 +1209,10 @@ async def antip_anecdote(message: Message, state: FSMContext):
 @router.message((F.text.in_({'😁', "🙂", "😕"})), state=propaganda_victim.final_end, flags=flags)
 async def antip_hole_in_deck(message: Message):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='reaction_on_anecdot', value=message.text)
-    a_all = await mongo_count_docs('database', 'statistics_new', {'reaction_on_anecdot': {'$exists': True}})
-    a_hoho = await mongo_count_docs('database', 'statistics_new', {'reaction_on_anecdot': "😁"})
-    a_haha = await mongo_count_docs('database', 'statistics_new', {'reaction_on_anecdot': "🙂"})
-    a_meh = await mongo_count_docs('database', 'statistics_new', {'reaction_on_anecdot': "😕"})
+    a_all = await mongo_count_stats('statistics_new', {'reaction_on_anecdot': {'$exists': True}})
+    a_hoho = await mongo_count_stats('statistics_new', {'reaction_on_anecdot': "😁"})
+    a_haha = await mongo_count_stats('statistics_new', {'reaction_on_anecdot': "🙂"})
+    a_meh = await mongo_count_stats('statistics_new', {'reaction_on_anecdot': "😕"})
     txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'antip_anecdote_reaction'}), a_all)
     txt.replace('XX', a_hoho)
     txt.replace('YY', a_haha)
@@ -1283,8 +1280,8 @@ async def antip_bite_me(message: Message):
         nmarkap = ReplyKeyboardBuilder()
         nmarkap.add(types.KeyboardButton(text="Расскажи 🙂️"))
         nmarkap.add(types.KeyboardButton(text="Не надо, двигаемся дальше 👉"))
-        p_all = await mongo_count_docs('database', 'statistics_new', {'web_prop_ex': {'$exists': True}})
-        p_wiki = await mongo_count_docs('database', 'statistics_new', {'web_prop_ex': "Википедия"})
+        p_all = await mongo_count_stats('statistics_new', {'web_prop_ex': {'$exists': True}})
+        p_wiki = await mongo_count_stats('statistics_new', {'web_prop_ex': "Википедия"})
         txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'antip_two_words'}), p_all)
         txt.replace('XX', p_wiki)
         await message.answer(txt(), reply_markup=nmarkap.as_markup(resize_keyboard=True), disable_web_page_preview=True)

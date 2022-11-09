@@ -7,7 +7,7 @@ from aiogram.types import User
 from pymongo.errors import DuplicateKeyError
 
 from bata import all_data
-from data_base.DBuse import data_getter, sql_add_value, mongo_user_info, mongo_easy_upsert, mongo_count_docs
+from data_base.DBuse import data_getter, sql_add_value, mongo_user_info, mongo_easy_upsert, mongo_count_stats
 from filters.isAdmin import IsAdmin
 from log import logg
 

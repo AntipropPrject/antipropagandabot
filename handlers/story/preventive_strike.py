@@ -5,7 +5,7 @@ from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from bot_statistics.stat import mongo_update_stat_new, mongo_update_stat
-from data_base.DBuse import sql_safe_select, mongo_count_docs, sql_games_row_selecter, mongo_game_answer
+from data_base.DBuse import sql_safe_select, mongo_count_stats, sql_games_row_selecter, mongo_game_answer
 from resources.all_polls import welc_message_one
 from states.preventstrike_states import PreventStrikeState
 from states.true_goals_states import WarGoalsState
@@ -85,32 +85,32 @@ async def prevent_strike_q4(message: Message, state: FSMContext):
 async def prevent_strike_results(message: Message):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='prevent_fourth_qstn', value=message.text)
 
-    sq_all = await mongo_count_docs('database', 'statistics_new', {'$or': [{'prevent_first_qstn': {'$exists': True}},
-                                                                           {'prevent_second_qstn': {'$exists': True}},
-                                                                           {'prevent_third_qstn': {'$exists': True}},
-                                                                           {'prevent_fourth_qstn': {'$exists': True}}
-                                                                           ]})
-    any_strange = await mongo_count_docs('database', 'statistics_new',
-                                         {'$or': [{'prevent_first_qstn': 'Да, это странно 🤔'},
-                                                  {'prevent_second_qstn': 'Да, это странно 🤔'},
-                                                  {'prevent_third_qstn': 'Да, это странно 🤔'},
-                                                  {'prevent_fourth_qstn': 'Да, это странно 🤔'}
-                                                  ]})
+    sq_all = await mongo_count_stats('statistics_new', [{'prevent_first_qstn': {'$exists': True}},
+                                                        {'prevent_second_qstn': {'$exists': True}},
+                                                        {'prevent_third_qstn': {'$exists': True}},
+                                                        {'prevent_fourth_qstn': {'$exists': True}}
+                                                        ])
+    any_strange = await mongo_count_stats('statistics_new',
+                                          [{'prevent_first_qstn': 'Да, это странно 🤔'},
+                                           {'prevent_second_qstn': 'Да, это странно 🤔'},
+                                           {'prevent_third_qstn': 'Да, это странно 🤔'},
+                                           {'prevent_fourth_qstn': 'Да, это странно 🤔'}
+                                           ])
 
     txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'prevent_strike_results'}), sq_all)
     txt.replace('XX', any_strange)
 
-    sq_first_all = await mongo_count_docs('database', 'statistics_new', {'prevent_first_qstn': {'$exists': True}})
-    sq_first_str = await mongo_count_docs('database', 'statistics_new', {'prevent_first_qstn': 'Да, это странно 🤔'})
+    sq_first_all = await mongo_count_stats('statistics_new', {'prevent_first_qstn': {'$exists': True}})
+    sq_first_str = await mongo_count_stats('statistics_new', {'prevent_first_qstn': 'Да, это странно 🤔'})
     txt.replace('AA', sq_first_str, temp_base=sq_first_all)
-    sq_second_all = await mongo_count_docs('database', 'statistics_new', {'prevent_second_qstn': {'$exists': True}})
-    sq_second_str = await mongo_count_docs('database', 'statistics_new', {'prevent_second_qstn': 'Да, это странно 🤔'})
+    sq_second_all = await mongo_count_stats('statistics_new', {'prevent_second_qstn': {'$exists': True}})
+    sq_second_str = await mongo_count_stats('statistics_new', {'prevent_second_qstn': 'Да, это странно 🤔'})
     txt.replace('BB', sq_second_str, temp_base=sq_second_all)
-    sq_third_all = await mongo_count_docs('database', 'statistics_new', {'prevent_third_qstn': {'$exists': True}})
-    sq_third_str = await mongo_count_docs('database', 'statistics_new', {'prevent_third_qstn': 'Да, это странно 🤔'})
+    sq_third_all = await mongo_count_stats('statistics_new', {'prevent_third_qstn': {'$exists': True}})
+    sq_third_str = await mongo_count_stats('statistics_new', {'prevent_third_qstn': 'Да, это странно 🤔'})
     txt.replace('CC', sq_third_str, temp_base=sq_third_all)
-    sq_fourth_all = await mongo_count_docs('database', 'statistics_new', {'prevent_fourth_qstn': {'$exists': True}})
-    sq_fourth_str = await mongo_count_docs('database', 'statistics_new', {'prevent_fourth_qstn': 'Да, это странно 🤔'})
+    sq_fourth_all = await mongo_count_stats('statistics_new', {'prevent_fourth_qstn': {'$exists': True}})
+    sq_fourth_str = await mongo_count_stats('statistics_new', {'prevent_fourth_qstn': 'Да, это странно 🤔'})
     txt.replace('DD', sq_fourth_str, temp_base=sq_fourth_all)
 
     nmarkup = ReplyKeyboardBuilder()
@@ -221,17 +221,16 @@ async def prevent_strike_do_you_agree(message: Message, state: FSMContext):
 async def prevent_strike_honesty_time(message: Message, state: FSMContext):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='preventive_final_result', value=message.text)
 
-    luca_all = await mongo_count_docs('database', 'statistics_new', {'preventive_final_result': {'$exists': True},
-                                                                     'war_aims_ex': welc_message_one[1]})
-    luca_yes = await mongo_count_docs('database', 'statistics_new',
-                                      {'preventive_final_result': 'Скорее да, это лишь предлог 👌',
-                                       'war_aims_ex': welc_message_one[1]})
-    luca_idk = await mongo_count_docs('database', 'statistics_new',
-                                      {'preventive_final_result': 'Скорее нет, это настоящая причина 🙅‍♂️',
-                                       'war_aims_ex': welc_message_one[1]})
-    luca_no = await mongo_count_docs('database', 'statistics_new',
-                                     {'preventive_final_result': 'Затрудняюсь ответить 🤷‍♀️',
-                                      'war_aims_ex': welc_message_one[1]})
+    luca_all = await mongo_count_stats('statistics_new', {'preventive_final_result': {'$exists': True},
+                                                          'war_aims_ex': welc_message_one[1]})
+    luca_yes = await mongo_count_stats('statistics_new',
+                                       {'preventive_final_result': 'Скорее да, это лишь предлог 👌',
+                                        'war_aims_ex': welc_message_one[1]})
+    luca_idk = await mongo_count_stats('statistics_new',
+                                       {'preventive_final_result': 'Скорее нет, это настоящая причина 🙅‍♂️',
+                                        'war_aims_ex': welc_message_one[1]})
+    luca_no = await mongo_count_stats('statistics_new', {'preventive_final_result': 'Затрудняюсь ответить 🤷‍♀️',
+                                                         'war_aims_ex': welc_message_one[1]})
     txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'prevent_strike_honesty_time'}), luca_all)
     txt.replace('AA', luca_yes)
     txt.replace('BB', luca_no)

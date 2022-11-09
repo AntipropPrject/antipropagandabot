@@ -4,12 +4,12 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from bot_statistics.stat import mongo_update_stat_new
-from data_base.DBuse import  mongo_count_docs
+from data_base.DBuse import mongo_count_stats
 from data_base.DBuse import sql_safe_select
 from keyboards.map_keys import polls_continue_kb
 from resources.all_polls import welc_message_one
 
-from states.true_goals_states import  WarGoalsState
+from states.true_goals_states import WarGoalsState
 from utilts import simple_media, CoolPercReplacer
 
 from states.nato_states import Nato_states
@@ -49,11 +49,11 @@ async def nato_first_poll(message: Message, bot: Bot, state: FSMContext):
 async def nato_poll_answer(poll_answer: types.PollAnswer, bot: Bot, state: FSMContext):
     await mongo_update_stat_new(tg_id=poll_answer.user.id, column='nato_poll_answer',
                                 value=poll_answer.option_ids[0])
-    right_answers = await mongo_count_docs('database', 'statistics_new', {'nato_poll_answer': 0})
-    answer_1 = await mongo_count_docs('database', 'statistics_new', {'nato_poll_answer': 1})
-    answer_2 = await mongo_count_docs('database', 'statistics_new', {'nato_poll_answer': 2})
-    answer_3 = await mongo_count_docs('database', 'statistics_new', {'nato_poll_answer': 3})
-    all_answers = await mongo_count_docs('database', 'statistics_new', {'nato_poll_answer': {'$exists': True}})
+    right_answers = await mongo_count_stats('statistics_new', {'nato_poll_answer': 0})
+    answer_1 = await mongo_count_stats('statistics_new', {'nato_poll_answer': 1})
+    answer_2 = await mongo_count_stats('statistics_new', {'nato_poll_answer': 2})
+    answer_3 = await mongo_count_stats('statistics_new', {'nato_poll_answer': 3})
+    all_answers = await mongo_count_stats('statistics_new', {'nato_poll_answer': {'$exists': True}})
     await state.set_state(Nato_states.poll_answer)
     await state.update_data(nato_poll_answer=poll_answer.option_ids[0])
 
@@ -68,7 +68,8 @@ async def nato_poll_answer(poll_answer: types.PollAnswer, bot: Bot, state: FSMCo
     nmarkup.row(types.KeyboardButton(text="Скорее нет, не согласен(а) 👎"))
     nmarkup.row(types.KeyboardButton(text="Затрудняюсь ответить 🤷‍♀"))
     nmarkup.adjust(2, 1)
-    await bot.send_message(text=txt(), chat_id=poll_answer.user.id, reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    await bot.send_message(text=txt(), chat_id=poll_answer.user.id,
+                           reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message((F.text.in_({'Скорее да, согласен(а) 👍', 'Скорее нет, не согласен(а) 👎',
@@ -77,13 +78,10 @@ async def nato_other_questions(message: Message, state: FSMContext):
     await state.set_state(Nato_states.nato_other_questions)
     await mongo_update_stat_new(tg_id=message.from_user.id, column='nato_other_questions',
                                 value=message.text)
-    answer_1 = await mongo_count_docs('database', 'statistics_new',
-                                      {'nato_other_questions': 'Скорее да, согласен(а) 👍'})
-    answer_2 = await mongo_count_docs('database', 'statistics_new',
-                                      {'nato_other_questions': 'Скорее нет, не согласен(а) 👎'})
-    answer_3 = await mongo_count_docs('database', 'statistics_new',
-                                      {'nato_other_questions': 'Затрудняюсь ответить 🤷‍♀'})
-    all_answers = await mongo_count_docs('database', 'statistics_new', {'nato_other_questions': {'$exists': True}})
+    answer_1 = await mongo_count_stats('statistics_new', {'nato_other_questions': 'Скорее да, согласен(а) 👍'})
+    answer_2 = await mongo_count_stats('statistics_new', {'nato_other_questions': 'Скорее нет, не согласен(а) 👎'})
+    answer_3 = await mongo_count_stats('statistics_new', {'nato_other_questions': 'Затрудняюсь ответить 🤷‍♀'})
+    all_answers = await mongo_count_stats('statistics_new', {'nato_other_questions': {'$exists': True}})
     txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'nato_other_questions'}), all_answers)
     txt.replace("AA", answer_1)
     txt.replace("BB", answer_2)
@@ -165,7 +163,6 @@ async def nato_ucraine_in(message: Message, bot: Bot, state: FSMContext):
     await simple_media(message, 'nato_ucraine_in', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-
 @router.message(F.text.contains('Взглянуть на карту 🗺'), state=Nato_states.nato_ucraine_in, flags=flags)
 async def nato_map(message: Message, bot: Bot, state: FSMContext):
     await state.set_state(Nato_states.nato_map)
@@ -174,7 +171,6 @@ async def nato_map(message: Message, bot: Bot, state: FSMContext):
     nmarkup.row(types.KeyboardButton(text="А Путин объяснил, почему Украина и Финляндия— это разное? 🤔"))
     nmarkup.row(types.KeyboardButton(text="Закончим диалог о НАТО 👉"))
     await simple_media(message, 'nato_map', reply_markup=nmarkup.as_markup(resize_keyboard=True))
-
 
 
 @router.message(F.text.contains('Так если бы Украина вступила в НАТО, они вместе вторглись бы в Крым!  ✈️'),
@@ -213,7 +209,6 @@ async def nato_diff_with_fin(message: Message, bot: Bot, state: FSMContext):
     await simple_media(message, 'nato_diff_with_fin', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-
 @router.message(F.text.contains('Закончим диалог о НАТО 👉'),
                 state=Nato_states.nato_map, flags=flags)
 async def nato_pre_end(message: Message, bot: Bot, state: FSMContext):
@@ -234,17 +229,14 @@ async def nato_end(message: Message, state: FSMContext):
     await state.set_state(WarGoalsState.main)
     await mongo_update_stat_new(tg_id=message.from_user.id, column='nato_end',
                                 value=message.text)
-    answer_1 = await mongo_count_docs('database', 'statistics_new',
-                                      {'nato_end': 'Скорее да, это лишь предлог 👌',
-                                       'war_aims_ex': welc_message_one[5]})
-    answer_2 = await mongo_count_docs('database', 'statistics_new',
-                                      {'nato_end': 'Скорее нет, это настоящая причина 🙅‍♂',
-                                       'war_aims_ex': welc_message_one[5]})
-    answer_3 = await mongo_count_docs('database', 'statistics_new',
-                                      {'nato_end': 'Затрудняюсь ответить 🤷‍♀',
-                                       'war_aims_ex': welc_message_one[5]})
-    all_answers = await mongo_count_docs('database', 'statistics_new', {'nato_end': {'$exists': True},
-                                                                        'war_aims_ex': welc_message_one[5]})
+    answer_1 = await mongo_count_stats('statistics_new', {'nato_end': 'Скорее да, это лишь предлог 👌',
+                                                          'war_aims_ex': welc_message_one[5]})
+    answer_2 = await mongo_count_stats('statistics_new', {'nato_end': 'Скорее нет, это настоящая причина 🙅‍♂',
+                                                          'war_aims_ex': welc_message_one[5]})
+    answer_3 = await mongo_count_stats('statistics_new', {'nato_end': 'Затрудняюсь ответить 🤷‍♀',
+                                                          'war_aims_ex': welc_message_one[5]})
+    all_answers = await mongo_count_stats('statistics_new', {'nato_end': {'$exists': True},
+                                                             'war_aims_ex': welc_message_one[5]})
     txt = CoolPercReplacer(await sql_safe_select('text', 'texts', {'name': 'nato_end'}), all_answers)
     txt.replace("AA", answer_1)
     txt.replace("BB", answer_2)
