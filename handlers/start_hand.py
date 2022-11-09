@@ -84,7 +84,8 @@ async def start_base(user: User):
     for key in redis.scan_iter(f"Usrs: {user.id}:*"):
         redis.delete(key)
 
-    if await mongo_count_stats("statistics_new", {'_id': int(user.id)}):
+    if await mongo_count_stats("statistics_new", {'_id': int(user.id), 'datetime': {"$lt": release_date['v3']}},
+                               version=None):
         await recycle_old_user(user.id)
 
     await mongo_stat(user_id)

@@ -61,7 +61,7 @@ async def menu(message: types.Message, state: FSMContext):
 
 
 @router.message((F.text == 'Отменить изменения'), state=(
-        admin.confirm_add_text, admin.confirm_add_media, admin.confirm_edit_text, admin.confirm_edit_media,))
+        admin.confirm_add_text, admin.confirm_add_media, admin.confirm_edit_text, admin.confirm_edit_media))
 async def reset(message: Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Отменить изменения'")
     stt = await state.get_state()
@@ -73,7 +73,7 @@ async def reset(message: Message, state: FSMContext):
         await state.set_state(admin.add_media)
         await message.answer('Хорошо, отправьте мне другое медиа', reply_markup=middle_admin_keyboard())
     elif stt == 'admin:confirm_edit_text':
-        await state.set_state(admin_home.text_edit)
+        await state.set_state(admin.text_edit)
         await message.answer('Хорошо, отправьте мне текст, который заменит старый',
                              reply_markup=middle_admin_keyboard())
     elif stt == 'admin:confirm_edit_media':

@@ -76,19 +76,13 @@ async def news_for_user(user, main_news_base, today_actual):
     print(today_actual)
     print('start start')
     for news in main_news_base:
-        print('0001')
         if news['_id'] not in user['viewed_news']:
-            print('1111')
             await send_spam(user_id=user_id, media_id=news['media'], caption=news['caption'])
             await mongo_update_viewed_news(user_id, news['_id'])
 
         else:
-            print('2222')
             if len(today_actual) != 0:
-                print('3333')
                 await send_spam(user_id=user_id, media_id=today_actual[0]['media'], caption=today_actual[0]['caption'])
-            print('4444')
-
     return True
 
 
