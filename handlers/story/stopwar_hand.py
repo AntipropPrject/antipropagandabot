@@ -107,9 +107,11 @@ async def stopwar_how_it_was(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_how_it_was'})
     await mongo_update_stat_new(message.from_user.id, 'SecondNewPolit')
     start_warbringers_count = await mongo_count_stats('statistics_new',
-                                                      {'NewPolitStat_start': 'Сторонник спецоперации'})
-    start_peacefull_count = await mongo_count_stats('statistics_new', {'NewPolitStat_start': 'Противник войны'})
-    start_doubting_count = await mongo_count_stats('statistics_new', {'NewPolitStat_start': 'Сомневающийся'})
+                                                      {'NewPolitStat_start': 'Сторонник спецоперации'}, version="v3.2")
+    start_peacefull_count = await mongo_count_stats('statistics_new',
+                                                    {'NewPolitStat_start': 'Противник войны'}, version="v3.2")
+    start_doubting_count = await mongo_count_stats('statistics_new',
+                                                   {'NewPolitStat_start': 'Сомневающийся'}, version="v3.2")
     all_count = start_doubting_count + start_peacefull_count + start_warbringers_count
     if all_count == 0:
         all_count = 1
@@ -121,7 +123,7 @@ async def stopwar_how_it_was(message: Message, state: FSMContext):
     text = text.replace('ZZ', start_doubt_percentage)
     all_count_end = await mongo_count_stats('statistics_new', [
         {'NewPolitStat_end': 'Сомневающийся'}, {'NewPolitStat_end': 'Сторонник спецоперации'},
-        {'NewPolitStat_end': 'Противник войны'}])
+        {'NewPolitStat_end': 'Противник войны'}], version="v3.2")
     await state.update_data({'How_many_will_end': all_count_end, 'start_warbringers_count': start_warbringers_count,
                              'start_peacefull_count': start_peacefull_count,
                              'start_doubting_count': start_doubting_count})
