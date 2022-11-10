@@ -1404,7 +1404,7 @@ async def admin_home(message: types.Message, state: FSMContext):
     await state.set_state(admin.mass_media_menu)
 
 
-@router.message((F.text.contazins('Добавить сюжет')), state=admin.mass_media_menu)
+@router.message(F.text == 'Добавить сюжет', state=admin.mass_media_menu)
 async def admin_home(message: types.Message, state: FSMContext):
     nmarkup = InlineKeyboardBuilder()
     nmarkup.button(text='РИА Новости', callback_data='RIANEWS_media_ TCHANEL_WAR_exposure_')
@@ -1681,6 +1681,5 @@ async def strike_add(message: types.Message, state: FSMContext):
     nmrkup.row(types.KeyboardButton(text="Назад"))
     await message.answer("Пришлите мне медиафайл (картинку или видео).\n"
                          "Он будет добавлен в конец списка мемов.", reply_markup=nmrkup.as_markup(resize_keyboard=True))
-
 
 
