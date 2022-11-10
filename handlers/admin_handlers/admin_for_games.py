@@ -1420,7 +1420,7 @@ async def admin_home(message: types.Message, state: FSMContext):
 async def add_media(query: types.CallbackQuery, state: FSMContext):
     await state.clear()
     if 'pop' not in query.data and 'edit' not in query.data:
-        await state.update_data(tag_media=query.data[3:])
+        await state.update_data(tag_media=query.data)
         await query.message.delete()
         await query.message.answer('Загрузите медиа и напишите описание')
         await state.set_state(admin.add_news)
@@ -1494,7 +1494,7 @@ async def admin_home(message: types.Message, state: FSMContext):
         await state.set_state(admin.mass_media_Done)
     except Exception as er:
         print(er)
-        await message.answer("Упс.. Что-то пошло не так, пожалуйста обратитесь к разработчиками")
+        await message.answer(f"{er}")
 
 
 @router.message((F.text.contains('Отменить изменения')),
@@ -1502,7 +1502,7 @@ async def admin_home(message: types.Message, state: FSMContext):
 async def admin_home(message: types.Message, state: FSMContext):
     await state.clear()
     await state.set_state(admin.mass_media_menu)
-    await message.answer('Отмена..', reply_markup=admin_games_keyboard())
+    await message.answer('Отмена', reply_markup=admin_games_keyboard())
 
 
 @router.message((F.text.contains('Подтвердить')), state=admin.mass_media_Done)
@@ -1513,20 +1513,21 @@ async def admin_home(message: types.Message, state: FSMContext):
     old_exposure_tag = tags[1]
     new_media = data['media_mass']
     new_caption = data['caption_mass']
-    new_caption_exposure = data['media_mass_exposure']
-    new_media_exposure = data['caption_mass_exposure']
+    new_media_exposure = data['media_mass_exposure']
+    new_caption_exposure = data['caption_mass_exposure']
     last_tag_numner = len(await data_getter(f"select name from assets where name like '%{old_exposure_tag}%'"))
     try:
-        await sql_safe_insert('assets', {'t_id': new_media, 'name': f"{old_media_tag}{last_tag_numner + 1}"})
-        await sql_safe_insert('assets',
+        await sql_safe_insert('public', 'assets', {'t_id': new_media, 'name': f"{old_media_tag}{last_tag_numner + 1}"})
+        await sql_safe_insert('public', 'assets',
                               {'t_id': new_media_exposure, 'name': f"{old_exposure_tag}{last_tag_numner + 1}"})
-        await sql_safe_insert('texts', {'text': new_caption, 'name': f"{old_media_tag}{last_tag_numner + 1}"})
-        await sql_safe_insert('texts',
+        await sql_safe_insert('public', 'texts', {'text': new_caption, 'name': f"{old_media_tag}{last_tag_numner + 1}"})
+        await sql_safe_insert('public', 'texts',
                               {'text': new_caption_exposure, 'name': f"{old_exposure_tag}{last_tag_numner + 1}"})
         await state.set_state(admin.mass_media_menu)
         await message.answer("Сюжет был успешно добавлен в базу", reply_markup=admin_games_keyboard())
-    except:
-        await message.answer('Упс.. Что-то пошло не так, пожалуйста обратитесь к разработчиками')
+    except Exception as err:
+        print(err)
+        await message.answer(f'{err}')
 
 
 @router.message((F.text.contains('Удалить сюжет')), state=admin.mass_media_menu)
@@ -1611,14 +1612,16 @@ async def admin_home(message: types.Message, state: FSMContext):
             media = message.photo[0].file_id
             await message.answer_photo(media, caption=caption)
         elif message.content_type == 'video':
+            print('video')
             media = message.video.file_id
-            await message.answer_photo(media, caption=caption)
+            await message.answer_video(media, caption=caption)
         await state.update_data(media_mass=media)
         await state.update_data(caption_mass=caption)
         await state.set_state(admin.mass_media_edit_add_exposure)
         await message.answer("Теперь отправьте мне опровержение этой новости")
 
-    except:
+    except Exception as er:
+        print(er)
         await message.answer('Упс.. Что-то пошло не так, пожалуйста обратитесь к разработчиками')
 
 
@@ -1632,12 +1635,13 @@ async def admin_home(message: types.Message, state: FSMContext):
             await message.answer_photo(media, caption=caption)
         elif message.content_type == 'video':
             media = message.video.file_id
-            await message.answer_photo(media, caption=caption)
+            await message.answer_video(media, caption=caption)
         await state.update_data(media_mass_exposure=media)
         await state.update_data(caption_mass_exposure=caption)
         await message.answer("Всё верно?", reply_markup=app_admin_keyboard())
         await state.set_state(admin.mass_media_edit_Done)
-    except:
+    except Exception as err:
+        print(err)
         await message.answer('Упс.. Что-то пошло не так, пожалуйста обратитесь к разработчиками')
 
 
@@ -1658,7 +1662,8 @@ async def admin_home(message: types.Message, state: FSMContext):
         await sql_safe_update('texts', {'text': new_caption_exposure}, {'name': tag_exposure})
         await state.set_state(admin.mass_media_menu)
         await message.answer("Сюжет был успешно обновлён в базе", reply_markup=admin_games_keyboard())
-    except:
+    except Exception as err:
+        print(err)
         await message.answer('Упс.. Что-то пошло не так, пожалуйста обратитесь к разработчиками')
 
 
