@@ -323,13 +323,13 @@ async def start_continue_or_peace_results(message: Message, state: FSMContext):
 
     war = await mongo_count_stats('statistics_new',
                                   {'start_continue_or_peace_results': "Продолжать военные действия ⚔️️"},
-                                  version='v3.2')
+                                  version='v3.2.1')
     stop_war = await mongo_count_stats('statistics_new',
                                        {'start_continue_or_peace_results': "Вывести войска с занятых территорий 🕊"},
-                                       version='v3.2')
+                                       version='v3.2.1')
     dont_know = await mongo_count_stats('statistics_new',
                                         {'start_continue_or_peace_results': "Затрудняюсь ответить 🤷‍♀️"},
-                                        version='v3.2')
+                                        version='v3.2.1')
     all_people = war + stop_war + dont_know
 
     txt = CoolPercReplacer(text, all_people)
@@ -380,11 +380,11 @@ async def start_now_you_putin_results(message: Message, bot: Bot):
                              {'[first_q]': user_answers[0], '[second_q]': user_answers[1], '[polit_status]': status})
 
     war = await mongo_count_stats('statistics_new', {'start_now_you_putin_results': 'Начну военную операцию ⚔️'},
-                                  version='v3.2')
+                                  version='v3.2.1')
     stop_war = await mongo_count_stats('statistics_new', {'start_now_you_putin_results': 'Не стану этого делать 🕊'},
-                                       version='v3.2')
+                                       version='v3.2.1')
     hz = await mongo_count_stats('statistics_new', {'start_now_you_putin_results': 'Затрудняюсь  ответить  🤷‍♀️'},
-                                 version='v3.2')
+                                 version='v3.2.1')
     all_people = war + stop_war + hz
 
     text = await sql_safe_select('text', 'texts', {'name': 'start_now_you_putin_results'})

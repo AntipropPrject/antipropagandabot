@@ -36,7 +36,7 @@ async def message_2(message: types.Message, state: FSMContext):
 @router.message(welcome_states.start_dialog.dialogue_4,
                 ((F.text == '1️⃣ Специальная военная операция (СВО)') | (F.text == "2️⃣ Война")),
                 flags=flags)
-async def message_3(message: types.Message, state: FSMContext):  # Начало опроса
+async def start_lets_start(message: types.Message, state: FSMContext):  # Начало опроса
     await poll_write(f'Usrs: {message.from_user.id}: Start_answers: Is_it_war:', message.text)
     await mongo_update_stat_new(tg_id=message.from_user.id, column='war_or_not', value=message.text)
 

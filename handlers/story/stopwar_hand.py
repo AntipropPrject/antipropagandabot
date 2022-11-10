@@ -42,13 +42,13 @@ async def stopwar_question_1(message: Message, state: FSMContext):
     await state.set_state(StopWarState.questions)
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_question_1'})
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Продолжать военную операцию ⚔️"))
-    nmarkup.row(types.KeyboardButton(text="Переходить к мирным переговорам 🕊"))
+    nmarkup.row(types.KeyboardButton(text="Продолжать военные действия ⚔️"))
+    nmarkup.row(types.KeyboardButton(text="Вывести войска с занятых территорий 🕊"))
     nmarkup.row(types.KeyboardButton(text="Затрудняюсь ответить 🤷‍♀️"))
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message((F.text.in_({"Продолжать военную операцию ⚔️", "Переходить к мирным переговорам 🕊",
+@router.message((F.text.in_({"Продолжать военные действия ⚔️", "Вывести войска с занятых территорий 🕊",
                              "Затрудняюсь ответить 🤷‍♀️"})), state=StopWarState.questions, flags=flags)
 async def stopwar_question_2(message: Message, state: FSMContext):
     await state.set_state(StopWarState.must_watch)
@@ -67,12 +67,12 @@ async def stopwar_question_2(message: Message, state: FSMContext):
 async def stopwar_here_they_all(message: Message, bot: Bot):
     await mongo_update_stat_new(message.from_user.id, 'stopwar_will_you_start_war', value=message.text)
     first_question = await poll_get(f'Usrs: {message.from_user.id}: StopWar: NewPolitList:')
-    if first_question[0] == "Продолжать военную операцию ⚔️" and message.text == "Начну военную операцию ⚔️":
+    if first_question[0] == "Продолжать военные действия ⚔️" and message.text == "Начну военную операцию ⚔️":
         await redis_just_one_write(f'Usrs: {message.from_user.id}: StopWar: NewPolitStat:',
                                    'Сторонник спецоперации ⚔️')
         await mongo_update_stat_new(tg_id=message.from_user.id, column='NewPolitStat_end',
                                     value='Сторонник спецоперации')
-    elif first_question[0] == "Переходить к мирным переговорам 🕊" and message.text == "Не стану этого делать 🕊":
+    elif first_question[0] == "Вывести войска с занятых территорий 🕊" and message.text == "Не стану этого делать 🕊":
         await redis_just_one_write(f'Usrs: {message.from_user.id}: StopWar: NewPolitStat:',
                                    'Противник войны 🕊')
         await mongo_update_stat_new(tg_id=message.from_user.id, column='NewPolitStat_end',
@@ -107,11 +107,12 @@ async def stopwar_how_it_was(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_how_it_was'})
     await mongo_update_stat_new(message.from_user.id, 'SecondNewPolit')
     start_warbringers_count = await mongo_count_stats('statistics_new',
-                                                      {'NewPolitStat_start': 'Сторонник спецоперации'}, version="v3.2")
+                                                      {'NewPolitStat_start': 'Сторонник спецоперации'},
+                                                      version="v3.2.1")
     start_peacefull_count = await mongo_count_stats('statistics_new',
-                                                    {'NewPolitStat_start': 'Противник войны'}, version="v3.2")
+                                                    {'NewPolitStat_start': 'Противник войны'}, version="v3.2.1")
     start_doubting_count = await mongo_count_stats('statistics_new',
-                                                   {'NewPolitStat_start': 'Сомневающийся'}, version="v3.2")
+                                                   {'NewPolitStat_start': 'Сомневающийся'}, version="v3.2.1")
     all_count = start_doubting_count + start_peacefull_count + start_warbringers_count
     if all_count == 0:
         all_count = 1
@@ -140,21 +141,21 @@ async def stopwar_how_was_warbringers(message: Message, state: FSMContext):
     text = await sql_safe_select('text', 'texts', {'name': 'stopwar_how_was_warbringers'})
     at_the_end = await mongo_count_stats('statistics_new',
                                          [{'NewPolitStat_start': 'Сторонник спецоперации'},
-                                          {'NewPolitStat_end': {'$exists': True}}], version="v3.2",
+                                          {'NewPolitStat_end': {'$exists': True}}], version="v3.2.1",
                                          hard_link=True)
     start_war = (await state.get_data())['start_warbringers_count']
     end_war_war = await mongo_count_stats('statistics_new',
                                           [{'NewPolitStat_start': 'Сторонник спецоперации'},
                                            {'NewPolitStat_end': 'Сторонник спецоперации'}],
-                                          version="v3.2", hard_link=True)
+                                          version="v3.2.1", hard_link=True)
     end_war_peace = await mongo_count_stats('statistics_new',
                                             [{'NewPolitStat_start': 'Сторонник спецоперации'},
                                              {'NewPolitStat_end': 'Противник войны'}],
-                                            hard_link=True, version="v3.2")
+                                            hard_link=True, version="v3.2.1")
     end_war_doubt = await mongo_count_stats('statistics_new',
                                             [{'NewPolitStat_start': 'Сторонник спецоперации'},
                                              {'NewPolitStat_end': 'Сомневающийся'}],
-                                            hard_link=True, version="v3.2")
+                                            hard_link=True, version="v3.2.1")
 
     text = percentage_replace(text, 'MM', at_the_end, start_war)
     text = percentage_replace(text, 'AA', end_war_war, at_the_end)
@@ -171,20 +172,20 @@ async def stopwar_how_was_doubting(message: Message, state: FSMContext):
     at_the_end = await mongo_count_stats('statistics_new',
                                          [{'NewPolitStat_start': 'Сомневающийся'},
                                           {'NewPolitStat_end': {'$exists': True}}],
-                                         hard_link=True, version="v3.2")
+                                         hard_link=True, version="v3.2.1")
     start_doub = (await state.get_data())['start_doubting_count']
     end_doub_war = await mongo_count_stats('statistics_new',
                                            [{'NewPolitStat_start': 'Сомневающийся'},
                                             {'NewPolitStat_end': 'Сторонник спецоперации'}],
-                                           hard_link=True, version="v3.2")
+                                           hard_link=True, version="v3.2.1")
     end_doub_doub = await mongo_count_stats('statistics_new',
                                             [{'NewPolitStat_start': 'Сомневающийся'},
                                              {'NewPolitStat_end': 'Сомневающийся'}],
-                                            hard_link=True, version="v3.2")
+                                            hard_link=True, version="v3.2.1")
     end_doub_peace = await mongo_count_stats('statistics_new',
                                              [{'NewPolitStat_start': 'Сомневающийся'},
                                               {'NewPolitStat_end': 'Противник войны'}],
-                                             hard_link=True, version="v3.2")
+                                             hard_link=True, version="v3.2.1")
 
     text = percentage_replace(text, 'NN', at_the_end, start_doub)
     text = percentage_replace(text, 'DD', end_doub_war, at_the_end)
@@ -201,20 +202,20 @@ async def stopwar_how_was_peacefull(message: Message, state: FSMContext):
     at_the_end = await mongo_count_stats('statistics_new',
                                          [{'NewPolitStat_start': 'Противник войны'},
                                           {'NewPolitStat_end': {'$exists': True}}],
-                                         hard_link=True, version="v3.2")
+                                         hard_link=True, version="v3.2.1")
     start_peace = (await state.get_data())['start_peacefull_count']
     end_peace_war = await mongo_count_stats('statistics_new',
                                             [{'NewPolitStat_start': 'Противник войны'},
                                              {'NewPolitStat_end': 'Сторонник спецоперации'}],
-                                            hard_link=True, version="v3.2")
+                                            hard_link=True, version="v3.2.1")
     end_peace_doub = await mongo_count_stats('statistics_new',
                                              [{'NewPolitStat_start': 'Противник войны'},
                                               {'NewPolitStat_end': 'Сомневающийся'}],
-                                             hard_link=True, version="v3.2")
+                                             hard_link=True, version="v3.2.1")
     end_peace_peace = await mongo_count_stats('statistics_new',
                                               [{'NewPolitStat_start': 'Противник войны'},
                                                {'NewPolitStat_end': 'Противник войны'}],
-                                              hard_link=True, version="v3.2")
+                                              hard_link=True, version="v3.2.1")
 
     text = percentage_replace(text, 'OO', at_the_end, start_peace)
     text = percentage_replace(text, 'GG', end_peace_war, at_the_end)
