@@ -39,7 +39,6 @@ def games_keyboard(t_id=None):
     nmarkup.row(types.KeyboardButton(text="Ложь других СМИ 🧮"))
     nmarkup.row(types.KeyboardButton(text="Пропагандисты 💢"))
     nmarkup.row(types.KeyboardButton(text="Игра в правду 🥸"))
-    nmarkup.row(types.KeyboardButton(text="Путин (Ложь) 🚮"))
     nmarkup.row(types.KeyboardButton(text="Путин (Обещания) 🍜"))
     nmarkup.row(types.KeyboardButton(text="Игра Абсурда 🗯"))
     nmarkup.row(types.KeyboardButton(text="Игра Нацизма 💤"))

@@ -65,7 +65,6 @@ async def menu(message: types.Message, state: FSMContext):
 async def reset(message: Message, state: FSMContext):
     await logg.admin_logs(message.from_user.id, message.from_user.username, "Нажал(a) -- 'Отменить изменения'")
     stt = await state.get_state()
-    print(stt)
     if stt == 'admin:confirm_add_text':
         await state.set_state(admin.add_text)
         await message.answer('Хорошо, отправьте мне текст с правками', reply_markup=middle_admin_keyboard())
