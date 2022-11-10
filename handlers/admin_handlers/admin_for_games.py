@@ -1467,7 +1467,7 @@ async def admin_home(message: types.Message, state: FSMContext):
             await message.answer_photo(media, caption=caption)
         elif message.content_type == 'video':
             media = message.video.file_id
-            await message.answer_photo(media, caption=caption)
+            await message.answer_video(media, caption=caption)
         await state.update_data(media_mass=media)
         await state.update_data(caption_mass=caption)
         await message.answer("Теперь отправьте мне опровержение этой новости")
@@ -1487,7 +1487,7 @@ async def admin_home(message: types.Message, state: FSMContext):
             await message.answer_photo(media, caption=caption)
         elif message.content_type == 'video':
             media = message.video.file_id
-            await message.answer_photo(media, caption=caption)
+            await message.answer_video(media, caption=caption)
         await state.update_data(media_mass_exposure=media)
         await state.update_data(caption_mass_exposure=caption)
         await message.answer("Всё верно?", reply_markup=app_admin_keyboard())
@@ -1612,7 +1612,6 @@ async def admin_home(message: types.Message, state: FSMContext):
             media = message.photo[0].file_id
             await message.answer_photo(media, caption=caption)
         elif message.content_type == 'video':
-            print('video')
             media = message.video.file_id
             await message.answer_video(media, caption=caption)
         await state.update_data(media_mass=media)
