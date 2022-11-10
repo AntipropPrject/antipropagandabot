@@ -739,7 +739,8 @@ async def menu(message: types.Message, state: FSMContext):
             f"insert into texts(text,name) values('{text}', 'putin_oldlie_game_{count}'); commit;")
 
         await data_getter(
-            f"insert into putin_old_lies(asset_name,text_name,belivers,nonbelivers) values ('putin_oldlie_game_{count}','putin_lie_game_{count}', 1,1); commit; ")
+            f"insert into putin_old_lies(id, asset_name,text_name,belivers,nonbelivers) values"
+            f" ({count}, 'putin_oldlie_game_{count}','putin_lie_game_{count}', 1,1); commit; ")
     except Exception as ex:
         await logg.admin_logs(message.from_user.id, message.from_user.username,
                               f"Старый Путин - Запись в базу данных +{ex}")
@@ -815,11 +816,13 @@ async def admin_home(message: types.Message, state: FSMContext):
     media_id = await data_getter(f"select t_id from assets where name = '{message.text}'")
     try:
         await message.answer_video(media_id[0][0],
-                                   caption="Посмотрите внимательно. Это сюжет вы хотите редактировать? \nЕсли да, тогда отправьте новый сюжет. Если нет, нажмите нет ",
+                                   caption="Посмотрите внимательно. Это сюжет вы хотите редактировать? \n"
+                                           "Если да, тогда отправьте новый сюжет. Если нет, нажмите нет ",
                                    reply_markup=nmrkup.as_markup(resize_keyboard=True))
     except:
         await message.answer_photo(media_id[0][0],
-                                   caption="Посмотрите внимательно. Это сюжет вы хотите редактировать? \nЕсли да, тогда отправьте новый сюжет. Если нет, нажмите нет",
+                                   caption="Посмотрите внимательно. Это сюжет вы хотите редактировать? \n"
+                                           "Если да, тогда отправьте новый сюжет. Если нет, нажмите нет",
                                    reply_markup=nmrkup.as_markup(resize_keyboard=True))
     await state.set_state(admin.putin_game_old_lies_upd_aplly)
 
@@ -1678,5 +1681,6 @@ async def strike_add(message: types.Message, state: FSMContext):
     nmrkup.row(types.KeyboardButton(text="Назад"))
     await message.answer("Пришлите мне медиафайл (картинку или видео).\n"
                          "Он будет добавлен в конец списка мемов.", reply_markup=nmrkup.as_markup(resize_keyboard=True))
+
 
 
