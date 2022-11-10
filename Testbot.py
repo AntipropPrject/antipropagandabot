@@ -107,12 +107,7 @@ def main():
     dp.include_router(other_file.router)
 
     # session = aiohttp.ClientSession()
-    # use the session here
 
-    # periodic function
-
-    # await session.close()
-    # await dp.start_polling(bot)
     dp.startup.register(on_startup)
     dp.shutdown.register(on_shutdown)
     app = configure_app(dp, bot)
