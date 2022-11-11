@@ -590,7 +590,7 @@ async def show_more(message: types.Message, state: FSMContext):
     count = await get_count(tag, state)
     actual_count = data['actual_count']
     await state.update_data(actual_count=actual_count + 1)
-    news_media = await data_getter(f"SELECT name FROM assets WHERE name LIKE '{tag}_media_%'")
+    news_media = await data_getter(f"SELECT name FROM assets WHERE name LIKE '{tag}_media_%' ORDER BY name")
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text='Новость посмотрел(а). Что с ней не так? 🤔'))
     await simple_media(message, news_media[count][0], reply_markup=markup.as_markup(resize_keyboard=True))
