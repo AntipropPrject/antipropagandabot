@@ -5,7 +5,7 @@ release_date = {
     'v3': datetime.strptime("2022-10-24 12:00:00.00", "%Y-%m-%d %H:%M:%S.%f"),
     'v3.1': datetime.strptime("2022-10-30 00:00:00.00", "%Y-%m-%d %H:%M:%S.%f"),
     'v3.2': datetime.strptime("2022-11-09 00:00:00.00", "%Y-%m-%d %H:%M:%S.%f"),
-    'v3.2.1': datetime.strptime("2022-11-10 11:00:00.00", "%Y-%m-%d %H:%M:%S.%f")
+    'v3.2.1': datetime.strptime("2022-11-10 21:00:00.00", "%Y-%m-%d %H:%M:%S.%f")
 }
 
 mobilisation_date = datetime.strptime("2022-09-21 10", "%Y-%m-%d %H")
