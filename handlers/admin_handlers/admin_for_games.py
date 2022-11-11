@@ -698,8 +698,7 @@ async def admin_home(message: types.Message, state: FSMContext):
     await state.clear()
     await logg.admin_logs(message.from_user.id, message.from_user.username,
                           "Путин - обещания")
-    await message.answer("Отправьте новый медиафайл и текст к посту",
-                         reply_markup=game_keys())
+    await message.answer("Что вы хотите сделать?", reply_markup=game_keys())
     await state.set_state(admin.putin_game_old_lies)
 
 
@@ -730,22 +729,23 @@ async def menu(message: types.Message, state: FSMContext):
     nmrkup.row(types.KeyboardButton(text="Назад"))
     postgressdata = await data_getter(f"select name from assets where name like '%putin_oldlie_game%'")
     count = len(postgressdata) + 1
+    str_count = str(count).zfill(2)
     await logg.admin_logs(message.from_user.id, message.from_user.username,
                           f"Путин-старый - Запись в базу данных \n {media_id} , putin_oldlie_game_{count}")
     try:
         await data_getter(
-            f"insert into assets(t_id,name) values('{media_id}', 'putin_oldlie_game_{count}'); commit;")
+            f"insert into assets(t_id,name) values('{media_id}', 'putin_oldlie_game_{str_count}'); commit;")
         await data_getter(
-            f"insert into texts(text,name) values('{text}', 'putin_oldlie_game_{count}'); commit;")
+            f"insert into texts(text,name) values('{text}', 'putin_oldlie_game_{str_count}'); commit;")
 
         await data_getter(
             f"insert into putin_old_lies(id, asset_name,text_name,belivers,nonbelivers) values"
-            f" ({count}, 'putin_oldlie_game_{count}','putin_lie_game_{count}', 1,1); commit; ")
+            f" ({count}, 'putin_oldlie_game_{str_count}','putin_oldlie_game_{str_count}', 1,1); commit; ")
     except Exception as ex:
         await logg.admin_logs(message.from_user.id, message.from_user.username,
                               f"Старый Путин - Запись в базу данных +{ex}")
         await message.answer(str(ex))
-    await message.answer(f"Добавлено новое утверждение под тегом putin_oldlie_game_{count}",
+    await message.answer(f"Добавлено новое утверждение под тегом putin_oldlie_game_{str_count}",
                          reply_markup=nmrkup.as_markup(resize_keyboard=True))
     await state.clear()
     await admin_home_games(message, state)
@@ -1405,7 +1405,7 @@ async def admin_home(message: types.Message, state: FSMContext):
 
 
 @router.message(F.text == 'Добавить сюжет', state=admin.mass_media_menu)
-async def admin_home(message: types.Message, state: FSMContext):
+async def admin_home(message: types.Message):
     nmarkup = InlineKeyboardBuilder()
     nmarkup.button(text='РИА Новости', callback_data='RIANEWS_media_ RIANEWS_exposure_')
     nmarkup.button(text='Russia Today', callback_data='RUSSIATODAY_media_ RUSSIATODAY_exposure_')
