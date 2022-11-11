@@ -569,7 +569,7 @@ async def revealing_the_news(message: types.Message, state: FSMContext):
     all_answers_user = data['all_answers_user']
     viewed_channel = data['viewed_channel']  # Просматриваемый канал  менять это для следующих каналов
     tag = await get_tag(viewed_channel)
-    news_exposure = await data_getter(f"SELECT name FROM assets WHERE name LIKE '{tag}_exposure_%'")
+    news_exposure = await data_getter(f"SELECT name FROM assets WHERE name LIKE '{tag}_exposure_%' ORDER BY name")
     if len(news_exposure) != count + 1:
         keyboard = await keyboard_for_next_chanel(f'Покажи еще новость с {viewed_channel}')
         await simple_media(message, news_exposure[count][0], reply_markup=keyboard)
