@@ -540,14 +540,14 @@ async def show_the_news(message: types.Message, state: FSMContext):
     if message.text == 'Покажи новость 👀':
         await mongo_update_stat_new(tg_id=message.from_user.id, column='false_on_web_prop', value='Да')
         tag = await get_tag(all_answers_user[0])
-        news = await data_getter(f"SELECT name FROM assets WHERE name LIKE '{tag}_media_%'")
+        news = await data_getter(f"SELECT name FROM assets WHERE name LIKE '{tag}_media_%' ORDER BY name")
         count = await get_count(tag, state)
         await state.update_data(viewed_channel=all_answers_user[0])
         await state.update_data(actual_count=count)
         await simple_media(message, news[count][0], reply_markup=markup.as_markup(resize_keyboard=True))
     elif message.text != 'Хорошо, давай вернемся и посмотрим 👀':
         tag = await get_tag(message.text)
-        news = await data_getter(f"SELECT name FROM assets WHERE name LIKE '{tag}_media_%'")
+        news = await data_getter(f"SELECT name FROM assets WHERE name LIKE '{tag}_media_%' ORDER BY name")
         count = await get_count(tag, state)
         await state.update_data(viewed_channel=message.text[:-2])
         await state.update_data(actual_count=count)
@@ -555,7 +555,7 @@ async def show_the_news(message: types.Message, state: FSMContext):
     elif message.text == 'Хорошо, давай вернемся и посмотрим 👀':
         not_viewed_chanel = data['not_viewed_chanel']
         tag = await get_tag(not_viewed_chanel)
-        news = await data_getter(f"SELECT name FROM assets WHERE name LIKE '{tag}_media_%'")
+        news = await data_getter(f"SELECT name FROM assets WHERE name LIKE '{tag}_media_%' ORDER BY name")
         count = await get_count(tag, state)
         await state.update_data(viewed_channel=not_viewed_chanel)
         await state.update_data(actual_count=count)
