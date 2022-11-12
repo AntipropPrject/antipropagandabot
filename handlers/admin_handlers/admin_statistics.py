@@ -356,7 +356,7 @@ async def pretty_polit_stats(ad_tag: str, title: str | None = None):
             end_data = result.get('Made_it')[0]
             text += f"<code>————————</code>\n"
             text += f"<code>Дошли до конца:</code> <code>{round(end_data['Perc'])}%</code>"
-            text += f"  ( <code>{start_data['Raw count']}</code> )" + "\n"
+            text += f"  ( <code>{end_data['Raw count']}</code> )" + "\n"
             text += f"\n<code>Из них:</code>\n"
 
             group_txt, group_title_txt = str(), str()
