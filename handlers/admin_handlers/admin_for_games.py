@@ -1659,13 +1659,6 @@ async def admin_home(message: types.Message, state: FSMContext):
     new_caption = data['caption_mass']
     new_media_exposure_id = data['media_mass_exposure']
     new_caption_exposure = data['caption_mass_exposure']
-    print(tag_media)
-    print(tag_exposure)
-    print(new_media_id)
-    print(new_caption)
-    print(new_media_exposure_id)
-    print(new_caption_exposure)
-
     try:
         await sql_safe_update('assets', {'t_id': new_media_id}, {'name': tag_media})
         await sql_safe_update('assets', {'t_id': new_media_exposure_id}, {'name': tag_exposure})
