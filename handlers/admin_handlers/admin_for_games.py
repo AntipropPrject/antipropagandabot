@@ -1331,7 +1331,6 @@ async def menu(message: types.Message, state: FSMContext):
         count += 1
         tag = f'{tv_channel}'
         print(tag)
-    print(tag)
     await state.update_data(tv_tag=tag)
     await state.update_data(tv_tag_count=count)
     nmrkup = ReplyKeyboardBuilder()
@@ -1407,29 +1406,51 @@ async def admin_home(message: types.Message, state: FSMContext):
 @router.message(F.text == 'Добавить сюжет', state=admin.mass_media_menu)
 async def admin_home(message: types.Message):
     nmarkup = InlineKeyboardBuilder()
-    nmarkup.button(text='РИА Новости', callback_data='RIANEWS_media_ RIANEWS_exposure_')
-    nmarkup.button(text='Russia Today', callback_data='RUSSIATODAY_media_ RUSSIATODAY_exposure_')
-    nmarkup.button(text='Телеграм-канал «Война с фейками»', callback_data='TCHANEL_WAR_media_ TCHANEL_WAR_exposure_')
-    nmarkup.button(text='ТАСС / Комсомольская правда..', callback_data='TACC_media_ TACC_exposure_')
-    nmarkup.button(text='Министерство обороны РФ', callback_data='MINISTRY_media_ MINISTRY_exposure_')
+    nmarkup.button(text='РИА Новости', callback_data='add|RIANEWS_media_|RIANEWS_exposure_')
+    nmarkup.button(text='Russia Today', callback_data='add|RUSSIATODAY_media_|RUSSIATODAY_exposure_')
+    nmarkup.button(text='Телеграм-канал «Война с фейками»', callback_data='add|TCHANEL_WAR_media_|TCHANEL_WAR_exposure_')
+    nmarkup.button(text='ТАСС / Комсомольская правда..', callback_data='add|TACC_media_|TACC_exposure_')
+    nmarkup.button(text='Министерство обороны РФ', callback_data='add|MINISTRY_media_|MINISTRY_exposure_')
     nmarkup.adjust(1, 1, 1, 1, 1)
     await message.answer("Выберите источник, в который хотите добавить сюжет", reply_markup=nmarkup.as_markup())
 
+@router.message((F.text.contains('Удалить сюжет')), state=admin.mass_media_menu)
+async def admin_home(message: types.Message, state: FSMContext):
+    nmarkup = InlineKeyboardBuilder()
+    nmarkup.button(text='РИА Новости', callback_data='pop|RIANEWS_media_|RIANEWS_exposure_')
+    nmarkup.button(text='Russia Today', callback_data='pop|RUSSIATODAY_media_|RUSSIATODAY_exposure_')
+    nmarkup.button(text='Телеграм-канал: Война с фейками', callback_data='pop|TCHANEL_WAR_media_|TCHANEL_WAR_exposure_')
+    nmarkup.button(text='ТАСС / Комсомольская правда..', callback_data='pop|TACC_media_|TACC_exposure_')
+    nmarkup.button(text='Министерство обороны РФ', callback_data='pop|MINISTRY_media_|MINISTRY_exposure_')
+    nmarkup.adjust(1, 1, 1, 1, 1)
+    await message.answer("Выберите источник, в котором хотите удалить сюжет", reply_markup=nmarkup.as_markup())
+
+@router.message((F.text.contains('Редактировать сюжет')), state=admin.mass_media_menu)
+async def admin_home(message: types.Message, state: FSMContext):
+    nmarkup = InlineKeyboardBuilder()
+    nmarkup.button(text='РИА Новости', callback_data='edit|RIANEWS_media_|TCHANEL_WAR_exposure_')
+    nmarkup.button(text='Russia Today', callback_data='edit|RUSSIATODAY_media_|RUSSIATODAY_exposure_')
+    nmarkup.button(text='Телеграм-канал: Война с фейками', callback_data='edit|TCHANEL_WAR_media_|TCHANEL_WAR_exposure_')
+    nmarkup.button(text='ТАСС / Комсомольская правда..', callback_data='edit|TACC_media_|TACC_exposure_')
+    nmarkup.button(text='Министерство обороны РФ', callback_data='edit|MINISTRY_media_|MINISTRY_exposure_')
+    nmarkup.adjust(1, 1, 1, 1, 1)
+    await message.answer("Выберите источник, в котором хотите изменить сюжет", reply_markup=nmarkup.as_markup())
 
 @router.callback_query(lambda call: "media" in call.data and "exposure" in call.data)
 async def add_media(query: types.CallbackQuery, state: FSMContext):
-    await state.clear()
-    if 'pop' not in query.data and 'edit' not in query.data:
+    data = query.data.split(sep='|')
+    tag = data[0]
+    media = data[1]
+    exposure = data[2]
+    last_tag_numner = len(await data_getter(f"select name from assets where name like '%{media}%'"))
+    if tag == 'add':
         await state.update_data(tag_media=query.data)
         await query.message.delete()
         await query.message.answer('Загрузите медиа и напишите описание')
         await state.set_state(admin.add_news)
-    elif 'pop' in query.data:
-        await state.update_data(tag_media=query.data[3:])
-        old_exposure = query.data.split()
-        last_tag_numner = len(await data_getter(f"select name from assets where name like '%{old_exposure[-1]}%'"))
-        print(last_tag_numner)
-        if last_tag_numner != 1:
+    elif tag == 'pop':
+        await state.update_data(tag_media=query.data)
+        if last_tag_numner != 0:
             await query.message.delete()
             keyboard = range(1, last_tag_numner + 1)
             nmarkup = ReplyKeyboardBuilder()
@@ -1440,11 +1461,9 @@ async def add_media(query: types.CallbackQuery, state: FSMContext):
             await query.message.answer('Выберите номер сюжета', reply_markup=nmarkup.as_markup(resize_keyboard=True))
         else:
             await query.answer('Сюжеты в этом блоке отсутствуют')
-    elif 'edit' in query.data:
-        await state.update_data(tag_media=query.data[4:])
-        old_exposure = query.data.split()
-        last_tag_numner = len(await data_getter(f"select name from assets where name like '%{old_exposure[-1]}%'"))
-        if last_tag_numner != 1:
+    elif tag == 'edit':
+        await state.update_data(tag_media=query.data)
+        if last_tag_numner != 0:
             await query.message.delete()
             keyboard = range(1, last_tag_numner + 1)
             nmarkup = ReplyKeyboardBuilder()
@@ -1508,52 +1527,46 @@ async def admin_home(message: types.Message, state: FSMContext):
 @router.message((F.text.contains('Подтвердить')), state=admin.mass_media_Done)
 async def admin_home(message: types.Message, state: FSMContext):
     data = await state.get_data()
-    tags = data['tag_media'].split()
-    old_media_tag = tags[0]
-    old_exposure_tag = tags[1]
+    tags = data['tag_media'].split(sep='|')
+    old_media_tag = tags[1]
+    old_exposure_tag = tags[2]
     new_media = data['media_mass']
     new_caption = data['caption_mass']
     new_media_exposure = data['media_mass_exposure']
     new_caption_exposure = data['caption_mass_exposure']
-    last_tag_numner = len(await data_getter(f"select name from assets where name like '%{old_exposure_tag}%'"))
+    last_tag_numner = len(await data_getter(f"select name from assets where name like '%{old_media_tag}%'"))
+    if last_tag_numner < 10:
+        tag_num = '0' + str(last_tag_numner + 1)
+    else:
+        tag_num = str(last_tag_numner + 1)
     try:
-        await sql_safe_insert('public', 'assets', {'t_id': new_media, 'name': f"{old_media_tag}{last_tag_numner + 1}"})
-        await sql_safe_insert('public', 'assets',
-                              {'t_id': new_media_exposure, 'name': f"{old_exposure_tag}{last_tag_numner + 1}"})
-        await sql_safe_insert('public', 'texts', {'text': new_caption, 'name': f"{old_media_tag}{last_tag_numner + 1}"})
-        await sql_safe_insert('public', 'texts',
-                              {'text': new_caption_exposure, 'name': f"{old_exposure_tag}{last_tag_numner + 1}"})
+        await sql_safe_insert('public', 'assets', {'t_id': new_media, 'name': f"{old_media_tag}{tag_num}"})
+        await sql_safe_insert('public', 'assets', {'t_id': new_media_exposure, 'name': f"{old_exposure_tag}{tag_num}"})
+        await sql_safe_insert('public', 'texts', {'text': new_caption, 'name': f"{old_media_tag}{tag_num}"})
+        await sql_safe_insert('public', 'texts', {'text': new_caption_exposure, 'name': f"{old_exposure_tag}{tag_num}"})
         await state.set_state(admin.mass_media_menu)
-        await message.answer("Сюжет был успешно добавлен в базу", reply_markup=admin_games_keyboard())
+        await message.answer("Сюжет был успешно добавлен в базу")
+        await admin_home_games(message, state)
     except Exception as err:
         print(err)
         await message.answer(f'{err}')
 
 
-@router.message((F.text.contains('Удалить сюжет')), state=admin.mass_media_menu)
-async def admin_home(message: types.Message, state: FSMContext):
-    await message.answer("Выберите интересующее вас действие", reply_markup=admin_games_keyboard())
-    nmarkup = InlineKeyboardBuilder()
-    nmarkup.button(text='РИА Новости', callback_data='popRIANEWS_media_ TCHANEL_WAR_exposure_')
-    nmarkup.button(text='Russia Today', callback_data='popRUSSIATODAY_media_ RUSSIATODAY_exposure_')
-    nmarkup.button(text='Телеграм-канал: Война с фейками', callback_data='popTCHANEL_WAR_media_ TCHANEL_WAR_exposure_')
-    nmarkup.button(text='ТАСС / Комсомольская правда..', callback_data='popTACC_media_ TACC_exposure_')
-    nmarkup.button(text='Министерство обороны РФ', callback_data='popMINISTRY_media_ MINISTRY_exposure_')
-    nmarkup.adjust(1, 1, 1, 1, 1)
-    await message.answer("Выберите источник, в котором хотите удалить сюжет", reply_markup=nmarkup.as_markup())
-
 
 @router.message(state=admin.mass_media_del)
 async def admin_home(message: types.Message, state: FSMContext):
     data = await state.get_data()
-    user_input = message.text
-    data = data['tag_media'].split()
+    user_input = int(message.text)
+    if user_input < 10:
+        user_input = '0' + str(user_input)
+
+    data = data['tag_media'].split(sep='|')
     await message.answer('Сюжет лжи:')
-    await simple_media(message, f'{data[0]}{user_input}')
-    await message.answer('Сюжет правды:')
     await simple_media(message, f'{data[1]}{user_input}')
-    await state.update_data(pop_media=f'{data[0]}{user_input}')
-    await state.update_data(pop_exposure=f'{data[1]}{user_input}')
+    await message.answer('Сюжет правды:')
+    await simple_media(message, f'{data[2]}{user_input}')
+    await state.update_data(pop_media=f'{data[1]}{user_input}')
+    await state.update_data(pop_exposure=f'{data[2]}{user_input}')
     await state.set_state(admin.mass_media_pop_Done)
     await message.answer('Хотите удалить этот сюжет?', reply_markup=app_admin_keyboard())
 
@@ -1569,34 +1582,27 @@ async def admin_home(message: types.Message, state: FSMContext):
         await sql_delete('texts', {'name': pop_media})
         await sql_delete('texts', {'name': pop_exposure})
         await state.set_state(admin.mass_media_menu)
-        await message.answer("Сюжет успешно удалён из базы", reply_markup=admin_games_keyboard())
+        await message.answer("Сюжет успешно удалён из базы")
+        await admin_home_games(message, state)
     except:
         await message.answer("Упс.. Что-то пошло не так, пожалуйста обратитесь к разработчиками")
 
 
-@router.message((F.text.contains('Редактировать сюжет')), state=admin.mass_media_menu)
-async def admin_home(message: types.Message, state: FSMContext):
-    nmarkup = InlineKeyboardBuilder()
-    nmarkup.button(text='РИА Новости', callback_data='editRIANEWS_media_ TCHANEL_WAR_exposure_')
-    nmarkup.button(text='Russia Today', callback_data='editRUSSIATODAY_media_ RUSSIATODAY_exposure_')
-    nmarkup.button(text='Телеграм-канал: Война с фейками', callback_data='editTCHANEL_WAR_media_ TCHANEL_WAR_exposure_')
-    nmarkup.button(text='ТАСС / Комсомольская правда..', callback_data='editTACC_media_ TACC_exposure_')
-    nmarkup.button(text='Министерство обороны РФ', callback_data='editMINISTRY_media_ MINISTRY_exposure_')
-    nmarkup.adjust(1, 1, 1, 1, 1)
-    await message.answer("Выберите источник, в котором хотите изменить сюжет", reply_markup=nmarkup.as_markup())
 
 
 @router.message(state=admin.mass_media_edit)
 async def admin_home(message: types.Message, state: FSMContext):
     data = await state.get_data()
     user_input = message.text
-    data = data['tag_media'].split()
+    data = data['tag_media'].split(sep='|')
+    if int(user_input) < 10:
+        user_input = '0' + str(user_input)
     await message.answer('Сюжет лжи:')
-    await simple_media(message, f'{data[0]}{user_input}')
-    await message.answer('Сюжет правды:')
     await simple_media(message, f'{data[1]}{user_input}')
-    await state.update_data(edit_media=f'{data[0]}{user_input}')
-    await state.update_data(edit_exposure=f'{data[1]}{user_input}')
+    await message.answer('Сюжет правды:')
+    await simple_media(message, f'{data[2]}{user_input}')
+    await state.update_data(edit_media=f'{data[1]}{user_input}')
+    await state.update_data(edit_exposure=f'{data[2]}{user_input}')
     await state.set_state(admin.mass_media_edit_add)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Отменить изменения"))
@@ -1653,6 +1659,12 @@ async def admin_home(message: types.Message, state: FSMContext):
     new_caption = data['caption_mass']
     new_media_exposure_id = data['media_mass_exposure']
     new_caption_exposure = data['caption_mass_exposure']
+    print(tag_media)
+    print(tag_exposure)
+    print(new_media_id)
+    print(new_caption)
+    print(new_media_exposure_id)
+    print(new_caption_exposure)
 
     try:
         await sql_safe_update('assets', {'t_id': new_media_id}, {'name': tag_media})
@@ -1660,7 +1672,8 @@ async def admin_home(message: types.Message, state: FSMContext):
         await sql_safe_update('texts', {'text': new_caption}, {'name': tag_media})
         await sql_safe_update('texts', {'text': new_caption_exposure}, {'name': tag_exposure})
         await state.set_state(admin.mass_media_menu)
-        await message.answer("Сюжет был успешно обновлён в базе", reply_markup=admin_games_keyboard())
+        await message.answer("Сюжет был успешно обновлён в базе")
+        await admin_home_games(message, state)
     except Exception as err:
         print(err)
         await message.answer('Упс.. Что-то пошло не так, пожалуйста обратитесь к разработчиками')
