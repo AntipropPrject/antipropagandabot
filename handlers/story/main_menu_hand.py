@@ -41,13 +41,6 @@ async def mainmenu_really_menu(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(SubscriberFilter(), F.text.in_({'Хочу пообщаться ещё раз! 🇷🇺🇺🇦', 'База Лжи 👀', 'Мини-игры 🎲'}),
-                flags=flags)
-async def mainmenu_need_subscr(message: Message):
-    text = await sql_safe_select('text', 'texts', {'name': 'mainmenu_need_subscr'})
-    await message.answer(text, disable_web_page_preview=True)
-
-
 @router.message(F.text == "Движение «Свобода!» 🕊", flags=flags)
 async def mainmenu_freedom_move(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'mainmenu_freedom_move'})
