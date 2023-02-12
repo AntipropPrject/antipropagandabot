@@ -5,13 +5,13 @@ from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from bata import all_data
-from bot_statistics.stat import mongo_update_stat_new
+from bot_statistics.stat import mongo_update_stat_new, mongo_update_stat
 from data_base.DBuse import poll_write, sql_safe_select, redis_just_one_write, \
     poll_get, redis_just_one_read, mongo_count_stats
 from log.logg import get_logger
 from resources.variables import release_date
 from states.welcome_states import start_dialog
-from utilts import simple_media, ref_spy_sender, CoolPercReplacer
+from utilts import simple_media, ref_spy_sender, CoolPercReplacer, MasterCommander
 
 flags = {"throttling_key": "True"}
 router = Router()
@@ -29,7 +29,7 @@ async def start_why_belive(message: types.Message):
 
 
 @router.message((F.text.contains("Начнём 🇷🇺🇺🇦")), flags=flags)
-async def start_why_communicate(message: Message):
+async def start_why_communicate(message: Message, bot: Bot):
     await mongo_update_stat_new(tg_id=message.from_user.id, column='first_button', value=message.text)
     text = await sql_safe_select('text', 'texts', {'name': 'start_why_communicate'})
     nmarkap = ReplyKeyboardBuilder()
@@ -37,6 +37,8 @@ async def start_why_communicate(message: Message):
     nmarkap.row(types.KeyboardButton(text="Хочу получить советы по поводу мобилизации 🪖"))
     nmarkap.row(types.KeyboardButton(text="Да просто знакомые уговорили пообщаться 🤷‍♂️"))
     nmarkap.row(types.KeyboardButton(text="Другое 🤔"))
+    await mongo_update_stat(message.from_user.id, 'end')
+    await MasterCommander(bot, 'chat', message.from_user.id).add({'menu': 'Главное меню'}, check_default_scope=False)
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
 
