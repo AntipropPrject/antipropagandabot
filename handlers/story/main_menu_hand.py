@@ -6,7 +6,6 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from bot_statistics.stat import mongo_update_stat_new
 from data_base.DBuse import sql_safe_select, data_getter, sql_games_row_selecter, sql_select_row_like, mongo_game_answer
-from filters.MapFilters import SubscriberFilter
 from handlers import start_hand
 from states.main_menu_states import MainMenuStates
 from utilts import simple_media, game_answer, dynamic_media_answer
@@ -41,7 +40,7 @@ async def mainmenu_really_menu(message: Message, state: FSMContext):
     await message.answer(text, reply_markup=nmarkup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
 
 
-@router.message(SubscriberFilter(), F.text.in_({'Хочу пообщаться ещё раз! 🇷🇺🇺🇦', 'База Лжи 👀', 'Мини-игры 🎲'}),
+@router.message(F.text.in_({'Хочу пообщаться ещё раз! 🇷🇺🇺🇦', 'База Лжи 👀', 'Мини-игры 🎲'}),
                 flags=flags)
 async def mainmenu_need_subscr(message: Message):
     text = await sql_safe_select('text', 'texts', {'name': 'mainmenu_need_subscr'})
