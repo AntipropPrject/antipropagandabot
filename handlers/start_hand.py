@@ -98,11 +98,8 @@ async def start_base(user: User):
 
 @router.message(commands=['menu'], flags=flags)
 async def commands_start_menu(message: types.Message, state: FSMContext):
-    if await mongo_is_done(message.from_user.id):
-        await state.set_state(MainMenuStates.main)
-        await main_menu_hand.mainmenu_really_menu(message, state)
-    else:
-        await message.answer('Эта команда будет доступна только после первого прохождения бота')
+    await state.set_state(MainMenuStates.main)
+    await main_menu_hand.mainmenu_really_menu(message, state)
 
 
 @router.message(IsAdmin(level=['Тестирование']), commands=["testend"], flags=flags)

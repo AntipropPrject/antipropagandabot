@@ -37,7 +37,6 @@ async def start_why_communicate(message: Message, bot: Bot):
     nmarkap.row(types.KeyboardButton(text="Хочу получить советы по поводу мобилизации 🪖"))
     nmarkap.row(types.KeyboardButton(text="Да просто знакомые уговорили пообщаться 🤷‍♂️"))
     nmarkap.row(types.KeyboardButton(text="Другое 🤔"))
-    await mongo_update_stat(message.from_user.id, 'end')
     await MasterCommander(bot, 'chat', message.from_user.id).add({'menu': 'Главное меню'}, check_default_scope=False)
     await message.answer(text, disable_web_page_preview=True, reply_markup=nmarkap.as_markup(resize_keyboard=True))
 
