@@ -2,8 +2,8 @@ name: everyday db dump
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '17 12 * * *'
+  #schedule:
+    #- cron: '17 12 * * *'
 
 jobs:
   pg_dumping:
