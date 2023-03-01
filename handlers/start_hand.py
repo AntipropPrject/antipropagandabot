@@ -64,7 +64,6 @@ async def commands_start(update: Message | CallbackQuery, bot: Bot, state: FSMCo
     markup = ReplyKeyboardBuilder()
     markup.row(types.KeyboardButton(text="Начнём 🇷🇺🇺🇦"))
     markup.row(types.KeyboardButton(text="А с чего мне тебе верить? 🤔"))
-    markup.row(types.KeyboardButton(text="Сначала расскажи про 50 000 руб за ложь 💵"))
     text = await sql_safe_select("text", "texts", {"name": "start_hello"})
     await bot.send_message(user_obj.id, text,
                            reply_markup=markup.as_markup(resize_keyboard=True), disable_web_page_preview=True)
